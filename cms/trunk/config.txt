@@ -1,0 +1,20 @@
+# MySQL Parameters
+
+mysql.host="localhost"
+mysql.username="root"
+mysql.password="root"
+mysql.database="cppcms"
+
+# FastCGI settings
+
+server.threads = 5
+server.buffer = 100
+server.socket = "/tmp/blog-fastcgi.socket"
+
+
+# Blog configuration
+
+blog.root_url = "/blog/"
+blog.script_path = "/blog/blog.fcgi"
+
+
