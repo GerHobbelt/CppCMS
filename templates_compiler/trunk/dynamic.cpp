@@ -76,6 +76,7 @@ void compile(char *fin_name,string fop_name)
 		Templates_Parser parser(fin);		
 		
 		int pos=0;
+		int tmp_pos;
 		string s;
 		Tmpl_Op op;
 		bool finished=false;
@@ -138,15 +139,13 @@ void compile(char *fin_name,string fop_name)
 				case T_ELSE:
 					if(call_stack.empty() || call_stack.top().operation!=TOP_IF)
 						throw string("ELSE without IF");
-					op.opcode=OP_GOTO;
-					op.jump=pos+2*OP_LEN;
-					WRITE_OP();
-					SET_JUMP(call_stack.top().position);
+					tmp_pos=call_stack.top().position;
 					call_stack.top().operation=TOP_ELSE;
 					call_stack.top().position=pos;
 					op.opcode=OP_GOTO;
 					op.jump=0;
 					WRITE_OP();
+					SET_JUMP(tmp_pos);
 					break;
 				case T_WHILE:
 				case T_WHILE_NOT:
