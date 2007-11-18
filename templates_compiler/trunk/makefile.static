@@ -1,5 +1,5 @@
-TR=cc_templ_d
-SRC=parser.cpp dynamic.cpp
+TR=cc_templ_s
+SRC=parser.cpp static.cpp
 
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
