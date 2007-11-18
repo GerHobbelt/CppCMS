@@ -5,6 +5,7 @@
 
 #include <stack>
 #include <map>
+#include <string>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ enum {
 	T_SOME_CODE
 };
 
+string filename_to_define(string fname);
 
 class Parser{
 	int line;
@@ -49,6 +51,6 @@ extern map<string,int> templates;
 int var(string &s);
 int templ(string &s);
 
-bool load_vars(char const *name,char *h_file=NULL);
+bool load_vars(char const *name,char *h_file=NULL,char const *prefix=NULL);
 
 #endif /* _PARSER_H */

@@ -62,13 +62,13 @@ enum {
 	TOP_IF, TOP_LOOP, TOP_REPEAT, TOP_ELSE
 };
 
-void compile(char *fin_name,string fop_name)
+void compile(char *fin_name,char const  *fop_name)
 {
 	FILE *fin=NULL,*fop=NULL;
 	try{
 		if((fin=fopen(fin_name,"r"))==NULL)
 			throw string("Failed to open ")+fin_name;
-		if((fop=fopen(fop_name.c_str(),"wb"))==NULL)
+		if((fop=fopen(fop_name,"wb"))==NULL)
 			throw string("Failed to open ")+fop_name;
 		
 		while(!call_stack.empty()) call_stack.pop();
@@ -152,7 +152,7 @@ void compile(char *fin_name,string fop_name)
 					if(t==T_WHILE) op.opcode=OP_GOTO_IF_FALSE;
 					else if(t==T_WHILE_NOT) op.opcode=OP_GOTO_IF_TRUE;
 					call_stack.push(stack_info(TOP_LOOP,pos));
-					op.opcode=var(s);
+					op.parameter=var(s);
 					WRITE_OP();
 					break;
 				case T_REPEAT:
@@ -160,7 +160,7 @@ void compile(char *fin_name,string fop_name)
 					break;
 				case T_UNTIL:
 				case T_UNTIL_N:
-					if(call_stack.empty() || call_stack.top().operation!=TOP_LOOP)
+					if(call_stack.empty() || call_stack.top().operation!=TOP_REPEAT)
 						throw string("UNTIL without REPEAT");
 					if(t==T_UNTIL) op.opcode=OP_GOTO_IF_FALSE;
 					else if(t==T_UNTIL_N) op.opcode=OP_GOTO_IF_TRUE;
@@ -176,6 +176,11 @@ void compile(char *fin_name,string fop_name)
 					   && call_stack.top().operation!=TOP_ELSE
 					   && call_stack.top().operation!=TOP_IF)
 						throw string("Unexpected END");
+					if(call_stack.top().operation==TOP_LOOP){
+						op.opcode=OP_GOTO;
+						op.jump=call_stack.top().position;
+						WRITE_OP();
+					}
 					SET_JUMP(call_stack.top().position);
 					call_stack.pop();
 					break;
@@ -200,23 +205,66 @@ void compile(char *fin_name,string fop_name)
 	fclose(fop);
 }
 
-
+void help()
+{
+	cerr<<"usage: -d interface.def [-p PREFIX ] [-h header.h] "
+			"[-o template.op ] template.tmpl\n";
+}
 
 int main(int argc,char *argv[])
 {
-	if(argc<3) {
-		cout<<"Usage: compile decl_file_name template1 template2...\n";
+	string prefix="TMPL_";
+	char *interface=NULL;
+	char *interface_h=NULL;
+	string s_op;
+	char const *tmpl_op=NULL;
+	char *tmpl=NULL;
+	int i;
+	for(i=1;i<argc;i++){
+		if(strcmp(argv[i],"-i")==0 && i+1<argc && !interface) {
+			i++;
+			interface=argv[i];
+		}
+		else if(strcmp(argv[i],"-p")==0 && i+1<argc && prefix=="TMPL_") {
+			i++;
+			prefix=argv[i];
+		}
+		else if(strcmp(argv[i],"-h")==0 && i+1<argc && !interface_h) {
+			i++;
+			interface_h=argv[i];
+		}
+		else if(strcmp(argv[i],"-o")==0 && i+1<argc && !tmpl_op) {
+			i++;
+			tmpl_op=argv[i];
+		}
+		else if(tmpl==NULL) {
+			tmpl=argv[i];
+		}
+		else {
+			help();
+			return 1;
+		}
+		
 	}
-	
-	if(!load_vars(argv[1],"resvars.h")) {
+	if(interface==NULL || (tmpl==NULL && interface_h==NULL)) {
+		help();		
+	}
+
+	if(!load_vars(interface,interface_h,prefix.c_str())) {
 		return 1;
 	}
-	int i;
-	for(i=2;i<argc;i++) {
-		string fopcode;
-		if(check_names(argv[i],fopcode)) {
-			compile(argv[i],fopcode);	
+
+	
+	if(tmpl_op==NULL && tmpl!=NULL) {
+		if(!check_names(tmpl,s_op)) {
+			help();
 		}
+		tmpl_op=s_op.c_str();
 	}
+
+	if(tmpl){
+		compile(tmpl,tmpl_op);	
+	}
+	
 	return exit_status;
 }

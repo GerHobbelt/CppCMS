@@ -24,7 +24,7 @@ regex e_while("^\\s*while\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 regex e_util("^\\s*until\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 
 regex e_call("^\\s*call\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
-regex e_inc("^\\s*inc\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
+regex e_inc("^\\s*include\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 
 regex e_repeat("^\\s*repeat\\s*$");
 regex e_end("^\\s*end\\s*$");
@@ -192,14 +192,21 @@ int templ(string &s)
 }
 
 
-bool load_vars(char const *name,char *h_file)
+bool load_vars(char const *name,char *h_file,char const *prefix)
 {
 	set<string> vars;
 	set<string> templs;
+	
 	regex comment("^(\\s*|\\s*#.*)$");
 	regex vars_d("^\\s*variables\\s*:\\s*$");
 	regex tpls_d("^\\s*templates\\s*:\\s*$");
 	regex var_t("^\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
+	
+	string define_name;
+	
+	if(h_file) {
+		define_name=filename_to_define(h_file);
+	}
 	
 	FILE *f=fopen(name,"r");
 	if(!f) {
@@ -265,34 +272,57 @@ bool load_vars(char const *name,char *h_file)
 			cerr<<"Failed to open file "<<h_file<<endl;
 			return false;
 		}
-		fprintf(f,"#ifndef _TEMPLATE_CODES_H_\n");
-		fprintf(f,"#defile _TEMPLATE_CODES_H_\n\n");
+		fprintf(f,"#ifndef %s\n",define_name.c_str());
+		fprintf(f,"#define %s\n\n",define_name.c_str());
 	}
 	
 	for(i=vars.begin();i!=vars.end();i++) {
 		if(h_file) {
-			fprintf(f,"#define TMPLV_%s %d\n",i->c_str(),n);
+			fprintf(f,"#define %sV_%s %d\n",prefix,i->c_str(),n);
 		}
 		variables[*i]=n;
 		n++;
 	}
-	if(h_file) fprintf(f,"\n#define TMPL_VAR_NUM %d\n\n",n);
+
+	if(h_file) fprintf(f,"\n#define %s_VAR_NUM %d\n\n",prefix,n);
 
 	n=0;
 	for(i=templs.begin();i!=templs.end();i++) {
 		if(h_file) {
-			fprintf(f,"#define TMPL_%s %d\n",i->c_str(),n);
+			fprintf(f,"#define %sT_%s %d\n",prefix,i->c_str(),n);
 		}
 		templates[*i]=n;
 		n++;
 	}
 	if(h_file) {
-		fprintf(f,"\n#define TMPL_TEMPL_NUM %d\n",n);
+		fprintf(f,"\n#define %s_TEMPL_NUM %d\n",prefix,n);
 		fprintf(f,"\n#endif\n");
 	}
-	fclose(f);
+
+	if(h_file){
+		fclose(f);
+	}
 	return true;
+
 err:
 	fclose(f);
 	return false;
+}
+
+
+string filename_to_define(string fname)
+{
+	string header="__";
+	header.reserve(30);
+	int i;
+	for(i=0;i<(int)fname.size();i++) {
+		char c=fname[i];
+		c=toupper(c);
+		if(c<'A' || c>'Z') {
+			c='_';
+		}
+		header+=c;
+	}
+	header+="__";
+	return header;
 }
