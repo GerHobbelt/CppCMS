@@ -88,8 +88,6 @@ int main(int argc,char *argv[])
 			interface=argv[i];
 		}
 		else {
-			cout<<(long)interface<<endl;
-			cout<<argv[i]<<endl;
 			help();
 			return 1;
 		}
