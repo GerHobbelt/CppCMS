@@ -24,13 +24,16 @@ int link_all(string &base_dir, string &out)
 		return 1;
 	}
 	
-	if((f=fopen(out.c_str(),"wb"))!=NULL) { // wb - for windows
-		cerr<<"Fauled to open file:"<<out<<endl;
+	if((f=fopen(out.c_str(),"wb"))==NULL) { // wb - for windows
+		cerr<<"Failed to open file:"<<out<<endl;
+		return 1;
 	}
 	
 	scoped_array<uint32_t> sizes(new uint32_t [size]);
 	
+	memset(sizes.get(),0,size*4);
 	fwrite(&size,1,4,f);
+	fwrite(sizes.get(),4,size,f);
 
 	for(i_it=templates.begin(),n=0;i_it!=templates.end();i_it++,n++){
 		if(i_it->second!=n) {
@@ -38,17 +41,18 @@ int link_all(string &base_dir, string &out)
 			return 1;
 		}
 		string fname;
-		fname=base_dir+i_it->first;
+		fname=base_dir+i_it->first+".op";
 		FILE *fin=fopen(fname.c_str(),"rb");
 		if(!fin) {
 			cerr<<"Failed to open file:"<<fname<<endl;
 			return 1;
 		}
-		char b;
-		uint32_t counter;
-		while(fread(&b,1,1,fin)) {
-			fwrite(&b,1,1,f);
-			counter++;
+		char buffer[256];
+		int r;
+		uint32_t counter=0;
+		while((r=fread(buffer,1,256,fin))>0) {
+			fwrite(buffer,1,r,f);
+			counter+=r;
 		}
 		fclose(fin);
 		sizes[n]=counter;
@@ -61,18 +65,17 @@ int link_all(string &base_dir, string &out)
 
 void help()
 {
-	cerr<<"Usage: interface.def [-d directory ] [-o output]";
+	cerr<<"Usage: interface.def [-d directory ] [-o output]\n";
 }
 
 int main(int argc,char *argv[])
 {
 	string base_dir="";
-	char *interface;
+	char *interface=NULL;
 	string output="";
 	int i;
 	
-	
-	for(i=0;i<argc;i++){
+	for(i=1;i<argc;i++){
 		if(strcmp(argv[i],"-d")==0 && i+1<argc && base_dir=="") {
 			i++;
 			base_dir=argv[i];
@@ -85,6 +88,8 @@ int main(int argc,char *argv[])
 			interface=argv[i];
 		}
 		else {
+			cout<<(long)interface<<endl;
+			cout<<argv[i]<<endl;
 			help();
 			return 1;
 		}
@@ -107,15 +112,6 @@ int main(int argc,char *argv[])
 	
 	if(!load_vars(interface,NULL,NULL)) {
 		return 1;
-	}
-	
-	map<string,int>::iterator i_it;
-	int n;
-	for(i_it=templates.begin(),n=0;i_it!=templates.end();i_it++,n++){
-		if(i_it->second!=n) {
-			cerr<<"Internal error\n";
-			return 1;
-		}
 	}
 	
 	return link_all(base_dir,output);
