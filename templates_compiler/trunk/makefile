@@ -1,17 +1,27 @@
-TR=cc_templ_d
-SRC=parser.cpp dynamic.cpp
+TR=cc_templ_d cc_templ_s ln_templ disass_templ
+SRC=parser.cpp dynamic.cpp static.cpp linker.cpp
 
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 LIBS = -lboost_regex 
 CXX = g++
+CC = gcc
 CFLAGS = -Wall -g 
 
 
 all: $(TR)
 
-$(TR) : $(OBJ)
-	$(CXX) -o $@ $^ $(LIBS)
+cc_templ_d: parser.o dynamic.o
+	$(CXX) $(LIBS) -o $@ parser.o dynamic.o
+
+cc_templ_s: parser.o static.o
+	$(CXX) $(LIBS) -o $@ parser.o static.o
+
+ln_templ: parser.o linker.o
+	$(CXX) $(LIBS) -o $@ parser.o linker.o
+
+disass_templ: disasemmble.c
+	$(CC) -o $@ disasemmble.c
 
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $<

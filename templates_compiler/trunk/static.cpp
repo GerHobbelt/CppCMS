@@ -10,7 +10,7 @@ void compile(string defname,string fname,FILE *fin,FILE *fout)
 	Parser parser(fin);
 	int i;
 	string s;
-	string header=filename_to_define();
+	string header=filename_to_define(fname);
 	
 	fprintf(fout,"#ifndef %s\n#define %s\n\n",header.c_str(),header.c_str());
 	int tok;
