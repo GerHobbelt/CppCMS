@@ -1,12 +1,12 @@
 TR=test.fcgi
 SRC=main.cpp textstream.cpp worker_thread.cpp FCgiIO.cpp main_thread.cpp mysql_db.cpp thread_pool.cpp \
-    global_config.cpp
+    global_config.cpp templates.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 LIBS = -lmysqlclient -lfcgi++ -lcgicc
 CXX = g++
 ;CFLAGS = -Wall -g -DFCGX_API_ACCEPT_ONLY_EXISTS
-CFLAGS = -Wall -g 
+CFLAGS = -Wall -g -I..
 
 
 all: $(TR)

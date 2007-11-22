@@ -8,8 +8,6 @@
 
 #include <sys/mman.h>
 
-#include "templ_generated.h"
-
 #include "compiler/bytecode.h"
 
 using namespace std;
@@ -40,11 +38,23 @@ public:
 };
 
 class Content {
+	int size;
 	vector<Variable> vars;
 public:
-	Content() { vars.reserve(TMPL_MAX_ID); }
+	void reset()
+	{
+		int i;
+		for(i=0;i<size;i++){
+			vars.push_back(Variable());
+		}
+	};
+	Content(int size) { 
+		this->size=size;
+		vars.reserve(size);
+		reset();
+	};
 	Variable operator[](int i) {
-		if(i<0 || i>=TMPL_MAX_ID) {
+		if(i<0 || i>=size) {
 			return Variable();
 		}
 		return vars[i];
@@ -87,8 +97,7 @@ public:
 		}
 	}
 	Base_Template *get(int id);
-	void load(char const *file,bool use_mmap);
-	void load();
+	void load(char const *file,int use_mmap=-1);
 	
 };
 
@@ -97,16 +106,15 @@ class Renderer {
 	static bool debug_defined;
 	vector<Base_Template *> templates_stack;
 	vector<int> returns_stack;
+	Templates_Set *templates_set;
 	int stack_size;
 
 	Base_Template *tmpl;
 	int pos;
 	Content *content;
 public:
-	Renderer(int id,Content &cont);
+	Renderer(Templates_Set &tset,int id,Content &cont);
 	int render(string &s);
 };
-
-extern Templates_Set templates_set;
 
 #endif /* _TEMPLATES_H */

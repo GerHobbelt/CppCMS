@@ -9,15 +9,16 @@
 
 
 bool Renderer::debug_defined=false;
-extern Templates_Set templates_set;
+bool Renderer::debug=false;
 
-Renderer::Renderer(int id,Content &cont)
+Renderer::Renderer(Templates_Set &tset,int id,Content &cont)
 {
 	if(!debug_defined) {
 		debug=global_config.lval("templates.debug_level",0);
 		debug_defined=true;
 	}
-	tmpl=templates_set.get(id);
+	templates_set=&tset;
+	tmpl=tset.get(id);
 	if(!tmpl && debug) {
 		char buf[32];
 		snprintf(buf,32,"%d",id);
@@ -72,7 +73,7 @@ int Renderer::render(string &s)
 				}
 				break;
 			case	OP_INCLUDE:
-				if((tmp_tmpl=templates_set.get(op->parameter))==NULL){
+				if((tmp_tmpl=templates_set->get(op->parameter))==NULL){
 					if(debug)
 						throw HTTP_Error("Undefined template");
 					break;
@@ -136,18 +137,11 @@ int Renderer::render(string &s)
 	}
 }
 
-
-void Templates_Set::load()
+void Templates_Set::load(char const *file,int use_mmap)
 {
-	if(global_config.lval("templates.disable",0)==1) {
-		return;
+	if(use_mmap==-1) {
+		use_mmap=global_config.lval("templates.use_mmap",0);
 	}
-	load(	global_config.sval("templates.file").c_str(),
-		global_config.lval("templates.use_mmap",1));
-}
-
-void Templates_Set::load(char const *file,bool use_mmap)
-{
 	if(use_mmap) {
 		// Rationale:
 		// In case of many processes openning same file
