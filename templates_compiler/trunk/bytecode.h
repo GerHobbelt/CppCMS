@@ -20,6 +20,8 @@ enum {
 	OP_GOTO_IF_NDEF	= 7,
 	OP_GOTO		= 8,
 
+	OP_INCLUDE_REF	= 9,
+
 	OP_STOP = 0xFF
 };
 

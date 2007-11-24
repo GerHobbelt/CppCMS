@@ -16,6 +16,8 @@ regex e_eif_not("^\\s*elsif\\s+not\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 regex e_while_not("^\\s*while\\s+not\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 regex e_util_not("^\\s*until\\s+not\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 
+regex e_inc_ref("^\\s*include\\s+ref\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
+
 regex e_if("^\\s*if\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 regex e_eif("^\\s*elsif\\s+([a-zA-Z_][a-zA-Z_0-9]*)\\s*$");
 
@@ -47,6 +49,7 @@ e_matcher patterns[] = {
 	{ &e_eif_not , T_ELIFN },
 	{ &e_while_not , T_WHILE_NOT },
 	{ &e_util_not , T_UNTIL_N },
+	{ &e_inc_ref , T_INCLUDE_REF },
 	{ &e_if , T_IF },
 	{ &e_eif, T_ELIF },
 	{ &e_while , T_WHILE },

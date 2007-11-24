@@ -32,5 +32,11 @@ clean:
 depend:
 	$(CXX) -M $(SRC) > .depend
 
+install:
+	cp $(TR) /usr/local/bin
+
+uninstall:
+	cd /usr/local/bin
+	rm -f $(TR)
 
 -include .depend

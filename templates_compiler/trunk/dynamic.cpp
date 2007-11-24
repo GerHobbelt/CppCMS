@@ -109,6 +109,11 @@ void compile(char *fin_name,char const  *fop_name)
 					op.parameter=templ(s);
 					WRITE_OP();
 					break;
+				case T_INCLUDE_REF:
+					op.opcode=OP_INCLUDE_REF;
+					op.parameter=var(s);
+					WRITE_OP();
+					break;
 				case T_IF:
 				case T_IFDEF:
 				case T_IFN:
