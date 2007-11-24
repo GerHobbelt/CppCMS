@@ -67,7 +67,6 @@ preferences.indent.closing=0
 module.include.name=.
 module.include.type=
 module.include.files=\
-	main_thread.h\
 	blog.h\
 	blog_options.h
 
@@ -75,7 +74,6 @@ module.source.name=.
 module.source.type=
 module.source.files=\
 	main.cpp\
-	main_thread.cpp\
 	blog.cpp\
 	blog_options.cpp
 

@@ -1,0 +1,82 @@
+body {
+	font-family: sans-serif;
+	background: #fffbf2;
+	text-align:center;
+}
+
+h1, h1 a:link, h1 a:visited {
+	text-decoration: none;
+	color: #4D0000;
+}
+
+
+
+h2, h3 {
+	font-family: serif;
+	color: #066;
+}
+
+a, a:visited {
+	color: #C30;
+	text-decoration: none;
+}
+a:hover, a:hover {
+	color: #066;
+	text-decoration: none;
+}
+
+#page {
+	text-align:justify;
+	margin:5px auto;
+	width:600px;
+	border:dotted 1px;
+	padding:10px;
+/*	background: url(bk.jpg) repeat-y 100% 0;*/
+}
+
+
+#intro {
+	height:150px;
+	width:600px;
+	margin-left:-10px;
+	padding-left:30px;
+	padding-top:2px;
+	background: url(header.jpg) no-repeat 8px 0;
+	font-style: italic;
+	font-family: serif;
+}
+
+#menu li {
+	display: inline;
+	list-style-type: none;
+}
+
+#menu hr {
+	width: 50%;
+}
+
+#footer {
+	font-size:80%;
+	border-top: dotted 1px;
+	text-align:center;
+}
+
+#footer h2 {
+	border:none;
+}
+
+.code { 
+	direction:ltr; font-family: monospace;
+	padding:5px;
+	margin:5px;
+	border: dotted 1px;
+}
+
+h2 {
+	border-bottom:dotted 1px;
+}
+
+dt {
+/*	font-weight: bold;*/
+	padding:3px;
+}

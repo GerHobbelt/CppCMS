@@ -21,18 +21,8 @@
 
 class Blog : public Worker_Thread {
 	MySQL_DB db;
-	
-	/* INPUT DATA */
-	int page;
-	int user_id;
-	int post_id;
-	string username;
-	
-	/* END */
-	void authenticate_user();
-	void load_inputs();
-	void show_post();
-	void show_main_page();
+	URL_Parser url;
+	void main_page(string page);	
 protected:
 	virtual void main();
 public:

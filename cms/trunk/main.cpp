@@ -6,12 +6,16 @@
 
 using namespace std;
 
+Templates_Set templates;
+
 int main(int argc,char **argv)
 {
 	try{
 		global_config.load(argc,argv);
 		
 		blog_options.load();
+
+		templates.load();
 		
 		Run_Application<Blog>(argc,argv);		
 		

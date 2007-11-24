@@ -1,0 +1,11 @@
+# All Templates
+templates:
+	master		# major frame
+	main_page	# main page of the blog
+	# post		# post in blog
+	# admin		# Main page of administrator
+variables:
+	title
+	subtitle
+	mater_content
+	

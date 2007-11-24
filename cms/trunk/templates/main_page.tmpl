@@ -1,0 +1,14 @@
+<% call get_post %>
+<%if next_post %>
+	<% repeat %>
+	<h2><a href="<% post_permlink %>"><% post_title %></a></h2>
+	<% post_content %>
+	<% call get_post %>
+	<% until not next_post %>
+	<% if def next_page_link %>	
+	<div style="text-align:right; text-size:80%;">
+		<a href="<%next_page_link%>">next page</a>
+	</div>
+<% else %>
+	<h2>There are still no posts in the blog</h2>
+<%end%>
