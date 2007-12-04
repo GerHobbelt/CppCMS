@@ -6,7 +6,7 @@ OBJ := $(patsubst %.cpp,%.o,$(SRC))
 LIBS = -lboost_regex 
 CXX = g++
 CC = gcc
-CFLAGS = -Wall -g 
+CFLAGS = -Wall -g -I./share
 
 
 all: $(TR)
@@ -21,7 +21,7 @@ ln_templ: parser.o linker.o
 	$(CXX) $(LIBS) -o $@ parser.o linker.o
 
 disass_templ: disasemmble.c
-	$(CC) -o $@ disasemmble.c
+	$(CC) $(CFLAGS) -o $@ disasemmble.c
 
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $<
