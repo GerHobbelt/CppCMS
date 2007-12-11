@@ -17,4 +17,5 @@ server.socket = "/tmp/blog-fastcgi.socket"
 blog.root_url = "/blog/"
 blog.script_path = "/blog/blog.fcgi"
 
-
+# bdb 
+bdb.path="./db/"

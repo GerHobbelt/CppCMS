@@ -1,4 +1,5 @@
-bin_PROGRAMS = cppblog
-cppblog_SOURCES = main.cpp  main_thread.cpp
+bin_PROGRAMS = cppblog cppblog_config
+cppblog_SOURCES = main.cpp  blog.cpp data.cpp
 
+cppblog_config_SOURCES = cppblog_config.cpp data.cpp
 

@@ -34,6 +34,25 @@ struct user_t {
 	password_t	password;
 };
 
+class Users {
+	public:
+		typedef Index_Auto_Increment<user_t,int,&user_t::id> id_idx;
+		typedef id_idx::cursor_t id_c;
+		id_idx id;
+
+		typedef Index_Var<user_t,username_t,&user_t::username> username_idx;
+		typedef username_idx::cursor_t username_c;
+		username_idx username;
+	Users(Environment &env) :
+			id(env,"users_id.db",DB_BTREE),
+	username(env,"users_username.db",DB_BTREE,&id)
+	{};
+	void open() { id.open(); username.open();};
+	void create() { id.create(); username.create();};
+	void close() { username.close();id.close(); };
+};
+
+
 struct post_t {
 	int id;
 	int author_id;
@@ -60,7 +79,7 @@ public:
 	{};
 	void open() { id.open(); publish.open();};
 	void create() { id.create(); publish.create();};
-	void close() { id.close(); publish.close();};
+	void close() { publish.close(); id.close(); };
 };
 
 struct approved_t {
@@ -76,6 +95,7 @@ public:
 	Approved(Environment &env) :
 		Index_Func<approved_t,approved_t::def_t,&approved_t::get>(env,"approved.db",DB_BTREE)
 	{};
+	
 };
 
 
@@ -90,7 +110,7 @@ struct comment_t {
 	bool moderated;
 	long content_id;
 	typedef Ord_Pair<int,time_t> sec_t;
-	sec_t secondary() { return sec_t(posts_id,publish_time); };
+	sec_t secondary() { return sec_t(post_id,publish_time); };
 };
 
 class Comments {
@@ -102,11 +122,19 @@ public:
 	typedef Index_Func<comment_t,comment_t::sec_t,&comment_t::secondary> posttime_t;
 	typedef posttime_t::cursor_t posttime_c;
 	posttime_t posttime;
+	
+	Comments(Environment &env) :
+			id(env,"comments_id.db",DB_BTREE),
+			posttime(env,"comments_posttime.db",DB_BTREE,&id,NOT_UNIQUE)
+	{};
+	void open() { id.open(); posttime.open();};
+	void create() { id.create(); posttime.create();};
+	void close() {  posttime.close();id.close();};
 };
 
 
 struct option_t {
-	enum { BLOG_TITLE, BLOG_DESCRIPTION, BLOG_URL } case_t;
+	typedef enum { BLOG_TITLE, BLOG_DESCRIPTION } case_t;
 	case_t id;
 	short_text_t value;
 };
@@ -126,8 +154,13 @@ extern std::auto_ptr<Options> options;
 extern std::auto_ptr<Comments> comments;
 extern std::auto_ptr<Approved> approved;
 extern std::auto_ptr<Posts> posts;
+extern std::auto_ptr<Users> users;
+extern std::auto_ptr<Texts_Collector> texts;
 
-
-
+void db_openall();
+void db_createall();
+void db_closeall();
+void db_initall();
+int  db_configure();
 
 #endif
