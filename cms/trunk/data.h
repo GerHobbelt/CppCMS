@@ -95,7 +95,7 @@ public:
 	Approved(Environment &env) :
 		Index_Func<approved_t,approved_t::def_t,&approved_t::get>(env,"approved.db",DB_BTREE)
 	{};
-	
+
 };
 
 
@@ -122,7 +122,7 @@ public:
 	typedef Index_Func<comment_t,comment_t::sec_t,&comment_t::secondary> posttime_t;
 	typedef posttime_t::cursor_t posttime_c;
 	posttime_t posttime;
-	
+
 	Comments(Environment &env) :
 			id(env,"comments_id.db",DB_BTREE),
 			posttime(env,"comments_posttime.db",DB_BTREE,&id,NOT_UNIQUE)
@@ -132,9 +132,9 @@ public:
 	void close() {  posttime.close();id.close();};
 };
 
+typedef enum { BLOG_TITLE, BLOG_DESCRIPTION } case_t;
 
 struct option_t {
-	typedef enum { BLOG_TITLE, BLOG_DESCRIPTION } case_t;
 	case_t id;
 	short_text_t value;
 };
