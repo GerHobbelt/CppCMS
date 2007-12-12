@@ -212,8 +212,28 @@ void compile(char *fin_name,char const  *fop_name)
 
 void help()
 {
-	cerr<<"usage: -d interface.def [-p PREFIX ] [-h header.h] "
-			"[-o template.op ] template.tmpl\n";
+	cerr<<"usage: -i interface.def [-p PREFIX ] [-h header.h] "
+	      "       [-o template.op ] [-M header.h] [template.tmpl\n";
+}
+
+void print_deps(char *fout,char *iface)
+{
+	FILE *f=fopen(".deps","w");
+	if(!f) {
+		cerr<<"Filed to open file:"<<f<<endl;
+		exit(1);
+	}
+	fprintf(f,"%s:",fout);
+	map<string,int>::iterator i;
+	for(i=templates.begin();i!=templates.end();i++) {
+		fprintf(f,"%s.op ",i->first.c_str());
+	}
+	fprintf(f,"\n");
+	for(i=templates.begin();i!=templates.end();i++) {
+		fprintf(f,"%s.op: %s\n",i->first.c_str(),iface);
+	}
+
+	fclose(f);
 }
 
 int main(int argc,char *argv[])
@@ -224,6 +244,7 @@ int main(int argc,char *argv[])
 	string s_op;
 	char const *tmpl_op=NULL;
 	char *tmpl=NULL;
+	char *deps=NULL;
 	int i;
 	for(i=1;i<argc;i++){
 		if(strcmp(argv[i],"-i")==0 && i+1<argc && !interface) {
@@ -242,6 +263,10 @@ int main(int argc,char *argv[])
 			i++;
 			tmpl_op=argv[i];
 		}
+		else if(strcmp(argv[i],"-M")==0 && i+1<argc && !deps) {
+			i++;
+			deps=argv[i];
+		}
 		else if(tmpl==NULL) {
 			tmpl=argv[i];
 		}
@@ -251,7 +276,7 @@ int main(int argc,char *argv[])
 		}
 		
 	}
-	if(interface==NULL || (tmpl==NULL && interface_h==NULL)) {
+	if(interface==NULL || (tmpl==NULL && interface_h==NULL && deps==NULL)) {
 		help();		
 	}
 
@@ -269,6 +294,10 @@ int main(int argc,char *argv[])
 
 	if(tmpl){
 		compile(tmpl,tmpl_op);	
+	}
+	
+	if(deps) {
+		print_deps(deps,interface);
 	}
 	
 	return exit_status;
