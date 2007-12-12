@@ -14,7 +14,7 @@ server.socket = "/tmp/blog-fastcgi.socket"
 
 # Blog configuration
 
-blog.root_url = "/blog/"
+blog.media_url = "/blog"
 blog.script_path = "/blog/blog.fcgi"
 
 # bdb 
