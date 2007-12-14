@@ -10,7 +10,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>src/cppblog</activetarget>
+      <activetarget>cppblog</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>

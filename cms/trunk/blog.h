@@ -26,6 +26,16 @@ struct links_t {
 	string approve;
 };
 
+struct post_content_t {
+	bool has_content;
+	string title;
+	string permlink;
+	string author;
+	string published;
+	string abstract;
+	string content;
+};
+
 class Blog {
 	Url_Parser url;
 	void main_page(string s);
