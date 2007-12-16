@@ -1,26 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title><% title %><% if def subtitle %> :: <% subtitle %></title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"/>
-<meta http-equiv="Content-Style-Type" content="text/css"/>
-<link rel=stylesheet type="text/css" href="<% media %>/style.css">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="page">
-<div id="intro">
-	<h1><% blog_name %></h1>
-	<p><% blog_description %></p>
+<div id="header">
+
+<ul id="nav">
+<li><a href="http://cppcms.sourceforge.net/">Project</a></li>
+<li><a href="http://cppcms.sourceforge.net/#downloads">Downloads</a></li>
+<li><a class="selected" href="<% base_url %>">Home</a></li>
+</ul>
+
+<div id="title"><% blog_name %></div>
+
+<div id="slogan"><% blog_description %></div>
+
+</div> <!-- end header -->
+
+<div id="path">
+
+<a href="<% base_url %>">Home</a>
+&nbsp;/&nbsp;
+<a href="http://cppcms.sourceforge.net/">Project Sitde</a>
 </div>
 
+<div id="maincontent">
 <% include ref master_content %>
+</div>
+
+<div id="sidecontent">
+<% include sidebar %>
+</div>
 
 <div id="footer">
-	<p>
-	Some footer text
-	</p>
+	<div id="copyrightdesign">
+		Copyright &copy; 2007 Artyom Tonkikh 
+		| Based on Design by <a href="http://ContentedDesigns.com">Contented Designs</a>
+	</div>
+	<div id="footercontact">
+		<a href="#">Contact</a>
+	</div>
 </div>
 </div>
 </body>

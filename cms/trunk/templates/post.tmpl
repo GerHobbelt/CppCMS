@@ -1,8 +1,48 @@
-<div class="post">
-        <h1><a href="<% post_permlink %>"><% post_title %></a></h1>
-	<div class="description"><% date %>, by <% author %></div>
-        <% post_abstract %>
-        <% if def content %>
-                <% content %>
-        <% end %>
+<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
+<div class="published">Publushed at <% date %>, by <% author %></div>
+<% post_abstract %>
+<% if def content %>
+	<span id="more"></span>
+	<% content %>
+<% end %>
+<div id="comments">
+<% call get_comment %>
+<% if next_comment %>
+	<h2>Comments</h2>
+	<dl>
+	<% repeat %>
+		<dt>
+			<%if def url %>
+				<a href="<% url %>"><% username %></a>
+			<% else %>
+				<% username %>
+			<% end %>
+			, at <% date %>
+		</dt>
+		<dd>
+		<% content %>
+		</dd>
+	<% call get_comment %> 
+	<% until not next_comment %>
+<% end %>
+	<h2>Add Comment:</h2>
+	<form action="<% post_comment_url %>" method="post">
+		<table>
+			<tr>
+				<td>Name:</td>
+				<td><input type="text" name="username" value="<% in_username %>" /></td>
+			</tr>
+			<tr>
+				<td>E-Mail:</td>
+				<td><input type="text" name="email" value="<% in_email %>"/></td>
+			</tr>
+			<tr>
+				<td>Site:</td>
+				<td><input type="text" name="url" value="<% in_url %>" /></td>
+			</tr>
+	 	</table>
+		<p><textarea name="message" cols="80" rows="10"></textarea></p>
+		<p><input type="submit" value="Submit" /></p>
+	</form>
 </div>
+

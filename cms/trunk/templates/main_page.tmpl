@@ -1,9 +1,8 @@
 <% call get_post %>
-<%if next_post %>
+<% if next_post %>
 	<% repeat %>
-        <div class="post">
-                <h1><a href="<% post_permlink %>"><% post_title %></a></h1>
-                <% post_abstract %>
+		<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
+		<div class="published">Publushed at <% date %>, by <% author %></div>
                 <% if has_content %>
                         <a href="<% post_permlink %>#more">more...</a>
                 <% end %>
@@ -11,10 +10,10 @@
 	<% call get_post %>
 	<% until not next_post %>
 	<% if def next_page_link %>	
-                <div style="text-align:right; text-size:80%;">
+                <div class="published">
                         <a href="<% next_page_link %>">next page</a>
                 </div>
         <% end %>
 <% else %>
-	<h2>There are no posts in the blog</h2>
+	<h1>There are no posts in the blog</h1>
 <%end%>

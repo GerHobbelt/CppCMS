@@ -7,6 +7,10 @@ templates:
 variables:
 	title
 	subtitle
+	media
+	base_url
+	blog_name
+	blog_description	
 	mater_content
-        base_url
-	
+	sidebar
+        
