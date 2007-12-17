@@ -15,6 +15,7 @@ class View_Comment {
 	string author;
 	string url;
 	string message;
+	string date;
 public:
 	View_Comment(Blog *b) { blog=b; };
 	void ini(comment_t &c);
@@ -29,10 +30,12 @@ class View_Post {
 	string author;
 	string abstract;
 	string content;
+	string date;
 	bool has_content;
 	string post_comment;
 	bool has_comments;
 	list<View_Comment> comments;
+	void ini_share(post_t &p);
 public:
 	View_Post(Blog *b) { blog=b; };
 	void ini_feed(post_6 &p);
