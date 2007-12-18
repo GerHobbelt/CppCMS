@@ -9,8 +9,13 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-
+#ifndef BLOG_H
+#define BLOG_H
 #include <cppcms/worker_thread.h>
+#include <cppcms/url.h>
+#include "views.h"
+#include "data.h"
+
 
 struct links_t {
 	string media;
@@ -36,16 +41,17 @@ struct post_content_t {
 	string content;
 };
 
-class Blog {
-	Url_Parser url;
-	void main_page(string s);
-	links_t fmt;
+class Blog : public Worker_Thread {
+	URL_Parser url;
 // Member functions:
-	void base_content(Content &c);
-	void render_post(post_t const &p,bool include_content,Content &c);
+	void main_page(string s);
+	void post(string s);
 
 public:
+	links_t fmt;
 	virtual void init();
 	virtual void main();
+	void date(time_t time,string &s);
 	Blog() : url(this) {};
 };
+#endif

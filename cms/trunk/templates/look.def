@@ -1,16 +1,32 @@
 # All Templates
 templates:
-	master		# major frame
-	main_page	# main page of the blog
-	post		# post in blog
-	# admin		# Main page of administrator
+	main_page
+	master
+	post
+	sidebar
 variables:
+	get_post
+	next_post
+	post_permlink
+	post_title
+	date
+	next_page_link
+	author
+	post_abstract
+	content
+	get_comment
+	next_comment
+	username
+	post_comment_url_1
+	post_comment_url_2
+	has_content
+	master_content
 	title
 	subtitle
 	media
 	base_url
+	url
 	blog_name
-	blog_description	
+	blog_description
 	mater_content
-	sidebar
-        
+

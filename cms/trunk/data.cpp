@@ -1,5 +1,5 @@
 #include "data.h"
-#include "global_config.h"
+#include <cppcms/global_config.h>
 
 using namespace std;
 
@@ -57,28 +57,52 @@ void db_closeall()
 }
 
 
+
+static void db_base_setup()
+{
+	string username,password;
+	cout<<"Blog owner username:";
+	cin>>username;
+	cout<<"Blog owner password:";
+	cin>>password;
+	user_t u;
+	u.username=username.c_str();
+	u.password=password.c_str();
+	users->id.add(u);
+
+	option_t op;
+	op.id=BLOG_TITLE;
+	op.value="CppBlog";
+	options->insert(op);
+	op.id=BLOG_DESCRIPTION;
+	op.value="Yet another CppBlog";
+	options->insert(op);
+
+	post_t post;
+	post.author_id=u.id;
+	post.is_open=true;
+	post.publish=time(NULL);
+	post.abstract_id=texts->add("This is first article in the blog.");
+	post.content_id=texts->add(
+			"This is only sample article, you can "
+			"edit it, remove it and do anything you with.");
+	post.title="Hello World!";
+	posts->id.add(post);
+	comment_t comment;
+	comment.author_id=u.id;
+	comment.moderated=true;
+	comment.post_id=post.id;
+	comment.publish_time=time(NULL);
+	comment.content_id=texts->add("This is sample comment in the blog.");
+	comments->id.add(comment);
+}
+
 int db_configure()
 {
 	try {
-		string username,password;
 		db_initall();
 		db_createall();
-		cout<<"Blog owner username:";
-		cin>>username;
-		cout<<"Blog owner password:";
-		cin>>password;
-		user_t u;
-		u.username=username.c_str();
-		u.password=password.c_str();
-		users->id.add(u);
-		
-		option_t op;
-		op.id=option_t::BLOG_TITLE;
-		op.value="CppBlog";
-		options->insert(op);
-		op.id=option_t::BLOG_DESCRIPTION;
-		op.value="Yet another CppBlog";
-		options->insert(op);
+		db_base_setup();
 		db_closeall();
 		return 0;
 	}
@@ -95,12 +119,13 @@ int db_configure()
 #ifdef CONFIG_ONLY
 int main(int argc, char **argv)
 {
-	global_config.load(argc,argv);
 	try {
+		global_config.load(argc,argv);
 		return db_configure();
 	}
 	catch(HTTP_Error &e) {
 		cerr<<e.get();
+		return 1;
 	}
 }
 #endif

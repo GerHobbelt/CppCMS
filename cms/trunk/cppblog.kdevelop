@@ -7,15 +7,27 @@
     <projectmanagement>KDevAutoProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
     <ignoreparts/>
+    <projectdirectory>.</projectdirectory>
+    <absoluteprojectpath>false</absoluteprojectpath>
+    <description></description>
+    <versioncontrol/>
   </general>
   <kdevautoproject>
     <general>
       <activetarget>cppblog</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>default</useconfiguration>
     </general>
     <run>
-      <mainprogram>src/cppblog</mainprogram>
+      <mainprogram>cppblog</mainprogram>
       <directoryradio>executable</directoryradio>
+      <customdirectory>/</customdirectory>
+      <programargs>-c config.txt</programargs>
+      <terminal>false</terminal>
+      <autocompile>true</autocompile>
+      <envvars/>
+      <runarguments>
+        <cppblog_config></cppblog_config>
+      </runarguments>
     </run>
     <configurations>
       <optimized>
@@ -24,6 +36,7 @@
         <cxxcompiler>GppOptions</cxxcompiler>
         <f77compiler>G77Options</f77compiler>
         <cxxflags>-O2 -g0</cxxflags>
+        <envvars/>
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
@@ -33,18 +46,40 @@
         <f77compiler>G77Options</f77compiler>
         <cxxflags>-O0 -g3</cxxflags>
       </debug>
+      <default>
+        <envvars/>
+      </default>
     </configurations>
     <make>
       <envvars>
         <envvar value="1" name="WANT_AUTOCONF_2_5" />
         <envvar value="1" name="WANT_AUTOMAKE_1_6" />
       </envvars>
+      <abortonerror>true</abortonerror>
+      <runmultiplejobs>false</runmultiplejobs>
+      <numberofjobs>1</numberofjobs>
+      <dontact>false</dontact>
+      <makebin/>
+      <prio>0</prio>
     </make>
   </kdevautoproject>
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
+      <programargs>-c config.txt</programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
+      <breakonloadinglibs>true</breakonloadinglibs>
+      <separatetty>false</separatetty>
+      <floatingtoolbar>false</floatingtoolbar>
     </general>
+    <display>
+      <staticmembers>false</staticmembers>
+      <demanglenames>true</demanglenames>
+      <outputradix>10</outputradix>
+    </display>
   </kdevdebugger>
   <kdevdoctreeview>
     <ignoretocs>
@@ -114,6 +149,19 @@
       <argumentsHintDelay>400</argumentsHintDelay>
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root></root>
+    </qt>
+    <creategettersetter>
+      <prefixGet></prefixGet>
+      <prefixSet>set</prefixSet>
+      <prefixVariable>m_,_</prefixVariable>
+      <parameterName>theValue</parameterName>
+      <inlineGet>true</inlineGet>
+      <inlineSet>true</inlineSet>
+    </creategettersetter>
   </kdevcppsupport>
   <kdevfileview>
     <groups>
@@ -125,4 +173,21 @@
       <hidenonprojectfiles>false</hidenonprojectfiles>
     </tree>
   </kdevfileview>
+  <cppsupportpart>
+    <filetemplates>
+      <interfacesuffix>.h</interfacesuffix>
+      <implementationsuffix>.cpp</implementationsuffix>
+    </filetemplates>
+  </cppsupportpart>
+  <kdevdocumentation>
+    <projectdoc>
+      <docsystem/>
+      <docurl/>
+      <usermanualurl/>
+    </projectdoc>
+  </kdevdocumentation>
+  <ctagspart>
+    <customArguments></customArguments>
+    <customTagfilePath></customTagfilePath>
+  </ctagspart>
 </kdevelop>

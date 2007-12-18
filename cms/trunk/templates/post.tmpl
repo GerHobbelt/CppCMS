@@ -22,27 +22,50 @@
 		<dd>
 		<% content %>
 		</dd>
-	<% call get_comment %> 
+	<% call get_comment %>
 	<% until not next_comment %>
 <% end %>
 	<h2>Add Comment:</h2>
-	<form action="<% post_comment_url %>" method="post">
+	<script type="text/javascript">
+	<!--
+		document.write('<')
+		document.write('for' + 'm ')
+		document.write('act')
+		document.write('ion')
+		document.write('="')
+		document.write('<% post_comment_url_1 %>')
+		document.write('<% post_comment_url_2 %>" meth')
+		document.write('od="pos')
+		document.write('t">')
+		document.getElementById('removecomment').innerHTML= "";
+	-->
+	</script>
 		<table>
 			<tr>
 				<td>Name:</td>
-				<td><input type="text" name="username" value="<% in_username %>" /></td>
+				<td><input type="text" name="username" /></td>
 			</tr>
 			<tr>
 				<td>E-Mail:</td>
-				<td><input type="text" name="email" value="<% in_email %>"/></td>
+				<td><input type="text" name="email" /></td>
 			</tr>
 			<tr>
 				<td>Site:</td>
-				<td><input type="text" name="url" value="<% in_url %>" /></td>
+				<td><input type="text" name="url" /></td>
 			</tr>
 	 	</table>
 		<p><textarea name="message" cols="80" rows="10"></textarea></p>
 		<p><input type="submit" value="Submit" /></p>
-	</form>
+	<script type="text/javascript">
+	<!--
+		document.write('<')
+		document.write('/form>')
+	-->
+	</script>
+	<div id="removecomment">
+		<p>
+		You must enable JavaScript in order to post comments.
+		</p>
+	</div>
 </div>
 

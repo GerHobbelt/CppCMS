@@ -13,7 +13,7 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include "easy_bdb.h"
+#include <cppcms/easy_bdb.h>
 
 using namespace ebdb;
 
@@ -140,11 +140,11 @@ struct option_t {
 };
 
 
-class Options : public Index_Var<option_t, option_t::case_t , &option_t::id>
+class Options : public Index_Var<option_t, case_t , &option_t::id>
 {
 public:
 	Options(Environment &env) :
-		Index_Var<option_t, option_t::case_t , &option_t::id>(env,"options.db",DB_BTREE)
+		Index_Var<option_t, case_t , &option_t::id>(env,"options.db",DB_BTREE)
 	{};
 };
 

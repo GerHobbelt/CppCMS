@@ -9,13 +9,16 @@ mysql.database="cppcms"
 
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/blog-fastcgi.socket"
+server.socket = "/tmp/php-fastcgi.socket"
 
 
 # Blog configuration
 
-blog.media_url = "/blog"
-blog.script_path = "/blog/blog.fcgi"
+blog.media_path = "/media"
+blog.script_path = "/blog/test.fcgi"
 
 # bdb 
 bdb.path="./db/"
+
+# Templates
+templates.file = "./templates/look.template"

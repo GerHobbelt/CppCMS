@@ -1,7 +1,7 @@
 //
 // C++ Implementation: views
 //
-// Description: 
+// Description:
 //
 //
 // Author: artik <artik@art-laptop>, (C) 2007
@@ -9,6 +9,18 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#ifndef VIEWS_H
+#define VIEWS_H
+
+#include <cppcms/templates.h>
+#include <boost/shared_ptr.hpp>
+#include "data.h"
+#include <list>
+#include <vector>
+
+using boost::shared_ptr;
+
+class Blog;
 
 class View_Comment {
 	Blog *blog;
@@ -18,11 +30,12 @@ class View_Comment {
 	string date;
 public:
 	View_Comment(Blog *b) { blog=b; };
-	void ini(comment_t &c);
+	void init(comment_t &c);
 	int render(Renderer &r,Content &c, string &out);
 };
 
 class View_Post {
+	friend class View_Main_Page;
 	Blog *blog;
 	int id;
 	string title;
@@ -32,13 +45,14 @@ class View_Post {
 	string content;
 	string date;
 	bool has_content;
-	string post_comment;
+	string post_comment1;
+	string post_comment2;
 	bool has_comments;
-	list<View_Comment> comments;
+	list<shared_ptr<View_Comment> > comments_list;
 	void ini_share(post_t &p);
 public:
 	View_Post(Blog *b) { blog=b; };
-	void ini_feed(post_6 &p);
+	void ini_feed(post_t &p);
 	void ini_short(post_t &p);
 	void ini_full(post_t &p);
 	int render(Renderer &r,Content &c, string &out);
@@ -50,15 +64,19 @@ class View_Main_Page {
 	string title;
 	string description;
 	shared_ptr<View_Post> single_post;
-	vector<View_Post> latest_posts;
-public:	
+	vector<shared_ptr<View_Post> > latest_posts;
+	string from;
+	enum { SUMMARY, SINGLE } disp;
+	void ini_share();
+public:
 	View_Main_Page(Blog *blog)
 	{
 		this->blog=blog;
 	};
-	void ini_post();
+	void ini_post(int id);
 	void ini_main(int id=-1);
-	void ini_feed();
 	int render(Renderer &r,Content &c, string &out);
-	
 };
+
+
+#endif
