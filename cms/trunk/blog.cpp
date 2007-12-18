@@ -41,6 +41,9 @@ void Blog::init()
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
 	fmt.approve=root+"/postback/approve";
+
+	// Default
+	url.add("^.*$",boost::bind(&Blog::main_page,this,"end"));
 }
 
 

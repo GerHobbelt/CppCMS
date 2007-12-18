@@ -3,13 +3,13 @@
 	<% repeat %>
 		<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
 		<div class="published">Publushed at <% date %>, by <% author %></div>
+		<% post_abstract %>
                 <% if has_content %>
                         <a href="<% post_permlink %>#more">more...</a>
                 <% end %>
-        </div>
 	<% call get_post %>
 	<% until not next_post %>
-	<% if def next_page_link %>	
+	<% if def next_page_link %>
                 <div class="published">
                         <a href="<% next_page_link %>">next page</a>
                 </div>

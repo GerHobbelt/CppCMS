@@ -160,6 +160,10 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 				id=(*i)->render(r,c,out);
 				i++;
 			}
+			else {
+				c[TV_next_comment]=false;
+				return r.render(out);
+			}
 		}
 		else {
 			return id;
@@ -238,7 +242,9 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 {
 	c[TV_media]=blog->fmt.media;
 	c[TV_title]=title;
+	c[TV_blog_name]=title;
 	c[TV_blog_description]=description;
+	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
 	if(disp==SINGLE) {
 		c[TV_subtitle]=single_post->title;
 		c[TV_master_content]=TT_post;
