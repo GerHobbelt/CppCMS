@@ -3,6 +3,44 @@
 #include <cppcms/templates.h>
 
 #include <time.h>
+#include <boost/format.hpp>
+#include <cgicc/HTTPRedirectHeader.h>
+
+using namespace cgicc;
+using boost::format;
+using boost::str;
+
+struct In_Comment {
+	string message;
+	string author;
+	string url;
+	string email;
+	bool load(const vector<FormEntry> &form);
+};
+
+bool In_Comment::load(const vector<FormEntry> &form)
+{
+	int i;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="author") {
+			author=form[i].getValue();
+		}
+		else if(field=="email") {
+			email=form[i].getValue();
+		}
+		else if(field=="url") {
+			url=form[i].getValue();
+		}
+		else if(field=="message") {
+			message=form[i].getValue();
+		}
+	}
+	if(message.size()==0 || author.size()==0 || email.size()==0) {
+		return false;
+	}
+	return true;
+}
 
 void Blog::init()
 {
@@ -32,8 +70,8 @@ void Blog::init()
 	//	boost::bind(&Blog::edit_comment,this,$1));
 	//fmt.edit_comment=root+"/adin/edit_comment/%1%";
 	// All incoming information
-	//url.add("^/postback/comment/(\\d+)$",
-	//	boost::bind(&Blog::add_comment,this));
+	url.add("^/postback/comment/(\\d+)$",
+		boost::bind(&Blog::add_comment,this,$1));
 	fmt.add_comment=root+"/postback/comment/%1%";
 	//url.add("^/postback/post$",
 	//	boost::bind(&Blog::add_post,this));
@@ -97,4 +135,30 @@ void Blog::main()
 		throw HTTP_Error(s);
 	}
 
+}
+
+void Blog::add_comment(string &postid)
+{
+	int post_id=atoi(postid.c_str());
+	In_Comment incom;
+	if(!incom.load(cgi->getElements())) {
+		throw HTTP_Error("Not all fields defined",true);
+	}
+	
+	post_t post;
+	if(!posts->id.get(post_id,post)) {
+		throw HTTP_Error("Invalid Article",true);
+	}
+	comment_t comment;
+	comment.post_id=post_id;
+	comment.author=incom.author.c_str();
+	comment.author_id=-1;
+	comment.url=incom.url.c_str();
+	comment.email=incom.email.c_str();
+	comment.publish_time=time(NULL);
+	comment.moderated=true;
+	comment.content_id=texts->add(incom.message.c_str());
+	comments->id.add(comment);
+	string redirect=str(format(fmt.post) % post_id);
+	set_header(new HTTPRedirectHeader(redirect));
 }

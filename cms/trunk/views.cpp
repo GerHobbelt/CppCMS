@@ -84,7 +84,7 @@ void View_Post::ini_full(post_t &p)
 	string post_comment=str(format(blog->fmt.add_comment) % p.id);
 	int n=post_comment.size()/2;
 	post_comment2=post_comment.substr(n);
-	post_comment1=post_comment.substr(0,n-1);
+	post_comment1=post_comment.substr(0,n);
 
 	Comments::posttime_c cur(comments->posttime);
 	has_comments=false;
