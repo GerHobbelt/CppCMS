@@ -23,7 +23,7 @@ bool In_Comment::load(const vector<FormEntry> &form)
 	int i;
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
-		if(field=="author") {
+		if(field=="username") {
 			author=form[i].getValue();
 		}
 		else if(field=="email") {
@@ -144,7 +144,7 @@ void Blog::add_comment(string &postid)
 	if(!incom.load(cgi->getElements())) {
 		throw HTTP_Error("Not all fields defined",true);
 	}
-	
+
 	post_t post;
 	if(!posts->id.get(post_id,post)) {
 		throw HTTP_Error("Invalid Article",true);
