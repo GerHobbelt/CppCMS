@@ -28,7 +28,9 @@ void View_Comment::init(comment_t &c)
 	}
 	else if(!(c.author=="")) {
 		tt.text2html(c.author,author);
-		tt.text2url(c.url,url);
+		if(c.url[0]!=0){
+			tt.text2url(c.url,url);
+		}
 	}
 	else {
 		author="unknown";
