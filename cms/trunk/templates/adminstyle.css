@@ -1,3 +1,8 @@
+* { margin:0px; padding:0px;}
+h1, h2, h3, h4, h5, h6, p, pre, blockquote, label, ul, ol, dl, 
+fieldset, address, pre { margin:5px;}
+li, dd { margin-left:2em;}
+
 
 body {
         border:1px solid #333;
@@ -7,8 +12,6 @@ body {
 	font-size:83%;
 	margin:20px auto;
 	width:760px;
-	/*padding-left:10px;
-	padding-right:10px;*/
 }
 
 a {
@@ -55,4 +58,28 @@ a:hover {
 }
 #footer p { margin:3px; }
 
-#logout { float:right; };
+#logout { float:right;}
+
+#form textarea {
+	width:100%
+}
+
+#form dd, dt {
+        margin-left:25px;
+        padding-left:5px;
+        margin-right:25px;
+        padding-right:5px;
+}
+#form dt {
+        font-size:120%;
+        font-weight:bold;
+}
+
+
+h1 {font-size:167%; }
+
+h2 {font-size:139%;}
+
+h3 {font-size:120%;}
+
+h4 {font-size:100%;}

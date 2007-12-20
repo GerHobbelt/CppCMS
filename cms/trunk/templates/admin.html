@@ -7,10 +7,15 @@
 </head>
 <body>
 <div id="header">
-<div id="logout"><a href="#">Logout</a></div>
-<h1><a href="#">Your Blog</a></h1>
+<div id="logout">
+        <p><a href="#">Blog</a> | <a href="#">Admin</a> | <a href="#">Logout</a></p>
+</div>
+
+<h1><a href="#">CppCMS Blog</a></h1>
 <h2>Administration Panel</h2>
 </div>
+<!--
+
 <div id="menu">
         <h2>Tasks</h2>
         <ul>
@@ -41,12 +46,38 @@
                 <li><a href="#">Eidth</a> on <a href="#">Best Article</a></li>
         </ul>
 </div>
+
+-->
+
+
+<div id="form">
+<h2>New Post</h2>
+<form action="#" method="post">
+        <dl>
+        <dt>Title:</dt>
+        <dd><input type="text" name="username" size="80" /></dd>
+        <dt>Abstract:</dt>
+        <dd>
+                <textarea name="message" cols="80" rows="10"></textarea>
+        </dd>
+        <dt>Content:</dt>
+        <dd>
+                <textarea name="message" cols="80" rows="20"></textarea>
+        </dd>
+        <dd>
+                <input type="submit" value="Save" />
+                <input type="submit" value="Publish" />
+                <input type="submit" value="Preview" />
+        </dd>
+        </dl>
+</form>
+</div>
 <div id="footer">
 <p>
-CppBlog is a high performance blog written in C++. &copy; Artyom Tonkikh.
+CppBlog is a high performance blog written in C++.
 </p>
 <p>
-This software is availible under GNU GPL Licence.
+This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh.
 </p>
 </div>
 </body>
