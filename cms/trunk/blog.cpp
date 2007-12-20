@@ -5,6 +5,7 @@
 #include <time.h>
 #include <boost/format.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
+#include "error.h"
 
 using namespace cgicc;
 using boost::format;
@@ -79,9 +80,6 @@ void Blog::init()
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
 	fmt.approve=root+"/postback/approve";
-
-	// Default
-	url.add("^.*$",boost::bind(&Blog::main_page,this,"end"));
 }
 
 
@@ -126,7 +124,14 @@ void Blog::date(time_t time,string &d)
 void Blog::main()
 {
 	try {
-		url.parse();
+		try{
+			if(url.parse()==-1){
+				throw Error(Error::E404);
+			}
+		}
+		catch(Error &e) {
+			error_page(e.what());
+		}
 	}
 	catch (DbException &err) {
 		throw HTTP_Error(err.what());
@@ -142,12 +147,12 @@ void Blog::add_comment(string &postid)
 	int post_id=atoi(postid.c_str());
 	In_Comment incom;
 	if(!incom.load(cgi->getElements())) {
-		throw HTTP_Error("Not all fields defined",true);
+		throw Error(Error::COMMENT_FIELDS);
 	}
 
 	post_t post;
 	if(!posts->id.get(post_id,post)) {
-		throw HTTP_Error("Invalid Article",true);
+		throw Error(Error::E404);
 	}
 	comment_t comment;
 	comment.post_id=post_id;
@@ -161,4 +166,14 @@ void Blog::add_comment(string &postid)
 	comments->id.add(comment);
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
+}
+
+void Blog::error_page(int what)
+{
+	Content c(T_VAR_NUM);
+	
+	Renderer r(templates,TT_master,c);
+	View_Main_Page view(this);
+	view.ini_error(what);
+	view.render(r,c,out.getstring());
 }

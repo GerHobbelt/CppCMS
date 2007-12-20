@@ -4,7 +4,10 @@ templates:
 	master
 	post
 	sidebar
+	error
 variables:
+	error_404
+	error_comment
 	get_post
 	next_post
 	post_permlink

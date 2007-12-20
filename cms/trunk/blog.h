@@ -47,6 +47,7 @@ class Blog : public Worker_Thread {
 	void main_page(string s);
 	void post(string s);
 	void add_comment(string &postid);
+	void error_page(int);
 
 public:
 	links_t fmt;

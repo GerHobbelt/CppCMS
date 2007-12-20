@@ -14,6 +14,7 @@
 #include <cppcms/text_tool.h>
 #include <boost/format.hpp>
 #include "blog.h"
+#include "error.h"
 
 using boost::format;
 using boost::str;
@@ -27,7 +28,7 @@ void View_Comment::init(comment_t &c)
 	}
 	else if(!(c.author=="")) {
 		tt.text2html(c.author,author);
-		url=(char const *)c.url;
+		tt.text2url(c.url,url);
 	}
 	else {
 		author="unknown";
@@ -228,7 +229,7 @@ void View_Main_Page::ini_post(int id)
 	shared_ptr<View_Post> ptr(new View_Post(blog));
 	post_t post;
 	if(!(posts->id.get(id,post))){
-		throw HTTP_Error("Post Not found",true);
+		throw Error(Error::E404);
 	}
 	single_post=ptr;
 
@@ -237,6 +238,14 @@ void View_Main_Page::ini_post(int id)
 	ptr->ini_full(post);
 	disp=SINGLE;
 }
+
+void View_Main_Page::ini_error(int id)
+{
+	ini_share();
+	disp=ERROR;
+	error_code=id;
+}
+
 
 int View_Main_Page::render( Renderer &r,Content &c,string &out)
 {
@@ -250,7 +259,7 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 		c[TV_master_content]=TT_post;
 		return single_post->render(r,c,out);
 	}
-	else {
+	else if(disp==SUMMARY){
 		c[TV_master_content]=TT_main_page;
 		int id;
 		id=r.render(out);
@@ -271,5 +280,17 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 				return id;
 			}
 		}
+	}
+	else if(disp==ERROR){
+		c[TV_master_content]=TT_error;
+		switch(error_code) {
+		case Error::E404:
+			c[TV_error_404]="";
+			break;
+		case Error::COMMENT_FIELDS:
+			c[TV_error_comment]="";
+			break;
+		}
+		return r.render(out);
 	}
 }

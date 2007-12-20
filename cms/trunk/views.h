@@ -66,7 +66,8 @@ class View_Main_Page {
 	shared_ptr<View_Post> single_post;
 	vector<shared_ptr<View_Post> > latest_posts;
 	string from;
-	enum { SUMMARY, SINGLE } disp;
+	enum { SUMMARY, SINGLE, ERROR } disp;
+	int error_code;
 	void ini_share();
 public:
 	View_Main_Page(Blog *blog)
@@ -75,6 +76,7 @@ public:
 	};
 	void ini_post(int id);
 	void ini_main(int id=-1);
+	void ini_error(int what);
 	int render(Renderer &r,Content &c, string &out);
 };
 
