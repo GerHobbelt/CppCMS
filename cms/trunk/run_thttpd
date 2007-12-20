@@ -1,4 +1,4 @@
 #!/bin/bash
 ./cppblog -c config-local.txt &
 
-exec thttpd.exe -D -c '**.cgi' -h localhost
+exec thttpd -D -p 8080 -c '**.cgi' -h localhost

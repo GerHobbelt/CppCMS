@@ -1,2 +1,2 @@
 #!/bin/bash
-cgi-fcgi.exe -bind -connect /tmp/php-fastcgi.socket
+cgi-fcgi -bind -connect /tmp/cppblog.socket

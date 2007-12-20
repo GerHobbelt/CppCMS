@@ -9,7 +9,7 @@ mysql.database="cppcms"
 
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/php-fastcgi.socket"
+server.socket = "/tmp/cppblog.socket"
 
 
 # Blog configuration
