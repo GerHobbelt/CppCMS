@@ -26,7 +26,27 @@
 	<script type="text/javascript">
 	<!--
                 /*  Form validation and simple-antispam */
-                function testform() 
+                function set_cookie(c_name,value,expiredays)
+                {
+                        var exdate=new Date();
+                        exdate.setDate(exdate.getDate()+expiredays);
+                        document.cookie=c_name+ "=" +escape(value)+
+                        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString());
+                }
+                function get_cookie(c_name)
+                {
+                        if (document.cookie.length>0){
+                                c_start=document.cookie.indexOf(c_name + "=");
+                                if (c_start!=-1){ 
+                                        c_start=c_start + c_name.length+1; 
+                                        c_end=document.cookie.indexOf(";",c_start);
+                                        if (c_end==-1) c_end=document.cookie.length;
+                                                return unescape(document.cookie.substring(c_start,c_end));
+                                } 
+                        }
+                        return "";
+                }
+        	function test_form() 
                 {
                         var form=document.getElementById('inp');
                         if(form.username.value.length == 0
@@ -37,6 +57,9 @@
                                 return false; 
                         }
                         else {
+                                set_cookie('visitor_name',form.username.value,365);
+                                set_cookie('visitor_email',form.email.value,365);
+                                set_cookie('visitor_url',form.url.value,365);
                                 return true;
                         }
                 }
@@ -48,7 +71,7 @@
 		document.write('<% post_comment_url_1 %>')
 		document.write('<% post_comment_url_2 %>" meth')
 		document.write('od="pos')
-		document.write('t" onsubmit="return testform();" >')
+		document.write('t" onsubmit="return test_form();" >')
 	-->
 	</script>
 		<table>
@@ -80,7 +103,17 @@
 	</div>
 	<script type="text/javascript">
 	<!--
-		document.getElementById('removecomment').innerHTML= "";
+                function setup_form()
+                {
+              		document.getElementById('removecomment').innerHTML= "";
+                        if((name=get_cookie('visitor_name'))!="") {
+                                var form=document.getElementById('inp');
+                                form.username.value = name ;
+                                form.email.value = get_cookie('visitor_email') ;
+                                form.url.value = get_cookie('visitor_url') ;
+                        }
+                }
+                setup_form();
 	-->
 	</script>
 </div>
