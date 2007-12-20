@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>Admin Protal</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="adminstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -52,17 +53,35 @@
 
 <div id="form">
 <h2>New Post</h2>
-<form action="#" method="post">
+	<script type="text/javascript">
+	<!--
+                /*  Form validation and simple-antispam */
+                function testform() 
+                {
+                        var form=document.getElementById('inp');
+                        if(form.title.value.length == 0 || form.abstract.value.length  == 0)
+                        {
+                                alert('Title and Abstract are mandatory!');
+                                return false; 
+                        }
+                        else {
+                                return true;
+                        }
+                }
+	-->
+	</script>
+
+<form id="inp" action="#" method="post" onsubmit="return testform();">
         <dl>
         <dt>Title:</dt>
-        <dd><input type="text" name="username" size="80" /></dd>
+        <dd><input type="text" name="title" size="80" /></dd>
         <dt>Abstract:</dt>
         <dd>
-                <textarea name="message" cols="80" rows="10"></textarea>
+                <textarea name="abstract" cols="80" rows="10"></textarea>
         </dd>
         <dt>Content:</dt>
         <dd>
-                <textarea name="message" cols="80" rows="20"></textarea>
+                <textarea name="content" cols="80" rows="20"></textarea>
         </dd>
         <dd>
                 <input type="submit" value="Save" />
