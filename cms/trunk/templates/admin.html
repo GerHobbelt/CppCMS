@@ -77,11 +77,15 @@
         <dd><input type="text" name="title" size="80" /></dd>
         <dt>Abstract:</dt>
         <dd>
-                <textarea name="abstract" cols="80" rows="10"></textarea>
+                <fieldset><div> <!-- IE Textarea ugly hack -->
+                        <textarea name="abstract" cols="80" rows="10"></textarea>
+                </div></fieldset>
         </dd>
         <dt>Content:</dt>
         <dd>
-                <textarea name="content" cols="80" rows="20"></textarea>
+                <fieldset><div> <!-- IE Textarea ugly hack -->
+                        <textarea name="content" cols="80" rows="20"></textarea>
+                </div></fieldset>
         </dd>
         <dd>
                 <input type="submit" value="Save" />
