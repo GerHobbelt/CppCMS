@@ -25,15 +25,30 @@
 	<h2>Add Comment:</h2>
 	<script type="text/javascript">
 	<!--
+                /*  Form validation and simple-antispam */
+                function testform() 
+                {
+                        var form=document.getElementById('inp');
+                        if(form.username.value.length == 0
+                           || form.email.value.length == 0
+                           || form.message.value.length  == 0)
+                        {
+                                alert('Name, E-Mail, Message content are mandatory!');
+                                return false; 
+                        }
+                        else {
+                                return true;
+                        }
+                }
 		document.write('<')
-		document.write('for' + 'm ')
-		document.write('act')
+		document.write('for' + 'm id=')
+		document.write('"inp" act')
 		document.write('ion')
 		document.write('="')
 		document.write('<% post_comment_url_1 %>')
 		document.write('<% post_comment_url_2 %>" meth')
 		document.write('od="pos')
-		document.write('t">')
+		document.write('t" onsubmit="return testform();" >')
 	-->
 	</script>
 		<table>

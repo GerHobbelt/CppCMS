@@ -163,7 +163,34 @@ href="http://www.contenteddesigns.com">Contented Designs</a>.  Thanks!
 		</dd>
 	</dl>
 	<h2>Add Comment:</h2>
-	<form action="#" method="post">
+	<script type="text/javascript">
+	<!--
+                /*  Form validation and simple-antispam */
+                function testform() 
+                {
+                        var form=document.getElementById('inp');
+                        if(form.username.value.length == 0
+                           || form.email.value.length == 0
+                           || form.message.value.length  == 0)
+                        {
+                                alert('Name, E-Mail, Message content are mandatory!');
+                                return false; 
+                        }
+                        else {
+                                return true;
+                        }
+                }
+		document.write('<')
+		document.write('for' + 'm id=')
+		document.write('"inp" act')
+		document.write('ion')
+		document.write('="')
+		document.write('#')
+		document.write('" meth')
+		document.write('od="pos')
+		document.write('t" onsubmit="return testform();">')
+	-->
+	</script>
 		<table>
 			<tr><td>Name:</td><td><input type="text" name="username" /></td></tr>
 			<tr><td>E-Mail:</td><td><input type="text" name="email" /></td></tr>
@@ -171,7 +198,22 @@ href="http://www.contenteddesigns.com">Contented Designs</a>.  Thanks!
 	 	</table>
 		<p><textarea name="message" cols="80" rows="10"></textarea></p>
 		<p><input type="submit" value="Submit" /></p>
-	</form>
+	<script type="text/javascript">
+	<!--
+		document.write('<')
+		document.write('/form>')
+	-->
+	</script>
+	<div id="removecomment">
+		<p>
+		You must enable JavaScript in order to post comments.
+		</p>
+	</div>
+	<script type="text/javascript">
+	<!--
+		document.getElementById('removecomment').innerHTML= "";
+	-->
+	</script>
 </div>
 
 
