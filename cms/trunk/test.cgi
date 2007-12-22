@@ -1,2 +1,2 @@
-#!/bin/bash
-cgi-fcgi -bind -connect /tmp/cppblog.socket
+#!/usr/bin/cgi-fcgi -f
+-bind -connect /tmp/cppblog.socket
