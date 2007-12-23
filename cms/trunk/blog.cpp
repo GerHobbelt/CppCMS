@@ -58,35 +58,49 @@ void Blog::init()
 	url.add("^/post/(\\d+)$",
 		boost::bind(&Blog::post,this,$1));
 	fmt.post=root + "/post/%1%";
+	//url.add("^/post/preview/(\\d+)$",
+	//	boost::bind(&Blog::post,this,$1));
+	fmt.preview=root + "/post/preview/%1%";
+
 	url.add("^/admin$",
 		boost::bind(&Blog::admin,this));
 	fmt.admin=root + "/admin";
+
 	url.add("^/admin/new_post$",
 		boost::bind(&Blog::edit_post,this,"new"));
 	fmt.new_post=root + "/admin/new_post";
+
 	url.add("^/admin/edit_post/(\\d+)$",
 		boost::bind(&Blog::edit_post,this,$1));
 	fmt.edit_post=root+"/admin/edit_post/%1%";
+
 	//url.add("^/admin/edit_comment/(\\d+)$",
 	//	boost::bind(&Blog::edit_comment,this,$1));
 	//fmt.edit_comment=root+"/adin/edit_comment/%1%";
 	// All incoming information
+
 	url.add("^/postback/comment/(\\d+)$",
 		boost::bind(&Blog::add_comment,this,$1));
 	fmt.add_comment=root+"/postback/comment/%1%";
-	//url.add("^/postback/post$",
-	//	boost::bind(&Blog::add_post,this));
-	fmt.add_post=root+"/postback/add_post";
+
+	url.add("^/postback/post/new$",
+		boost::bind(&Blog::get_post,this,"new"));
+	fmt.add_post=root+"/postback/post/new";
+
+	url.add("^/postback/post/(\\d+)$",
+		boost::bind(&Blog::get_post,this,$1));
+	fmt.update_post=root+"/postback/post/new";
+
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
 	fmt.approve=root+"/postback/approve";
-	
+
 	url.add("^/admin/login$",
 		boost::bind(&Blog::login,this));
 	fmt.login=root+"/admin/login";
-	
+
 	url.add("/admin/logout",
-		boodt::bind(&Blog::logout,this));
+		boost::bind(&Blog::logout,this));
 	fmt.logout=root+"/admin/logout";
 }
 
@@ -179,9 +193,121 @@ void Blog::add_comment(string &postid)
 void Blog::error_page(int what)
 {
 	Content c(T_VAR_NUM);
-	
-	Renderer r(templates,TT_master,c);
-	View_Main_Page view(this);
-	view.ini_error(what);
+
+	if(what==Error::AUTH) {
+		Renderer r(templates,TT_admin,c);
+		View_Admin view(this);
+ 		view.ini_login();
+		view.render(r,c,out.getstring());
+	}
+	else {
+		Renderer r(templates,TT_master,c);
+		View_Main_Page view(this);
+		view.ini_error(what);
+		view.render(r,c,out.getstring());
+	}
+}
+
+int Blog::check_login( string username,string password)
+{
+	user_t user;
+	if(users->username.get(username,user) && password==user.password.val()) {
+		return user.id;
+	}
+	return -1;
+}
+
+void Blog::auth_or_throw()
+{
+	int id,i;
+	string tmp_username;
+	string tmp_password;
+
+	const vector<HTTPCookie> &cookies = env->getCookieList();
+	const vector<HTTPCookie>::iterator i;
+
+	for(i=0;i!=cookies.size();i++) {
+		if(cookies[i].getName()=="username") {
+			tmp_username=cookies[i].getValue();
+		}
+		else if(cookies[i].getName()=="password") {
+			tmp_password=cookies[i].getValue();
+		}
+	}
+	if((id=check_login(tmp_username,tmp_password))!=-1) {
+		this->username=tmp_username;
+		this->userid=id;
+	}
+	else {
+		throw Error(Error::AUTH);
+	}
+}
+
+void Blog::set_login_cookies(string u,string p,int d)
+{
+	if(d<0) {
+		d=-1;
+	}
+	else {
+		d*=24*3600;
+	}
+	HTTPCookie u_c("username",u,"","",d,"/",false);
+	response_header->setCookie(u_c);
+	HTTPCookie p_c("username",p,"","",d,"/",false);
+	response_header->setCookie(p_c);
+}
+
+void Blog::login()
+{
+	string tmp_username,tmp_password;
+	const vector<FormEntry> &formc=gi->getElements();
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="username") {
+			tmp_username=form[i].getValue();
+		}
+		else if(field=="email") {
+			tmp_password=form[i].getValue();
+		}
+	}
+	if(tmp_username.size()==0
+	   || tmp_password.size()==0
+           || check_login(tmp_username,tmp_password)==-1)
+	{
+		throw Error(Error::AUTH);
+	}
+	set_header(new HTTPRedirectHeader(fmt.admin));
+	set_login_cookies(tmp_username,tmp_password,365);
+}
+
+void Blog::logout()
+{
+	set_header(new HTTPRedirectHeader(global_config.sval("blog.script_path"));
+	set_login_cookies("","",-1);
+}
+
+void Blog::admin()
+{
+	auth_or_throw();
+
+	Content c(T_VAR_NUM);
+
+	Renderer r(templates,TT_admin,c);
+	View_Admin view(this);
+	view.ini_main();
 	view.render(r,c,out.getstring());
+
+}
+
+void Blog::new_post()
+{
+	auth_or_throw();
+
+	Content c(T_VAR_NUM);
+
+	Renderer r(templates,TT_admin,c);
+	View_Admin view(this);
+	view.ini_main();
+	view.render(r,c,out.getstring());
+
 }

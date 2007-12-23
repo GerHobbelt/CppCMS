@@ -31,6 +31,7 @@ struct links_t {
 	string approve;
 	string login;
 	string logout;
+	string preview;
 };
 
 struct post_content_t {
@@ -50,6 +51,20 @@ class Blog : public Worker_Thread {
 	void post(string s);
 	void add_comment(string &postid);
 	void error_page(int);
+
+	string username;
+	int userid;
+
+	void auth_or_throw();
+
+	void admin();
+	void edit_post(string id);
+	void get_post(string id);
+	void login();
+	void logout();
+
+	void set_login_cookies(string username,string password,int days);
+	int check_login(string username,string password);
 
 public:
 	links_t fmt;

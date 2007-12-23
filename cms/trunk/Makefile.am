@@ -6,7 +6,7 @@ cppblog_config_CXXFLAGS = -DCONFIG_ONLY
 
 noinst_HEADERS = blog.h data.h views.h error.h
 
-templates/look.h:
+templates/look.h: templates/look.def
 	cd templates; make
 
 clean-local: 

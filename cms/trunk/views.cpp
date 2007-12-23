@@ -177,7 +177,7 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 void View_Main_Page::ini_share()
 {
 	option_t opt;
-	
+
 	options->get(BLOG_TITLE,opt);
 	title=(char const*)opt.value;
 	options->get(BLOG_DESCRIPTION,opt);
@@ -300,21 +300,15 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 
 void View_Admin::ini_share()
 {
-	base_url=global_config.sval("blog.script_path").c_str();
-	media=global_config.sval("blog.media").c_str();
 	option_t opt;
 	options->get(BLOG_TITLE,opt);
 	blog_name=(char const*)opt.value;
-	admin_url=blog->fmt.admin;
-	logout_url=blog->fmt.logout;
-	admin_url=blog->fmt.admin;
 }
 
 void View_Admin::ini_login()
 {
 	ini_share();
 	page=LOGIN;
-	login_url=fmt.login;
 }
 
 void View_Admin::ini_edit(int id)
@@ -328,5 +322,72 @@ void View_Admin::ini_edit(int id)
 void View_Admin::ini_main()
 {
 	ini_share();
+	main=shared_ptr<View_Admin_Main>(new View_Admin_Main(blog));
 	page=MAIN;
 }
+
+int View_Admin::render( Renderer &r,Content &c,string &out)
+{
+	c[TV_media]=blog->fmt.media;
+	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
+	c[TV_admin_url]=blog->fmt.admin.c_str();
+	c[TV_logout_url]=blog->fmt.logout;
+	c[TV_blog_name]=blog_name;
+	switch(page){
+	case MAIN:
+		c[TV_master_content]=TT_admin_main;
+		return main->render(r,c,out);
+	case POST:
+		c[TV_master_content]=TT_admin_editpost; break;
+		return post->render(r,c,out);
+	case LOGIN:
+		c[TV_master_content]=TT_admin_login;
+		return r.render(out);
+	}
+	return r.render(out);
+}
+
+int View_Admin_Main::render(Renderer &r,Content &c,string &out)
+{
+	c[TV_new_post_url]=blog->fmt.new_post;
+	return r.render(out);
+}
+
+void View_Admin_Post::ini( int id)
+{
+	Text_Tool tt;
+	if(id!=-1) {
+		post_id=str(format("%1%") % id);
+		post_url=str(format(blog->fmt.edit_post) % id);
+		preview=str(format(blog->fmt.preview) % id);
+	}
+	else {
+		post_url=blog->fmt.new_post;
+	}
+	post_t post_data;
+	if(!posts->id.get(id,post_data)){
+		throw Error(Error::E404);
+	}
+	title=post_data.title.c_str();
+	string abs_tmp,cnt_tmp;
+	if(post_data.abstract_id!=-1 && texts->get(post_data.abstract_id,abs_tmp)) {
+		tt.text2html(abs_tmp,abstract);
+	}
+	if(post_data.content_id!=-1 && texts->get(post_data.content_id,cnt_tmp)) {
+		tt.text2html(cnt_tmp,content);
+	}
+}
+
+int View_Admin_Post::render( Renderer &r,Content &c,string &out)
+{
+	c[TV_submit_post_url]=post_url.c_str();
+	if(post_id.size()>0) {
+		c[TV_post_id]=post_id.c_str();
+		c[TV_preview_url]=preview.c_str();
+	}
+	c[TV_post_title]=title.c_str();
+	c[TV_abstract]=abstract.c_str();
+	c[TV_content]=content.c_str();
+	return r.render(out);
+}
+

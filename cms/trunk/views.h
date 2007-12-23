@@ -84,9 +84,11 @@ class View_Admin_Post {
 	Blog *blog;
 	string title;
 	string post_url;
+	string post_id;
 	string abstract;
 	string content;
-public:	
+	string preview;
+public:
 	View_Admin_Post(Blog *b) : blog(b) {};
 	void ini(int id=-1);
 	int render(Renderer &r,Content &c, string &out);
@@ -97,21 +99,19 @@ class View_Admin_Main
 	Blog *blog;
 public:
 	View_Admin_Main(Blog *b): blog(b){};
+	void ini() {};
+	int render(Renderer &r,Content &c, string &out);
 };
 
 class View_Admin {
 	Blog *blog;
-	string base_url;
-	string media;
 	string blog_name;
-	string logout_url;
-	string login_url;
-	string admin_url;
 	enum { MAIN, POST, LOGIN} page;
 	void ini_share();
-	
+
 	shared_ptr<View_Admin_Post> post;
-public:	
+	shared_ptr<View_Admin_Main> main;
+	public:
 	View_Admin(Blog *b) : blog(b) {};
 	void ini_main();
 	void ini_edit(int id=-1);
