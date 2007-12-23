@@ -5,6 +5,10 @@ templates:
 	post
 	sidebar
 	error
+	admin
+	admin_main
+	admin_editpost
+	admin_login
 variables:
 	error_404
 	error_comment
@@ -32,4 +36,11 @@ variables:
 	blog_name
 	blog_description
 	mater_content
-
+	admin_url
+	logout_url
+	login_url
+	new_post_url
+	post_id
+	submit_post_url
+	preview_url
+	abstract

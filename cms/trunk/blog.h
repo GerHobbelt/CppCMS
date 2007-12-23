@@ -29,6 +29,8 @@ struct links_t {
 	string add_comment;
 	string add_post;
 	string approve;
+	string login;
+	string logout;
 };
 
 struct post_content_t {

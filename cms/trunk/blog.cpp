@@ -58,15 +58,15 @@ void Blog::init()
 	url.add("^/post/(\\d+)$",
 		boost::bind(&Blog::post,this,$1));
 	fmt.post=root + "/post/%1%";
-	//url.add("^/admin$",
-	//	boost::bind(&Blog::admin,this));
+	url.add("^/admin$",
+		boost::bind(&Blog::admin,this));
 	fmt.admin=root + "/admin";
-	//url.add("^/admin/new_post$",
-	//	boost::bind(&Blog::new_post,this));
+	url.add("^/admin/new_post$",
+		boost::bind(&Blog::edit_post,this,"new"));
 	fmt.new_post=root + "/admin/new_post";
-	//url.add("^/admin/edit_post/(\\d+)$",
-	//	boost::bind(&Blog::edit_post,this,$1));
-	fmt.edit_post=root+"/adin/edit_post/%1%";
+	url.add("^/admin/edit_post/(\\d+)$",
+		boost::bind(&Blog::edit_post,this,$1));
+	fmt.edit_post=root+"/admin/edit_post/%1%";
 	//url.add("^/admin/edit_comment/(\\d+)$",
 	//	boost::bind(&Blog::edit_comment,this,$1));
 	//fmt.edit_comment=root+"/adin/edit_comment/%1%";
@@ -80,6 +80,14 @@ void Blog::init()
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
 	fmt.approve=root+"/postback/approve";
+	
+	url.add("^/admin/login$",
+		boost::bind(&Blog::login,this));
+	fmt.login=root+"/admin/login";
+	
+	url.add("/admin/logout",
+		boodt::bind(&Blog::logout,this));
+	fmt.logout=root+"/admin/logout";
 }
 
 

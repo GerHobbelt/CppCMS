@@ -177,7 +177,7 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 void View_Main_Page::ini_share()
 {
 	option_t opt;
-
+	
 	options->get(BLOG_TITLE,opt);
 	title=(char const*)opt.value;
 	options->get(BLOG_DESCRIPTION,opt);
@@ -295,4 +295,38 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 		}
 		return r.render(out);
 	}
+}
+
+
+void View_Admin::ini_share()
+{
+	base_url=global_config.sval("blog.script_path").c_str();
+	media=global_config.sval("blog.media").c_str();
+	option_t opt;
+	options->get(BLOG_TITLE,opt);
+	blog_name=(char const*)opt.value;
+	admin_url=blog->fmt.admin;
+	logout_url=blog->fmt.logout;
+	admin_url=blog->fmt.admin;
+}
+
+void View_Admin::ini_login()
+{
+	ini_share();
+	page=LOGIN;
+	login_url=fmt.login;
+}
+
+void View_Admin::ini_edit(int id)
+{
+	ini_share();
+	page=POST;
+	post=shared_ptr<View_Admin_Post>(new View_Admin_Post(blog));
+	post->ini(id);
+}
+
+void View_Admin::ini_main()
+{
+	ini_share();
+	page=MAIN;
 }
