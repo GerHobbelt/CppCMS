@@ -1,2 +1,2 @@
 #!/usr/bin/cgi-fcgi -f
--bind -connect /tmp/cppblog.socket
+-bind -connect 127.0.0.1:8000
