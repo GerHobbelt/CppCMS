@@ -15,7 +15,7 @@ server.socket = "127.0.0.1:8000"
 # Blog configuration
 
 blog.media_path = "/templates"
-blog.script_path = "/test.cgi"
+blog.script_path = "/blog"
 
 # bdb 
 bdb.path="./db/"
