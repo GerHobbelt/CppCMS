@@ -22,3 +22,16 @@ bdb.path="./db/"
 
 # Templates
 templates.file = "./templates/look.template"
+
+# gzip
+
+# gzip - default disabled
+gzip.enable=1
+
+
+# For fastest compression gzip.level=1
+#
+ gzip.level = 1
+
+# Use other buffer size then default
+# gzip.buffer=256
