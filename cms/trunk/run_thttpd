@@ -1,4 +1,16 @@
 #!/bin/bash
-./cppblog -c config-local.txt &
 
-exec thttpd -D -p 8080 -c '**.cgi' -h localhost
+./cppblog -c config-local.txt &
+SERVER=$!
+
+thttpd -D -p 8080 -c '**.cgi' -h localhost &
+PROCESS=$!
+
+trap "echo signal... ; kill $SERVER ; kill $PROCESS; sleep 1; exit " SIGHUP SIGINT SIGTERM
+
+echo "Press any key to exit"
+read
+
+kill $SERVER
+kill $PROCESS
+sleep 1
