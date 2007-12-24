@@ -13,7 +13,7 @@ down()
 ./cppblog -c config-local.txt &
 SERVER=$!
 
-thttpd -D -p 8080 -c '**.cgi' -h localhost &
+/usr/sbin/lighttpd -D -f light.conf &
 PROCESS=$!
 
 trap "echo signal... ; down $SERVER  $PROCESS " SIGHUP SIGINT SIGTERM

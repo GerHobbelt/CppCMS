@@ -9,7 +9,7 @@ mysql.database="cppcms"
 
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/cppblog.socket"
+server.socket = "127.0.0.1:8000"
 
 
 # Blog configuration
