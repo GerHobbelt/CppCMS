@@ -260,7 +260,7 @@ void Blog::set_login_cookies(string u,string p,int d)
 void Blog::login()
 {
 	string tmp_username,tmp_password;
-	const vector<FormEntry> &formc=gi->getElements();
+	const vector<FormEntry> &form=cgi->getElements();
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="username") {
@@ -299,15 +299,103 @@ void Blog::admin()
 
 }
 
-void Blog::new_post()
+void Blog::edit_post(string sid)
 {
 	auth_or_throw();
+	
+	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
 
 	Content c(T_VAR_NUM);
 
 	Renderer r(templates,TT_admin,c);
 	View_Admin view(this);
-	view.ini_main();
+	view.ini_post(id);
 	view.render(r,c,out.getstring());
 
+}
+
+void Blog::get_post(string sid)
+{
+	int id=sid=="new" ? -1 : atoi(sid.c_str());
+	const vector<FormEntry> &form=cgi->getElements();
+	
+	string title,abstract,content;
+	
+	enum { SAVE, PUBLISH, PREVIEW } type;
+	
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="title") {
+			title=form[i].getValue();
+		}
+		else if(field=="abstract") {
+			abstract=form[i].getValue();
+		}
+		else if(field=="content") {
+			content=form[i].getValue();
+		}
+		else if(field=="publish") {
+			type=PUBLISH;
+		}
+		else if(field=="save") {
+			type=SAVE;
+		}
+		else if(field=="preview") {
+			type=PREVIEW;
+		}
+	}
+	
+	save_post(id,title,abstract,content,type==PUBLISH);
+	
+	if(type==SAVE){
+		set_header(new HTTPRedirectHeader(fmt.admin));
+	}
+	else if(type==PUBLISH){
+		string redirect=str(format(fmt.post)%id);
+		set_header(new HTTPRedirectHeader(fmt.admin));
+	}
+	else if(type==PREVIEW) {
+		edit_post(sid);
+	}
+}
+
+void Blog::save_post(int id,string &title,
+		     string &abstract,string &content,bool pub)
+{
+	Posts::id_c cursor(posts->id);
+	post_t post;
+	
+	if(id!=-1) {
+		if(!posts->get(id,post)) {
+			throw Error(Error::E404);
+		}
+	}
+	
+	post.title=title;
+	if(pub){
+		post.is_open=true;
+		post.publish=time(NULL);
+	}
+
+	if(id==-1) {
+		post.abstract_id=texts->add(abstract);
+		if(content!=""){
+			post.content_id=texts->add(content);
+		}
+		else {
+			post.content_id=-1;
+		}
+		post.author_id=userid;
+		return posts->id.add(post);
+	}
+	else {
+		texts->update(post.abstract_id,abstract);
+		if(post.content_id!=-1) {
+			texts->update(post.content_id,content);
+		}
+		if(content!="" && post.content_id==-1) {
+			post.content_id=texts->add(content);
+		}
+		return posts->id.update(post);
+	}	
 }

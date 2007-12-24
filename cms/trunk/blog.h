@@ -62,6 +62,8 @@ class Blog : public Worker_Thread {
 	void get_post(string id);
 	void login();
 	void logout();
+	void save_post(int id,string &title,
+		       string &abstract,string &content,bool pub);
 
 	void set_login_cookies(string username,string password,int days);
 	int check_login(string username,string password);
