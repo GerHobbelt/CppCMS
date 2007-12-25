@@ -206,8 +206,10 @@ void View_Main_Page::ini_main(int id)
 
 	for(;;) {
 		if(cur) {
-			if(!cur.val().is_open)
+			if(!cur.val().is_open){
+				cur.next();
 				continue;
+			}
 			if(counter==10) {
 				from=str(format(blog->fmt.main_from) % cur.val().id);
 				break;
@@ -221,7 +223,9 @@ void View_Main_Page::ini_main(int id)
 			counter++;
 			cur.next();
 		}
-		break;
+		else {
+			break;
+		}
 	}
 	disp=SUMMARY;
 }
@@ -255,6 +259,7 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 	c[TV_title]=title;
 	c[TV_blog_name]=title;
 	c[TV_blog_description]=description;
+	c[TV_admin_url]=blog->fmt.admin;
 	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
 	if(disp==SINGLE) {
 		c[TV_subtitle]=single_post->title;
@@ -323,6 +328,7 @@ void View_Admin::ini_main()
 {
 	ini_share();
 	main=shared_ptr<View_Admin_Main>(new View_Admin_Main(blog));
+	main->ini();
 	page=MAIN;
 }
 
@@ -338,33 +344,64 @@ int View_Admin::render( Renderer &r,Content &c,string &out)
 		c[TV_master_content]=TT_admin_main;
 		return main->render(r,c,out);
 	case POST:
-		c[TV_master_content]=TT_admin_editpost; break;
+		c[TV_master_content]=TT_admin_editpost;
 		return post->render(r,c,out);
 	case LOGIN:
 		c[TV_master_content]=TT_admin_login;
+		c[TV_login_url]=blog->fmt.login.c_str();
 		return r.render(out);
 	}
 	return r.render(out);
 }
 
+void View_Admin_Main::ini()
+{
+	Text_Tool tt;
+	Posts::is_open_c cur(posts->is_open);
+	for(cur<=false;cur;cur.next()) {
+		post_ref post_data;
+		post_t const &post=cur;
+		post_data.edit_url=
+			str(format(blog->fmt.edit_post) % post.id);
+		tt.text2html(post.title,post_data.title);
+		unpublished_posts.push_back(post_data);
+	}
+}
+
 int View_Admin_Main::render(Renderer &r,Content &c,string &out)
 {
 	c[TV_new_post_url]=blog->fmt.new_post;
-	return r.render(out);
+	int id=r.render(out);
+	list<post_ref>::iterator it=unpublished_posts.begin();
+	for(;;) {
+		id=r.render(out);
+		if(id==TV_get_post && it!=unpublished_posts.end()) {
+			c[TV_next_post]=true;
+			c[TV_post_title]=it->title.c_str();
+			c[TV_edit_url]=it->edit_url;
+			it++;
+		}
+		else if(id==TV_get_post){
+			c[TV_next_post]=false;
+		}
+		else
+			return id;
+	}
 }
 
 void View_Admin_Post::ini( int id)
 {
 	Text_Tool tt;
+	post_t post_data;
 	if(id!=-1) {
 		post_id=str(format("%1%") % id);
-		post_url=str(format(blog->fmt.edit_post) % id);
+		post_url=str(format(blog->fmt.update_post) % id);
 		preview=str(format(blog->fmt.preview) % id);
 	}
 	else {
-		post_url=blog->fmt.new_post;
+		post_url=blog->fmt.add_post;
+		return;
 	}
-	post_t post_data;
 	if(!posts->id.get(id,post_data)){
 		throw Error(Error::E404);
 	}

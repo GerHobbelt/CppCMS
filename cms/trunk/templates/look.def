@@ -44,3 +44,4 @@ variables:
 	submit_post_url
 	preview_url
 	abstract
+	edit_url

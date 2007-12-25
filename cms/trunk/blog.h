@@ -28,6 +28,7 @@ struct links_t {
 	string edit_comment;
 	string add_comment;
 	string add_post;
+	string update_post;
 	string approve;
 	string login;
 	string logout;
@@ -62,7 +63,7 @@ class Blog : public Worker_Thread {
 	void get_post(string id);
 	void login();
 	void logout();
-	void save_post(int id,string &title,
+	void save_post(int &id,string &title,
 		       string &abstract,string &content,bool pub);
 
 	void set_login_cookies(string username,string password,int days);

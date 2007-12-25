@@ -89,7 +89,7 @@ void Blog::init()
 
 	url.add("^/postback/post/(\\d+)$",
 		boost::bind(&Blog::get_post,this,$1));
-	fmt.update_post=root+"/postback/post/new";
+	fmt.update_post=root+"/postback/post/%1%";
 
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
@@ -211,7 +211,7 @@ void Blog::error_page(int what)
 int Blog::check_login( string username,string password)
 {
 	user_t user;
-	if(users->username.get(username,user) && password==user.password.val()) {
+	if(users->username.get(username,user) && password==user.password.c_str()) {
 		return user.id;
 	}
 	return -1;
@@ -224,7 +224,6 @@ void Blog::auth_or_throw()
 	string tmp_password;
 
 	const vector<HTTPCookie> &cookies = env->getCookieList();
-	const vector<HTTPCookie>::iterator i;
 
 	for(i=0;i!=cookies.size();i++) {
 		if(cookies[i].getName()=="username") {
@@ -253,23 +252,26 @@ void Blog::set_login_cookies(string u,string p,int d)
 	}
 	HTTPCookie u_c("username",u,"","",d,"/",false);
 	response_header->setCookie(u_c);
-	HTTPCookie p_c("username",p,"","",d,"/",false);
+	HTTPCookie p_c("password",p,"","",d,"/",false);
 	response_header->setCookie(p_c);
 }
 
 void Blog::login()
 {
+	int i;
 	string tmp_username,tmp_password;
 	const vector<FormEntry> &form=cgi->getElements();
+
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="username") {
 			tmp_username=form[i].getValue();
 		}
-		else if(field=="email") {
+		else if(field=="password") {
 			tmp_password=form[i].getValue();
 		}
 	}
+
 	if(tmp_username.size()==0
 	   || tmp_password.size()==0
            || check_login(tmp_username,tmp_password)==-1)
@@ -282,7 +284,7 @@ void Blog::login()
 
 void Blog::logout()
 {
-	set_header(new HTTPRedirectHeader(global_config.sval("blog.script_path"));
+	set_header(new HTTPRedirectHeader(global_config.sval("blog.script_path")));
 	set_login_cookies("","",-1);
 }
 
@@ -302,27 +304,30 @@ void Blog::admin()
 void Blog::edit_post(string sid)
 {
 	auth_or_throw();
-	
+
 	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
 
 	Content c(T_VAR_NUM);
 
 	Renderer r(templates,TT_admin,c);
 	View_Admin view(this);
-	view.ini_post(id);
+	view.ini_edit(id);
 	view.render(r,c,out.getstring());
 
 }
 
 void Blog::get_post(string sid)
 {
+	auth_or_throw();
+
+	int i;
 	int id=sid=="new" ? -1 : atoi(sid.c_str());
 	const vector<FormEntry> &form=cgi->getElements();
-	
+
 	string title,abstract,content;
-	
+
 	enum { SAVE, PUBLISH, PREVIEW } type;
-	
+
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="title") {
@@ -344,34 +349,35 @@ void Blog::get_post(string sid)
 			type=PREVIEW;
 		}
 	}
-	
+
 	save_post(id,title,abstract,content,type==PUBLISH);
-	
+
 	if(type==SAVE){
 		set_header(new HTTPRedirectHeader(fmt.admin));
 	}
 	else if(type==PUBLISH){
 		string redirect=str(format(fmt.post)%id);
-		set_header(new HTTPRedirectHeader(fmt.admin));
+		set_header(new HTTPRedirectHeader(redirect));
 	}
 	else if(type==PREVIEW) {
-		edit_post(sid);
+		edit_post(str(format("%1%") % id));
 	}
 }
 
-void Blog::save_post(int id,string &title,
+void Blog::save_post(int &id,string &title,
 		     string &abstract,string &content,bool pub)
 {
 	Posts::id_c cursor(posts->id);
 	post_t post;
-	
+
 	if(id!=-1) {
-		if(!posts->get(id,post)) {
+		if(!(cursor==id)) {
 			throw Error(Error::E404);
 		}
+		cursor.get(post);
 	}
-	
-	post.title=title;
+
+	post.title=title.c_str();
 	if(pub){
 		post.is_open=true;
 		post.publish=time(NULL);
@@ -386,7 +392,7 @@ void Blog::save_post(int id,string &title,
 			post.content_id=-1;
 		}
 		post.author_id=userid;
-		return posts->id.add(post);
+		id=posts->id.add(post);
 	}
 	else {
 		texts->update(post.abstract_id,abstract);
@@ -396,6 +402,6 @@ void Blog::save_post(int id,string &title,
 		if(content!="" && post.content_id==-1) {
 			post.content_id=texts->add(content);
 		}
-		return posts->id.update(post);
-	}	
+		cursor=post;
+	}
 }

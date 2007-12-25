@@ -9,11 +9,16 @@
                 <li><a href="#">Edit Options</a></li>  -->
         </ul>
         <h2>Unpublished Posts</h2>
-<p>TODO</p>
-<!--        <ul>
-                <li><a href="#">First Draft</a></li>
-                <li><a href="#">Personal</a></li>
-        </ul> -->
+        <% call get_post %>
+        <% if next_post %>
+	        <ul>
+        	<% repeat %>
+			<li><a href="<% edit_url %>"><% post_title %></a></li>
+		<% call get_post %>
+		<% until not next_post %>
+	<% else %>
+		<p>No unpublished posts</p>
+	<% end%>
 </div>
 <div id="news">
 <h2>Latest Comments</h2>

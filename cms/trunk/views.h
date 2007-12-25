@@ -97,9 +97,15 @@ public:
 class View_Admin_Main
 {
 	Blog *blog;
+	struct post_ref {
+		string title;
+		string edit_url;
+	};
+
+	list<post_ref> unpublished_posts;
 public:
 	View_Admin_Main(Blog *b): blog(b){};
-	void ini() {};
+	void ini();
 	int render(Renderer &r,Content &c, string &out);
 };
 

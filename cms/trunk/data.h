@@ -73,13 +73,20 @@ public:
 	typedef Index_Var<post_t,time_t,&post_t::publish> publish_t;
 	typedef publish_t::cursor_t publish_c;
 	publish_t publish;
+
+	typedef Index_Var<post_t,bool,&post_t::is_open> is_open_t;
+	typedef is_open_t::cursor_t is_open_c;
+	is_open_t is_open;
+
+
 	Posts(Environment &env) :
 		id(env,"posts_id.db",DB_BTREE),
-		publish(env,"posts_publish.db",DB_BTREE,&id)
-	{};
-	void open() { id.open(); publish.open();};
-	void create() { id.create(); publish.create();};
-	void close() { publish.close(); id.close(); };
+		publish(env,"posts_publish.db",DB_BTREE,&id),
+		is_open(env,"posts_is_open.db",DB_BTREE,&id)
+		{};
+	void open() { id.open(); publish.open(); is_open.open(); };
+	void create() { id.create(); publish.create(); is_open.create();};
+	void close() { publish.close(); id.close(); is_open.close();};
 };
 
 struct approved_t {

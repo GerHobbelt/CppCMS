@@ -77,24 +77,6 @@ static void db_base_setup()
 	op.id=BLOG_DESCRIPTION;
 	op.value="Yet another CppBlog";
 	options->insert(op);
-
-	post_t post;
-	post.author_id=u.id;
-	post.is_open=true;
-	post.publish=time(NULL);
-	post.abstract_id=texts->add("This is first article in the blog.");
-	post.content_id=texts->add(
-			"This is only sample article, you can "
-			"edit it, remove it and do anything you with.");
-	post.title="Hello World!";
-	posts->id.add(post);
-	comment_t comment;
-	comment.author_id=u.id;
-	comment.moderated=true;
-	comment.post_id=post.id;
-	comment.publish_time=time(NULL);
-	comment.content_id=texts->add("This is sample comment in the blog.");
-	comments->id.add(comment);
 }
 
 int db_configure()
