@@ -404,7 +404,8 @@ void Blog::save_post(int &id,string &title,
 		if(content!="" && post.content_id==-1) {
 			post.content_id=texts->add(content);
 		}
-		if((post.is_open=pub)==true) {
+		if(pub==true) {
+			post.is_open=true;
 			post.publish=time(NULL);
 		}
 		cursor=post;
