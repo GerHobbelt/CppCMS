@@ -81,8 +81,8 @@ public:
 
 	Posts(Environment &env) :
 		id(env,"posts_id.db",DB_BTREE),
-		publish(env,"posts_publish.db",DB_BTREE,&id),
-		is_open(env,"posts_is_open.db",DB_BTREE,&id)
+		publish(env,"posts_publish.db",DB_BTREE,&id,NOT_UNIQUE),
+		is_open(env,"posts_is_open.db",DB_BTREE,&id,NOT_UNIQUE)
 		{};
 	void open() { id.open(); publish.open(); is_open.open(); };
 	void create() { id.create(); publish.create(); is_open.create();};
