@@ -230,11 +230,11 @@ void View_Main_Page::ini_main(int id)
 	disp=SUMMARY;
 }
 
-void View_Main_Page::ini_post(int id)
+void View_Main_Page::ini_post(int id,bool preview)
 {
 	shared_ptr<View_Post> ptr(new View_Post(blog));
 	post_t post;
-	if(!(posts->id.get(id,post))){
+	if(!(posts->id.get(id,post)) || (!post.is_open && !preview)){
 		throw Error(Error::E404);
 	}
 	single_post=ptr;
@@ -374,7 +374,6 @@ int View_Admin_Main::render(Renderer &r,Content &c,string &out)
 	int id=r.render(out);
 	list<post_ref>::iterator it=unpublished_posts.begin();
 	for(;;) {
-		id=r.render(out);
 		if(id==TV_get_post && it!=unpublished_posts.end()) {
 			c[TV_next_post]=true;
 			c[TV_post_title]=it->title.c_str();
@@ -386,6 +385,7 @@ int View_Admin_Main::render(Renderer &r,Content &c,string &out)
 		}
 		else
 			return id;
+		id=r.render(out);
 	}
 }
 

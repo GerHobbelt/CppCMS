@@ -74,7 +74,7 @@ public:
 	{
 		this->blog=blog;
 	};
-	void ini_post(int id);
+	void ini_post(int id,bool preview);
 	void ini_main(int id=-1);
 	void ini_error(int what);
 	int render(Renderer &r,Content &c, string &out);

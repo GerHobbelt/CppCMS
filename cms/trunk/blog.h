@@ -49,7 +49,7 @@ class Blog : public Worker_Thread {
 	URL_Parser url;
 // Member functions:
 	void main_page(string s);
-	void post(string s);
+	void post(string s,bool preview);
 	void add_comment(string &postid);
 	void error_page(int);
 

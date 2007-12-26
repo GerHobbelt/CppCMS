@@ -56,10 +56,10 @@ void Blog::init()
 		boost::bind(&Blog::main_page,this,$1));
 	fmt.main_from=root + "/from/%1%";
 	url.add("^/post/(\\d+)$",
-		boost::bind(&Blog::post,this,$1));
+		boost::bind(&Blog::post,this,$1,false));
 	fmt.post=root + "/post/%1%";
-	//url.add("^/post/preview/(\\d+)$",
-	//	boost::bind(&Blog::post,this,$1));
+	url.add("^/post/preview/(\\d+)$",
+		boost::bind(&Blog::post,this,$1,true));
 	fmt.preview=root + "/post/preview/%1%";
 
 	url.add("^/admin$",
@@ -105,14 +105,17 @@ void Blog::init()
 }
 
 
-void Blog::post(string s_id)
+void Blog::post(string s_id,bool preview)
 {
+	if(preview) {
+		auth_or_throw();
+	}
 	int id=atoi(s_id.c_str());
 	Content c(T_VAR_NUM);
 
 	Renderer r(templates,TT_master,c);
 	View_Main_Page view(this);
-	view.ini_post(id);
+	view.ini_post(id,preview);
 	view.render(r,c,out.getstring());
 }
 
@@ -388,7 +391,9 @@ void Blog::save_post(int &id,string &title,
 			post.content_id=-1;
 		}
 		post.author_id=userid;
-		post.is_open=false;
+		if((post.is_open=pub)==true) {
+			post.publish=time(NULL);
+		}
 		id=posts->id.add(post);
 	}
 	else {
@@ -399,11 +404,10 @@ void Blog::save_post(int &id,string &title,
 		if(content!="" && post.content_id==-1) {
 			post.content_id=texts->add(content);
 		}
+		if((post.is_open=pub)==true) {
+			post.publish=time(NULL);
+		}
 		cursor=post;
 	}
-
-	if(pub){
-		post.is_open=true;
-		post.publish=time(NULL);
-	}
 }
+
