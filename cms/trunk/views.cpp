@@ -68,6 +68,7 @@ void View_Post::ini_share(post_t &p)
 	if(users->id.get(p.author_id,user)) {
 		tt.text2html(user.username,author);
 	}
+	edit_url=str(format(blog->fmt.edit_post) % p.id);
 	permlink=str(format(blog->fmt.post) % p.id);
 }
 
@@ -92,7 +93,6 @@ void View_Post::ini_full(post_t &p)
 	int n=post_comment.size()/2;
 	post_comment2=post_comment.substr(n);
 	post_comment1=post_comment.substr(0,n);
-	edit_url=str(format(blog->fmt.edit_post) % p.id);
 
 	Comments::posttime_c cur(comments->posttime);
 	has_comments=false;

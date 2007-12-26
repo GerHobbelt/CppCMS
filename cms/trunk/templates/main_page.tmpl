@@ -2,7 +2,12 @@
 <% if next_post %>
 	<% repeat %>
 		<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
-		<div class="published">Publushed at <% date %>, by <% author %></div>
+		<div class="published">
+			Publushed at <% date %>, by <% author %>
+			<% if def edit_url %>
+				| <a href="<% edit_url %>">edit</a>
+			<%end%>
+		</div>
 		<% post_abstract %>
                 <% if has_content %>
                         <a href="<% post_permlink %>#more">more...</a>
