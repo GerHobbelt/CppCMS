@@ -202,7 +202,9 @@ void View_Main_Page::ini_main(int id)
 
 	int counter=0;
 
-	latest_posts.reserve(10);
+	int max_posts=5;
+
+	latest_posts.reserve(max_posts);
 
 	for(;;) {
 		if(cur) {
@@ -210,7 +212,7 @@ void View_Main_Page::ini_main(int id)
 				cur.next();
 				continue;
 			}
-			if(counter==10) {
+			if(counter==max_posts) {
 				from=str(format(blog->fmt.main_from) % cur.val().id);
 				break;
 			}
@@ -261,6 +263,9 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 	c[TV_blog_description]=description;
 	c[TV_admin_url]=blog->fmt.admin;
 	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
+	if(from!="") {
+		c[TV_next_page_link]=from;
+	}
 	if(disp==SINGLE) {
 		c[TV_subtitle]=single_post->title;
 		c[TV_master_content]=TT_post;
