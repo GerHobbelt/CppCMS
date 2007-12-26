@@ -145,6 +145,7 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 	c[TV_post_abstract]=abstract;
 	c[TV_post_comment_url_1]=post_comment1;
 	c[TV_post_comment_url_2]=post_comment2;
+	c[TV_has_content]=has_content;
 
 	if(has_content) {
 		c[TV_content]=content;
