@@ -378,10 +378,6 @@ void Blog::save_post(int &id,string &title,
 	}
 
 	post.title=title.c_str();
-	if(pub){
-		post.is_open=true;
-		post.publish=time(NULL);
-	}
 
 	if(id==-1) {
 		post.abstract_id=texts->add(abstract);
@@ -392,6 +388,7 @@ void Blog::save_post(int &id,string &title,
 			post.content_id=-1;
 		}
 		post.author_id=userid;
+		post.is_open=false;
 		id=posts->id.add(post);
 	}
 	else {
@@ -403,5 +400,10 @@ void Blog::save_post(int &id,string &title,
 			post.content_id=texts->add(content);
 		}
 		cursor=post;
+	}
+
+	if(pub){
+		post.is_open=true;
+		post.publish=time(NULL);
 	}
 }
