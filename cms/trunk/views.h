@@ -24,6 +24,7 @@ class Blog;
 
 class View_Comment {
 	Blog *blog;
+	string del_url;
 	string author;
 	string url;
 	string message;
@@ -44,6 +45,7 @@ class View_Post {
 	string abstract;
 	string content;
 	string date;
+	string edit_url;
 	bool has_content;
 	string post_comment1;
 	string post_comment2;

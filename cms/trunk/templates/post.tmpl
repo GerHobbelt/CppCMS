@@ -1,5 +1,10 @@
 <h1><a href="<% post_permlink %>"><% post_title %></a></h1>
-<div class="published">Publushed at <% date %>, by <% author %></div>
+<div class="published">
+	Publushed at <% date %>, by <% author %>
+	<% if def edit_url %>
+		| <a href="<% edit_url %>">edit</a>
+	<%end%>
+</div>
 <% post_abstract %>
 <% if def content %>
 	<span id="more"></span>
@@ -14,6 +19,9 @@
 		<dt>
 			<%if def url %><a href="<% url %>"><% username %></a><% else %><% username %><% end %>,
  			at <% date %>
+			<% if def delete_url %>
+				| <a href="<% delete_url%>" onclick="a=confirm('Are you shure?'); return a;" >delete</a>
+			<% end %>
 		</dt>
 		<dd>
 		<% content %>

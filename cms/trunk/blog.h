@@ -33,6 +33,7 @@ struct links_t {
 	string login;
 	string logout;
 	string preview;
+	string del_comment;
 };
 
 struct post_content_t {
@@ -53,8 +54,10 @@ class Blog : public Worker_Thread {
 	void add_comment(string &postid);
 	void error_page(int);
 
+public:
 	string username;
 	int userid;
+private:
 
 	void auth_or_throw();
 
@@ -68,6 +71,8 @@ class Blog : public Worker_Thread {
 
 	void set_login_cookies(string username,string password,int days);
 	int check_login(string username,string password);
+	void del_comment(string id);
+	bool auth();
 
 public:
 	links_t fmt;

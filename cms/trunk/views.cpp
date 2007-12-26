@@ -39,6 +39,7 @@ void View_Comment::init(comment_t &c)
 	texts->get(c.content_id,text);
 	tt.markdown2html(text,message);
 	blog->date(c.publish_time,date);
+	del_url=str(format(blog->fmt.del_comment) % c.id);
 }
 
 int View_Comment::render(Renderer &r,Content &c, string &out)
@@ -46,6 +47,9 @@ int View_Comment::render(Renderer &r,Content &c, string &out)
 	c[TV_username]=author;
 	c[TV_content]=message;
 	c[TV_date]=date;
+	if(blog->userid!=-1){
+		c[TV_delete_url]=del_url;
+	}
 	if(url!="") {
 		c[TV_url]=url;
 	}
@@ -88,6 +92,7 @@ void View_Post::ini_full(post_t &p)
 	int n=post_comment.size()/2;
 	post_comment2=post_comment.substr(n);
 	post_comment1=post_comment.substr(0,n);
+	edit_url=str(format(blog->fmt.edit_post) % p.id);
 
 	Comments::posttime_c cur(comments->posttime);
 	has_comments=false;
@@ -146,6 +151,10 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 	c[TV_post_comment_url_1]=post_comment1;
 	c[TV_post_comment_url_2]=post_comment2;
 	c[TV_has_content]=has_content;
+
+	if(blog->userid!=-1) {
+		c[TV_edit_url]=edit_url;
+	}
 
 	if(has_content) {
 		c[TV_content]=content;

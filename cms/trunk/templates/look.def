@@ -43,5 +43,6 @@ variables:
 	post_id
 	submit_post_url
 	preview_url
+	delete_url
 	abstract
 	edit_url

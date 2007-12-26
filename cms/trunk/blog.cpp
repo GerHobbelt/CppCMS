@@ -99,9 +99,14 @@ void Blog::init()
 		boost::bind(&Blog::login,this));
 	fmt.login=root+"/admin/login";
 
-	url.add("/admin/logout",
+	url.add("^/admin/logout$",
 		boost::bind(&Blog::logout,this));
 	fmt.logout=root+"/admin/logout";
+
+	url.add("^/postback/delete/comment/(\\d+)$",
+		boost::bind(&Blog::del_comment,this,$1));
+	fmt.del_comment=
+		root+"/postback/delete/comment/%1%";
 }
 
 
@@ -150,6 +155,7 @@ void Blog::main()
 {
 	try {
 		try{
+			auth();
 			if(url.parse()==-1){
 				throw Error(Error::E404);
 			}
@@ -220,7 +226,7 @@ int Blog::check_login( string username,string password)
 	return -1;
 }
 
-void Blog::auth_or_throw()
+bool Blog::auth()
 {
 	int id,i;
 	string tmp_username;
@@ -239,8 +245,16 @@ void Blog::auth_or_throw()
 	if((id=check_login(tmp_username,tmp_password))!=-1) {
 		this->username=tmp_username;
 		this->userid=id;
+		return true;
 	}
-	else {
+	this->username="";
+	this->userid=-1;
+	return false;
+}
+
+void Blog::auth_or_throw()
+{
+	if(userid==-1){
 		throw Error(Error::AUTH);
 	}
 }
@@ -412,3 +426,16 @@ void Blog::save_post(int &id,string &title,
 	}
 }
 
+void Blog::del_comment(string sid)
+{
+	auth_or_throw();
+	Comments::id_c cur(comments->id);
+	int id=atoi(sid.c_str());
+	if(cur==id) {
+		if(cur.val().content_id!=-1) {
+			texts->del(cur.val().content_id);
+		}
+		cur.del();
+	}
+	set_header(new HTTPRedirectHeader(env->getReferrer()));
+}
