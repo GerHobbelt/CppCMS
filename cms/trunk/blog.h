@@ -34,6 +34,7 @@ struct links_t {
 	string logout;
 	string preview;
 	string del_comment;
+	string feed;
 };
 
 struct post_content_t {
@@ -73,6 +74,7 @@ private:
 	int check_login(string username,string password);
 	void del_comment(string id);
 	bool auth();
+	void feed();
 
 public:
 	links_t fmt;

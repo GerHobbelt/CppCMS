@@ -5,13 +5,14 @@
 <title><% title %><% if def subtitle %> :: <% subtitle %><% end %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host%><% rss_posts %>" />
+
 </head>
 <body>
 <div id="page">
 <div id="header">
 
 <ul id="nav">
-<li><a href="<% admin_url %>">Enter</a></li>
 <li><a href="http://cppcms.sourceforge.net/">Project</a></li>
 <li><a href="http://cppcms.sourceforge.net/#downloads">Downloads</a></li>
 <li><a class="selected" href="<% base_url %>">Home</a></li>
@@ -27,7 +28,11 @@
 
 <a href="<% base_url %>">Home</a>
 &nbsp;/&nbsp;
-<a href="http://cppcms.sourceforge.net/">Project Sitde</a>
+<a href="<% rss_posts %>">RSS</a>
+&nbsp;/&nbsp;
+<a href="http://cppcms.sourceforge.net/">Project Site</a>
+&nbsp;/&nbsp;
+<a href="<% admin_url %>">Enter</a>
 </div>
 
 <div id="maincontent">

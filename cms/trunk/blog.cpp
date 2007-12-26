@@ -107,6 +107,8 @@ void Blog::init()
 		boost::bind(&Blog::del_comment,this,$1));
 	fmt.del_comment=
 		root+"/postback/delete/comment/%1%";
+	url.add("^/rss$",boost::bind(&Blog::feed,this));
+	fmt.feed=root+"/rss";
 }
 
 
@@ -439,3 +441,17 @@ void Blog::del_comment(string sid)
 	}
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
 }
+
+
+void Blog::feed()
+{
+
+	Content c(T_VAR_NUM);
+
+	Renderer r(templates,TT_feed_posts,c);
+	View_Main_Page view(this);
+	view.ini_main(-1,true);
+	view.render(r,c,out.getstring());
+}
+
+

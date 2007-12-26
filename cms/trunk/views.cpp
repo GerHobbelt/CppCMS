@@ -195,7 +195,7 @@ void View_Main_Page::ini_share()
 
 }
 
-void View_Main_Page::ini_main(int id)
+void View_Main_Page::ini_main(int id,bool feed)
 {
 	ini_share();
 
@@ -212,7 +212,7 @@ void View_Main_Page::ini_main(int id)
 
 	int counter=0;
 
-	int max_posts=5;
+	int max_posts=feed ? 10 : 5;
 
 	latest_posts.reserve(max_posts);
 
@@ -230,7 +230,12 @@ void View_Main_Page::ini_main(int id)
 			cur.get(post);
 
 			shared_ptr<View_Post> ptr(new View_Post(blog));
-			ptr->ini_short(post);
+			if(feed){
+				ptr->ini_feed(post);
+			}
+			else {
+				ptr->ini_short(post);
+			}
 			latest_posts.push_back(ptr);
 			counter++;
 			cur.next();
@@ -273,6 +278,8 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 	c[TV_blog_description]=description;
 	c[TV_admin_url]=blog->fmt.admin;
 	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
+	c[TV_host]=global_config.sval("blog.host").c_str();
+	c[TV_rss_posts]=blog->fmt.feed;
 	if(from!="") {
 		c[TV_next_page_link]=from;
 	}

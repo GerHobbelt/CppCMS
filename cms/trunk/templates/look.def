@@ -9,7 +9,10 @@ templates:
 	admin_main
 	admin_editpost
 	admin_login
+	feed_posts
 variables:
+	rss_posts
+	host
 	error_404
 	error_comment
 	get_post

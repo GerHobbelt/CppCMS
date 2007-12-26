@@ -16,6 +16,7 @@ server.socket = "127.0.0.1:8000"
 
 blog.media_path = "/templates"
 blog.script_path = "/blog"
+blog.host = "localhost:8080"
 
 # bdb 
 bdb.path="./db/"
