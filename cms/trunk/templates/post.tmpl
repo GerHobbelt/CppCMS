@@ -20,7 +20,7 @@
 			<%if def url %><a href="<% url %>"><% username %></a><% else %><% username %><% end %>,
  			at <% date %>
 			<% if def delete_url %>
-				| <a href="<% delete_url%>" onclick="a=confirm('Are you shure?'); return a;" >delete</a>
+				| <a href="<% delete_url%>" onclick="return confirm('Are you shure?'); " >delete</a>
 			<% end %>
 		</dt>
 		<dd>
