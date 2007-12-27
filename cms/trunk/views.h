@@ -103,8 +103,14 @@ class View_Admin_Main
 		string title;
 		string edit_url;
 	};
+	
+	struct comment_ref {
+		string url;
+		string author;
+	};
 
 	list<post_ref> unpublished_posts;
+	list<comment_ref> latest_comments;
 public:
 	View_Admin_Main(Blog *b): blog(b){};
 	void ini();

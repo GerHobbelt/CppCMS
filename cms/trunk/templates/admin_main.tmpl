@@ -23,12 +23,17 @@
 </div>
 <div id="news">
 <h2>Latest Comments</h2>
-<p>TODO</p>
-<!--        <ul>
-                <li><a href="#">Artyom</a> on <a href="#">Cool Article</a></li>
-                <li><a href="#">Maxim</a> on <a href="#">Best Article</a></li>
-                <li><a href="#">Eidth</a> on <a href="#">Best Article</a></li>
-        </ul>-->
+        <% call get_comment %>
+        <% if next_comment %>
+	        <ul>
+        	<% repeat %>
+			<li><a href="<% post_permlink %>"><% username %></a></li>
+		<% call get_comment %>
+		<% until not next_comment %>
+		</ul>
+	<% else %>
+		<p>No comments</p>
+	<% end%>
 <h2>Wait For Moderation</h2>
 <p>TODO</p>
 <!--        <ul>

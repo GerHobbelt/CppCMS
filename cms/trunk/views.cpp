@@ -388,6 +388,15 @@ void View_Admin_Main::ini()
 		tt.text2html(post.title,post_data.title);
 		unpublished_posts.push_back(post_data);
 	}
+	Comments::id_c post_cur(comments->id);
+	
+	int i;
+	for(i=0,post_cur.end(); i<10 && post_cur; i++, post_cur.next()) {
+		comment_ref com;
+		com.url=str(format(blog->fmt.post) % post_cur.val().post_id);
+		tt.text2html(post_cur.val().author.c_str(),com.author);
+		latest_comments.push_back(com);
+	}
 }
 
 int View_Admin_Main::render(Renderer &r,Content &c,string &out)
@@ -395,6 +404,7 @@ int View_Admin_Main::render(Renderer &r,Content &c,string &out)
 	c[TV_new_post_url]=blog->fmt.new_post;
 	int id=r.render(out);
 	list<post_ref>::iterator it=unpublished_posts.begin();
+	list<comment_ref>::iterator it_c=latest_comments.begin();
 	for(;;) {
 		if(id==TV_get_post && it!=unpublished_posts.end()) {
 			c[TV_next_post]=true;
@@ -404,6 +414,15 @@ int View_Admin_Main::render(Renderer &r,Content &c,string &out)
 		}
 		else if(id==TV_get_post){
 			c[TV_next_post]=false;
+		}
+		else if(id==TV_get_comment && it_c!=latest_comments.end()){
+			c[TV_next_comment]=true;
+			c[TV_username]=it_c->author;
+			c[TV_post_permlink]=it_c->url;
+			it_c++;
+		}
+		else if(id==TV_get_comment) {
+			c[TV_next_comment]=false;
 		}
 		else
 			return id;
