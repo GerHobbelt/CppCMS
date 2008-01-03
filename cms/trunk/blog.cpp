@@ -184,7 +184,7 @@ void Blog::add_comment(string &postid)
 	}
 
 	post_t post;
-	if(!posts->id.get(post_id,post)) {
+	if(!posts->id.get(post_id,post) || !post.is_open) {
 		throw Error(Error::E404);
 	}
 	comment_t comment;
