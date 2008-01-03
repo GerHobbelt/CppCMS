@@ -63,7 +63,7 @@ void View_Post::ini_share(post_t &p)
 {
 	Text_Tool tt;
 	tt.text2html(p.title,title);
-	blog->date(p.publish,date);
+	blog->date( (p.is_open ? p.publish : time(NULL)) ,date);
 	user_t user;
 	if(users->id.get(p.author_id,user)) {
 		tt.text2html(user.username,author);
