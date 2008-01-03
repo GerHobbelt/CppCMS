@@ -28,6 +28,7 @@ using cgicc::HTTPHeader;
 
 class Worker_Thread {
 friend class URL_Parser;
+	shared_ptr<Base_Cache> cache;
 protected:	
 	auto_ptr<FCgiIO>io;
 	auto_ptr<Cgicc> cgi;
@@ -37,6 +38,12 @@ protected:
 	auto_ptr<HTTPHeader> response_header;
 	void set_header(HTTPHeader*h){response_header=auto_ptr<HTTPHeader>(h);};
 	virtual void main();
+	
+	bool cache_try(string const &key);
+	void cache_store(string const &key);
+	void cache_drop(string const &key);
+	void cache_setup();
+	
 public:
 	int id;
 	pthread_t pid;

@@ -5,6 +5,24 @@
 
 using namespace cgicc;
 
+void Worker_Thread::cache_setup()
+{
+	string type=global_config.sval("cache.type","none");
+	if(type=="none") {
+		cache=shared_ptr<Base_Cache>(new Base_Cache);
+	}
+	else if(type=="process") {
+		int size=global_config.lval("cache.pages");
+		cache=shared_ptr<Base_Cache>(new Memory_Cache(size));
+	}
+	else if(type=="shared") {
+		cache=shared_ptr<Base_Cache>(new Base_Cache);
+	}
+	else if(type=="memcached") {
+		cache=shared_ptr<Base_Cache>(new Base_Cache);
+	}
+}
+
 Worker_Thread::Worker_Thread()
 {
 }
