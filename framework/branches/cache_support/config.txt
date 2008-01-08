@@ -14,7 +14,7 @@ bdb.path="./db/"
 
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/php-fastcgi.socket"
+server.socket = "/tmp/test-fast.cgi.socket"
 
 # Templates
 templates.debug_level = 1
@@ -26,3 +26,7 @@ gzip.enable = 1
 gzip.level = 1
 gzip.buffer = 4096
 
+# cache
+
+cache.type="process"
+cache.pages=10
