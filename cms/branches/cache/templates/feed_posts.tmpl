@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	<title><% blog_name %></title>
+	<link>http://<% host %><% base_url %></link>
+	<description><% blog_description %></description>
+	<atom:link 
+		href="http://<% host %><% rss_posts %>" 
+		rel="self" type="application/rss+xml" />
+	<% call get_post %>
+	<% while next_post %>
+		<item>
+			<title><% post_title %></title>
+			<link>http://<% host %><% post_permlink %></link>
+			<guid>http://<% host %><% post_permlink %></guid>
+			<description><% post_abstract %></description>
+		</item>
+		<% call get_post %>
+	<% end %>
+</channel>
+</rss>
