@@ -97,7 +97,6 @@ void Worker_Thread::flush_output(FCgiIO &io)
 		io<<*response_header;
 		
 		if(is_cached) {
-			cerr<<"gzip, cache\n";
 			io<<gzip_cache;
 		}
 		else {
@@ -119,18 +118,15 @@ void Worker_Thread::flush_output(FCgiIO &io)
 	
 			zstream.push(io);
 			zstream<<out.get();
-			cerr<<"gzip, no cache\n";
 		}
 	}	
 	else {
 		io<<*response_header;
 		if(is_cached) {
-			cerr<<"Not gzip, cache\n";
 			io<<string_cache;
 		}
 		else {
 			io<<out.get();
-			cerr<<"Not gzip, no cache\n";
 		}
 	}
 }
