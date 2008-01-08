@@ -103,7 +103,7 @@ void Memory_Cache::drop( string const &key)
 void Memory_Cache::drop_prefix( string const &prefix)
 {
 	Write_Lock L(&lock);
-	map_iterator_t it=data.find(prefix);
+	map_iterator_t it=data.lower_bound(prefix);
 	while(it!=data.end() && it->first.find(prefix)==0){
 		lru.erase(it->second.lru_ptr);
 		map_iterator_t tmp=it;
