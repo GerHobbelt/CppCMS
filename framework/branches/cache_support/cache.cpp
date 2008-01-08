@@ -36,7 +36,7 @@ string Memory_Cache::insert(string const &key,string const &input)
 	string result=deflate(input);
 	Write_Lock L(&lock);
 	map_iterator_t it=data.find(key);
-	if(it==data.end() && data.size()>limit) {
+	if(it==data.end() && data.size()>=limit) {
 		data.erase(*(lru.rbegin()));
 		lru.pop_back();
 	}
