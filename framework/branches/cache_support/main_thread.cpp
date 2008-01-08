@@ -129,7 +129,7 @@ void Main_Thread::do_login()
 	check_athentication_by_name(new_username,new_password);
 
 	if(authenticated) {
-		set_header(new HTTPRedirectHeader("/site/"));
+		set_header(new HTTPRedirectHeader("/test.fcgi/"));
 		HTTPCookie cookie_u("username",username,"","",7*24*3600,"/",false);
 		response_header->setCookie(cookie_u);
 		HTTPCookie cookie_p("password",new_password,"","",7*24*3600,"/",false);
@@ -138,13 +138,13 @@ void Main_Thread::do_login()
 	else {
 		username="";
 		password="";
-		set_header(new HTTPRedirectHeader("/site/login"));
+		set_header(new HTTPRedirectHeader("/test.fcgi/login"));
 	}
 };
 
 void Main_Thread::show_logout()
 {
-	set_header(new HTTPRedirectHeader("/site/"));
+	set_header(new HTTPRedirectHeader("/test.fcgi/"));
 	HTTPCookie cookie("username","","","",0,"/",false);
 	response_header->setCookie(cookie);
 	cookie.setName("password");
@@ -164,6 +164,11 @@ void Main_Thread::show_main_page(string from)
 
 	if(authenticated) {
 		c[TV_username]=username;
+	}
+	
+	string key="main_page:"+from+" for "+username;
+	if(cache_try(key)){
+		return;
 	}
 
 	Messages::id_c cur(all_messages->id);
@@ -209,21 +214,27 @@ void Main_Thread::show_main_page(string from)
 			}
 		}
 	}
+	
+	cache_store(key);
 }
 
 void Main_Thread::show_post_form()
 {
 	check_athentication();
 	if(authenticated) {
+		if(cache_try("post_form:")) {
+			return;
+		}
 		Content c(T_VAR_NUM);
 
 		c[TV_title]="New message";
 		c[TV_show_content]=TT_post;
 		Renderer t(templates,TT_master,c);
 		while(t.render(out));
+		cache_store("post_form:");
 	}
 	else {
-		set_header(new HTTPRedirectHeader("/site/login"));
+		set_header(new HTTPRedirectHeader("/test.fcgi/login"));
 
 	}
 }
@@ -235,7 +246,7 @@ void Main_Thread::get_post_message()
 	load_inputs();
 
 	if(!authenticated){
-		set_header(new HTTPRedirectHeader("/site/login"));
+		set_header(new HTTPRedirectHeader("/test.fcgi/login"));
 		return;
 	}
 
@@ -245,7 +256,9 @@ void Main_Thread::get_post_message()
 	msg.user_id=user_id;
 	all_messages->id.add(msg);
 
-	set_header(new HTTPRedirectHeader("/site/"));
+	cache_drop("main_page:");
+	
+	set_header(new HTTPRedirectHeader("/test.fcgi/"));
 }
 
 void Main_Thread::show_page()

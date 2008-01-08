@@ -1,4 +1,9 @@
 #include "cache.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <sstream>
+#include <iostream>
+#include <boost/format.hpp>
 
 class RWLock {
 protected:	
@@ -20,23 +25,26 @@ public:
 
 class Mutex {
 protected:	
-	pthread_muthex_t *lock;
+	pthread_mutex_t *lock;
 public:
-	Mutex(pthread_mutex_t *p) : lock(p) { pthread_muthex_lock(p); };
+	Mutex(pthread_mutex_t *p) : lock(p) { pthread_mutex_lock(p); };
 	~Mutex() { pthread_mutex_unlock(lock); };
 };
 
-shared_ptr<Compressed_Text> Memory_Cache::insert(string const &key,string const &input)
+string Memory_Cache::insert(string const &key,string const &input)
 {
-	shared_ptr<Compressed_Text> result=deflate(input);
+	string result=deflate(input);
 	Write_Lock L(&lock);
 	map_iterator_t it=data.find(key);
 	if(it==data.end() && data.size()>limit) {
-		lru.erase(lru.rbegin());
+		data.erase(*(lru.rbegin()));
+		lru.pop_back();
 	}
 	if(it==data.end()) {
-		it=data.insert(key,Compressed_Text(result,input));
+		data.insert(pair<string,Container>(key,Container(result,input)));
+		it=data.find(key);
 		lru.push_front(it);
+		it->second.lru_ptr=lru.begin();
 	}
 	else {
 		lru.erase(it->second.lru_ptr);
@@ -47,17 +55,16 @@ shared_ptr<Compressed_Text> Memory_Cache::insert(string const &key,string const 
 	return result;
 }
 
-map_iterator_t Memory_Cache::fetch( string const &key)
+Memory_Cache::map_iterator_t Memory_Cache::fetch( string const &key)
 {
-	map_iterator_t it=map.find(key);
-	if(it==map.end()) {
+	map_iterator_t it=data.find(key);
+	if(it==data.end()) {
 		return it;
 	}
 	
-	Mutex L(&lru_lock)
-			lru.erase(it->second.lru_ptr);
+	Mutex L(&lru_lock);
+	lru.erase(it->second.lru_ptr);
 	lru.push_front(it);
-	
 	return it;
 }
 
@@ -72,7 +79,7 @@ bool Memory_Cache::fetch_string(string const &key,string &output)
 	return false;
 }
 
-bool Memory_Cache::fetch_gzip(string const &key,shared_ptr<Compressed_Text> &output)
+bool Memory_Cache::fetch_gzip(string const &key,string &output)
 {
 	Read_Lock L(&lock);
 	map_iterator_t it=fetch(key);
@@ -96,11 +103,26 @@ void Memory_Cache::drop( string const &key)
 void Memory_Cache::drop_prefix( string const &prefix)
 {
 	Write_Lock L(&lock);
-	map_iterator_t it=data.find(start);
-	while(it!=data.end() && it->key.find(prefix)==0){
+	map_iterator_t it=data.find(prefix);
+	while(it!=data.end() && it->first.find(prefix)==0){
 		lru.erase(it->second.lru_ptr);
 		map_iterator_t tmp=it;
 		it++;
 		data.erase(tmp);
 	}
+}
+
+
+string Base_Cache::deflate(string const &text)
+{
+	using namespace boost::iostreams;
+	
+	ostringstream sstream;
+
+	filtering_ostream zstream;
+	zstream.push(gzip_compressor());
+	zstream.push(sstream);
+	zstream << text;
+	zstream.pop();
+	return sstream.str();
 }

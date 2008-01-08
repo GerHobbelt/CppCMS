@@ -11,6 +11,9 @@
 #include "cgicc/HTTPHTMLHeader.h"
 #include "cgicc/HTTPStatusHeader.h"
 #include "cgicc/HTMLClasses.h"
+
+#include "cache.h"
+
 #include <memory>
 
 #include "FCgiIO.h"
@@ -24,11 +27,8 @@ using cgicc::Cgicc;
 using cgicc::HTTPHeader;
 
 
-
-
 class Worker_Thread {
 friend class URL_Parser;
-	shared_ptr<Base_Cache> cache;
 protected:	
 	auto_ptr<FCgiIO>io;
 	auto_ptr<Cgicc> cgi;
@@ -39,11 +39,19 @@ protected:
 	void set_header(HTTPHeader*h){response_header=auto_ptr<HTTPHeader>(h);};
 	virtual void main();
 	
+	bool out_gzip;
+	bool is_cached;
+	
+	string string_cache;
+	string gzip_cache;
+	
+	bool check_gzip(FCGX_Request *fcgi);
+	void flush_output(FCgiIO &io);
+	
 	bool cache_try(string const &key);
 	void cache_store(string const &key);
 	void cache_drop(string const &key);
-	void cache_setup();
-	
+
 public:
 	int id;
 	pthread_t pid;

@@ -3,6 +3,7 @@
 #include <poll.h>
 #include <signal.h>
 
+shared_ptr<Base_Cache> global_cache;
 
 FastCGI_Application *FastCGI_Application::handlers_owner=NULL;
 

@@ -31,7 +31,8 @@ void Text_Tool::getline(string &in)
 		ptr=pos+1;
 	}
 
-	int blanks=0,i;
+	int blanks=0;
+	unsigned i;
 	for(i=0;i<tmp.size() && blanks<4;i++) {
 		char c=tmp[i];
 		if(c=='\r') continue;
@@ -122,13 +123,13 @@ void Text_Tool::basic_to_html(string s)
 
 void Text_Tool::to_html(string s)
 {
-	int i;
+	unsigned i;
 	content="";
 	content.reserve(s.size()*3/2);
 	bool bold_on=false;
 	bool it_on=false;
 	enum { B, I };
-	int last;
+	int last=B;
 
 	for(i=0;i<s.size();i++) {
 		char c=s[i];

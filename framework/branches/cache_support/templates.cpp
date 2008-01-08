@@ -39,7 +39,7 @@ int Renderer::render(string &s)
 	if(!tmpl) return 0;
 	Content &cont=*content;
 	Base_Template *tmp_tmpl;
-	int templ_id;
+	int templ_id=0;
 	for(;;) {
 		if(pos<0 || pos>(int64_t)(tmpl->len-sizeof(Tmpl_Op))){
 			throw HTTP_Error("Template overflow");

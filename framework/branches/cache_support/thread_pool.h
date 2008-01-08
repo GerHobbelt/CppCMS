@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "worker_thread.h"
+#include "cache.h"
 
 
 class FastCGI_Application {
@@ -188,11 +189,21 @@ public:
 	};
 };
 
+
 template<class T>
 void Run_Application(int argc,char *argv[])
 {
 	int n,max;
 	global_config.load(argc,argv);
+	string type=global_config.sval("cache.type","none");
+	if(type=="process") {
+		int size=global_config.lval("cache.pages");
+		global_cache=shared_ptr<Base_Cache>(new Memory_Cache(size));
+	}
+	else { // Default no cache
+		global_cache=shared_ptr<Base_Cache>(new Base_Cache);
+	}
+
 	
 	char const *socket=global_config.sval("server.socket","").c_str();
 	

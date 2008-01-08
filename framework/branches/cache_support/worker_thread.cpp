@@ -5,24 +5,6 @@
 
 using namespace cgicc;
 
-void Worker_Thread::cache_setup()
-{
-	string type=global_config.sval("cache.type","none");
-	if(type=="none") {
-		cache=shared_ptr<Base_Cache>(new Base_Cache);
-	}
-	else if(type=="process") {
-		int size=global_config.lval("cache.pages");
-		cache=shared_ptr<Base_Cache>(new Memory_Cache(size));
-	}
-	else if(type=="shared") {
-		cache=shared_ptr<Base_Cache>(new Base_Cache);
-	}
-	else if(type=="memcached") {
-		cache=shared_ptr<Base_Cache>(new Base_Cache);
-	}
-}
-
 Worker_Thread::Worker_Thread()
 {
 }
@@ -32,6 +14,25 @@ void Worker_Thread::main()
 	out.puts("<h1>Hello World</h2>\n");
 }
 
+
+bool Worker_Thread::check_gzip( FCGX_Request *fcgi)
+{
+	char *ptr;
+	
+	bool out_gzip=false;
+
+	if((ptr=FCGX_GetParam("HTTP_ACCEPT_ENCODING",fcgi->envp))!=NULL) {
+		if(strstr(ptr,"gzip")!=NULL) {
+			out_gzip=true;
+		}
+	}
+
+	if(global_config.lval("gzip.enable",0)==0) {
+		out_gzip=false;
+	}
+	
+	return out_gzip;
+}
 
 void Worker_Thread::run(FCGX_Request *fcgi)
 {
@@ -46,6 +47,11 @@ void Worker_Thread::run(FCGX_Request *fcgi)
 	env=&(cgi->getEnvironment());
 
 	set_header(new HTTPHTMLHeader);
+	
+	out_gzip=check_gzip(fcgi);
+	is_cached=false;
+	gzip_cache="";
+	string_cache="";
 	
 	try {
 		/**********/
@@ -72,47 +78,7 @@ void Worker_Thread::run(FCGX_Request *fcgi)
 		out.puts(msg.c_str());
 	}
 
-	char *ptr;
-	
-	bool gzip=false;
-
-	if((ptr=FCGX_GetParam("HTTP_ACCEPT_ENCODING",fcgi->envp))!=NULL) {
-		if(strstr(ptr,"gzip")!=NULL) {
-			gzip=true;
-		}
-	}
-
-	if(global_config.lval("gzip.enable",0)==0) {
-		gzip=false;
-	}
-	
-	if(gzip) {
-		using namespace boost::iostreams;
-		*io<<"Content-Encoding: gzip\r\n";
-		*io<<*response_header;
-		gzip_params params;
-		long level,length;
-
-		if((level=global_config.lval("gzip.level",-1))!=-1){
-			params.level=level;
-		}		
-
-		filtering_ostream zstream;
-
-		if((length=global_config.lval("gzip.buffer",-1))!=-1){
-			zstream.push(gzip_compressor(params,length));
-		}
-		else {
-			zstream.push(gzip_compressor(params));
-		}
-
-		zstream.push(*io);
-		zstream<<out.get();
-	}	
-	else {
-		*io<<*response_header;
-		*io<<out.get();
-	}
+	flush_output(*io);
 	
 	out.reset();
 	
@@ -121,4 +87,71 @@ void Worker_Thread::run(FCGX_Request *fcgi)
 	io.reset();
 	
         FCGX_Finish_r(fcgi);
+}
+
+void Worker_Thread::flush_output(FCgiIO &io)
+{
+	if(out_gzip) {
+		using namespace boost::iostreams;
+		io<<"Content-Encoding: gzip\r\n";
+		io<<*response_header;
+		
+		if(is_cached) {
+			cerr<<"gzip, cache\n";
+			io<<gzip_cache;
+		}
+		else {
+			gzip_params params;
+			long level,length;
+	
+			if((level=global_config.lval("gzip.level",-1))!=-1){
+				params.level=level;
+			}
+	
+			filtering_ostream zstream;
+	
+			if((length=global_config.lval("gzip.buffer",-1))!=-1){
+				zstream.push(gzip_compressor(params,length));
+			}
+			else {
+				zstream.push(gzip_compressor(params));
+			}
+	
+			zstream.push(io);
+			zstream<<out.get();
+			cerr<<"gzip, no cache\n";
+		}
+	}	
+	else {
+		io<<*response_header;
+		if(is_cached) {
+			cerr<<"Not gzip, cache\n";
+			io<<string_cache;
+		}
+		else {
+			io<<out.get();
+			cerr<<"Not gzip, no cache\n";
+		}
+	}
+}
+
+bool Worker_Thread::cache_try(string const &key)
+{
+	if(out_gzip) {
+		is_cached=global_cache->fetch_gzip(key,gzip_cache);
+	}
+	else {
+		is_cached=global_cache->fetch_string(key,string_cache);
+	}
+	return is_cached;
+}
+
+void Worker_Thread::cache_store(string const &key)
+{
+	global_cache->insert(key,out.get());
+}
+
+void Worker_Thread::cache_drop(string const &key)
+{
+	global_cache->drop_prefix(key);
 }
