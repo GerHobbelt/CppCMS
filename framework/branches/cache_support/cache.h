@@ -46,7 +46,11 @@ class Memory_Cache : public Base_Cache
 	list<map_iterator_t> lru;
 	map_iterator_t fetch(string const &key);
 public:	
-	Memory_Cache(int size) : limit(size) {};
+	Memory_Cache(int size) : limit(size) 
+	{
+		pthread_mutex_init(&lru_lock,NULL);
+		pthread_rwlock_init(&lock,NULL);
+	};
 	virtual string insert(string const &key, string const &input);
 	virtual bool fetch_string(string const &key,string &output);
 	virtual bool fetch_gzip(string const &key,string &output);
