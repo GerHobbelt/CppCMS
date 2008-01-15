@@ -16,7 +16,7 @@ class Base_Cache {
 protected:	
 	string deflate(string const &s);
 public:
-	virtual string insert(string const &key, string const &input)
+	virtual string insert(string const &key, string const &input,time_t timeout=365*24*3600)
 	{
 		return deflate(input);
 	};
@@ -34,16 +34,17 @@ class Memory_Cache : public Base_Cache
 	unsigned limit;
 	struct Container {
 		list<map<string,Container>::iterator>::iterator lru_ptr;
+		multimap<time_t,map<string,Container>::iterator>::iterator time_ptr;
 		string compressed;
 		string text;
-		Container(string c,
-			  string const &s) : compressed(c), text(s) 
-		{}; 
+		Container(string c, string const &s) : 
+				compressed(c), text(s) {};
 	};
 	typedef map<string,Container> map_t;
 	typedef map_t::iterator map_iterator_t;
 	map_t data;
 	list<map_iterator_t> lru;
+	multimap<time_t,map_iterator_t> timeline;
 	map_iterator_t fetch(string const &key);
 public:	
 	Memory_Cache(int size) : limit(size) 
@@ -51,7 +52,7 @@ public:
 		pthread_mutex_init(&lru_lock,NULL);
 		pthread_rwlock_init(&lock,NULL);
 	};
-	virtual string insert(string const &key, string const &input);
+	virtual string insert(string const &key, string const &input,time_t timeout=365*24*3600);
 	virtual bool fetch_string(string const &key,string &output);
 	virtual bool fetch_gzip(string const &key,string &output);
 	virtual void drop(string const &key);

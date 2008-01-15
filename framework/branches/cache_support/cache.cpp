@@ -31,24 +31,42 @@ public:
 	~Mutex() { pthread_mutex_unlock(lock); };
 };
 
-string Memory_Cache::insert(string const &key,string const &input)
+string Memory_Cache::insert(string const &key,string const &input,time_t timeout)
 {
 	string result=deflate(input);
+	time_t curtime=time(NULL);
+	timeout = curtime + timeout;
 	Write_Lock L(&lock);
 	map_iterator_t it=data.find(key);
 	if(it==data.end() && data.size()>=limit) {
-		data.erase(*(lru.rbegin()));
-		lru.pop_back();
+		map<time_t,map_iterator_t>::iterator time_order;
+		if((time_order=timeline.begin())!=timeline.end() && 
+			time_order->first<curtime) 
+		{
+			lru.erase(time_order->second->second.lru_ptr);
+			data.erase(time_order->second);
+			timeline.erase(time_order);
+		}
+		else {
+			timeline.erase((*lru.rbegin())->second.time_ptr);
+			data.erase(*(lru.rbegin()));
+			lru.pop_back();
+		}
 	}
 	if(it==data.end()) {
 		data.insert(pair<string,Container>(key,Container(result,input)));
 		it=data.find(key);
 		lru.push_front(it);
 		it->second.lru_ptr=lru.begin();
+		it->second.time_ptr=
+			timeline.insert(pair<time_t,map_iterator_t>(timeout,it));
 	}
 	else {
 		lru.erase(it->second.lru_ptr);
 		lru.push_front(it);
+		timeline.erase(it->second.time_ptr);
+		it->second.time_ptr=
+			timeline.insert(pair<time_t,map_iterator_t>(timeout,it));
 		it->second.text=input;
 		it->second.compressed=result;
 	}
@@ -60,6 +78,9 @@ Memory_Cache::map_iterator_t Memory_Cache::fetch( string const &key)
 	map_iterator_t it=data.find(key);
 	if(it==data.end()) {
 		return it;
+	}
+	if(it->second.time_ptr->first<time(NULL)) {
+		return data.end();
 	}
 	
 	Mutex L(&lru_lock);
@@ -95,6 +116,7 @@ void Memory_Cache::drop( string const &key)
 	Write_Lock L(&lock);
 	map_iterator_t it=data.find(key);
 	if(it!=data.end()){
+		timeline.erase(it->second.time_ptr);
 		lru.erase(it->second.lru_ptr);
 		data.erase(it);
 	}
@@ -106,6 +128,7 @@ void Memory_Cache::drop_prefix( string const &prefix)
 	map_iterator_t it=data.lower_bound(prefix);
 	while(it!=data.end() && it->first.find(prefix)==0){
 		lru.erase(it->second.lru_ptr);
+		timeline.erase(it->second.time_ptr);
 		map_iterator_t tmp=it;
 		it++;
 		data.erase(tmp);
