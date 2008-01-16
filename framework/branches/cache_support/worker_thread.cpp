@@ -142,9 +142,9 @@ bool Worker_Thread::cache_try(string const &key)
 	return is_cached;
 }
 
-void Worker_Thread::cache_store(string const &key)
+void Worker_Thread::cache_store(string const &key,time_t timeout)
 {
-	global_cache->insert(key,out.get());
+	global_cache->insert(key,out.get(),timeout);
 }
 
 void Worker_Thread::cache_drop(string const &key)

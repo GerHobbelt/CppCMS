@@ -215,7 +215,7 @@ void Main_Thread::show_main_page(string from)
 		}
 	}
 	
-	cache_store(key);
+	cache_store(key,5);
 }
 
 void Main_Thread::show_post_form()
@@ -231,7 +231,7 @@ void Main_Thread::show_post_form()
 		c[TV_show_content]=TT_post;
 		Renderer t(templates,TT_master,c);
 		while(t.render(out));
-		cache_store("post_form:");
+		cache_store("post_form:",10);
 	}
 	else {
 		set_header(new HTTPRedirectHeader("/test.fcgi/login"));

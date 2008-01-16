@@ -49,7 +49,7 @@ protected:
 	void flush_output(FCgiIO &io);
 	
 	bool cache_try(string const &key);
-	void cache_store(string const &key);
+	void cache_store(string const &key,time_t timeout=365*24*3600);
 	void cache_drop(string const &key);
 
 public:
