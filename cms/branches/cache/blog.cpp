@@ -117,6 +117,14 @@ void Blog::post(string s_id,bool preview)
 	if(preview) {
 		auth_or_throw();
 	}
+	string key;
+	if(!preview) {
+		key=str(format("post:%1% by %2%") % s_id % userid);
+		if(cache_try(key)){
+			return;
+		}
+	}
+	
 	int id=atoi(s_id.c_str());
 	Content c(T_VAR_NUM);
 
@@ -124,12 +132,21 @@ void Blog::post(string s_id,bool preview)
 	View_Main_Page view(this);
 	view.ini_post(id,preview);
 	view.render(r,c,out.getstring());
+	
+	if(!preview) {
+		cache_store(key);
+	}
 }
 
 void Blog::main_page(string from)
 {
 
 	Content c(T_VAR_NUM);
+	
+	string key=str(format("main:%1% by %2%") % from % userid);
+	if(cache_try(key)){
+		return;
+	}
 
 	Renderer r(templates,TT_master,c);
 	View_Main_Page view(this);
@@ -140,6 +157,8 @@ void Blog::main_page(string from)
 		view.ini_main(atoi(from.c_str()));
 	}
 	view.render(r,c,out.getstring());
+	
+	cache_store(key);
 }
 
 void Blog::date(time_t time,string &d)
@@ -199,6 +218,8 @@ void Blog::add_comment(string &postid)
 	comments->id.add(comment);
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
+	
+	cache_drop("post:"+postid+" by");
 }
 
 void Blog::error_page(int what)
@@ -381,6 +402,11 @@ void Blog::get_post(string sid)
 	else if(type==PREVIEW) {
 		edit_post(str(format("%1%") % id));
 	}
+	
+	string key=str(format("post:%1% by") % id);
+	cache_drop(key);
+	cache_drop("main:");
+	cache_drop("feed:");
 }
 
 void Blog::save_post(int &id,string &title,
@@ -440,18 +466,22 @@ void Blog::del_comment(string sid)
 		cur.del();
 	}
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
+	
+	string key=str(format("post:%1$ by") % cur.val().post_id);
+	cache_drop(key);
 }
 
 
 void Blog::feed()
 {
 
+	if(cache_try("feed:"))
+		return;
 	Content c(T_VAR_NUM);
 
 	Renderer r(templates,TT_feed_posts,c);
 	View_Main_Page view(this);
 	view.ini_main(-1,true);
 	view.render(r,c,out.getstring());
+	cache_store("feed:");
 }
-
-

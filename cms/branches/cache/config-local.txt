@@ -36,3 +36,7 @@ gzip.enable=1
 
 # Use other buffer size then default
 # gzip.buffer=256
+#
+
+cache.type="process"
+cache.pages=50
