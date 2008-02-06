@@ -13,7 +13,12 @@
 			<title><% post_title %></title>
 			<link>http://<% host %><% post_permlink %></link>
 			<guid>http://<% host %><% post_permlink %></guid>
-			<description><% post_abstract %></description>
+			<description>
+			<% post_abstract %>
+			&lt;p&gt;
+			&lt;a href="<% post_permlink %>"&gt;more...&lt;/a&gt;
+			&lt;/p&gt;
+			</description>
 		</item>
 		<% call get_post %>
 	<% end %>
