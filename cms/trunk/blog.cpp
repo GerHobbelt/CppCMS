@@ -8,6 +8,7 @@
 #include "error.h"
 
 using namespace cgicc;
+using namespace soci;
 using boost::format;
 using boost::str;
 
@@ -109,6 +110,9 @@ void Blog::init()
 		root+"/postback/delete/comment/%1%";
 	url.add("^/rss$",boost::bind(&Blog::feed,this));
 	fmt.feed=root+"/rss";
+
+	sql.open(global_config.sval("soci.engine"),global_config.sval("soci.connect"));
+	connected=true;
 }
 
 
@@ -142,10 +146,8 @@ void Blog::main_page(string from)
 	view.render(r,c,out.getstring());
 }
 
-void Blog::date(time_t time,string &d)
+void Blog::date(tm t,string &d)
 {
-	struct tm t;
-	localtime_r(&time,&t);
 	char buf[80];
 	snprintf(buf,80,"%02d/%02d/%04d, %02d:%02d",
 		 t.tm_mday,t.tm_mon+1,t.tm_year+1900,
@@ -157,6 +159,8 @@ void Blog::main()
 {
 	try {
 		try{
+			if(!connected)
+				sql.reconnect();
 			auth();
 			if(url.parse()==-1){
 				throw Error(Error::E404);
@@ -166,7 +170,9 @@ void Blog::main()
 			error_page(e.what());
 		}
 	}
-	catch (DbException &err) {
+	catch (soci_error &err) {
+		sql.close();
+		connected=false;
 		throw HTTP_Error(err.what());
 	}
 	catch(char const *s) {
@@ -184,19 +190,25 @@ void Blog::add_comment(string &postid)
 	}
 
 	post_t post;
-	if(!posts->id.get(post_id,post) || !post.is_open) {
+	post.is_open=0;
+
+	sql<<"SELECT is_open FROM posts WHERE id=:id",
+		use(post_id),into(post.is_open);
+
+	if(!post.is_open) {
 		throw Error(Error::E404);
 	}
-	comment_t comment;
-	comment.post_id=post_id;
-	comment.author=incom.author.c_str();
-	comment.author_id=-1;
-	comment.url=incom.url.c_str();
-	comment.email=incom.email.c_str();
-	comment.publish_time=time(NULL);
-	comment.moderated=true;
-	comment.content_id=texts->add(incom.message.c_str());
-	comments->id.add(comment);
+
+	tm t;
+	time_t cur=time(NULL);
+	localtime_r(&cur,&t);
+
+	sql<<	"INSERT INTO "
+		"comments (post_id,author,url,email,publish_time,content) "
+		"values(:post_id,:author,:url,:email,:tm,:content)",
+		use(post_id),use(incom.author),use(incom.url),
+		use(incom.email),use(t),use(incom.message);
+
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
 }
@@ -221,9 +233,13 @@ void Blog::error_page(int what)
 
 int Blog::check_login( string username,string password)
 {
-	user_t user;
-	if(users->username.get(username,user) && password==user.password.c_str()) {
-		return user.id;
+	int id=-1;
+	string pass;
+	sql<<	"SELECT id,password FROM users WHERE username=:u",
+		use(username),
+		into(id),into(pass);
+	if(id!=-1 && password==pass) {
+		return id;
 	}
 	return -1;
 }
@@ -386,59 +402,40 @@ void Blog::get_post(string sid)
 void Blog::save_post(int &id,string &title,
 		     string &abstract,string &content,bool pub)
 {
-	Posts::id_c cursor(posts->id);
-	post_t post;
+	tm t;
+	time_t tt=time(NULL);
 
-	if(id!=-1) {
-		if(!(cursor==id)) {
-			throw Error(Error::E404);
-		}
-		cursor.get(post);
-	}
-
-	post.title=title.c_str();
+	localtime_r(&tt,&t);
+	eIndicator ind= content == "" ? eNull : eOK;
+	int is_open = pub ? 1: 0;
 
 	if(id==-1) {
-		post.abstract_id=texts->add(abstract);
-		if(content!=""){
-			post.content_id=texts->add(content);
-		}
-		else {
-			post.content_id=-1;
-		}
-		post.author_id=userid;
-		if((post.is_open=pub)==true) {
-			post.publish=time(NULL);
-		}
-		id=posts->id.add(post);
+		int i;
+		sql.begin();
+		sql<<	"INSERT INTO posts (title,abstract,content,is_open,publish_time) "
+			"VALUES(:title,:abstract,:content,:is_open,:tm)",
+			use(title),use(abstract),use(content,ind),use(is_open),use(t);
+		sql<<	"SELECT id FROM posts ORDER BY id DESC LIMIT 1",into(id);
+		sql.commit();
 	}
 	else {
-		texts->update(post.abstract_id,abstract);
-		if(post.content_id!=-1) {
-			texts->update(post.content_id,content);
-		}
-		if(content!="" && post.content_id==-1) {
-			post.content_id=texts->add(content);
-		}
-		if(pub==true) {
-			post.is_open=true;
-			post.publish=time(NULL);
-		}
-		cursor=post;
+		sql<<	"UPDATE posts "
+			"SET	title= :title,"
+			"	abstract= :abstract,"
+			"	content=:content,"
+			"	is_open=is_open OR :open,"
+			"	publish_time=:tm "
+			"WHERE id=:id",
+			use(title),use(abstract),use(content,ind),
+			use(is_open),use(t),use(id);
 	}
 }
 
 void Blog::del_comment(string sid)
 {
 	auth_or_throw();
-	Comments::id_c cur(comments->id);
 	int id=atoi(sid.c_str());
-	if(cur==id) {
-		if(cur.val().content_id!=-1) {
-			texts->del(cur.val().content_id);
-		}
-		cur.del();
-	}
+	sql<<"DELETE FROM comments WHERE id=:id",use(id);
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
 }
 

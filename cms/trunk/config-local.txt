@@ -36,3 +36,6 @@ gzip.enable=1
 
 # Use other buffer size then default
 # gzip.buffer=256
+
+soci.engine="sqlite3"
+soci.connect="db/cppcms.db"

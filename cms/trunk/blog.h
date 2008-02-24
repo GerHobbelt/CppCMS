@@ -13,6 +13,7 @@
 #define BLOG_H
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
+#include <soci/soci.h>
 #include "views.h"
 #include "data.h"
 
@@ -58,6 +59,8 @@ class Blog : public Worker_Thread {
 public:
 	string username;
 	int userid;
+	bool connected;
+	soci::session sql;
 private:
 
 	void auth_or_throw();
@@ -80,7 +83,7 @@ public:
 	links_t fmt;
 	virtual void init();
 	virtual void main();
-	void date(time_t time,string &s);
+	void date(std::tm t,string &s);
 	Blog() : url(this) {};
 };
 #endif

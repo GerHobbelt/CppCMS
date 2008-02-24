@@ -23,21 +23,11 @@ void View_Comment::init(comment_t &c)
 {
 	Text_Tool tt;
 	user_t user;
-	if(c.author_id!=-1 && users->id.get(c.author_id,user)) {
-		tt.text2html(user.username,author);
+	tt.text2html(c.author,author);
+	if(c.url.size!=0){
+		tt.text2url(c.url,url);
 	}
-	else if(!(c.author=="")) {
-		tt.text2html(c.author,author);
-		if(c.url[0]!=0){
-			tt.text2url(c.url,url);
-		}
-	}
-	else {
-		author="unknown";
-	}
-	string text;
-	texts->get(c.content_id,text);
-	tt.markdown2html(text,message);
+	tt.markdown2html(c.content,message);
 	blog->date(c.publish_time,date);
 	del_url=str(format(blog->fmt.del_comment) % c.id);
 }
@@ -63,11 +53,9 @@ void View_Post::ini_share(post_t &p)
 {
 	Text_Tool tt;
 	tt.text2html(p.title,title);
-	blog->date( (p.is_open ? p.publish : time(NULL)) ,date);
-	user_t user;
-	if(users->id.get(p.author_id,user)) {
-		tt.text2html(user.username,author);
-	}
+	blog->date( p.publish ,date);
+	tt.text2html(p.author_name,author);
+
 	edit_url=str(format(blog->fmt.edit_post) % p.id);
 	permlink=str(format(blog->fmt.post) % p.id);
 }
@@ -76,13 +64,9 @@ void View_Post::ini_full(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
-	string abstract;
-	string content;
-	texts->get(p.abstract_id,abstract);
-	tt.markdown2html(abstract,this->abstract);
-	if(p.content_id!=-1) {
-		texts->get(p.content_id,content);
-		tt.markdown2html(content,this->content);
+	tt.markdown2html(p.abstract,this->abstract);
+	if(p.content!="") {
+		tt.markdown2html(p.content,this->content);
 		has_content=true;
 	}
 	else {
@@ -94,18 +78,25 @@ void View_Post::ini_full(post_t &p)
 	post_comment2=post_comment.substr(n);
 	post_comment1=post_comment.substr(0,n);
 
+	
 	Comments::posttime_c cur(comments->posttime);
 	has_comments=false;
-	for(cur.gte(comment_t::sec_t(p.id,0));
-		    cur && cur.val().post_id==p.id;
-		    cur.next())
+	
+	rowset<> rs=(blog->sql.prepare<<
+		"SELECT id,author,email,url,publish_time,content "
+		"FROM comments "
+		"WHERE post_id=:id "
+		"ORDER BY publish_time",use(p.id));
+
+	rowset<>::const_iterator cur;
+
+	for(cur=rs.begin();cur!=rs.end();cur++)
 	{
-		if(!cur.val().moderated) {
-			continue;
-		}
 		shared_ptr<View_Comment> com(new View_Comment(blog));
 		comments_list.push_back(com);
-		comment_t comment=cur;
+		comment_t comment;
+		*cur	>> comment.id >>comment.author >> comment.email >> comment.url
+			>> comment.publish_time >> comment.content ;
 		com->init(comment);
 		has_comments=true;
 	}
@@ -116,15 +107,8 @@ void View_Post::ini_short(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
-	string abstract;
-	texts->get(p.abstract_id,abstract);
-	tt.markdown2html(abstract,this->abstract);
-	if(p.content_id!=-1) {
-		has_content=true;
-	}
-	else {
-		has_content=false;
-	}
+	tt.markdown2html(p.abstract,abstract);
+	has_content=p.has_content;
 	has_comments=false;
 }
 
@@ -133,12 +117,12 @@ void View_Post::ini_feed(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
-	string abstract,abstract_html;
-	texts->get(p.abstract_id,abstract);
-	tt.markdown2html(abstract,abstract_html);
+	string abstract_html;
+	tt.markdown2html(p.abstract,abstract_html);
 	// For xml feed we need convert html to text
 	tt.text2html(abstract_html,this->abstract);
-	has_content=has_comments=false;
+	has_content=p.has_content;
+	has_comments=false;
 }
 
 int View_Post::render(Renderer &r,Content &c, string &out)
@@ -186,20 +170,22 @@ int View_Post::render(Renderer &r,Content &c, string &out)
 
 void View_Main_Page::ini_share()
 {
-	option_t opt;
-
-	options->get(BLOG_TITLE,opt);
-	title=(char const*)opt.value;
-	options->get(BLOG_DESCRIPTION,opt);
-	description=(char const*)opt.value;
-
+	int id;
+	string val;
+	rowset<> rs=(blog->sql<<"SELECT id,value FROM options");
+	rowset<>::const_iterator *i;
+	for(i=rs.begin();i!=rs.end();i++){
+		*i >>id>>val;
+		if(id==BLOG_TITLE)
+			title=val;
+		else if(id==BLOG_DESCRIPTION)
+			description=val;
+	}
 }
 
 void View_Main_Page::ini_main(int id,bool feed)
 {
 	ini_share();
-
-	Posts::publish_c cur(posts->publish);
 
 	if(id==-1) {
 		cur.end();
@@ -210,39 +196,56 @@ void View_Main_Page::ini_main(int id,bool feed)
 		cur.lte(p.publish);
 	}
 
-	int counter=0;
-
 	int max_posts=feed ? 10 : 5;
 
 	latest_posts.reserve(max_posts);
 
-	for(;;) {
-		if(cur) {
-			if(!cur.val().is_open){
-				cur.next();
-				continue;
-			}
-			if(counter==max_posts) {
-				from=str(format(blog->fmt.main_from) % cur.val().id);
-				break;
-			}
-			post_t post;
-			cur.get(post);
-
-			shared_ptr<View_Post> ptr(new View_Post(blog));
-			if(feed){
-				ptr->ini_feed(post);
-			}
-			else {
-				ptr->ini_short(post);
-			}
-			latest_posts.push_back(ptr);
-			counter++;
-			cur.next();
-		}
-		else {
+	rowset<> rs;
+	if(id!=-1){
+		rs=(blog->sql.prepare<<
+			"SELECT posts.id,users.username,posts.title, "
+			"	posts.abstract, posts.content NOTNULL, "
+			"	posts.publish "
+			"FROM	posts "
+			"JOIN	users ON users.id=posts.author_id "
+			"WHERE	posts.is_open=1 "
+			"	AND posts.publish >= (SELECT publish FROM posts WHERE id=:id) "
+			"ORDER BY posts.publish DESC "
+			"LIMIT :max",use(max_posts+1),use(id));
+	}
+	else {
+		rs=(blog->sql.prepare<<
+			"SELECT posts.id,users.username,posts.title, "
+			"	posts.abstract, posts.content NOTNULL, "
+			"	posts.publish "
+			"FROM	posts "
+			"JOIN	users ON users.id=posts.author_id "
+			"WHERE	posts.is_open=1 "
+			"ORDER BY posts.publish DESC"
+			"LIMIT :max",use(max_posts+1));
+	}
+		
+	rowset<>::const_iterator row;
+	int conter;
+	for(counter=0,row=rs.begin();row!=rs.end();row++,counter++) {
+		if(counter==max_posts+1) {
+			int id;
+			*row>>id;
+			from=str(format(blog->fmt.main_from) % id);
 			break;
 		}
+		post_t post;
+		*row	>>post.id>>post.author_name>>post.title>>
+		 	>>post.abstract>>post.has_content>>post.publish;
+		
+		shared_ptr<View_Post> ptr(new View_Post(blog));
+		if(feed){
+			ptr->ini_feed(post);
+		}
+		else {
+			ptr->ini_short(post);
+		}
+		latest_posts.push_back(ptr);
 	}
 	disp=SUMMARY;
 }
@@ -251,9 +254,25 @@ void View_Main_Page::ini_post(int id,bool preview)
 {
 	shared_ptr<View_Post> ptr(new View_Post(blog));
 	post_t post;
-	if(!(posts->id.get(id,post)) || (!post.is_open && !preview)){
+	eIndicator ind;
+	post.id=-1;
+	blog->sql<<
+		"SELECT posts.id,users.username,posts.title, "
+		"	posts.abstract, posts.content, "
+		"	posts.publish,posts.is_open "
+		"FROM	posts "
+		"JOIN	users ON users.id=posts.author_id "
+		"WHERE	posts.id=:id ",
+		use(id),
+		into(post.id);
+		into(post.author_name),into(post.title),
+		into(post,abstract),into(post.content,ind),
+		into(post.publish),into(post.is_ope);
+
+	if(post.id==-1 || (!post.is_open && !preview)){
 		throw Error(Error::E404);
 	}
+
 	single_post=ptr;
 
 	ini_share();
@@ -327,9 +346,9 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 
 void View_Admin::ini_share()
 {
-	option_t opt;
-	options->get(BLOG_TITLE,opt);
-	blog_name=(char const*)opt.value;
+	blog->sql<<
+		"SELECT value FROM options WHERE id=:id",
+		use((int)BLOG_TITLE),into(blog_name);
 }
 
 void View_Admin::ini_login()
