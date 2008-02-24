@@ -19,13 +19,15 @@
 using boost::format;
 using boost::str;
 
+using namespace soci;
+
 void View_Comment::init(comment_t &c)
 {
 	Text_Tool tt;
 	user_t user;
 	tt.text2html(c.author,author);
-	if(c.url.size!=0){
-		tt.text2url(c.url,url);
+	if(c.url.size()!=0){
+		tt.text2url(c.url.c_str(),url);
 	}
 	tt.markdown2html(c.content,message);
 	blog->date(c.publish_time,date);
@@ -78,10 +80,9 @@ void View_Post::ini_full(post_t &p)
 	post_comment2=post_comment.substr(n);
 	post_comment1=post_comment.substr(0,n);
 
-	
-	Comments::posttime_c cur(comments->posttime);
+
 	has_comments=false;
-	
+
 	rowset<> rs=(blog->sql.prepare<<
 		"SELECT id,author,email,url,publish_time,content "
 		"FROM comments "
@@ -172,8 +173,8 @@ void View_Main_Page::ini_share()
 {
 	int id;
 	string val;
-	rowset<> rs=(blog->sql<<"SELECT id,value FROM options");
-	rowset<>::const_iterator *i;
+	rowset<> rs=(blog->sql.prepare<<"SELECT id,value FROM options");
+	rowset<>::const_iterator i;
 	for(i=rs.begin();i!=rs.end();i++){
 		*i >>id>>val;
 		if(id==BLOG_TITLE)
@@ -187,22 +188,13 @@ void View_Main_Page::ini_main(int id,bool feed)
 {
 	ini_share();
 
-	if(id==-1) {
-		cur.end();
-	}
-	else {
-		post_t p;
-		posts->id.get(id,p);
-		cur.lte(p.publish);
-	}
-
 	int max_posts=feed ? 10 : 5;
 
 	latest_posts.reserve(max_posts);
 
-	rowset<> rs;
-	if(id!=-1){
-		rs=(blog->sql.prepare<<
+	rowset<> rs =
+		(id!=-1) ?
+		(blog->sql.prepare<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content NOTNULL, "
 			"	posts.publish "
@@ -211,22 +203,21 @@ void View_Main_Page::ini_main(int id,bool feed)
 			"WHERE	posts.is_open=1 "
 			"	AND posts.publish >= (SELECT publish FROM posts WHERE id=:id) "
 			"ORDER BY posts.publish DESC "
-			"LIMIT :max",use(max_posts+1),use(id));
-	}
-	else {
-		rs=(blog->sql.prepare<<
+			"LIMIT :max",use(max_posts+1),use(id))
+		:
+		(blog->sql.prepare<<
 			"SELECT posts.id,users.username,posts.title, "
-			"	posts.abstract, posts.content NOTNULL, "
+			"	posts.abstract, 1, "
+			//"	posts.abstract, posts.content NOTNULL, "
 			"	posts.publish "
 			"FROM	posts "
 			"JOIN	users ON users.id=posts.author_id "
 			"WHERE	posts.is_open=1 "
-			"ORDER BY posts.publish DESC"
+			"ORDER BY posts.publish DESC "
 			"LIMIT :max",use(max_posts+1));
-	}
-		
+
 	rowset<>::const_iterator row;
-	int conter;
+	int counter;
 	for(counter=0,row=rs.begin();row!=rs.end();row++,counter++) {
 		if(counter==max_posts+1) {
 			int id;
@@ -235,9 +226,13 @@ void View_Main_Page::ini_main(int id,bool feed)
 			break;
 		}
 		post_t post;
-		*row	>>post.id>>post.author_name>>post.title>>
-		 	>>post.abstract>>post.has_content>>post.publish;
-		
+		*row>>post.id;
+		*row>>post.author_name;
+		*row>>post.title;
+		*row>>post.abstract;
+		*row>>post.has_content;
+		*row>>post.publish;
+
 		shared_ptr<View_Post> ptr(new View_Post(blog));
 		if(feed){
 			ptr->ini_feed(post);
@@ -266,8 +261,8 @@ void View_Main_Page::ini_post(int id,bool preview)
 		use(id),
 		into(post.id);
 		into(post.author_name),into(post.title),
-		into(post,abstract),into(post.content,ind),
-		into(post.publish),into(post.is_ope);
+		into(post.abstract),into(post.content,ind),
+		into(post.publish),into(post.is_open);
 
 	if(post.id==-1 || (!post.is_open && !preview)){
 		throw Error(Error::E404);
@@ -398,22 +393,34 @@ int View_Admin::render( Renderer &r,Content &c,string &out)
 void View_Admin_Main::ini()
 {
 	Text_Tool tt;
-	Posts::is_open_c cur(posts->is_open);
-	for(cur<=false;cur;cur.next()) {
+	rowset<>::const_iterator r;
+	rowset<> rs1=(blog->sql.prepare<<
+		"SELECT id,title "
+		"FROM posts "
+		"WHERE is_open=0");
+	for(r=rs1.begin();r!=rs1.end();r++) {
+		int id;
+		string title;
+		*r>>id>>title;
 		post_ref post_data;
-		post_t const &post=cur;
 		post_data.edit_url=
-			str(format(blog->fmt.edit_post) % post.id);
-		tt.text2html(post.title,post_data.title);
+			str(format(blog->fmt.edit_post) % id);
+		tt.text2html(title,post_data.title);
 		unpublished_posts.push_back(post_data);
 	}
-	Comments::id_c post_cur(comments->id);
-	
-	int i;
-	for(i=0,post_cur.end(); i<10 && post_cur; i++, post_cur.next()) {
+	rowset<> rs2=(blog->sql.prepare<<
+		"SELECT post_id,author "
+		"FROM posts "
+		"ORDER BY publish DESC "
+		"LIMIT 10");
+
+	for(r=rs2.begin();r!=rs2.end();r++) {
+		int id;
+		string author;
+		*r>>id>>author;
 		comment_ref com;
-		com.url=str(format(blog->fmt.post) % post_cur.val().post_id);
-		tt.text2html(post_cur.val().author.c_str(),com.author);
+		com.url=str(format(blog->fmt.post) % id);
+		tt.text2html(author,com.author);
 		latest_comments.push_back(com);
 	}
 }
@@ -453,6 +460,7 @@ void View_Admin_Post::ini( int id)
 {
 	Text_Tool tt;
 	post_t post_data;
+	eIndicator ind;
 	if(id!=-1) {
 		post_id=str(format("%1%") % id);
 		post_url=str(format(blog->fmt.update_post) % id);
@@ -462,17 +470,20 @@ void View_Admin_Post::ini( int id)
 		post_url=blog->fmt.add_post;
 		return;
 	}
-	if(!posts->id.get(id,post_data)){
+	post_data.id=-1;
+	blog->sql<<
+		"SELECT id,title,abstract,content "
+		"FROM posts "
+		"WHERE id=:id",
+		use(id),
+		into(post_data.id),into(post_data.title),
+		into(post_data.abstract),into(post_data.content,ind);
+	if(post_data.id==-1){
 		throw Error(Error::E404);
 	}
-	title=post_data.title.c_str();
-	string abs_tmp,cnt_tmp;
-	if(post_data.abstract_id!=-1 && texts->get(post_data.abstract_id,abs_tmp)) {
-		tt.text2html(abs_tmp,abstract);
-	}
-	if(post_data.content_id!=-1 && texts->get(post_data.content_id,cnt_tmp)) {
-		tt.text2html(cnt_tmp,content);
-	}
+	title=post_data.title;
+	tt.text2html(post_data.abstract,abstract);
+	tt.text2html(post_data.content,content);
 }
 
 int View_Admin_Post::render( Renderer &r,Content &c,string &out)

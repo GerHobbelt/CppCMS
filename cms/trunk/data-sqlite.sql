@@ -13,7 +13,7 @@ create table posts (
 	id integer  primary key autoincrement not null,
 	author_id integer not null,
 	title varchar(256) not null,
-	abstact text not null,
+	abstract text not null,
 	content text,
 	publish datetime not null,
 	is_open integer not null
