@@ -7,9 +7,9 @@ mysql.database="cppcms"
 
 # FastCGI settings
 
-server.threads = 0
+server.threads = 5
 server.buffer = 100
-server.socket = "127.0.0.1:8000"
+server.socket = "/tmp/cppblog.socket"
 
 
 # Blog configuration
@@ -45,10 +45,10 @@ gzip.enable=1
 #soci.engine="mysql"
 #soci.connect="dbname=cppcms user=root password=root"
 
-#soci.engine="postgresql"
-#soci.connect="dbname=cppcms"
+soci.engine="postgresql"
+soci.connect="dbname=cppcms"
 
-soci.engine="sqlite3"
-soci.connect="db/cppcms.db"
+#soci.engine="sqlite3"
+#soci.connect="db/cppcms.db"
 
 

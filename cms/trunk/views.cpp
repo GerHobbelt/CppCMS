@@ -200,8 +200,8 @@ void View_Main_Page::ini_main(int id,bool feed)
 			"	posts.publish "
 			"FROM	posts "
 			"JOIN	users ON users.id=posts.author_id "
-			"WHERE	posts.is_open=1 "
-			"	AND posts.publish >= (SELECT publish FROM posts WHERE id=:id) "
+			"WHERE	posts.publish >= (SELECT publish FROM posts WHERE id=:id) "
+			"	AND posts.is_open=1 "
 			"ORDER BY posts.publish DESC "
 			"LIMIT :max",use(max_posts+1),use(id))
 		:
@@ -229,15 +229,22 @@ void View_Main_Page::ini_main(int id,bool feed)
 		*row>>post.author_name;
 		*row>>post.title;
 		*row>>post.abstract;
-		// SQLITE SOCI UGLY HACK
+		// The type of output varies
+		// for different DBS WTF!!!
 		if(row->get_properties(4).get_data_type()==eInteger){
 			*row>>post.has_content;
+		}
+		else if(row->get_properties(4).get_data_type()==eLongLong){
+			long long tmp;
+			*row>>tmp;
+			post.has_content=(int)tmp;
 		}
 		else {
 			string tmp;
 			*row>>tmp;
 			post.has_content=atoi(tmp.c_str());
 		}
+
 		*row>>post.publish;
 
 		shared_ptr<View_Post> ptr(new View_Post(blog));

@@ -1,7 +1,7 @@
-drop table if exists users;
-drop table if exists posts;
-drop table if exists comments;
 drop table if exists options;
+drop table if exists comments;
+drop table if exists posts;
+drop table if exists users;
 
 create table users (
 	id  integer auto_increment primary key not null,
