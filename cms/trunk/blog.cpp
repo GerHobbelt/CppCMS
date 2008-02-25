@@ -424,15 +424,26 @@ void Blog::save_post(int &id,string &title,
 		sql.commit();
 	}
 	else {
-		sql<<	"UPDATE posts "
-			"SET	title= :title,"
-			"	abstract= :abstract,"
-			"	content=:content,"
-			"	is_open=is_open | :open,"
-			"	publish=:tm "
-			"WHERE id=:id",
+		if(pub)	{
+			sql<<	"UPDATE posts "
+				"SET	title= :title,"
+				"	abstract= :abstract,"
+				"	content=:content,"
+				"	is_open=1,"
+				"	publish=:tm "
+				"WHERE id=:id",
 			use(title),use(abstract),use(content),
-			use(is_open),use(t),use(id);
+			use(t),use(id);
+		}
+		else {
+			sql<<	"UPDATE posts "
+				"SET	title= :title,"
+				"	abstract= :abstract,"
+				"	content=:content "
+				"WHERE id=:id",
+			use(title),use(abstract),use(content),
+			use(id);
+		}
 	}
 }
 
