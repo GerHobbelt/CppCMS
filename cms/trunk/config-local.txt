@@ -7,7 +7,7 @@ mysql.database="cppcms"
 
 # FastCGI settings
 
-server.threads = 5
+server.threads = 0
 server.buffer = 100
 server.socket = "127.0.0.1:8000"
 
@@ -42,10 +42,13 @@ gzip.enable=1
 # Engine #
 ##########
 
-soci.engine="postgresql"
-soci.connect="dbname=cppcms"
+#soci.engine="mysql"
+#soci.connect="dbname=cppcms user=root password=root"
 
-#soci.engine="sqlite3"
-#soci.connect="db/cppcms.db"
+#soci.engine="postgresql"
+#soci.connect="dbname=cppcms"
+
+soci.engine="sqlite3"
+soci.connect="db/cppcms.db"
 
 

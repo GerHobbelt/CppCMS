@@ -1,8 +1,32 @@
 #!/bin/bash
-sqlite3 db/cppcms.db <data-sqlite.sql
-echo "Enter username and password"
+echo Select Backend
+echo 1 - MySQL
+echo 2 - PostrgreSQL
+echo 3 - Sqlite3
+read B
+if [ "$B" == "1" ] ; then
+	echo DATABASE USERNAME PASSWORD
+	read DB U P
+	COM="mysql -u $U --password=$P $DB"
+	$COM <data-mysql.sql
+elif [ "$B" == "2" ] ; then 
+	echo DATABASE 
+	read DB
+	COM="psql $DB"
+	$COM <data-psql.sql
+elif [ "$B" == "3" ] ; then
+	echo DATABASE
+	read DB
+	COM="sqlite3 $DB"
+	$COM <data-sqlite.sql
+else
+	echo Incorrect backend
+	exit 1;
+fi
+
+echo "Enter Blog username and password"
 read U P
-echo "INSERT INTO users(username,password) values('$U','$P');"  | sqlite3 db/cppcms.db 
-echo "INSERT INTO options values(0,'CppCMS Blog');"  | sqlite3 db/cppcms.db 
-echo "INSERT INTO options values(1,'Yet Another C++ Blog');"  | sqlite3 db/cppcms.db 
+echo "INSERT INTO users(username,password) values('$U','$P');"  | $COM 
+echo "INSERT INTO options values(0,'CppCMS Blog');"  | $COM
+echo "INSERT INTO options values(1,'Yet Another C++ Blog');"  | $COM
 
