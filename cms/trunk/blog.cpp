@@ -111,7 +111,12 @@ void Blog::init()
 	url.add("^/rss$",boost::bind(&Blog::feed,this));
 	fmt.feed=root+"/rss";
 
-	sql.open(global_config.sval("soci.engine"),global_config.sval("soci.connect"));
+	try {
+		sql.open(global_config.sval("soci.engine"),global_config.sval("soci.connect"));
+	}
+	catch(soci_error const &e){
+		throw HTTP_Error(string("Failed to access DB")+e.what());
+	}
 	connected=true;
 }
 
@@ -406,15 +411,15 @@ void Blog::save_post(int &id,string &title,
 	time_t tt=time(NULL);
 
 	localtime_r(&tt,&t);
-	eIndicator ind= content == "" ? eNull : eOK;
 	int is_open = pub ? 1: 0;
 
 	if(id==-1) {
 		int i;
 		sql.begin();
-		sql<<	"INSERT INTO posts (title,abstract,content,is_open,publish_time) "
-			"VALUES(:title,:abstract,:content,:is_open,:tm)",
-			use(title),use(abstract),use(content,ind),use(is_open),use(t);
+		sql<<	"INSERT INTO posts (author_id,title,abstract,content,is_open,publish) "
+			"VALUES(:author_id,:title,:abstract,:content,:is_open,:tm)",
+			use(userid),use(title),use(abstract),
+			use(content),use(is_open),use(t);
 		sql<<	"SELECT id FROM posts ORDER BY id DESC LIMIT 1",into(id);
 		sql.commit();
 	}
@@ -424,9 +429,9 @@ void Blog::save_post(int &id,string &title,
 			"	abstract= :abstract,"
 			"	content=:content,"
 			"	is_open=is_open OR :open,"
-			"	publish_time=:tm "
+			"	publish=:tm "
 			"WHERE id=:id",
-			use(title),use(abstract),use(content,ind),
+			use(title),use(abstract),use(content),
 			use(is_open),use(t),use(id);
 	}
 }

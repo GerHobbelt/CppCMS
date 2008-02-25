@@ -196,7 +196,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		(id!=-1) ?
 		(blog->sql.prepare<<
 			"SELECT posts.id,users.username,posts.title, "
-			"	posts.abstract, posts.content NOTNULL, "
+			"	posts.abstract, posts.content !='', "
 			"	posts.publish "
 			"FROM	posts "
 			"JOIN	users ON users.id=posts.author_id "
@@ -207,8 +207,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		:
 		(blog->sql.prepare<<
 			"SELECT posts.id,users.username,posts.title, "
-			"	posts.abstract, 1, "
-			//"	posts.abstract, posts.content NOTNULL, "
+			"	posts.abstract, posts.content!='', "
 			"	posts.publish "
 			"FROM	posts "
 			"JOIN	users ON users.id=posts.author_id "
@@ -230,7 +229,15 @@ void View_Main_Page::ini_main(int id,bool feed)
 		*row>>post.author_name;
 		*row>>post.title;
 		*row>>post.abstract;
-		*row>>post.has_content;
+		// SQLITE SOCI UGLY HACK
+		if(row->get_properties(4).get_data_type()==eInteger){
+			*row>>post.has_content;
+		}
+		else {
+			string tmp;
+			*row>>tmp;
+			post.has_content=atoi(tmp.c_str());
+		}
 		*row>>post.publish;
 
 		shared_ptr<View_Post> ptr(new View_Post(blog));
@@ -259,7 +266,7 @@ void View_Main_Page::ini_post(int id,bool preview)
 		"JOIN	users ON users.id=posts.author_id "
 		"WHERE	posts.id=:id ",
 		use(id),
-		into(post.id);
+		into(post.id),
 		into(post.author_name),into(post.title),
 		into(post.abstract),into(post.content,ind),
 		into(post.publish),into(post.is_open);
@@ -410,8 +417,8 @@ void View_Admin_Main::ini()
 	}
 	rowset<> rs2=(blog->sql.prepare<<
 		"SELECT post_id,author "
-		"FROM posts "
-		"ORDER BY publish DESC "
+		"FROM comments "
+		"ORDER BY publish_time DESC "
 		"LIMIT 10");
 
 	for(r=rs2.begin();r!=rs2.end();r++) {

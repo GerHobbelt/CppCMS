@@ -1,0 +1,8 @@
+#!/bin/bash
+sqlite3 db/cppcms.db <data-sqlite.sql
+echo "Enter username and password"
+read U P
+echo "INSERT INTO users(username,password) values('$U','$P');"  | sqlite3 db/cppcms.db 
+echo "INSERT INTO options values(0,'CppCMS Blog');"  | sqlite3 db/cppcms.db 
+echo "INSERT INTO users(username,password) values(1,'Yet Another C++ Blog');"  | sqlite3 db/cppcms.db 
+

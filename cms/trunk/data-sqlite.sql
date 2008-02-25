@@ -14,7 +14,7 @@ create table posts (
 	author_id integer not null,
 	title varchar(256) not null,
 	abstract text not null,
-	content text,
+	content text not null,
 	publish datetime not null,
 	is_open integer not null
 );
