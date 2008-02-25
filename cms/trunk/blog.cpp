@@ -428,7 +428,7 @@ void Blog::save_post(int &id,string &title,
 			"SET	title= :title,"
 			"	abstract= :abstract,"
 			"	content=:content,"
-			"	is_open=is_open OR :open,"
+			"	is_open=is_open | :open,"
 			"	publish=:tm "
 			"WHERE id=:id",
 			use(title),use(abstract),use(content),
