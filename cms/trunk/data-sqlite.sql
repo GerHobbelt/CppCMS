@@ -18,8 +18,7 @@ create table posts (
 	publish datetime not null,
 	is_open integer not null
 );
-create index posts_pub on posts (publish);
-create index posts_open on posts (is_open);
+create index posts_pub on posts (is_open,publish);
 
 create table comments (
 	id integer primary key autoincrement not null,

@@ -199,25 +199,27 @@ void View_Main_Page::ini_main(int id,bool feed)
 			"	posts.abstract, posts.content !='', "
 			"	posts.publish "
 			"FROM	posts "
-			"JOIN	users ON users.id=posts.author_id "
-			"WHERE	posts.publish >= (SELECT publish FROM posts WHERE id=:id) "
+			"LEFT JOIN "
+			"	users ON users.id=posts.author_id "
+			"WHERE	posts.publish <= (SELECT publish FROM posts WHERE id=:id) "
 			"	AND posts.is_open=1 "
 			"ORDER BY posts.publish DESC "
-			"LIMIT :max",use(max_posts+1),use(id))
+			"LIMIT :max",use(id),use(max_posts+1))
 		:
 		(blog->sql.prepare<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content!='', "
 			"	posts.publish "
 			"FROM	posts "
-			"JOIN	users ON users.id=posts.author_id "
+			"LEFT JOIN "
+			"	users ON users.id=posts.author_id "
 			"WHERE	posts.is_open=1 "
 			"ORDER BY posts.publish DESC "
 			"LIMIT :max",use(max_posts+1));
 
 	rowset<>::const_iterator row;
 	int counter;
-	for(counter=0,row=rs.begin();row!=rs.end();row++,counter++) {
+	for(counter=1,row=rs.begin();row!=rs.end();row++,counter++) {
 		if(counter==max_posts+1) {
 			int id;
 			*row>>id;
@@ -425,7 +427,7 @@ void View_Admin_Main::ini()
 	rowset<> rs2=(blog->sql.prepare<<
 		"SELECT post_id,author "
 		"FROM comments "
-		"ORDER BY publish_time DESC "
+		"ORDER BY id DESC "
 		"LIMIT 10");
 
 	for(r=rs2.begin();r!=rs2.end();r++) {

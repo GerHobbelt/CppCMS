@@ -13,8 +13,7 @@ create table posts (
 	publish timestamp not null,
 	is_open integer not null
 );
-create index posts_pub on posts (publish);
-create index posts_open on posts (is_open);
+create index posts_pub on posts (is_open,publish);
 
 create table comments (
 	id serial primary key not null,
