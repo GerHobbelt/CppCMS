@@ -240,6 +240,9 @@ int Blog::check_login( string username,string password)
 {
 	int id=-1;
 	string pass;
+	if(username==""){
+		return -1;
+	}
 	sql<<	"SELECT id,password FROM users WHERE username=:u",
 		use(username),
 		into(id),into(pass);
