@@ -6,7 +6,7 @@ create table users (
 
 create table posts (
 	id serial  primary key  not null,
-	author_id integer not null,
+	author_id integer not null references users(id),
 	title varchar(256) not null,
 	abstract text not null,
 	content text not null,
@@ -17,7 +17,7 @@ create index posts_pub on posts (is_open,publish);
 
 create table comments (
 	id serial primary key not null,
-	post_id integer not null,
+	post_id integer not null references posts(id),
 	author varchar(64) not null,
 	email  varchar(64) not null,
 	url    varchar(128) not null,
