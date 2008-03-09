@@ -1,0 +1,54 @@
+# MySQL Parameters
+
+mysql.host="localhost"
+mysql.username="root"
+mysql.password="root"
+mysql.database="cppcms"
+
+# FastCGI settings
+
+server.threads = 5
+server.buffer = 100
+server.socket = "/tmp/cppblog.socket"
+
+
+# Blog configuration
+
+blog.media_path = "/templates"
+blog.script_path = "/blog"
+blog.host = "localhost:8080"
+
+# bdb 
+bdb.path="./db/"
+
+# Templates
+templates.file = "./templates/look.template"
+
+# gzip
+
+# gzip - default disabled
+gzip.enable=1
+
+
+# For fastest compression gzip.level=1
+#
+ gzip.level = 1
+
+# Use other buffer size then default
+# gzip.buffer=256
+
+
+##########
+# Engine #
+##########
+
+#soci.engine="mysql"
+#soci.connect="dbname=cppcms user=root password=root"
+
+soci.engine="postgresql"
+soci.connect="dbname=cppcms"
+
+#soci.engine="sqlite3"
+#soci.connect="db/cppcms.db"
+
+

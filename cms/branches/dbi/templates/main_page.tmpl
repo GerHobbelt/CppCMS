@@ -1,0 +1,24 @@
+<% call get_post %>
+<% if next_post %>
+	<% repeat %>
+		<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
+		<div class="published">
+			Publushed at <% date %>, by <% author %>
+			<% if def edit_url %>
+				| <a href="<% edit_url %>">edit</a>
+			<%end%>
+		</div>
+		<% post_abstract %>
+                <% if has_content %>
+                        <a href="<% post_permlink %>#more">more...</a>
+                <% end %>
+	<% call get_post %>
+	<% until not next_post %>
+	<% if def next_page_link %>
+                <div class="published">
+                        <a href="<% next_page_link %>">next page</a>
+                </div>
+        <% end %>
+<% else %>
+	<h1>There are no posts in the blog</h1>
+<%end%>

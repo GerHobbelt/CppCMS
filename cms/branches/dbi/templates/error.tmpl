@@ -1,0 +1,12 @@
+<h1>Error</h1>
+<% if def error_404 %>
+	<p>The page you had looked for not found</p>
+<% elsif def error_comment %>
+	<p>Not all mandatory fields were filled:</p>
+	<ul>
+		<li>Name</li>
+		<li>E-Mail, it will not be disclosed in the comment text</li>
+		<li>Message Body</li>
+	</ul>
+	<p>Press "back" browser button and fix the form</p>
+<% end %>

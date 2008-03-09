@@ -1,0 +1,49 @@
+<script type="text/javascript">
+<!--
+	/*  Form validation and simple-antispam */
+	function testform()
+	{
+		var form=document.getElementById('inp');
+		if(form.title.value.length == 0 || form.abstract.value.length  == 0)
+		{
+			alert('Title and Abstract are mandatory!');
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+-->
+</script>
+<div id="form">
+<% if def post_id %>
+<h2>Edit Post No. <% post_id%></h2>
+<p><a href="<% preview_url %>">preview...</a></p>
+<% else %>
+<h2>New Post</h2>
+<% end %>
+
+<form id="inp" action="<% submit_post_url %>" method="post" onsubmit="return testform();">
+        <dl>
+        <dt>Title:</dt>
+        <dd><input type="text" name="title" size="80" <% if def post_title %>value="<%post_title%>"<% end %> /></dd>
+        <dt>Abstract:</dt>
+        <dd>
+                <fieldset><div> <!-- IE Textarea ugly hack -->
+                        <textarea name="abstract" cols="80" rows="10"><% if def abstract %><% abstract %><% end %></textarea>
+                </div></fieldset>
+        </dd>
+        <dt>Content:</dt>
+        <dd>
+                <fieldset><div> <!-- IE Textarea ugly hack -->
+                        <textarea name="content" cols="80" rows="20"><% if def content %><% content %><% end %></textarea>
+                </div></fieldset>
+        </dd>
+        <dd>
+                <input type="submit" name="save" value="Save" />
+                <input type="submit" name="publish" value="Publish" />
+                <input type="submit" name="preview" value="Preview" />
+        </dd>
+        </dl>
+</form>
+</div>
