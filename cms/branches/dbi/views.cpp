@@ -19,7 +19,7 @@
 using boost::format;
 using boost::str;
 
-using namespace soci;
+using namespace dbixx;
 
 void View_Comment::init(comment_t &c)
 {
@@ -83,20 +83,22 @@ void View_Post::ini_full(post_t &p)
 
 	has_comments=false;
 
-	rowset<> rs=(blog->sql.prepare<<
+	result rs;
+	blog->sql<<
 		"SELECT id,author,email,url,publish_time,content "
 		"FROM comments "
-		"WHERE post_id=:id "
-		"ORDER BY publish_time",use(p.id));
+		"WHERE post_id=? "
+		"ORDER BY publish_time",p.id;
+	blog->sql.fetch(rs);
 
-	rowset<>::const_iterator cur;
+	row cur;
 
-	for(cur=rs.begin();cur!=rs.end();cur++)
+	while(rs.next(cur))
 	{
 		shared_ptr<View_Comment> com(new View_Comment(blog));
 		comments_list.push_back(com);
 		comment_t comment;
-		*cur	>> comment.id >>comment.author >> comment.email >> comment.url
+		cur	>> comment.id >>comment.author >> comment.email >> comment.url
 			>> comment.publish_time >> comment.content ;
 		com->init(comment);
 		has_comments=true;
@@ -173,10 +175,12 @@ void View_Main_Page::ini_share()
 {
 	int id;
 	string val;
-	rowset<> rs=(blog->sql.prepare<<"SELECT id,value FROM options");
-	rowset<>::const_iterator i;
-	for(i=rs.begin();i!=rs.end();i++){
-		*i >>id>>val;
+	result rs;
+	blog->sql<<"SELECT id,value FROM options";
+	blog->sql.fetch(rs);
+	row i;
+	for(;rs.next(i);){
+		i >>id>>val;
 		if(id==BLOG_TITLE)
 			title=val;
 		else if(id==BLOG_DESCRIPTION)
@@ -192,21 +196,23 @@ void View_Main_Page::ini_main(int id,bool feed)
 
 	latest_posts.reserve(max_posts);
 
-	rowset<> rs =
-		(id!=-1) ?
-		(blog->sql.prepare<<
+	result rs;
+	if(id!=-1) {
+		blog->sql<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content !='', "
 			"	posts.publish "
 			"FROM	posts "
 			"LEFT JOIN "
 			"	users ON users.id=posts.author_id "
-			"WHERE	posts.publish <= (SELECT publish FROM posts WHERE id=:id) "
+			"WHERE	posts.publish <= (SELECT publish FROM posts WHERE id=?) "
 			"	AND posts.is_open=1 "
 			"ORDER BY posts.publish DESC "
-			"LIMIT :max",use(id),use(max_posts+1))
-		:
-		(blog->sql.prepare<<
+			"LIMIT ?",
+			id,max_posts+1;
+	}
+	else {
+		blog->sql<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content!='', "
 			"	posts.publish "
@@ -215,39 +221,27 @@ void View_Main_Page::ini_main(int id,bool feed)
 			"	users ON users.id=posts.author_id "
 			"WHERE	posts.is_open=1 "
 			"ORDER BY posts.publish DESC "
-			"LIMIT :max",use(max_posts+1));
+			"LIMIT ?",(max_posts+1);
+	}
+	blog->sql.fetch(rs);
 
-	rowset<>::const_iterator row;
+	row r;
 	int counter;
-	for(counter=1,row=rs.begin();row!=rs.end();row++,counter++) {
+	for(counter=1;rs.next(r);counter++) {
 		if(counter==max_posts+1) {
 			int id;
-			*row>>id;
+			r>>id;
 			from=str(format(blog->fmt.main_from) % id);
 			break;
 		}
 		post_t post;
-		*row>>post.id;
-		*row>>post.author_name;
-		*row>>post.title;
-		*row>>post.abstract;
-		// The type of output varies
-		// for different DBS WTF!!!
-		if(row->get_properties(4).get_data_type()==eInteger){
-			*row>>post.has_content;
-		}
-		else if(row->get_properties(4).get_data_type()==eLongLong){
-			long long tmp;
-			*row>>tmp;
-			post.has_content=(int)tmp;
-		}
-		else {
-			string tmp;
-			*row>>tmp;
-			post.has_content=atoi(tmp.c_str());
-		}
 
-		*row>>post.publish;
+		r>>post.id;
+		r>>post.author_name;
+		r>>post.title;
+		r>>post.abstract;
+		r>>post.has_content;
+		r>>post.publish;
 
 		shared_ptr<View_Post> ptr(new View_Post(blog));
 		if(feed){
@@ -265,20 +259,22 @@ void View_Main_Page::ini_post(int id,bool preview)
 {
 	shared_ptr<View_Post> ptr(new View_Post(blog));
 	post_t post;
-	eIndicator ind;
 	post.id=-1;
+	row r;
 	blog->sql<<
 		"SELECT posts.id,users.username,posts.title, "
 		"	posts.abstract, posts.content, "
 		"	posts.publish,posts.is_open "
 		"FROM	posts "
 		"JOIN	users ON users.id=posts.author_id "
-		"WHERE	posts.id=:id ",
-		use(id),
-		into(post.id),
-		into(post.author_name),into(post.title),
-		into(post.abstract),into(post.content,ind),
-		into(post.publish),into(post.is_open);
+		"WHERE	posts.id=? ",
+		id;
+	if(!blog->sql.single(r)) {
+		throw Error(Error::E404);
+	}
+	r>>	post.id>>post.author_name>>post.title>>
+		post.abstract>>post.content>>
+		post.publish>>post.is_open;
 
 	if(post.id==-1 || (!post.is_open && !preview)){
 		throw Error(Error::E404);
@@ -357,9 +353,12 @@ int View_Main_Page::render( Renderer &r,Content &c,string &out)
 
 void View_Admin::ini_share()
 {
+	row r;
 	blog->sql<<
-		"SELECT value FROM options WHERE id=:id",
-		use((int)BLOG_TITLE),into(blog_name);
+		"SELECT value FROM options WHERE id=?",
+		(int)BLOG_TITLE;
+	if(blog->sql.single(r)) 
+		r>>blog_name;
 }
 
 void View_Admin::ini_login()
@@ -409,31 +408,33 @@ int View_Admin::render( Renderer &r,Content &c,string &out)
 void View_Admin_Main::ini()
 {
 	Text_Tool tt;
-	rowset<>::const_iterator r;
-	rowset<> rs1=(blog->sql.prepare<<
+	result rs;
+	blog->sql<<
 		"SELECT id,title "
 		"FROM posts "
-		"WHERE is_open=0");
-	for(r=rs1.begin();r!=rs1.end();r++) {
+		"WHERE is_open=0";
+	blog->sql.fetch(rs);
+	row r;
+	for(;rs.next(r);) {
 		int id;
 		string title;
-		*r>>id>>title;
+		r>>id>>title;
 		post_ref post_data;
 		post_data.edit_url=
 			str(format(blog->fmt.edit_post) % id);
 		tt.text2html(title,post_data.title);
 		unpublished_posts.push_back(post_data);
 	}
-	rowset<> rs2=(blog->sql.prepare<<
+	blog->sql<<
 		"SELECT post_id,author "
 		"FROM comments "
 		"ORDER BY id DESC "
-		"LIMIT 10");
+		"LIMIT 10",rs;
 
-	for(r=rs2.begin();r!=rs2.end();r++) {
+	for(;rs.next(r);) {
 		int id;
 		string author;
-		*r>>id>>author;
+		r>>id>>author;
 		comment_ref com;
 		com.url=str(format(blog->fmt.post) % id);
 		tt.text2html(author,com.author);
@@ -476,7 +477,6 @@ void View_Admin_Post::ini( int id)
 {
 	Text_Tool tt;
 	post_t post_data;
-	eIndicator ind;
 	if(id!=-1) {
 		post_id=str(format("%1%") % id);
 		post_url=str(format(blog->fmt.update_post) % id);
@@ -487,16 +487,17 @@ void View_Admin_Post::ini( int id)
 		return;
 	}
 	post_data.id=-1;
+	row r;
 	blog->sql<<
 		"SELECT id,title,abstract,content "
 		"FROM posts "
-		"WHERE id=:id",
-		use(id),
-		into(post_data.id),into(post_data.title),
-		into(post_data.abstract),into(post_data.content,ind);
-	if(post_data.id==-1){
+		"WHERE id=?",
+		id;
+	if(!blog->sql.single(r)){
 		throw Error(Error::E404);
 	}
+	r>>	post_data.id>>post_data.title>>
+		post_data.abstract>>post_data.content;
 	title=post_data.title;
 	tt.text2html(post_data.abstract,abstract);
 	tt.text2html(post_data.content,content);

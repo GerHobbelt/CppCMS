@@ -8,7 +8,7 @@
 #include "error.h"
 
 using namespace cgicc;
-using namespace soci;
+using namespace dbixx;
 using boost::format;
 using boost::str;
 
@@ -112,9 +112,24 @@ void Blog::init()
 	fmt.feed=root+"/rss";
 
 	try {
-		sql.open(global_config.sval("soci.engine"),global_config.sval("soci.connect"));
+		string engine=global_config.sval("dbi.engine");
+		sql.driver(engine);
+		if(engine=="sqlite3") {
+			sql.param("dbname",global_config.sval("sqlite3.db"));
+			sql.param("sqlite3_dbdir",global_config.sval("sqlite3.dir"));
+		}
+		else if(engine=="mysql") {
+			sql.param("dbname",global_config.sval("mysql.db"));
+			sql.param("username",global_config.sval("mysql.user"));
+			sql.param("password",global_config.sval("mysql.pass"));
+		}
+		else if(engine=="pgsql") {
+			sql.param("dbname",global_config.sval("pgsql.db"));
+			sql.param("username",global_config.sval("pgsql.user"));
+		}
+		sql.connect();
 	}
-	catch(soci_error const &e){
+	catch(dbixx_error const &e){
 		throw HTTP_Error(string("Failed to access DB")+e.what());
 	}
 	connected=true;
@@ -175,7 +190,7 @@ void Blog::main()
 			error_page(e.what());
 		}
 	}
-	catch (soci_error &err) {
+	catch (dbixx_error &err) {
 		sql.close();
 		connected=false;
 		throw HTTP_Error(err.what());
@@ -197,8 +212,10 @@ void Blog::add_comment(string &postid)
 	post_t post;
 	post.is_open=0;
 
-	sql<<"SELECT is_open FROM posts WHERE id=:id",
-		use(post_id),into(post.is_open);
+	row r;
+	sql<<"SELECT is_open FROM posts WHERE id=?",
+		post_id,r;
+	r>>post.is_open;
 
 	if(!post.is_open) {
 		throw Error(Error::E404);
@@ -210,9 +227,10 @@ void Blog::add_comment(string &postid)
 
 	sql<<	"INSERT INTO "
 		"comments (post_id,author,url,email,publish_time,content) "
-		"values(:post_id,:author,:url,:email,:tm,:content)",
-		use(post_id),use(incom.author),use(incom.url),
-		use(incom.email),use(t),use(incom.message);
+		"values(?,?,?,?,?,?)",
+		post_id,incom.author,incom.url,
+		incom.email,t,incom.message;
+	sql.exec();
 
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
@@ -243,9 +261,14 @@ int Blog::check_login( string username,string password)
 	if(username==""){
 		return -1;
 	}
-	sql<<	"SELECT id,password FROM users WHERE username=:u",
-		use(username),
-		into(id),into(pass);
+	row r;
+	sql<<	"SELECT id,password FROM users WHERE username=?",
+		username;
+	if(!sql.single(r))
+		return -1;
+
+	r>>id>>pass;
+
 	if(id!=-1 && password==pass) {
 		return id;
 	}
@@ -418,34 +441,42 @@ void Blog::save_post(int &id,string &title,
 
 	if(id==-1) {
 		int i;
-		sql.begin();
+		sql<<"begin";
+		sql.exec();
 		sql<<	"INSERT INTO posts (author_id,title,abstract,content,is_open,publish) "
-			"VALUES(:author_id,:title,:abstract,:content,:is_open,:tm)",
-			use(userid),use(title),use(abstract),
-			use(content),use(is_open),use(t);
-		sql<<	"SELECT id FROM posts ORDER BY id DESC LIMIT 1",into(id);
-		sql.commit();
+			"VALUES(?,?,?,?,?,?)",
+			userid,title,abstract,
+			content,is_open,t;
+		sql.exec();
+		row r;
+		sql<<	"SELECT id FROM posts ORDER BY id DESC LIMIT 1";
+		sql.single(r);
+		r>>id;
+		sql<<"commit";
+		sql.exec();
 	}
 	else {
 		if(pub)	{
 			sql<<	"UPDATE posts "
-				"SET	title= :title,"
-				"	abstract= :abstract,"
-				"	content=:content,"
+				"SET	title= ?,"
+				"	abstract= ?,"
+				"	content=?,"
 				"	is_open=1,"
-				"	publish=:tm "
-				"WHERE id=:id",
-			use(title),use(abstract),use(content),
-			use(t),use(id);
+				"	publish=? "
+				"WHERE id=?",
+			title,abstract,content,
+			t,id;
+			sql.exec();
 		}
 		else {
 			sql<<	"UPDATE posts "
-				"SET	title= :title,"
-				"	abstract= :abstract,"
-				"	content=:content "
-				"WHERE id=:id",
-			use(title),use(abstract),use(content),
-			use(id);
+				"SET	title= ?,"
+				"	abstract= ?,"
+				"	content=? "
+				"WHERE id=?",
+			title,abstract,content,
+			id;
+			sql.exec();
 		}
 	}
 }
@@ -454,7 +485,8 @@ void Blog::del_comment(string sid)
 {
 	auth_or_throw();
 	int id=atoi(sid.c_str());
-	sql<<"DELETE FROM comments WHERE id=:id",use(id);
+	sql<<"DELETE FROM comments WHERE id=?",id;
+	sql.exec();
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
 }
 

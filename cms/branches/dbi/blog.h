@@ -13,7 +13,7 @@
 #define BLOG_H
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
-#include <soci/soci.h>
+#include <dbi/dbixx.h>
 #include "views.h"
 #include "data.h"
 
@@ -60,7 +60,7 @@ public:
 	string username;
 	int userid;
 	bool connected;
-	soci::session sql;
+	dbixx::session sql;
 private:
 
 	void auth_or_throw();
