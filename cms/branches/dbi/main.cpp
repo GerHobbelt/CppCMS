@@ -4,7 +4,7 @@
 #include <cppcms/thread_pool.h>
 #include <cppcms/global_config.h>
 #include <cppcms/url.h>
-#include <soci/soci.h>
+#include <dbi/dbixx.h>
 #include <cppcms/templates.h>
 
 using namespace std;
@@ -26,8 +26,8 @@ int main(int argc,char **argv)
 		cerr<<s.get()<<endl;
 		return 1;
 	}
-	catch(soci::soci_error &e) {
-		cerr<<"soci:"<<e.what()<<endl;
+	catch(dbixx::dbixx_error &e) {
+		cerr<<"dbi:"<<e.what()<<endl;
 	}
 	catch(std::exception &e) {
 		cerr<<e.what()<<endl;
