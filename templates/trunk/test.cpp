@@ -38,11 +38,11 @@ int main()
 #if 1
 		c.signal("list",boost::bind(mycallback,_1,i));
 #else
-#if 0		
+	#if 1 
 		content::vector_t &l=c.vector("list",2);
-#elsif
-		content::list_t &l=c.vector("list");
-#endif
+	#else 
+		content::list_t &l=c.list("list");
+	#endif
 
 		l.push_back(content());
 		l.back()["author"]=string("me");
