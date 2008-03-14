@@ -29,7 +29,7 @@ map<uint32_t,string> references;
 	static boost::regex r_extern("^\\s*extern\\s+(\\w+)\\s*$");
 	static boost::regex r_show("^\\s*show\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))\\s*$");
 	static boost::regex r_start_seq("^\\s*seqf\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+),(\\w+)\\s*$");
-	static boost::regex r_store("^\\sto\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+)\\s*$");
+	static boost::regex r_store("^\\s*sto\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+)\\s*$");
 	static boost::regex r_next_seq("^\\s*seqn\\s+(\\d+),(\\w+)\\s*$");
 	static boost::regex r_istest("^\\s*(def|true)\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))\\s*$");
 	static boost::regex r_jmp("^\\s*jmp\\s+(t|f|u),(\\w+)\\s*$");
@@ -317,8 +317,8 @@ void write_file(void)
 	h.texts_tbl_size=texts.size();
 	for(i=0;i<texts.size();i++)
 		fwrite(texts[i].c_str(),texts[i].size()+1,1,fout);
-	h.local_variables=max_local;
-	h.local_sequences=max_seq;
+	h.local_variables=max_local+1;
+	h.local_sequences=max_seq+1;
 
 	fseek(fout,0,SEEK_SET);
 	fwrite(&h,sizeof(h),1,fout);
@@ -348,7 +348,7 @@ int main(int argc,char **argv)
 		return error;
 	
 	write_file();
-#if 1
+#ifdef DEBUG
 	unsigned i;
 	for(i=0;i<ops.size();i++) {
 		printf("%04x\t%s\t(%d),%d,%d,%d:%04x\n", i, names[ops[i].opcode], ops[i].flag,

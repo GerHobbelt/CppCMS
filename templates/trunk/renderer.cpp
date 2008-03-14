@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include <boost/format.hpp>
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #include <iostream>
@@ -39,15 +39,8 @@ boost::any const &renderer::any_value(details::instruction const &op,content con
 		throw tmpl_error((boost::format("Incorrect flag value=%d at PC=%d") % op.flag % pc).str());
 	}
 	
-	cout<<"Variables of content\n";
-	for(p=c.begin();p!=c.end();p++) {
-		cout<<p->first<<endl;
-	}
-	cout<<"Looking for "<<id_to_name[op.r0]<<endl;
-	
-	p=c.find(id_to_name[op.r0]);
-	if(p==c.end()) {
-		cout<<"Not found\n";
+	p=tmp->find(id_to_name[op.r0]);
+	if(p==tmp->end()) {
 		return empty;
 	}
 	return p->second;
@@ -92,6 +85,7 @@ void renderer::setup()
 	cout<<"Inst "<<sizeof(details::instruction)<<endl;
 	cout<<"Code "<<code_len<<' '<<h->opcode_start<<endl;
 	cout<<"Func "<<h->func_tbl_size<<' '<<h->func_tbl_start<<endl;
+	cout<<"Entr "<<h->func_entries_tbl_start<<endl;
 	cout<<"Name "<<h->names_tbl_size<<' '<<h->names_tbl_start<<endl;
 	cout<<"Text "<<h->texts_tbl_size<<' '<<h->texts_tbl_start<<endl;
 	for(i=0;i<code_len;i++) {
@@ -102,7 +96,7 @@ void renderer::setup()
 #endif // DEBUG
 
 	char const *first=base+h->func_tbl_start;
-	uint32_t const *entries=(uint32_t const *)base+h->func_entries_tbl_start;
+	uint32_t const *entries=(uint32_t const *)(base+h->func_entries_tbl_start);
 	for(i=0;i<h->func_tbl_size;i++) {
 #ifdef DEBUG
 			cout<<"Functions: "<<first<<' '<<entries[i]<<endl;
@@ -206,7 +200,10 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			break;
 		case	OP_CALL_REF:
 			{
-				if((p=functions.find(string_value(op,c)))==functions.end()) {
+				if((p=functions.find(string_value(op,c)))!=functions.end()) {
+#ifdef DEBUG				
+					cout<<"Calling:"<<p->first<<endl;
+#endif
 					call_stack.push(pc);
 					pc=p->second;
 				}
@@ -274,12 +271,15 @@ bool sequence::next()
 		{
 			content::callback_ptr const &cb=*callback;
 			tmp_content.erase(tmp_content.begin(),tmp_content.end());
-			return (*cb)(tmp_content);
+			if((*cb)(tmp_content)) {
+				return true;
+			}
 		}
 		break;
 	default:
 		return false;
 	}
+	type=s_none;
 	return false;
 }
 
@@ -302,12 +302,15 @@ bool sequence::first()
 		{
 			content::callback_ptr const &cb=*callback;
 			tmp_content.erase(tmp_content.begin(),tmp_content.end());
-			return (*cb)(tmp_content);
+			if((*cb)(tmp_content)){
+				return true;
+			}
 		}
 		break;
 	default:
 		return false;
 	}
+	type=s_none;
 	return false;
 }
 
