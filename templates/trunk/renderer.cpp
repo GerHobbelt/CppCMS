@@ -46,6 +46,11 @@ boost::any const &renderer::any_value(details::instruction const &op,content con
 	return p->second;
 }
 
+void renderer::add_converter(std::type_info const &type,converter_t::slot_type slot)
+{
+	converters.push_back(type_holder(type,slot));
+}
+
 string const &renderer::string_value(details::instruction const &op,content const &c)
 {
 	boost::any const &val=any_value(op,c);
@@ -184,10 +189,7 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			out.append(texts[op.r0],op.r1);
 			break;
 		case	OP_DISPLAY:
-			{
-				string const &tmp=string_value(op,c);
-				out.append(tmp);
-			}
+			display(any_value(op,c),out);
 			break;
 		case	OP_CHECK_DEF:
 			flag=!(any_value(op,c).empty());
@@ -227,6 +229,23 @@ void renderer::render(content const &c,std::string const &func,string &out)
 		default:
 			throw tmpl_error((boost::format("Incorrect opcode %d at PC=%d")%op.opcode%pc).str());
 		};
+	}
+}
+void renderer::display(boost::any const &a,string &out)
+{
+	converters_list_t::const_iterator p;
+	if(a.type()==typeid(string)){
+		string const &tmp=boost::any_cast<string const &>(a);
+		out.append(tmp);
+	}
+	else if(a.empty()) {
+		return;
+	}
+	for(p=converters.begin();p!=converters.end();p++){
+		if(p->type()==a.type()) {
+			p->exec(a,out);
+			return;
+		}
 	}
 }
 

@@ -127,8 +127,27 @@ class renderer
 	void setup();
 
 public:
+	typedef boost::signal<void (boost::any const &val,std::string &out)> converter_t;
+	typedef boost::shared_ptr<converter_t>	converter_ptr;
+private:
+
+	class type_holder {
+		std::type_info const *typeinfo;
+		converter_ptr	converter;
+	public:
+		type_holder() : typeinfo(&typeid(void)) {};
+		type_holder(std::type_info const &t,converter_t::slot_type slot)
+			: typeinfo(&t), converter(new converter_t) { converter->connect(slot); };
+		std::type_info const &type() const { return *typeinfo; };
+		void exec(boost::any const &val,std::string &out) const { (*converter)(val,out); };
+	};
+	typedef	std::list<type_holder> converters_list_t;
+	converters_list_t converters;
+	void	display(boost::any const &param,std::string &out);
+public:
 	renderer(template_data const &tmpl) : view(&tmpl) { setup(); };
 	void render(content const &c,std::string const &func,std::string &out);
+	void add_converter(std::type_info const &type,converter_t::slot_type slot);
 };
 
 }

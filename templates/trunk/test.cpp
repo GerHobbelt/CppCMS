@@ -21,6 +21,20 @@ bool mycallback(content &c,int &i)
 	}
 }
 
+void v(boost::any const &a,string &o)
+{
+	if(a.type()==typeid(int)) {
+		char buf[32];
+		snprintf(buf,32,"%d",boost::any_cast<int>(a));
+		o+=buf;
+	}
+}
+
+void t(renderer &r)
+{
+	r.add_converter(typeid(int),v);
+}
+
 int main()
 {
 	try{
@@ -29,9 +43,10 @@ int main()
 		template_data tmpl("test.tmpl");
 
 		renderer r(tmpl);
+		t(r);
 
 		string out;
-		c["title"]=string("title\n");
+		c["title"]=(int)-15;
 		c["proc"]=string("text");
 		c["someval"]=false;
 		int i=0;
