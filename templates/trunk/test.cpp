@@ -50,14 +50,17 @@ int main()
 		c["proc"]=string("text");
 		c["someval"]=false;
 		int i=0;
-#if 1
+#if 0
 		c.signal("list",boost::bind(mycallback,_1,i));
 #else
 	#if 1 
 		content::vector_t &l=c.vector("list",2);
+		l[0]["author"]=string("me");
+		l[0]["content"]=string("otherme");
+		l[1]["author"]=string("artik");
+		l[1]["content"]=string("mastik");
 	#else 
 		content::list_t &l=c.list("list");
-	#endif
 
 		l.push_back(content());
 		l.back()["author"]=string("me");
@@ -66,6 +69,8 @@ int main()
 		l.push_back(content());
 		l.back()["author"]=string("artik");
 		l.back()["content"]=string("mastik");
+	#endif
+
 #endif
 		
 		r.render(c,"main",out);

@@ -5,8 +5,7 @@ namespace tmpl {
 content::vector_t &content::vector(std::string const key,int reserve)
 {
 	vector_t &v=boost::any_cast<vector_t & >
-		((*this)[key] = vector_t());
-	v.reserve(reserve);
+		((*this)[key] = vector_t(reserve));
 	return v;
 }
 
