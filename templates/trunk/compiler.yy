@@ -1,8 +1,5 @@
-%{
-#define YYSTYPE 
-int yylex (void);
-void yyerror (char const *);
-%}
+%baseclass-preinclude boost/any.hpp
+%stype boost::any
 
 %token TEMPLATE 
 %token IDENT
@@ -26,8 +23,7 @@ input:  template
 ;
 
 template:
-	TEMPLATE IDENT  
-	empty_body 	;
+	TEMPLATE IDENT  empty_body 	;
 
 empty_body: /*empty*/ | body ;
 body:	text_line | body text_line ;
