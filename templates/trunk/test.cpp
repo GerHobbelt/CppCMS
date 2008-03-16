@@ -32,7 +32,7 @@ void v(boost::any const &a,string &o)
 
 void t(renderer &r)
 {
-	r.add_converter(typeid(int),v);
+	r.add_converter(typeid(int),boost::bind(v,_1,_2));
 }
 
 int main()
