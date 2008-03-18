@@ -26,11 +26,8 @@ class template:
 		print "# template %s" % name
 		print "export %s" % name
 
-class inline_content:
-	pattern=r'(.*)';
-	def use(self,m):
-		content=m.group(0)
-		print "\tinline '%s'" % to_string(content)
+def inline_content(s):
+	print "\tinline '%s'" % to_string(s)
 
 def error_exit(x):
 	global exit_flag
@@ -46,8 +43,11 @@ def new_label():
 def to_string(s):
 	res=''
 	for ch in s:
-		if ch < ' ':
-			res+=("\\x%02x" % ch)
+		if ord(ch) < 32:
+			if ord(ch) == 0:
+				error_exit("charrecter \\0 is not allowed")
+			else:
+				res+=("\\x%02x" % ord(ch))
 		else:
 			res+=ch
 	return res
@@ -85,7 +85,6 @@ class ifop:
 	type='if'
 	def prepare(self):
 		ident_str=make_ident(self.ident)
-		self.label=new_label()
 		if self.has_def:
 			print "\tdef\t%s" % ident_str
 		else:
@@ -104,14 +103,16 @@ class ifop:
 		self.has_not=m.group(3)
 		self.has_def=m.group(5)
 		self.ident=m.group(6)
+		self.label=new_label()
 		if self.type == 'if' :
 			stack.append(self)
 			self.prepare()
 		else: # type == elif
 			if len(stack)!=0 :
 				prev=stack.pop()
-				if prev.type!='if':
+				if prev.type!='if' and prev.type!='elif':
 					error_exit("elif without if");
+				print "\tjmp\tu,%s" % self.label
 				prev.on_end()
 				stack.append(self)
 				self.prepare()
@@ -144,11 +145,16 @@ def main():
 		commands=re.findall(r'<\%[^\%]*\%\>',content)
 		for x in interleave(texts,commands):
 			if x=='' : continue
-			for c in [  ifop(), template(), end_block(), error_com() , inline_content()]:
+			matched=0
+			for c in [  ifop(), template(), end_block(), error_com() ]:
 				m = re.match(c.pattern,x)
 				if m :
 					c.use(m)
+					matched=1
 					break
+			if not matched:
+				inline_content(x)
+
 
 		if(len(stack)!=0):
 			sys.stderr.write("Unexpected end of file %s\n" % file)
