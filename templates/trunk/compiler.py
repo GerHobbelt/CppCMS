@@ -23,21 +23,28 @@ class callback:
 		self.call=call
 
 def template(name):
-	print "###### template %s\nexport %s" % name % name
+	print "# template %s" % name
+	print "export %s" % name
 
 def inline_content(content):
+	if content=='' :
+		return
 	print "inline '%s'" % content[1:5]
 
 def error_exit(x):
 	print "Error %s" % x
 #	exit(1)
 
-def if_true(name):
-	print "\tdef\t%s" %name
+def ifop(param,name):
+	print "\tif %s\t%s" % (param , name)
 
 def prepare(calls):
-	list =[ [ r'^<%\s*template\s+([a-zA-Z]\w*)\s*%>$' , template ], \
-		[ r'^<%\s*if\s+([a-zA-Z]\w*)\s*%>$' , if_true ],\
+	list =[ [ r'^<%\s*template\s+([a-zA-Z]\w*)\s*%>$' , (lambda x: template(x.group(1))) ], \
+		[ r'^<%\s*(elif|if)(\s+(not|\s+)([a-zA-Z]\w*)\s*%>$' , (lambda x : ifop('true',x)) ],\
+		[ r'^<%\s*(elif|if)\s+not\s+([a-zA-Z]\w*)\s*%>$' , (lambda x : ifop('false',x)) ],\
+		[ r'^<%\s*(if\s+def\s+([a-zA-Z]\w*)\s*%>$' , (lambda x : ifop('def',x)) ],\
+		[ r'^<%\s*if\s+not\s+def\s+([a-zA-Z]\w*)\s*%>$' , (lambda x : ifop('ndef',x)) ],\
+		[ r'^<%\s*if\s+not\s+def\s+([a-zA-Z]\w*)\s*%>$' , (lambda x : ifop('ndef',x)) ],\
 		[ r'^<%(.*)%>$',(lambda s: error_exit("Unkown command '%s'"%s)) ], \
 		[ r'^(.*)$',inline_content] ]
 	for a in list:
@@ -51,11 +58,10 @@ def main():
 		texts=re.split(r'<\%[^\%]*\%\>',content)
 		commands=re.findall(r'<\%[^\%]*\%\>',content)
 		for x in interleave(texts,commands):
-			if x=='' : continue
-			for call in calls:
-				m = call.pattern.match(x)
+			for c in calls:
+				m = c.pattern.match(x)
 				if m :
-					call.call(m.group(1))
+					c.call(m.group(1))
 
 		if(len(stack)!=0):
 			sys.stderr.write("Unexpected end of file %s\n" % file)

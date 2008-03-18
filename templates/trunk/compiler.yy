@@ -1,4 +1,8 @@
 %baseclass-preinclude boost/any.hpp
+%baseclass-preinclude iostream
+%baseclass-preinclude string
+
+
 %stype boost::any
 
 %token TEMPLATE 
@@ -15,20 +19,23 @@
 %token INCLUDE
 %token NOT
 %token USING
+%token DEF
 
 %% 
+
 /* Grammar rules and actions follow.  */
 input:  template 
         | input template 
 ;
 
 template:
-	TEMPLATE IDENT  empty_body 	;
+	TEMPLATE IDENT  empty_body  { 
+		std::cout<<"extern " << (boost::any_cast<std::string>($2)) <<std::endl;}	;
 
 empty_body: /*empty*/ | body ;
 body:	text_line | body text_line ;
 
-text_line : INLINE 
+text_line : INLINE  { std::cout<<$1<<std::endl; }
 	| ifblock
 	| foreach
 	| show
@@ -57,7 +64,7 @@ using:
 params: name | params ',' name ;
 
 show:	name ;
-expr:	name | NOT name;
+expr:	DEF name | NOT DEF name | name | NOT name;
 name:	IDENT | IDENT '.' IDENT;
 
 %%
