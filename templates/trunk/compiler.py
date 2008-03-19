@@ -57,7 +57,6 @@ def sequence(seq_name):
 	if tmpl_seq.has_key(seq_name):
 		return tmpl_seq[seq_name]
 	error_exit("Undefined sequence %s" % seq_name)
-	# FIIIX MMMEEE
 	return 0
 
 def make_ident(val):
@@ -72,13 +71,108 @@ def make_ident(val):
 	return "%s(%d)" % ( m.group(2),seq_id )
 
 class foreach_block:
-	pattern=r'^<%\s*foreach\s+in\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
-	def use(self):
-		if tmpl_seq.has_key(seq_name):
+	pattern=r'^<%\s*foreach\s+([a-zA-Z]\w*)\s+in\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
+	type='foreach'
+	has_item=0
+	has_separator=0
+	separator_label=''
+	on_first_label=''
+	def use(self,m):
+		self.empty=new_label()
+		self.end=new_label()
+		ident=make_ident(m.group(2))
+		self.seq_name=m.group(1);
+		if tmpl_seq.has_key(self.seq_name):
 			error_exit("Nested sequences with same name")
-		pass
+		global seq_no
+		self.seq=seq_no
+		tmpl_seq[self.seq_name]=seq_no;
+		seq_no+=1
+		print "\tseqf\t%s,%d,%s" % ( ident,self.seq,self.empty );
+		global stack
+		stack.append(self)
+
 	def on_end(self):
-		pass
+		if not self.has_item:
+			error_exit("foreach without item")
+		print "%s:" % self.end
+		print "%s:" % self.empty
+		del tmpl_seq[self.seq_name]
+
+class separator_block:
+	pattern=r'^<%\s*separator\s*%>'
+	type='separator'
+	def use(self,m):
+		global stack
+		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+			error_exit("separator without foreach")
+			return
+		foreachb=stack[len(stack)-1]
+		if foreachb.has_separator:
+			error_exit("two separators for one foreach")
+		foreachb.has_separator=1
+		foreachb.separator_label=new_label()
+		foreachb.on_first_label=new_label()
+		print "\tjmp\tu,%s" % foreachb.on_first_label
+		print "%s:" % foreachb.separator_label
+		
+
+class item_block:
+	pattern=r'^<%\s*item\s*%>'
+	type='item'
+	def use(self,m):
+		global stack
+		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+			error_exit("item without foreach")
+			return
+		foreachb=stack[len(stack)-1]
+		self.seq=foreachb.seq
+		if foreachb.has_item:
+			error_exit("Two items for one foreach");
+		if foreachb.has_separator:
+			self.next=foreachb.separator_label
+			print "%s:" % foreachb.on_first_label
+		else:
+			self.next=new_label();
+			print "%s:" % self.next;
+		stack.append(self)
+	def on_end(self):
+		print "\tseqn\t%d,%s" % (self.seq , self.next);
+
+class empty_block:
+	pattern=r'^<%\s*empty\s*%>'
+	type='empty'
+	def use(self,m):
+		global stack
+		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+			error_exit("empty without foreach")
+			return
+		forb=stack.pop()
+		if not forb.has_item:
+			error_exit("Unexpected empty - item missed?")
+		print "\tjmp\tu,%s" % forb.end
+		print "%s:" % forb.empty
+		self.end=forb.end
+		self.seq_name=forb.seq_name
+		stack.append(self)
+	def on_end(self):
+		print "%s:" % self.end
+		del tmpl_seq[self.seq_name]
+
+
+class else_block:
+	pattern=r'^<%\s*else\s*%>$'
+	def on_end(self):
+		print "%s:" % self.final
+	def use(self,m):
+		prev=stack.pop()
+		if prev.type!='if' and prev.type!='elif':
+			error_exit("elif without if");
+		self.final=prev.final
+		print "\tjmp\tu,%s" % self.final
+		print "%s:" % prev.label
+		stack.append(self)
+
 
 class ifop:
 	pattern=r'^<%\s*(if|elif)\s+((not)\s+)?((def)\s+)?([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
@@ -96,6 +190,7 @@ class ifop:
 
 	def on_end(self):
 		print "%s:" % self.label
+		print "%s:" % self.final
 
 	def use(self,m):
 		global stack
@@ -105,6 +200,7 @@ class ifop:
 		self.ident=m.group(6)
 		self.label=new_label()
 		if self.type == 'if' :
+			self.final=new_label();
 			stack.append(self)
 			self.prepare()
 		else: # type == elif
@@ -112,8 +208,9 @@ class ifop:
 				prev=stack.pop()
 				if prev.type!='if' and prev.type!='elif':
 					error_exit("elif without if");
-				print "\tjmp\tu,%s" % self.label
-				prev.on_end()
+				self.final=prev.final
+				print "\tjmp\tu,%s" % self.final
+				print "%s:" % prev.label
 				stack.append(self)
 				self.prepare()
 			else:
@@ -135,6 +232,14 @@ class error_com:
 	def use(self,m):
 		error_exit("unknown command %s" % m.group(1))
 
+class show_block:
+	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
+	def use(self,m):
+		idnt=make_ident(m.group(1))
+		print "\tshow\t%s" % idnt
+		
+
+
 def main():
 	global stack
 	for file in os.sys.argv[1:]:
@@ -146,7 +251,9 @@ def main():
 		for x in interleave(texts,commands):
 			if x=='' : continue
 			matched=0
-			for c in [  ifop(), template(), end_block(), error_com() ]:
+			for c in [  ifop(), template(), end_block(), else_block(), \
+					foreach_block(), item_block(), empty_block(),separator_block(),\
+					show_block(), error_com()]:
 				m = re.match(c.pattern,x)
 				if m :
 					c.use(m)
