@@ -221,7 +221,7 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			break;
 		case	OP_NEXT_SEQ:
 			{
-				if(!seq[op.r0].next()) {
+				if(seq[op.r0].next()) {
 					pc=op.jump;
 				}
 			}

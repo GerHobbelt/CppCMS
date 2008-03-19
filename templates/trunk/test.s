@@ -8,8 +8,8 @@ next:
 	sto	author(1),0
 	sto	content(1),1
 	callr	proc
-	seqn	1,end
-	jmp	u,next
+	seqn	1,next
+	jmp	u,end
 empty:
 	inline	'Nothing'
 	jmp	u,end
@@ -40,8 +40,8 @@ next2:
 	sto	author(0),0
 	sto	content(0),1
 	call	xml
-	seqn	0,end2
-	jmp	u,next2
+	seqn	0,next2
+	jmp	u,end2
 empty2:
 	inline	'Nothing'
 	jmp	u,end2

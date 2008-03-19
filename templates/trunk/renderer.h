@@ -34,7 +34,7 @@ typedef enum {
 			//		r2 local ref local_var[r2]=RES
 
 	OP_NEXT_SEQ,	//		r0 sequence id		local_seq[r0]++;
-			//		jump - goto on empty
+			//		jump - goto NOT empty
 	OP_CHECK_DEF,	// (flag/r0/r1)
 	OP_CHECK_TRUE,	// (flag/r0/r1)
 	OP_JMP,		// flag = 0	goto jump
