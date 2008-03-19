@@ -19,19 +19,54 @@ def interleave(*args):
 				continue
 
 
-class template:
-	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*%>$'
+class tmpl_descr:
+	def __init__(self,start,size):
+		self.start_id=start
+		self.param_num=size
+
+class template_block:
+	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*\((.*)\)\s*%>$'
+	type='template'
 	def use(self,m):
-		name=m.group(1)
-		print "# template %s" % name
-		print "export %s" % name
+		global template_parametes
+		global parameters_counter
+		template_parameters.clear()
+		self.name=m.group(1)
+		print "# template %s" % self.name
+		print "extern %s" % self.name
+		parameters=m.group(2)
+		start_id=parameters_counter
+		if not re.match(r'^\s*$',parameters):
+			for param in re.split(',',parameters):
+				m=re.match(r'^\s*([a-zA-Z]\w*)\s*$',param)
+				if not m:
+					error_exit("syntax error for paremeter %s" % param)
+				else:
+					pname=m.group(1)
+					template_parameters[pname]=parameters_counter
+					parameters_counter+=1
+		global	templates_map
+		if templates_map.has_key(self.name):
+			error_exit("Double definition of template %s" % self.name)
+		templates_map[self.name]=tmpl_descr(start_id,len(template_parameters));
+		global stack
+		if len(stack)!=0:
+			error_exit("Can not define template inside other template")
+		stack.append(self)
+		global current_template
+		current_template=self.name
+
+	def on_end(self):
+		print "\tret\n# End of template %s" % self.name
+
+		
 
 def inline_content(s):
 	print "\tinline '%s'" % to_string(s)
 
 def error_exit(x):
 	global exit_flag
-	print "Error %s" % x
+	sys.stderr.write("Error: %s\n" % x)
 	exit_flag=1
 
 def new_label():
@@ -43,7 +78,7 @@ def new_label():
 def to_string(s):
 	res=''
 	for ch in s:
-		if ord(ch) < 32:
+		if ord(ch) < 32 or ch=='\'':
 			if ord(ch) == 0:
 				error_exit("charrecter \\0 is not allowed")
 			else:
@@ -60,11 +95,11 @@ def sequence(seq_name):
 	return 0
 
 def make_ident(val):
-	m=re.match(r'^ARG_(\d)$',val)
-	if m :
-		return "%s" % (template_id*10+int(m.group(1)))
 	m=re.match(r'^\w+$',val)
 	if m:
+		global template_parameters
+		if template_parameters.has_key(val):
+			return str(template_parameters[val])
 		return val
 	m=re.match(r'^(\w+)\.(\w+)$',val)
 	seq_id=sequence(m.group(1))
@@ -135,6 +170,7 @@ class item_block:
 		else:
 			self.next=new_label();
 			print "%s:" % self.next;
+		foreachb.has_item=1
 		stack.append(self)
 	def on_end(self):
 		print "\tseqn\t%d,%s" % (self.seq , self.next);
@@ -174,7 +210,7 @@ class else_block:
 		stack.append(self)
 
 
-class ifop:
+class if_block:
 	pattern=r'^<%\s*(if|elif)\s+((not)\s+)?((def)\s+)?([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
 	type='if'
 	def prepare(self):
@@ -239,6 +275,44 @@ class show_block:
 		print "\tshow\t%s" % idnt
 		
 
+class include_block:
+	pattern=r'^<%\s*include\s+(([a-zA_Z]\w*)(\s+using(.*))?|ref\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$';
+	def setup_store(self,list,tmpl):
+		if not templates_map.has_key(tmpl):
+			error_exit("Undefined template %s" % tmpl)
+			return
+		start=templates_map[tmpl].start_id
+		num=templates_map[tmpl].param_num
+		n=0
+		for var in re.split(',',list):
+			m=re.match(r'^\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*',var)
+			if m:
+				id=make_ident(m.group(1))
+				print "\tsto\t%s,%d" % (id,n)
+				n+=1
+			else:
+				error_exit("Syntaxis error in param %s" % var)
+		if n>num:
+			error_exit("Too many parameters for template %s" % tmpl)
+		elif n<num:
+			error_exit("Too few parameters for template %s" % tmpl)
+				
+			
+	def use(self,m):
+		if m.group(2):
+			ref=m.group(2)
+			global current_template
+			if ref==current_template:
+				error_exit("Recurtion is not allowed")
+			if m.group(4):
+				self.setup_store(m.group(4),ref)
+			print "\tcall\t%s" % ref
+		elif m.group(5):
+			ref=make_ident(m.group(3))
+			print "\tcallr\t%s" % ref
+		else:
+			error_exit("Internal error")
+
 
 def main():
 	global stack
@@ -251,8 +325,9 @@ def main():
 		for x in interleave(texts,commands):
 			if x=='' : continue
 			matched=0
-			for c in [  ifop(), template(), end_block(), else_block(), \
+			for c in [  if_block(), template_block(), end_block(), else_block(), \
 					foreach_block(), item_block(), empty_block(),separator_block(),\
+					include_block(),\
 					show_block(), error_com()]:
 				m = re.match(c.pattern,x)
 				if m :
@@ -264,12 +339,20 @@ def main():
 
 
 		if(len(stack)!=0):
-			sys.stderr.write("Unexpected end of file %s\n" % file)
-			exit(1)
+			error_exit("Unexpected end of file %s" % file)
+
+#######################
+# MAIN
+#######################
 
 labels_counter=0
 tmpl_seq={}
+template_parameters={}
+templates_map={}
+parameters_counter=0
 seq_no=0
 stack=[]
 exit_flag=0
+current_template=''
 main()
+sys.exit(exit_flag)

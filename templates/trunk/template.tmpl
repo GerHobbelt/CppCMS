@@ -1,0 +1,20 @@
+<% template foo(x,y) %>
+	<% if def name %>
+		Hello <% name %>
+	<% elif def user_id %>
+		Hello user #<%user_id%>
+	<% else %>
+		Hello <% y %>
+	<% end %>
+
+	<% foreach post in x %>
+		<strong>
+		<% separator %>,<% item %><a href="<% post.link %>"><% post.title %></a><% end %>
+		</strong>
+	<% empty %>
+		No posts
+	<% end %>
+<% end %>
+<% template main() %>
+	<% include foo using list,somename %>
+<% end %>
