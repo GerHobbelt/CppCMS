@@ -1,0 +1,65 @@
+First of all I had tested the SQL drivers: native driver and soci wrapper. I had found that soci was significantly slower. I could think that it was due to wrapping that can never be as fast
+as native version.
+
+So I tested other library [dbi](http://libdbi.sourceforge.net) and I had written a little C++ wrapper I had called "[dbixx](http://cppcms.svn.sourceforge.net/viewvc/cppcms/dbixx/)". This wrapper mostly provides syntactic sugar, integration with C++ exceptions and allows auto escaping of input parameters -- all the job that [soci](http://soci.sourceforge.net) had done.
+
+I created a simple table:
+    CREATE TABLE numbers
+    (
+       id integer primary key not null,
+       number varchar(10) not null
+     );
+Filled it with 10,000 rows of type (N,'N')
+And run 10,000 queries:
+
+    SELECT id,number
+    FROM   numbers
+    WHERE  id>?
+    ORDER BY id DESC
+    LIMIT 10
+
+With "?" changing from 1 to 10,000.
+
+I measured overall run time of 10,000 queries using 4 drivers: native, soci, dbi and dbixx.
+
+There are results:
+
+    Driver   MySQL PgSQL  Sqlite3  MySQL PgSQL Sqlite3
+    --------------------------------------------------
+    native   0.62  2.04   0.76
+    --------------------------------------------------
+    soci     1.07  3.30   1.47     -42%  -38%  -48%
+    dbi      0.68  2.13   0.95     - 9%  - 4%  -20%
+    dbixx    0.73  2.22   0.97     -14%  - 8%  -22%
+
+Any wrapper had introduced a performance reduction, however soci had reduced the performance
+by about 40%, when dbi had given much better result. C++ wrapper of dbi had increased a runtime a little by additional few percents however still had given much better results then soci.
+
+I must admit that dbi hadn't given good results for sqlite3. But in overall it behaves better then soci.
+
+When I had written dbixx wrapped I had taken may good ideas form soci, so it was quite
+simple to covert the code of *this* blog to dbixx from soci and I did it in about half an hour.
+
+And then run new benchmarks (similar to these: [one](http://art-blog.no-ip.info/cppcms/blog/post/11), [two](http://art-blog.no-ip.info/cppcms/blog/post/4)):
+
+    Data Base       gzip no gzip   gzip no gzip
+    -------------------------------------------
+    Berkeley DB     565  830                  
+    
+    MySQL    (dbi)  580  800       + 3%   - 4%
+    MySQL    (soci) 475  645       -16%   -22%
+    
+    Sqlite3  (dbi)  330  410       -42%   -51%
+    Sqlite3  (soci) 410  515       -27%   -38%
+    
+    PgSQL    (dbi)  350  430       -38%   -48%
+    PgSQL    (soci) 305  360       -46%   -57%
+    -------------------------------------------
+
+I still do not understand why, but sqlite3 does not behave well with dbixx driver,
+it had given lower results then soci one, the situation that contradicts driver benchmarks
+I did before.
+
+However it is clear, soci is not as fast as I expected. It is probably well suited
+for many purposes, but for high performance web framework it is not good enough (when
+there are some other alternatives).
