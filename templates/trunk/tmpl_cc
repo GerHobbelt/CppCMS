@@ -4,10 +4,6 @@ import os
 import re
 import sys
 
-class tocken:
-	def __init__(self,name,param):
-		self.name=name
-		self.val=param
 
 
 def interleave(*args):
@@ -50,7 +46,7 @@ class template_block:
 			error_exit("Double definition of template %s" % self.name)
 		templates_map[self.name]=tmpl_descr(start_id,len(template_parameters));
 		global stack
-		if len(stack)!=0:
+		if len(stack):
 			error_exit("Can not define template inside other template")
 		stack.append(self)
 		global current_template
@@ -157,10 +153,10 @@ class item_block:
 	type='item'
 	def use(self,m):
 		global stack
-		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+		if not stack or stack[-1].type!='foreach':
 			error_exit("item without foreach")
 			return
-		foreachb=stack[len(stack)-1]
+		foreachb=stack[-1]
 		self.seq=foreachb.seq
 		if foreachb.has_item:
 			error_exit("Two items for one foreach");
@@ -180,7 +176,7 @@ class empty_block:
 	type='empty'
 	def use(self,m):
 		global stack
-		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+		if not stack or stack[-1].type!='foreach':
 			error_exit("empty without foreach")
 			return
 		forb=stack.pop()
@@ -241,7 +237,7 @@ class if_block:
 			stack.append(self)
 			self.prepare()
 		else: # type == elif
-			if len(stack)!=0 :
+			if stack :
 				prev=stack.pop()
 				if prev.type!='if' and prev.type!='elif':
 					error_exit("elif without if");
@@ -259,7 +255,7 @@ class end_block:
 	pattern=r'^<%\s*end\s*%>';
 	def use(self,m):
 		global stack
-		if len(stack)==0:
+		if not stack:
 			error_exit("Unexpeced 'end'");
 		else:
 			stack.pop().on_end()
@@ -309,7 +305,7 @@ class include_block:
 				self.setup_store(m.group(4),ref)
 			print "\tcall\t%s" % ref
 		elif m.group(5):
-			ref=make_ident(m.group(3))
+			ref=make_ident(m.group(5))
 			print "\tcallr\t%s" % ref
 		else:
 			error_exit("Internal error")
@@ -339,7 +335,7 @@ def main():
 				inline_content(x)
 
 
-		if(len(stack)!=0):
+		if stack:
 			error_exit("Unexpected end of file %s" % file)
 
 #######################

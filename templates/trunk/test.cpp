@@ -7,26 +7,43 @@
 using namespace std;
 using namespace tmpl;
 
+bool counter(content &c,int &i)
+{
+	if(i<5) {
+		string tmp=(boost::format("%d") % i).str();
+		c["val"]=tmp;
+		i++;
+		return true;
+	}
+	else {
+		i=0;
+		return false;
+	}
+
+}
+
 int main()
 {
 	try{
 		
 		content c;
-		template_data tmpl("test.tmpl");
+		template_data tmpl("test.opcode");
 
 		renderer r(tmpl);
 
 		string out;
-		//c["name"]=string("artik");
-		//c["proc"]=string("text");
-		c["somename"]=string("Noone");
+		c["istrue"]=true;
+		c["isfalse"]=false;
+		c["myref"]=string("foo_ref");
 		int i=0;
 
-/*		content::vector_t &l=c.vector("list",0);
-		l[0]["link"]=string("me");
-		l[0]["title"]=string("otherme");
-		l[1]["link"]=string("artik");
-		l[1]["title"]=string("mastik");*/
+		content::vector_t &l1=c.vector("list_1",1);
+		l1[0]["val"]=string("One item");
+
+		c.list("list_empty");
+		c.signal("count",boost::bind(counter,_1,i));
+
+
 		r.render(c,"main",out);
 		cout<<out<<endl;
 	}
