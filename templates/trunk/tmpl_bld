@@ -1,0 +1,24 @@
+#!/bin/bash
+
+TMPL_CC="`dirname $0`/tmpl_cc"
+TMPL_AS="`dirname $0`/tmpl_as"
+
+SNAME=${1%.opcode}.s
+TNAME=$1
+
+RES=0
+
+shift
+if $TMPL_CC $@ >$SNAME ; then
+	if $TMPL_AS $TNAME <$SNAME ; then
+		RES=0
+	else
+		echo "Assembly failed"
+		RES=1
+	fi
+echo
+	RES=1
+fi
+
+rm -f $SNAME
+exit $RES

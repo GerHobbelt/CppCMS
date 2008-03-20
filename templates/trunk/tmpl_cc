@@ -198,6 +198,7 @@ class empty_block:
 
 class else_block:
 	pattern=r'^<%\s*else\s*%>$'
+	type='else'
 	def on_end(self):
 		print "%s:" % self.final
 	def use(self,m):
