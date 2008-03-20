@@ -25,10 +25,15 @@ boost::any const &renderer::any_value(details::instruction const &op,content con
 		tmp=&c;
 		break;
 	case 1:
+		if(op.r1>=local_sequences) 
+			return empty;
 		tmp=seq[op.r1].get();
 		break;
 	case 2:
 		{
+			if(op.r0>=local_variables){
+				return empty;
+			}
 			boost::any const *tmp=local[op.r0];
 			if(tmp==NULL)
 				return empty;
@@ -198,7 +203,8 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			flag=bool_value(op,c);
 			break;
 		case	OP_STORE:
-			local[op.r2]=&any_value(op,c);
+			if(op.r2<=local_variables)
+				local[op.r2]=&any_value(op,c);
 			break;
 		case	OP_CALL_REF:
 			{
@@ -213,6 +219,10 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			break;
 		case	OP_START_SEQ:
 			{
+				if(op.r2>=local_sequences){
+					pc=op.jump;
+					break;
+				}
 				seq[op.r2].set(any_value(op,c));
 				if(!seq[op.r2].first()) {
 					pc=op.jump;
@@ -221,7 +231,7 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			break;
 		case	OP_NEXT_SEQ:
 			{
-				if(seq[op.r0].next()) {
+				if(op.r0>=local_sequences || seq[op.r0].next()) {
 					pc=op.jump;
 				}
 			}
