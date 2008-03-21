@@ -1,3 +1,4 @@
+<% template feed_posts() %>
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
@@ -7,20 +8,21 @@
 	<atom:link 
 		href="http://<% host %><% rss_posts %>" 
 		rel="self" type="application/rss+xml" />
-	<% call get_post %>
-	<% while next_post %>
+	<% foreach post in posts %>
+		<% item %>
 		<item>
-			<title><% post_title %></title>
-			<link>http://<% host %><% post_permlink %></link>
-			<guid>http://<% host %><% post_permlink %></guid>
+			<title><% post.title %></title>
+			<link>http://<% host %><% post.permlink %></link>
+			<guid>http://<% host %><% post.permlink %></guid>
 			<description>
-			<% post_abstract %>
+			<% post.abstract %>
 			&lt;p&gt;
-			&lt;a href="<% post_permlink %>"&gt;more...&lt;/a&gt;
+			&lt;a href="<% post.permlink %>"&gt;more...&lt;/a&gt;
 			&lt;/p&gt;
 			</description>
 		</item>
-		<% call get_post %>
+		<% end %>
 	<% end %>
 </channel>
 </rss>
+<% end %>

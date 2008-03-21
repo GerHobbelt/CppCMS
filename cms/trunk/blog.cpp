@@ -1,6 +1,4 @@
 #include "blog.h"
-#include "templates/look.h"
-#include <cppcms/templates.h>
 
 #include <time.h>
 #include <boost/format.hpp>
@@ -11,6 +9,7 @@ using namespace cgicc;
 using namespace dbixx;
 using boost::format;
 using boost::str;
+using namespace tmpl;
 
 struct In_Comment {
 	string message;
@@ -142,28 +141,27 @@ void Blog::post(string s_id,bool preview)
 		auth_or_throw();
 	}
 	int id=atoi(s_id.c_str());
-	Content c(T_VAR_NUM);
+	content c;
 
-	Renderer r(templates,TT_master,c);
-	View_Main_Page view(this);
+	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
-	view.render(r,c,out.getstring());
+
+	render.render(c,"master",out.getstring());
 }
 
 void Blog::main_page(string from)
 {
 
-	Content c(T_VAR_NUM);
+	content c;
 
-	Renderer r(templates,TT_master,c);
-	View_Main_Page view(this);
+	View_Main_Page view(this,c);
 	if(from=="end") {
 		view.ini_main(-1);
 	}
 	else {
 		view.ini_main(atoi(from.c_str()));
 	}
-	view.render(r,c,out.getstring());
+	render.render(c,"master",out.getstring());
 }
 
 void Blog::date(tm t,string &d)
@@ -238,19 +236,17 @@ void Blog::add_comment(string &postid)
 
 void Blog::error_page(int what)
 {
-	Content c(T_VAR_NUM);
+	content c;
 
 	if(what==Error::AUTH) {
-		Renderer r(templates,TT_admin,c);
-		View_Admin view(this);
+		View_Admin view(this,c);
  		view.ini_login();
-		view.render(r,c,out.getstring());
+		render.render(c,"admin",out.getstring());
 	}
 	else {
-		Renderer r(templates,TT_master,c);
-		View_Main_Page view(this);
+		View_Main_Page view(this,c);
 		view.ini_error(what);
-		view.render(r,c,out.getstring());
+		render.render(c,"master",out.getstring());
 	}
 }
 
@@ -358,12 +354,11 @@ void Blog::admin()
 {
 	auth_or_throw();
 
-	Content c(T_VAR_NUM);
+	content c;
 
-	Renderer r(templates,TT_admin,c);
-	View_Admin view(this);
+	View_Admin view(this,c);
 	view.ini_main();
-	view.render(r,c,out.getstring());
+	render.render(c,"admin",out.getstring());
 
 }
 
@@ -373,12 +368,11 @@ void Blog::edit_post(string sid)
 
 	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
 
-	Content c(T_VAR_NUM);
+	content c;
 
-	Renderer r(templates,TT_admin,c);
-	View_Admin view(this);
+	View_Admin view(this,c);
 	view.ini_edit(id);
-	view.render(r,c,out.getstring());
+	render.render(c,"admin",out.getstring());
 
 }
 
@@ -494,12 +488,11 @@ void Blog::del_comment(string sid)
 void Blog::feed()
 {
 
-	Content c(T_VAR_NUM);
+	content c;
 
-	Renderer r(templates,TT_feed_posts,c);
-	View_Main_Page view(this);
+	View_Main_Page view(this,c);
 	view.ini_main(-1,true);
-	view.render(r,c,out.getstring());
+	render.render(c,"feed_posts",out.getstring());
 }
 
 

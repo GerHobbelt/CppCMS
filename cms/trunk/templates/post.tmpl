@@ -1,33 +1,32 @@
-<h1><a href="<% post_permlink %>"><% post_title %></a></h1>
+<% template post() %>
+<h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
 	Publushed at <% date %>, by <% author %>
 	<% if def edit_url %>
 		| <a href="<% edit_url %>">edit</a>
 	<%end%>
 </div>
-<% post_abstract %>
+<% abstract %>
 <% if def content %>
 	<span id="more"></span>
 	<% content %>
 <% end %>
 <div id="comments">
-<% call get_comment %>
-<% if next_comment %>
+<% foreach comment in comments %>
 	<h2>Comments</h2>
 	<dl>
-	<% repeat %>
+	<% item %>
 		<dt>
-			<%if def url %><a href="<% url %>"><% username %></a><% else %><% username %><% end %>,
- 			at <% date %>
-			<% if def delete_url %>
-				| <a href="<% delete_url%>" onclick="return confirm('Are you shure?'); " >delete</a>
+			<%if def comment.url %><a href="<% comment.url %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
+ 			at <% comment.date %>
+			<% if def comment.delete_url %>
+				| <a href="<% comment.delete_url%>" onclick="return confirm('Are you shure?'); " >delete</a>
 			<% end %>
 		</dt>
 		<dd>
-		<% content %>
+		<% comment.content %>
 		</dd>
-	<% call get_comment %>
-	<% until not next_comment %>
+	<% end %>
 	</dl>
 <% end %>
 	<h2>Add Comment:</h2>
@@ -125,4 +124,4 @@
 	-->
 	</script>
 </div>
-
+<% end %>

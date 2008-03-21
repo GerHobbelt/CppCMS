@@ -1,18 +1,18 @@
 sbin_PROGRAMS = cppblog
-cppblog_SOURCES = main.cpp blog.cpp views.cpp templates/look.h
+cppblog_SOURCES = main.cpp blog.cpp views.cpp
 
 cppblog_config_CXXFLAGS = -DCONFIG_ONLY
 
 noinst_HEADERS = blog.h data.h views.h error.h
 
-pkgdata_DATA = templates/look.template templates/style.css templates/adminstyle.css 
+pkgdata_DATA = templates/look.opcode templates/style.css templates/adminstyle.css
 
 
 sysconf_DATA = config.txt
 
-templates/look.h: templates/look.def
-	cd templates; make
+templates/look.opcode: templates/*.html
+	cd templates; ./build.sh
 
-clean-local: 
-	cd templates; make clean
+clean-local:
+	rm -f templates/look.opcode
 

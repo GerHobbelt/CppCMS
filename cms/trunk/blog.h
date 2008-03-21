@@ -14,6 +14,8 @@
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
 #include <dbi/dbixx.h>
+#include <tmpl/renderer.h>
+#include <tmpl/content.h>
 #include "views.h"
 #include "data.h"
 
@@ -78,12 +80,18 @@ private:
 	void del_comment(string id);
 	bool auth();
 	void feed();
+	tmpl::template_data	tmpl_dat;
+	tmpl::renderer		render;
 
 public:
 	links_t fmt;
 	virtual void init();
 	virtual void main();
 	void date(std::tm t,string &s);
-	Blog() : url(this) {};
+	Blog() :
+		url(this),
+		tmpl_dat(global_config.sval("templates.opcode")),
+		render(tmpl_dat)
+	{};
 };
 #endif

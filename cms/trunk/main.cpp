@@ -16,8 +16,6 @@ int main(int argc,char **argv)
 	try{
 		global_config.load(argc,argv);
 
-		templates.load();
-
 		Run_Application<Blog>(argc,argv);
 
 		cout<<"Exiting\n";

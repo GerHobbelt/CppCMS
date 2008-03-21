@@ -10,7 +10,6 @@
 //
 //
 #include "views.h"
-#include "templates/look.h"
 #include <cppcms/text_tool.h>
 #include <boost/format.hpp>
 #include "blog.h"
@@ -21,67 +20,71 @@ using boost::str;
 
 using namespace dbixx;
 
-void View_Comment::init(comment_t &c)
+void View_Comment::init(comment_t &com)
 {
 	Text_Tool tt;
-	user_t user;
-	tt.text2html(c.author,author);
-	if(c.url.size()!=0){
-		tt.text2url(c.url.c_str(),url);
+	string author;
+	tt.text2html(com.author,author);
+	c["username"]=author;
+	string url;
+	if(com.url.size()!=0){
+		tt.text2url(com.url.c_str(),url);
+		c["url"]=url;
 	}
-	tt.markdown2html(c.content,message);
-	blog->date(c.publish_time,date);
-	del_url=str(format(blog->fmt.del_comment) % c.id);
-}
-
-int View_Comment::render(Renderer &r,Content &c, string &out)
-{
-	c[TV_username]=author;
-	c[TV_content]=message;
-	c[TV_date]=date;
+	string message;
+	tt.markdown2html(com.content,message);
+	c["content"]=message;
+	string date;
+	blog->date(com.publish_time,date);
+	c["date"]=date;
 	if(blog->userid!=-1){
-		c[TV_delete_url]=del_url;
+		c["delete_url"]=str(format(blog->fmt.del_comment) % com.id);
 	}
-	if(url!="") {
-		c[TV_url]=url;
-	}
-	else {
-		c[TV_url].reset();
-	}
-	return r.render(out);
 }
 
 void View_Post::ini_share(post_t &p)
 {
 	Text_Tool tt;
+	string title;
 	tt.text2html(p.title,title);
+	c["title"]=title;
+	c["subtitle"]=title;
+	string date;
 	blog->date( p.publish ,date);
+	c["date"]=date;
+	string author;
 	tt.text2html(p.author_name,author);
+	c["author"]=author;
 
-	edit_url=str(format(blog->fmt.edit_post) % p.id);
-	permlink=str(format(blog->fmt.post) % p.id);
+	if(blog->userid!=-1){
+		c["edit_url"]=str(format(blog->fmt.edit_post) % p.id);
+	}
+	c["permlink"]=str(format(blog->fmt.post) % p.id);
 }
 
 void View_Post::ini_full(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
-	tt.markdown2html(p.abstract,this->abstract);
+	string abstract;
+	tt.markdown2html(p.abstract,abstract);
+	c["abstract"]=abstract;
 	if(p.content!="") {
-		tt.markdown2html(p.content,this->content);
-		has_content=true;
+		string content;
+		tt.markdown2html(p.content,content);
+		c["content"]=content;
+		c["has_content"]=true;
 	}
 	else {
-		has_content=false;
+		c["has_content"]=false;
 	}
 
 	string post_comment=str(format(blog->fmt.add_comment) % p.id);
 	int n=post_comment.size()/2;
-	post_comment2=post_comment.substr(n);
-	post_comment1=post_comment.substr(0,n);
-
-
-	has_comments=false;
+	string post_comment_url_2=post_comment.substr(n);
+	string post_comment_url_1=post_comment.substr(0,n);
+	c["post_comment_url_1"]=post_comment_url_1;
+	c["post_comment_url_2"]=post_comment_url_2;
 
 	result rs;
 	blog->sql<<
@@ -93,15 +96,18 @@ void View_Post::ini_full(post_t &p)
 
 	row cur;
 
+	content::list_t &comments_list=c.list("comments");
+
 	while(rs.next(cur))
 	{
-		shared_ptr<View_Comment> com(new View_Comment(blog));
-		comments_list.push_back(com);
+		comments_list.push_back(content());
+		View_Comment com(blog,comments_list.back());
+
 		comment_t comment;
 		cur	>> comment.id >>comment.author >> comment.email >> comment.url
 			>> comment.publish_time >> comment.content ;
-		com->init(comment);
-		has_comments=true;
+
+		com.init(comment);
 	}
 }
 
@@ -110,9 +116,10 @@ void View_Post::ini_short(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
+	string abstract;
 	tt.markdown2html(p.abstract,abstract);
-	has_content=p.has_content;
-	has_comments=false;
+	c["abstract"]=abstract;
+	c["has_content"]=(bool)p.has_content;
 }
 
 
@@ -120,55 +127,14 @@ void View_Post::ini_feed(post_t &p)
 {
 	Text_Tool tt;
 	ini_share(p);
+	string abstract;
 	string abstract_html;
 	tt.markdown2html(p.abstract,abstract_html);
 	// For xml feed we need convert html to text
-	tt.text2html(abstract_html,this->abstract);
-	has_content=p.has_content;
-	has_comments=false;
-}
+	tt.text2html(abstract,abstract_html);
 
-int View_Post::render(Renderer &r,Content &c, string &out)
-{
-	c[TV_post_permlink]=permlink;
-	c[TV_post_title]=title;
-	c[TV_date]=date;
-	c[TV_author]=author;
-	c[TV_post_abstract]=abstract;
-	c[TV_post_comment_url_1]=post_comment1;
-	c[TV_post_comment_url_2]=post_comment2;
-	c[TV_has_content]=has_content;
-
-	if(blog->userid!=-1) {
-		c[TV_edit_url]=edit_url;
-	}
-
-	if(has_content) {
-		c[TV_content]=content;
-	}
-	else {
-		c[TV_content].reset();
-	}
-
-	list<shared_ptr<View_Comment> >::iterator i=comments_list.begin();
-
-	id=r.render(out);
-	while(id) {
-		if(id==TV_get_comment) {
-			if(has_comments && i!=comments_list.end()) {
-				c[TV_next_comment]=true;
-				id=(*i)->render(r,c,out);
-				i++;
-			}
-			else {
-				c[TV_next_comment]=false;
-				return r.render(out);
-			}
-		}
-		else {
-			return id;
-		}
-	}
+	c["abstract"]=abstract_html;
+	c["has_content"]=(bool)p.has_content;
 }
 
 void View_Main_Page::ini_share()
@@ -182,10 +148,15 @@ void View_Main_Page::ini_share()
 	for(;rs.next(i);){
 		i >>id>>val;
 		if(id==BLOG_TITLE)
-			title=val;
+			c["blog_name"]=val;
 		else if(id==BLOG_DESCRIPTION)
-			description=val;
+			c["blog_description"]=val;
 	}
+	c["media"]=blog->fmt.media;
+	c["admin_url"]=blog->fmt.admin;
+	c["base_url"]=global_config.sval("blog.script_path");
+	c["host"]=global_config.sval("blog.host");
+	c["rss_posts"]=blog->fmt.feed;
 }
 
 void View_Main_Page::ini_main(int id,bool feed)
@@ -194,7 +165,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 
 	int max_posts=feed ? 10 : 5;
 
-	latest_posts.reserve(max_posts);
+	content::vector_t &latest_posts=c.vector("posts",max_posts);
 
 	result rs;
 	if(id!=-1) {
@@ -226,12 +197,12 @@ void View_Main_Page::ini_main(int id,bool feed)
 	blog->sql.fetch(rs);
 
 	row r;
-	int counter;
-	for(counter=1;rs.next(r);counter++) {
+	int counter,n;
+	for(counter=1,n=0;rs.next(r);counter++) {
 		if(counter==max_posts+1) {
 			int id;
 			r>>id;
-			from=str(format(blog->fmt.main_from) % id);
+			c["next_page_link"]=str(format(blog->fmt.main_from) % id);
 			break;
 		}
 		post_t post;
@@ -243,21 +214,24 @@ void View_Main_Page::ini_main(int id,bool feed)
 		r>>post.has_content;
 		r>>post.publish;
 
-		shared_ptr<View_Post> ptr(new View_Post(blog));
+		View_Post post_v(blog,latest_posts[n]);
 		if(feed){
-			ptr->ini_feed(post);
+			post_v.ini_feed(post);
 		}
 		else {
-			ptr->ini_short(post);
+			post_v.ini_short(post);
 		}
-		latest_posts.push_back(ptr);
+		n++;
 	}
-	disp=SUMMARY;
+	if(n<max_posts){
+		latest_posts.resize(n);
+	}
+	c["master_content"]=string("main_page");
 }
 
 void View_Main_Page::ini_post(int id,bool preview)
 {
-	shared_ptr<View_Post> ptr(new View_Post(blog));
+	View_Post post_v(blog,c);
 	post_t post;
 	post.id=-1;
 	row r;
@@ -280,76 +254,27 @@ void View_Main_Page::ini_post(int id,bool preview)
 		throw Error(Error::E404);
 	}
 
-	single_post=ptr;
-
 	ini_share();
 
-	ptr->ini_full(post);
-	disp=SINGLE;
+	post_v.ini_full(post);
+	c["master_content"]=string("post");
 }
 
 void View_Main_Page::ini_error(int id)
 {
 	ini_share();
-	disp=ERROR;
-	error_code=id;
-}
-
-
-int View_Main_Page::render( Renderer &r,Content &c,string &out)
-{
-	c[TV_media]=blog->fmt.media;
-	c[TV_title]=title;
-	c[TV_blog_name]=title;
-	c[TV_blog_description]=description;
-	c[TV_admin_url]=blog->fmt.admin;
-	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
-	c[TV_host]=global_config.sval("blog.host").c_str();
-	c[TV_rss_posts]=blog->fmt.feed;
-	if(from!="") {
-		c[TV_next_page_link]=from;
-	}
-	if(disp==SINGLE) {
-		c[TV_subtitle]=single_post->title;
-		c[TV_master_content]=TT_post;
-		return single_post->render(r,c,out);
-	}
-	else if(disp==SUMMARY){
-		c[TV_master_content]=TT_main_page;
-		int id;
-		id=r.render(out);
-		vector<shared_ptr<View_Post> >::iterator i=latest_posts.begin();
-		for(;;){
-			if(id==TV_get_post){
-				if(i!=latest_posts.end()) {
-					c[TV_next_post]=true;
-					id=(*i)->render(r,c,out);
-					i++;
-				}
-				else {
-					c[TV_next_post]=false;
-					id=r.render(out);
-				}
-			}
-			else {
-				return id;
-			}
-		}
-	}
-	else if(disp==ERROR){
-		c[TV_master_content]=TT_error;
-		switch(error_code) {
-		case Error::E404:
-			c[TV_error_404]="";
-			break;
-		case Error::COMMENT_FIELDS:
-			c[TV_error_comment]="";
-			break;
-		}
-		return r.render(out);
+	c["master_content"]=string("error");
+	switch(id){
+	case Error::E404:
+		c["error_404"]=true;
+		c["error_comment"]=false;
+		break;
+	case Error::COMMENT_FIELDS:
+		c["error_404"]=false;
+		c["error_comment"]=true;
+		break;
 	}
 }
-
 
 void View_Admin::ini_share()
 {
@@ -357,52 +282,38 @@ void View_Admin::ini_share()
 	blog->sql<<
 		"SELECT value FROM options WHERE id=?",
 		(int)BLOG_TITLE;
-	if(blog->sql.single(r)) 
+	string blog_name;
+	if(blog->sql.single(r))
 		r>>blog_name;
+	c["blog_name"]=blog_name;
+	c["media"]=blog->fmt.media;
+	c["base_url"]=global_config.sval("blog.script_path");
+	c["admin_url"]=blog->fmt.admin;
+	c["logout_url"]=blog->fmt.logout;
+	c["new_post_url"]=blog->fmt.new_post;
 }
 
 void View_Admin::ini_login()
 {
 	ini_share();
-	page=LOGIN;
+	c["master_content"]=string("admin_login");
+	c["login_url"]=blog->fmt.login;
 }
 
 void View_Admin::ini_edit(int id)
 {
 	ini_share();
-	page=POST;
-	post=shared_ptr<View_Admin_Post>(new View_Admin_Post(blog));
-	post->ini(id);
+	c["master_content"]=string("admin_editpost");
+	View_Admin_Post post(blog,c);
+	post.ini(id);
 }
 
 void View_Admin::ini_main()
 {
 	ini_share();
-	main=shared_ptr<View_Admin_Main>(new View_Admin_Main(blog));
-	main->ini();
-	page=MAIN;
-}
-
-int View_Admin::render( Renderer &r,Content &c,string &out)
-{
-	c[TV_media]=blog->fmt.media;
-	c[TV_base_url]=global_config.sval("blog.script_path").c_str();
-	c[TV_admin_url]=blog->fmt.admin.c_str();
-	c[TV_logout_url]=blog->fmt.logout;
-	c[TV_blog_name]=blog_name;
-	switch(page){
-	case MAIN:
-		c[TV_master_content]=TT_admin_main;
-		return main->render(r,c,out);
-	case POST:
-		c[TV_master_content]=TT_admin_editpost;
-		return post->render(r,c,out);
-	case LOGIN:
-		c[TV_master_content]=TT_admin_login;
-		c[TV_login_url]=blog->fmt.login.c_str();
-		return r.render(out);
-	}
-	return r.render(out);
+	View_Admin_Main main(blog,c);
+	main.ini();
+	c["master_content"]=string("admin_main");
 }
 
 void View_Admin_Main::ini()
@@ -415,15 +326,20 @@ void View_Admin_Main::ini()
 		"WHERE is_open=0";
 	blog->sql.fetch(rs);
 	row r;
+
+	content::list_t &unpublished_posts=c.list("posts");
+
 	for(;rs.next(r);) {
 		int id;
+		string intitle;
+		r>>id>>intitle;
+		string edit_url=str(format(blog->fmt.edit_post) % id);
 		string title;
-		r>>id>>title;
-		post_ref post_data;
-		post_data.edit_url=
-			str(format(blog->fmt.edit_post) % id);
-		tt.text2html(title,post_data.title);
-		unpublished_posts.push_back(post_data);
+		tt.text2html(intitle,title);
+
+		unpublished_posts.push_back(content());
+		unpublished_posts.back()["edit_url"]=edit_url;
+		unpublished_posts.back()["title"]=title;
 	}
 	blog->sql<<
 		"SELECT post_id,author "
@@ -431,45 +347,18 @@ void View_Admin_Main::ini()
 		"ORDER BY id DESC "
 		"LIMIT 10",rs;
 
+	content::list_t &latest_comments=c.list("comments");
+
 	for(;rs.next(r);) {
 		int id;
 		string author;
 		r>>id>>author;
-		comment_ref com;
-		com.url=str(format(blog->fmt.post) % id);
-		tt.text2html(author,com.author);
-		latest_comments.push_back(com);
-	}
-}
+		string author_html;
+		tt.text2html(author,author_html);
 
-int View_Admin_Main::render(Renderer &r,Content &c,string &out)
-{
-	c[TV_new_post_url]=blog->fmt.new_post;
-	int id=r.render(out);
-	list<post_ref>::iterator it=unpublished_posts.begin();
-	list<comment_ref>::iterator it_c=latest_comments.begin();
-	for(;;) {
-		if(id==TV_get_post && it!=unpublished_posts.end()) {
-			c[TV_next_post]=true;
-			c[TV_post_title]=it->title.c_str();
-			c[TV_edit_url]=it->edit_url;
-			it++;
-		}
-		else if(id==TV_get_post){
-			c[TV_next_post]=false;
-		}
-		else if(id==TV_get_comment && it_c!=latest_comments.end()){
-			c[TV_next_comment]=true;
-			c[TV_username]=it_c->author;
-			c[TV_post_permlink]=it_c->url;
-			it_c++;
-		}
-		else if(id==TV_get_comment) {
-			c[TV_next_comment]=false;
-		}
-		else
-			return id;
-		id=r.render(out);
+		latest_comments.push_back(content());
+		latest_comments.back()["post_permlink"]=str(format(blog->fmt.post) % id);
+		latest_comments.back()["username"]=author_html;
 	}
 }
 
@@ -478,12 +367,12 @@ void View_Admin_Post::ini( int id)
 	Text_Tool tt;
 	post_t post_data;
 	if(id!=-1) {
-		post_id=str(format("%1%") % id);
-		post_url=str(format(blog->fmt.update_post) % id);
-		preview=str(format(blog->fmt.preview) % id);
+		c["post_id"]=str(format("%1%") % id);
+		c["submit_post_url"]=str(format(blog->fmt.update_post) % id);
+		c["preview_url"]=str(format(blog->fmt.preview) % id);
 	}
 	else {
-		post_url=blog->fmt.add_post;
+		c["submit_post_url"]=blog->fmt.add_post;
 		return;
 	}
 	post_data.id=-1;
@@ -498,21 +387,14 @@ void View_Admin_Post::ini( int id)
 	}
 	r>>	post_data.id>>post_data.title>>
 		post_data.abstract>>post_data.content;
-	title=post_data.title;
+
+	string title;
+	tt.text2html(post_data.title,title);
+	c["post_title"]=title;
+	string abstract;
 	tt.text2html(post_data.abstract,abstract);
+	c["abstract"]=abstract;
+	string content;
 	tt.text2html(post_data.content,content);
+	c["content"]=content;
 }
-
-int View_Admin_Post::render( Renderer &r,Content &c,string &out)
-{
-	c[TV_submit_post_url]=post_url.c_str();
-	if(post_id.size()>0) {
-		c[TV_post_id]=post_id.c_str();
-		c[TV_preview_url]=preview.c_str();
-	}
-	c[TV_post_title]=title.c_str();
-	c[TV_abstract]=abstract.c_str();
-	c[TV_content]=content.c_str();
-	return r.render(out);
-}
-

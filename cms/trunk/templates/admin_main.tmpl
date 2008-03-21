@@ -1,3 +1,4 @@
+<% template admin_main() %>
 <div id="menu">
         <h2>Tasks</h2>
         <ul>
@@ -9,29 +10,25 @@
                 <li><a href="#">Edit Options</a></li>  -->
         </ul>
         <h2>Unpublished Posts</h2>
-        <% call get_post %>
-        <% if next_post %>
+        <% foreach post in posts %>
 	        <ul>
-        	<% repeat %>
-			<li><a href="<% edit_url %>"><% post_title %></a></li>
-		<% call get_post %>
-		<% until not next_post %>
+        	<% item %>
+			<li><a href="<% post.edit_url %>"><% post.title %></a></li>
+		<% end %>
 		</ul>
-	<% else %>
+	<% empty %>
 		<p>No unpublished posts</p>
 	<% end%>
 </div>
 <div id="news">
 <h2>Latest Comments</h2>
-        <% call get_comment %>
-        <% if next_comment %>
+        <% foreach comment in comments %>
 	        <ul>
-        	<% repeat %>
-			<li><a href="<% post_permlink %>"><% username %></a></li>
-		<% call get_comment %>
-		<% until not next_comment %>
+        	<% item %>
+			<li><a href="<% comment.post_permlink %>"><% comment.username %></a></li>
+		<% end %>
 		</ul>
-	<% else %>
+	<% empty %>
 		<p>No comments</p>
 	<% end%>
 <h2>Wait For Moderation</h2>
@@ -42,3 +39,4 @@
                 <li><a href="#">Eidth</a> on <a href="#">Best Article</a></li>
         </ul> -->
 </div>
+<% end %>
