@@ -129,7 +129,7 @@ void View_Post::ini_feed(post_t &p)
 	ini_share(p);
 	string abstract;
 	string abstract_html;
-	tt.markdown2html(p.abstract,abstract_html);
+	tt.markdown2html(p.abstract,abstract);
 	// For xml feed we need convert html to text
 	tt.text2html(abstract,abstract_html);
 

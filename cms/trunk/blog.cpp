@@ -490,6 +490,8 @@ void Blog::feed()
 
 	content c;
 
+	set_header(new HTTPContentHeader("text/xml"));
+
 	View_Main_Page view(this,c);
 	view.ini_main(-1,true);
 	render.render(c,"feed_posts",out.getstring());
