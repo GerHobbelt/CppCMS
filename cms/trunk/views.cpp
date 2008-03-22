@@ -96,12 +96,12 @@ void View_Post::ini_full(post_t &p)
 
 	row cur;
 
-	content::list_t &comments_list=c.list("comments");
+	content::vector_t &comments_list=c.vector("comments",rs.rows());
 
-	while(rs.next(cur))
+	int i;
+	for(i=0;rs.next(cur);i++)
 	{
-		comments_list.push_back(content());
-		View_Comment com(blog,comments_list.back());
+		View_Comment com(blog,comments_list[i]);
 
 		comment_t comment;
 		cur	>> comment.id >>comment.author >> comment.email >> comment.url
@@ -327,9 +327,10 @@ void View_Admin_Main::ini()
 	blog->sql.fetch(rs);
 	row r;
 
-	content::list_t &unpublished_posts=c.list("posts");
+	content::vector_t &unpublished_posts=c.vector("posts",rs.rows());
 
-	for(;rs.next(r);) {
+	int i;
+	for(i=0;rs.next(r);i++) {
 		int id;
 		string intitle;
 		r>>id>>intitle;
@@ -337,9 +338,8 @@ void View_Admin_Main::ini()
 		string title;
 		tt.text2html(intitle,title);
 
-		unpublished_posts.push_back(content());
-		unpublished_posts.back()["edit_url"]=edit_url;
-		unpublished_posts.back()["title"]=title;
+		unpublished_posts[i]["edit_url"]=edit_url;
+		unpublished_posts[i]["title"]=title;
 	}
 	blog->sql<<
 		"SELECT post_id,author "
@@ -347,18 +347,17 @@ void View_Admin_Main::ini()
 		"ORDER BY id DESC "
 		"LIMIT 10",rs;
 
-	content::list_t &latest_comments=c.list("comments");
+	content::vector_t &latest_comments=c.vector("comments",rs.rows());
 
-	for(;rs.next(r);) {
+	for(i=0;rs.next(r);i++) {
 		int id;
 		string author;
 		r>>id>>author;
 		string author_html;
 		tt.text2html(author,author_html);
 
-		latest_comments.push_back(content());
-		latest_comments.back()["post_permlink"]=str(format(blog->fmt.post) % id);
-		latest_comments.back()["username"]=author_html;
+		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
+		latest_comments[i]["username"]=author_html;
 	}
 }
 
