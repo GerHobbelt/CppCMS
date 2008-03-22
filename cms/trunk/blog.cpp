@@ -435,19 +435,13 @@ void Blog::save_post(int &id,string &title,
 
 	if(id==-1) {
 		int i;
-		sql<<"begin";
-		sql.exec();
 		sql<<	"INSERT INTO posts (author_id,title,abstract,content,is_open,publish) "
 			"VALUES(?,?,?,?,?,?)",
 			userid,title,abstract,
 			content,is_open,t;
 		sql.exec();
-		row r;
-		sql<<	"SELECT id FROM posts ORDER BY id DESC LIMIT 1";
-		sql.single(r);
-		r>>id;
-		sql<<"commit";
-		sql.exec();
+		id=sql.rowid("posts_id_seq");
+		// The parameter is relevant for PgSQL only
 	}
 	else {
 		if(pub)	{
