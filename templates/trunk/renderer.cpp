@@ -366,8 +366,11 @@ void sequence::reset()
 
 };
 
-template_data::template_data(std::string const &fname)
+void template_data::load(std::string const &fname)
 {
+	if(image){
+		throw tmpl_error("Can't load template twice");
+	}
 	FILE *f=fopen(fname.c_str(),"rb");
 	if(!f){
 		throw tmpl_error("Failed to open file:"+fname);

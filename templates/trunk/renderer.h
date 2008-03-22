@@ -93,7 +93,9 @@ public:
 
 class template_data {
 public:
-	template_data(std::string const &fname);
+	void load(std::string const &fname);
+	template_data(std::string const &fname) :image(NULL) { load(fname); };
+	template_data() : image(NULL) {} ;
 	~template_data();
 	void *image;
 };
