@@ -62,7 +62,8 @@ def inline_content(s):
 
 def error_exit(x):
 	global exit_flag
-	sys.stderr.write("Error: %s\n" % x)
+	global file_name
+	sys.stderr.write("Error: %s in file %s\n" % (x,file_name))
 	exit_flag=1
 
 def new_label():
@@ -314,6 +315,8 @@ class include_block:
 def main():
 	global stack
 	for file in os.sys.argv[1:]:
+		global file_name
+		file_name=file
 		f=open(file,'r')
 		content=f.read()
 		f.close()
@@ -342,6 +345,7 @@ def main():
 # MAIN
 #######################
 
+file_name=''
 labels_counter=0
 tmpl_seq={}
 template_parameters={}
