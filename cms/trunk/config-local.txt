@@ -22,8 +22,7 @@ blog.host = "localhost:8080"
 bdb.path="./db/"
 
 # Templates
-#templates.file = "./templates/look.opcode"
-templates.opcode = "./templates/look.opcode"
+templates.file = "./templates/look.opcode"
 
 # gzip
 

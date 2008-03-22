@@ -20,6 +20,8 @@
 #include "data.h"
 
 
+extern tmpl::template_data global_template;
+
 struct links_t {
 	string media;
 	string main;
@@ -80,7 +82,6 @@ private:
 	void del_comment(string id);
 	bool auth();
 	void feed();
-	tmpl::template_data	tmpl_dat;
 	tmpl::renderer		render;
 
 public:
@@ -90,8 +91,7 @@ public:
 	void date(std::tm t,string &s);
 	Blog() :
 		url(this),
-		tmpl_dat(global_config.sval("templates.opcode")),
-		render(tmpl_dat)
+		render(global_template)
 	{};
 };
 #endif
