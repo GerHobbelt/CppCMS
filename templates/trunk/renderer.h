@@ -18,6 +18,28 @@ public:
 namespace details {
 
 typedef enum {
+	FLT_DEFAULT = 0, // string  - text2html
+			 // std::tm - ISO time 2007-12-31 23:34:43
+			 // int	    - as is
+			 // bool    - none
+	FLT_CHAIN,	 // use chain
+	FLT_RAW,	 // string  - no change
+	FLT_USING_FILTERS,
+			 // NON OP - separator only
+	FLT_TO_HTML,	 // string to html
+	FLT_URL,	 // string  - urlize content
+	FLT_DATE,	 // std::tm - 2007-12-31
+	FLT_TIME,	 // std::tm   23:32
+	FLT_TIME_SEC,	 // std::tm   23:32:43
+	FLT_TIMEF,	 // std::tm   use format
+			 // std::tm   local time presentation with seconds
+	FLT_LAST,	 // last filter
+	FLT_EXTERNAL = 32768,
+			 // boost::any - external filter (by name)
+			 // 		id-FLT_EXTERNAL=name
+};
+
+typedef enum {
 	OP_INLINE,	// 		r0 text_id
 			//		r1 text_len
 
@@ -25,6 +47,8 @@ typedef enum {
 			// flag = 1,	r0 -  sequence 		print local_seq[r1][name(r0)]
 			//		r1 - sequence id 	
 			// flag = 2,    r0 - input parameter	print local_var[r0]
+			// 		r2 - filter ID 
+			// 		jmp - filter parameter
 
 	OP_START_SEQ,	// flag/r0/r1 - see display
 			//		r2 - new seq id	local_seq[r2]=RES
@@ -42,7 +66,11 @@ typedef enum {
 			// flag = 2	jump on false
 	OP_CALL,	// 		call jump
 	OP_CALL_REF,	// (flag/r0/r1)
-	OP_RET		//		return
+	OP_RET,		//		return
+	OP_PUSH_CHAIN,	// r0 - chain id
+	OP_CALL_V,	// r0 - ref value
+	OP_SET_V	// r0 - ref value,
+			// jump - call pos
 };
 
 struct instruction {
@@ -146,6 +174,14 @@ private:
 	typedef	std::list<type_holder> converters_list_t;
 	converters_list_t converters;
 	void	display(boost::any const &param,std::string &out);
+
+	class filter {
+		uint16_t parameter;
+		uint16_t filter_id;
+	public:
+		any_filter(boost::any const &a,std::string &out);
+		text_filter(std::string const &in,std::string &out);
+	};
 public:
 	renderer(template_data const &tmpl) : view(&tmpl) { setup(); };
 	void render(content const &c,std::string const &func,std::string &out);

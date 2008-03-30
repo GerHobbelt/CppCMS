@@ -43,6 +43,13 @@ int main()
 		c.list("list_empty");
 		c.signal("count",boost::bind(counter,_1,i));
 
+		std::tm t;
+		time_t t2;
+		t2=time(NULL);
+		localtime_r(&t2,&t);
+
+		c["time"]=t;
+		c["number"]=1948;
 
 		r.render(c,"main",out);
 		cout<<out<<endl;
