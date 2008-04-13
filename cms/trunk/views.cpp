@@ -14,6 +14,7 @@
 #include <boost/format.hpp>
 #include "blog.h"
 #include "error.h"
+#include "cxxmarkdown/markdowncxx.h"
 
 using boost::format;
 using boost::str;
@@ -32,7 +33,7 @@ void View_Comment::init(comment_t &com)
 		c["url"]=url;
 	}
 	string message;
-	tt.markdown2html(com.content,message);
+	markdown2html(com.content,message);
 	c["content"]=message;
 	string date;
 	blog->date(com.publish_time,date);
@@ -67,11 +68,11 @@ void View_Post::ini_full(post_t &p)
 	Text_Tool tt;
 	ini_share(p);
 	string abstract;
-	tt.markdown2html(p.abstract,abstract);
+	markdown2html(p.abstract,abstract);
 	c["abstract"]=abstract;
 	if(p.content!="") {
 		string content;
-		tt.markdown2html(p.content,content);
+		markdown2html(p.content,content);
 		c["content"]=content;
 		c["has_content"]=true;
 	}
@@ -117,7 +118,7 @@ void View_Post::ini_short(post_t &p)
 	Text_Tool tt;
 	ini_share(p);
 	string abstract;
-	tt.markdown2html(p.abstract,abstract);
+	markdown2html(p.abstract,abstract);
 	c["abstract"]=abstract;
 	c["has_content"]=(bool)p.has_content;
 }
@@ -129,7 +130,7 @@ void View_Post::ini_feed(post_t &p)
 	ini_share(p);
 	string abstract;
 	string abstract_html;
-	tt.markdown2html(p.abstract,abstract);
+	markdown2html(p.abstract,abstract);
 	// For xml feed we need convert html to text
 	tt.text2html(abstract,abstract_html);
 

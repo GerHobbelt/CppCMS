@@ -1,6 +1,8 @@
+SUBDIRS = cxxmarkdown
+
 sbin_PROGRAMS = cppblog
 cppblog_SOURCES = main.cpp blog.cpp views.cpp
-
+cppblog_LDADD = cxxmarkdown/libmarkdowncxx.a
 cppblog_config_CXXFLAGS = -DCONFIG_ONLY
 
 noinst_HEADERS = blog.h data.h views.h error.h
