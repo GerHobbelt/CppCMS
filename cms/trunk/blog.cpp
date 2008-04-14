@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
 #include "error.h"
+#include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
 
 using namespace cgicc;
@@ -42,6 +43,14 @@ bool In_Comment::load(const vector<FormEntry> &form)
 		return false;
 	}
 	return true;
+}
+
+static void old_markdown2html(string const &in,string &out)
+{
+	Text_Tool tt;
+	string tmp;
+	tt.markdown2html(in.c_str(),tmp);
+	out.append(tmp);
 }
 
 void Blog::init()
@@ -133,8 +142,15 @@ void Blog::init()
 		throw HTTP_Error(string("Failed to access DB")+e.what());
 	}
 	connected=true;
-	render.add_string_filter("markdown2html",
-		boost::bind(markdown2html,_1,_2));
+	string e;
+	if((e=global_config.sval("markdown.engine","discount"))=="discount"){
+		render.add_string_filter("markdown2html",
+			boost::bind(markdown2html,_1,_2));
+	}
+	else {
+		render.add_string_filter("markdown2html",
+			boost::bind(old_markdown2html,_1,_2));
+	}
 }
 
 

@@ -10,7 +10,6 @@
 //
 //
 #include "views.h"
-#include <cppcms/text_tool.h>
 #include <boost/format.hpp>
 #include "blog.h"
 #include "error.h"
@@ -328,7 +327,6 @@ void View_Admin_Main::ini()
 
 void View_Admin_Post::ini( int id)
 {
-	Text_Tool tt;
 	post_t post_data;
 	if(id!=-1) {
 		c["post_id"]=id;
