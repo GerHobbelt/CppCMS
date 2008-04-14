@@ -5,8 +5,8 @@
 <head>
 <title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
-<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host%><% rss_posts %>" />
+<link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_posts |raw%>" />
 
 </head>
 <body>
@@ -16,7 +16,7 @@
 <ul id="nav">
 <li><a href="http://cppcms.sourceforge.net/">Project</a></li>
 <li><a href="http://cppcms.sourceforge.net/#downloads">Downloads</a></li>
-<li><a class="selected" href="<% base_url %>">Home</a></li>
+<li><a class="selected" href="<% base_url | raw %>">Home</a></li>
 </ul>
 
 <div id="title"><% blog_name %></div>
@@ -27,9 +27,9 @@
 
 <div id="path">
 
-<a href="<% base_url %>">Home</a>
+<a href="<% base_url | raw %>">Home</a>
 &nbsp;/&nbsp;
-<a href="<% rss_posts %>">RSS</a>
+<a href="<% rss_posts | raw %>">RSS</a>
 &nbsp;/&nbsp;
 <a href="http://cppcms.sourceforge.net/">Project Site</a>
 &nbsp;/&nbsp;

@@ -18,13 +18,13 @@
 </script>
 <div id="form">
 <% if def post_id %>
-<h2>Edit Post No. <% post_id%></h2>
-<p><a href="<% preview_url %>">preview...</a></p>
+<h2>Edit Post No. <% post_id %></h2>
+<p><a href="<% preview_url | raw %>">preview...</a></p>
 <% else %>
 <h2>New Post</h2>
 <% end %>
 
-<form id="inp" action="<% submit_post_url %>" method="post" onsubmit="return testform();">
+<form id="inp" action="<% submit_post_url | raw %>" method="post" onsubmit="return testform();">
         <dl>
         <dt>Title:</dt>
         <dd><input type="text" name="title" size="80" <% if def post_title %>value="<%post_title%>"<% end %> /></dd>

@@ -23,21 +23,12 @@ using namespace dbixx;
 
 void View_Comment::init(comment_t &com)
 {
-	Text_Tool tt;
-	string author;
-	tt.text2html(com.author,author);
-	c["username"]=author;
-	string url;
+	c["username"]=com.author;
 	if(com.url.size()!=0){
-		tt.text2url(com.url.c_str(),url);
-		c["url"]=url;
+		c["url"]=com.url;
 	}
-	string message;
-	markdown2html(com.content,message);
-	c["content"]=message;
-	string date;
-	blog->date(com.publish_time,date);
-	c["date"]=date;
+	c["content"]=com.content;
+	c["date"]=com.publish_time;
 	if(blog->userid!=-1){
 		c["delete_url"]=str(format(blog->fmt.del_comment) % com.id);
 	}
@@ -45,17 +36,10 @@ void View_Comment::init(comment_t &com)
 
 void View_Post::ini_share(post_t &p)
 {
-	Text_Tool tt;
-	string title;
-	tt.text2html(p.title,title);
-	c["title"]=title;
-	c["subtitle"]=title;
-	string date;
-	blog->date( p.publish ,date);
-	c["date"]=date;
-	string author;
-	tt.text2html(p.author_name,author);
-	c["author"]=author;
+	c["title"]=p.title;
+	c["subtitle"]=p.title;
+	c["date"]=p.publish;
+	c["author"]=p.author_name;
 
 	if(blog->userid!=-1){
 		c["edit_url"]=str(format(blog->fmt.edit_post) % p.id);
@@ -65,15 +49,10 @@ void View_Post::ini_share(post_t &p)
 
 void View_Post::ini_full(post_t &p)
 {
-	Text_Tool tt;
 	ini_share(p);
-	string abstract;
-	markdown2html(p.abstract,abstract);
-	c["abstract"]=abstract;
+	c["abstract"]=p.abstract;
 	if(p.content!="") {
-		string content;
-		markdown2html(p.content,content);
-		c["content"]=content;
+		c["content"]=p.content;
 		c["has_content"]=true;
 	}
 	else {
@@ -115,26 +94,16 @@ void View_Post::ini_full(post_t &p)
 
 void View_Post::ini_short(post_t &p)
 {
-	Text_Tool tt;
 	ini_share(p);
-	string abstract;
-	markdown2html(p.abstract,abstract);
-	c["abstract"]=abstract;
+	c["abstract"]=p.abstract;
 	c["has_content"]=(bool)p.has_content;
 }
 
 
 void View_Post::ini_feed(post_t &p)
 {
-	Text_Tool tt;
 	ini_share(p);
-	string abstract;
-	string abstract_html;
-	markdown2html(p.abstract,abstract);
-	// For xml feed we need convert html to text
-	tt.text2html(abstract,abstract_html);
-
-	c["abstract"]=abstract_html;
+	c["abstract"]=p.abstract;
 	c["has_content"]=(bool)p.has_content;
 }
 
@@ -319,7 +288,6 @@ void View_Admin::ini_main()
 
 void View_Admin_Main::ini()
 {
-	Text_Tool tt;
 	result rs;
 	blog->sql<<
 		"SELECT id,title "
@@ -336,11 +304,9 @@ void View_Admin_Main::ini()
 		string intitle;
 		r>>id>>intitle;
 		string edit_url=str(format(blog->fmt.edit_post) % id);
-		string title;
-		tt.text2html(intitle,title);
 
 		unpublished_posts[i]["edit_url"]=edit_url;
-		unpublished_posts[i]["title"]=title;
+		unpublished_posts[i]["title"]=intitle;
 	}
 	blog->sql<<
 		"SELECT post_id,author "
@@ -354,11 +320,9 @@ void View_Admin_Main::ini()
 		int id;
 		string author;
 		r>>id>>author;
-		string author_html;
-		tt.text2html(author,author_html);
-
+		
 		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
-		latest_comments[i]["username"]=author_html;
+		latest_comments[i]["username"]=author;
 	}
 }
 
@@ -367,7 +331,7 @@ void View_Admin_Post::ini( int id)
 	Text_Tool tt;
 	post_t post_data;
 	if(id!=-1) {
-		c["post_id"]=str(format("%1%") % id);
+		c["post_id"]=id;
 		c["submit_post_url"]=str(format(blog->fmt.update_post) % id);
 		c["preview_url"]=str(format(blog->fmt.preview) % id);
 	}
@@ -388,13 +352,7 @@ void View_Admin_Post::ini( int id)
 	r>>	post_data.id>>post_data.title>>
 		post_data.abstract>>post_data.content;
 
-	string title;
-	tt.text2html(post_data.title,title);
-	c["post_title"]=title;
-	string abstract;
-	tt.text2html(post_data.abstract,abstract);
-	c["abstract"]=abstract;
-	string content;
-	tt.text2html(post_data.content,content);
-	c["content"]=content;
+	c["post_title"]=post_data.title;
+	c["abstract"]=post_data.abstract;
+	c["content"]=post_data.content;
 }

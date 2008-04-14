@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
 #include "error.h"
+#include "cxxmarkdown/markdowncxx.h"
 
 using namespace cgicc;
 using namespace dbixx;
@@ -132,6 +133,8 @@ void Blog::init()
 		throw HTTP_Error(string("Failed to access DB")+e.what());
 	}
 	connected=true;
+	render.add_string_filter("markdown2html",
+		boost::bind(markdown2html,_1,_2));
 }
 
 

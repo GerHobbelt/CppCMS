@@ -5,14 +5,14 @@
 <head>
 <title>Admin Protal</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<% media  %>/adminstyle.css" rel="stylesheet" type="text/css" />
+<link href="<% media | raw %>/adminstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="header">
 <div id="logout">
-        <p><a href="<% base_url %>">Blog</a> | <a href="<% admin_url %>">Admin</a> | <a href="<%logout_url%>">Logout</a></p>
+        <p><a href="<% base_url | raw%>">Blog</a> | <a href="<% admin_url| raw %>">Admin</a> | <a href="<%logout_url | raw %>">Logout</a></p>
 </div>
-<h1><a href="<% base_url %>"><% blog_name %></a></h1>
+<h1><a href="<% base_url | raw %>"><% blog_name %></a></h1>
 <h2>Administration Panel</h2>
 </div>
 

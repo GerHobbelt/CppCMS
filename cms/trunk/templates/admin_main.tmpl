@@ -2,8 +2,8 @@
 <div id="menu">
         <h2>Tasks</h2>
         <ul>
-                <li><a href="<% base_url %>">To The Blog</a></li>
-                <li><a href="<% new_post_url %>">New Post</a></li>
+                <li><a href="<% base_url | raw %>">To The Blog</a></li>
+                <li><a href="<% new_post_url | raw  %>">New Post</a></li>
 <!--                <li><a href="#">Edit Posts</a></li>
                 <li><a href="#">Edit Comments</a></li>
                 <li><a href="#">Moderate New Comments</a></li>
@@ -13,7 +13,7 @@
         <% foreach post in posts %>
 	        <ul>
         	<% item %>
-			<li><a href="<% post.edit_url %>"><% post.title %></a></li>
+			<li><a href="<% post.edit_url | raw %>"><% post.title %></a></li>
 		<% end %>
 		</ul>
 	<% empty %>
@@ -25,7 +25,7 @@
         <% foreach comment in comments %>
 	        <ul>
         	<% item %>
-			<li><a href="<% comment.post_permlink %>"><% comment.username %></a></li>
+			<li><a href="<% comment.post_permlink | raw %>"><% comment.username %></a></li>
 		<% end %>
 		</ul>
 	<% empty %>

@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
 	<title><% blog_name %></title>
-	<link>http://<% host %><% base_url %></link>
+	<link>http://<% host | raw %><% base_url | raw %></link>
 	<description><% blog_description %></description>
 	<atom:link 
-		href="http://<% host %><% rss_posts %>" 
+		href="http://<% host | raw %><% rss_posts | raw %>" 
 		rel="self" type="application/rss+xml" />
 	<% foreach post in posts %>
 		<% item %>
 		<item>
 			<title><% post.title %></title>
-			<link>http://<% host %><% post.permlink %></link>
-			<guid>http://<% host %><% post.permlink %></guid>
+			<link>http://<% host | raw %><% post.permlink | raw %></link>
+			<guid>http://<% host | raw %><% post.permlink | raw %></guid>
 			<description>
-			<% post.abstract %>
+			<% post.abstract | ext markdown2html | escape %>
 			&lt;p&gt;
-			&lt;a href="<% post.permlink %>"&gt;more...&lt;/a&gt;
+			&lt;a href="<% post.permlink | raw %>"&gt;more...&lt;/a&gt;
 			&lt;/p&gt;
 			</description>
 		</item>
