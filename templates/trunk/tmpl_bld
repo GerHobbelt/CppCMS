@@ -9,14 +9,14 @@ TNAME=$1
 RES=0
 
 shift
-if $TMPL_CC $@ >$SNAME ; then
-	if $TMPL_AS $TNAME <$SNAME ; then
+if $TMPL_CC $@ >"$SNAME" ; then
+	if $TMPL_AS "$TNAME" <"$SNAME" ; then
 		RES=0
 	else
 		echo "Assembly failed"
 		RES=1
 	fi
-echo
+else
 	echo "Compilation failed"
 	RES=1
 fi
