@@ -27,7 +27,7 @@ map<uint32_t,string> references;
 
 	static boost::regex r_label("^\\s*(\\w+)\\s*:\\s*$");
 	static boost::regex r_extern("^\\s*extern\\s+(\\w+)\\s*$");
-	static boost::regex r_show("^\\s*show\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))\\s*$");
+	static boost::regex r_show("^\\s*show\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))(,((ext\\s)?\\w+(,.*)?))?\\s*$");
 	static boost::regex r_start_seq("^\\s*seqf\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+),(\\w+)\\s*$");
 	static boost::regex r_store("^\\s*sto\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+)\\s*$");
 	static boost::regex r_next_seq("^\\s*seqn\\s+(\\d+),(\\w+)\\s*$");
@@ -43,6 +43,7 @@ map<uint32_t,string> references;
 	static boost::regex r_var_loc("^(\\d+)$");
 
 	static boost::regex r_comment("^\\s*(#.*)?$");
+	static boost::regex r_filter("^\\s*filter\\s+((ext\\s)?\\w+(,.*)?)\\s*$");
 
 
 #ifndef max
@@ -66,6 +67,10 @@ string make_string(string inp)
 				buf[2]=0;
 				int n;
 				sscanf(buf,"%x",&n);
+				if(n==0) {
+					cerr<<"Zero charrecter is illegal in line "<<cur_line;
+					return tmp;
+				}
 				tmp+=(char)(unsigned char)(n);
 				s+=3;
 			}
@@ -107,6 +112,20 @@ long tolong(string s)
 	return atol(s.c_str());
 }
 
+uint32_t get_variable(string const &name)
+{
+	uint32_t id;
+	map<string,uint32_t>::iterator p;
+	if((p=variables.find(name))==variables.end()) {
+		id=variables.size();
+		variables[name]=id;
+	}
+	else {
+		id=p->second;
+	}
+	return id;
+}
+
 
 void setup_var_op(instruction &op,string t)
 {
@@ -114,26 +133,12 @@ void setup_var_op(instruction &op,string t)
 	map<string,uint32_t>::iterator p;
 	if(boost::regex_match(t.c_str(),m,r_var_glob)) {
 		op.flag=0;
-		uint32_t id;
-		if((p=variables.find(m[1]))==variables.end()) {
-			id=variables.size();
-			variables[m[1]]=id;
-		}
-		else {
-			id=p->second;
-		}
+		uint32_t id=get_variable(m[1]);
 		op.r0=id;
 	}
 	else if(boost::regex_match(t.c_str(),m,r_var_ref)) {
 		op.flag=1;
-		uint32_t id;
-		if((p=variables.find(m[1]))==variables.end()) {
-			id=variables.size();
-			variables[m[1]]=id;
-		}
-		else {
-			id=p->second;
-		}
+		uint32_t id=get_variable(m[1]);
 		op.r0=id;
 		op.r1=tolong(m[2]);
 		max_seq=max(max_seq,op.r1);
@@ -147,6 +152,63 @@ void setup_var_op(instruction &op,string t)
 	}
 }
 
+uint16_t get_param(string const &s)
+{
+	string tmp=make_string(s);
+	if(texts.size()==0) {
+		// param must not be 0
+		texts.push_back(string(""));
+	}
+	uint16_t res=texts.size();
+	texts.push_back(tmp);
+	return res;
+}
+
+void setup_filter(string const &s,uint16_t &filter,uint32_t &param)
+{
+	static boost::regex external("^ext\\s+([a-zA-Z]\\w*)(,'([^']*)')?\\s*$");
+	static boost::regex internal("^([a-zA-Z]\\w*)(,'([^']*)')?\\s*$");
+	
+	boost::cmatch m;
+	filter=0;
+	param=0;
+	if(boost::regex_match(s.c_str(),m,external)) {
+		uint16_t id=get_variable(m[1]);
+		filter=FLT_EXTERNAL+id;
+	}
+	else if(boost::regex_match(s.c_str(),m,internal)){
+		static struct { char const *name; uint16_t id; } 
+			data[] = 
+			{
+				{ "chain" , FLT_CHAIN },
+				{ "escape", FLT_TO_HTML},
+				{ "raw", FLT_RAW },
+				{ "date", FLT_DATE },
+				{ "time", FLT_TIME },
+				{ "timesec", FLT_TIME_SEC },
+				{ "strftime", FLT_TIMEF },
+				{ "intf", FLT_PRINTF },
+			};
+		int i,n=sizeof(data)/sizeof(data[0]);
+		for(i=0;i<n;i++) {
+			if(m[1]==data[i].name) {
+				filter=data[i].id;
+				break;
+			}
+		}
+		if(i==n) {
+			error=true;
+			cerr<<boost::format("Unknown filter %s at line %d\n") % m[1] % cur_line;
+		}
+	}
+	else {
+		error=true;
+		cerr<<"Syntax error in filter definiton `" << s <<"'at line "<<cur_line<<endl;
+	}
+	if(m[2]!="") {
+		param=get_param(m[3]);
+	}
+}
 
 void process_command(char const *line)
 {
@@ -178,6 +240,9 @@ void process_command(char const *line)
 	else if(boost::regex_match(line,m,r_show)) {
 		op.opcode=OP_DISPLAY;
 		setup_var_op(op,m[1]);
+		if(m[2]!="") {
+			setup_filter(m[3],op.r2,op.jump);
+		}
 	}
 	else if(boost::regex_match(line,m,r_start_seq)) {
 		op.opcode=OP_START_SEQ;
@@ -218,6 +283,10 @@ void process_command(char const *line)
 		op.opcode=OP_CALL;
 		references[ops.size()]=m[1];
 	}
+	else if(boost::regex_match(line,m,r_filter)) {
+		op.opcode=OP_PUSH_CHAIN;
+		setup_filter(m[1],op.r0,op.jump);
+	}
 	else if(boost::regex_match(line,m,r_call_ref)) {
 		op.opcode=OP_CALL_REF;
 		setup_var_op(op,m[1]);
@@ -243,7 +312,7 @@ void process_command(char const *line)
 }
 
 char const *names[] = { "inline", "display", "seq_start", "sto", "next" , "ch_def", "ch_true" ,
-			"jmp", "call", "call_ref", "ret" };
+			"jmp", "call", "call_ref", "ret", "filter" };
 
 bool read_line(string &s)
 {

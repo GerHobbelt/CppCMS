@@ -267,11 +267,58 @@ class error_com:
 		error_exit("unknown command %s" % m.group(1))
 
 class show_block:
-	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
+	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*%>$'
+	def make_filter_id(self,str):
+		if str in [ 'raw' ,'escape', 'raw','date','time','timesec','strftime','intf' ]:
+			return str;
+		else:
+			error_exit("Unkown internal filter %s" % str);
+			return 'raw';
+	def make_filter_param(self,param):
+		res=''
+		for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
+			s=m.group(1)
+			if s==r"\'":
+				res+="'"
+			elif s==r"\l":
+				res+="<"
+			elif s==r"\r":
+				res+=">"
+			elif s=='<' or s=='>':
+				error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
+			else:
+				res+=s
+		res="'"+to_string(res)+"'"
+		return res
+
+	def make_filters_list(self,filter_def):
+		lst=[];
+		if not re.match(r"^(\s*\|\s*(ext\s*)?([a-zA-Z]\w*)(\('([^']|\\')*'\))?\s*)+$",filter_def):
+			error_exit("Syntax error in filter definition %s" % filter_def);
+			return [ 'raw' ];
+		for m in re.finditer(r"\s*\|\s*(ext\s*)?([a-zA-Z]\w*)(\('(([^'><]|\\')*)'\))?\s*",filter_def):
+			res=''
+			if m.group(1):
+				res+='ext '+m.group(2)
+			else:
+				res+=self.make_filter_id(m.group(2))
+			if m.group(4):
+				res+=','+self.make_filter_param(m.group(4))
+			lst.append(res);
+		return lst
+
 	def use(self,m):
 		idnt=make_ident(m.group(1))
-		print "\tshow\t%s" % idnt
-		
+		if not m.group(4) or len(m.group(4))==0:
+			print "\tshow\t%s" % idnt
+			return
+		filters=self.make_filters_list(m.group(4))
+		if len(filters)==1:
+			print "\tshow\t%s,%s" % (idnt , filters[0])
+		else:
+			for filter in filters:
+				print "\tfilter\t%s" % filter
+			print "\tshow\t%s,chain" % idnt
 
 class include_block:
 	pattern=r'^<%\s*include\s+(([a-zA_Z]\w*)(\s+using(.*))?|ref\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$';
@@ -311,6 +358,18 @@ class include_block:
 		else:
 			error_exit("Internal error")
 
+def fetch_content(content):
+	tmp=''
+	for row in re.split('\n',content):
+		l1=re.split(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row)
+		n=0
+		for l2 in re.finditer(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row):
+			yield tmp+l1[n]
+			tmp=''
+			yield l2.group(0)
+			n+=3
+		tmp+=l1[n]+'\n'
+	yield tmp
 
 def main():
 	global stack
@@ -320,10 +379,14 @@ def main():
 		f=open(file,'r')
 		content=f.read()
 		f.close()
-		texts=re.split(r'<\%[^\%]*\%\>',content)
-		commands=re.findall(r'<\%[^\%]*\%\>',content)
-		for x in interleave(texts,commands):
+		for x in fetch_content(content):
 			if x=='' : continue
+			if len(stack)==0:
+				if re.match(r"^\s*$",x):
+					continue
+				elif not re.match(r"<\%.*\%>",x):
+					error_exit("Content is not allowed outside template blocks")
+					continue
 			matched=0
 			for c in [  if_block(), template_block(), end_block(), else_block(), \
 					foreach_block(), item_block(), empty_block(),separator_block(),\
@@ -356,4 +419,7 @@ stack=[]
 exit_flag=0
 current_template=''
 main()
-sys.exit(exit_flag)
+if exit_flag == 0:
+	sys.exit(1)
+else:
+	sys.exit(0)

@@ -17,8 +17,8 @@ if $TMPL_CC $@ >$SNAME ; then
 		RES=1
 	fi
 echo
+	echo "Compilation failed"
 	RES=1
 fi
 
-rm -f $SNAME
 exit $RES

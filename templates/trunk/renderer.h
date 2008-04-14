@@ -202,12 +202,12 @@ private:
 	bool get_external_filter(filter_ptr &p,uint16_t filter);
 	void str_filter(std::string const &str,std::string &out,uint16_t filter,uint16_t param);
 	void any_filter(boost::any const &a,std::string &out,uint16_t filter,uint16_t param);
-	void internal_time_filter(std::tm const &t,std::string out,uint16_t filter,uint16_t param);
-	void internal_string_filter(std::string const &s,std::string out,uint16_t filter,uint16_t param);
-	void internal_int_filter(int val,std::string out,uint16_t filter,uint16_t param);
+	void internal_time_filter(std::tm const &t,std::string &out,uint16_t filter,uint16_t param);
+	void internal_string_filter(std::string const &s,std::string &out,uint16_t filter,uint16_t param);
+	void internal_int_filter(int val,std::string &out,uint16_t filter,uint16_t param);
 	void default_filter(boost::any const &a,std::string &out);
 	void text2html(std::string const &str,std::string &content);
-
+	void usertype_to_string(boost::any const &a,std::string &out);
 
 public:
 	renderer(template_data const &tmpl) : view(&tmpl) { setup(); };

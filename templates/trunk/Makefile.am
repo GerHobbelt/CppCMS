@@ -1,6 +1,8 @@
-noinst_PROGRAMS = test
+noinst_PROGRAMS = test test_f
 test_SOURCES = test.cpp 
 test_LDADD = libtmpl.la
+test_f_SOURCES = test_f.cpp
+test_f_LDADD = libtmpl.la
 
 bin_PROGRAMS	= tmpl_as
 tmpl_as_SOURCES	= assemly.cpp

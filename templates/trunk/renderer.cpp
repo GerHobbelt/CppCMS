@@ -262,6 +262,17 @@ void renderer::text2html(string const &str,string &content)
 	}
 }
 
+void renderer::usertype_to_string(boost::any const &a,string &out)
+{
+	converters_list_t::iterator p;
+	for(p=converters.begin();p!=converters.end();p++){
+		if(p->type()==a.type()) {
+			p->exec(a,out);
+			return;
+		}
+	}
+}
+
 void renderer::default_filter(boost::any const &a,string &out)
 {
 	if(a.type()==typeid(string)) {
@@ -278,18 +289,12 @@ void renderer::default_filter(boost::any const &a,string &out)
 		out.append(buf);
 	}
 	else {
-		converters_list_t::iterator p;
-		for(p=converters.begin();p!=converters.end();p++){
-			if(p->type()==a.type()) {
-				p->exec(a,out);
-				return;
-			}
-		}
+		usertype_to_string(a,out);
 	}
 	
 }
 
-void renderer::internal_string_filter(string const &s,string out,uint16_t filter,uint16_t param)
+void renderer::internal_string_filter(string const &s,string &out,uint16_t filter,uint16_t param)
 {
 	using namespace details;
 	switch(filter) {
@@ -318,21 +323,26 @@ void renderer::add_any_filter(std::string const &name,any_filter_t::slot_type sl
 	external_filters[name]=ptr;
 }
 
-void renderer::internal_int_filter(int val,string out,uint16_t filter,uint16_t param)
+void renderer::internal_int_filter(int val,string &out,uint16_t filter,uint16_t param)
 {
 	char const *format;
 	switch(filter){
 	case details::FLT_PRINTF:
 		format=get_parameter(param);
+		break;
 	default:
 		format="%d";
 	}
 	if(format) {
-		out.append(str(boost::format(format) % val));
+		try{
+			out.append(str(boost::format(format) % val));
+		}
+		catch(std::exception const &e)
+		{ /* In case of bad format string */ }
 	}
 }
 
-void renderer::internal_time_filter(std::tm const &t,string out,uint16_t filter,uint16_t param)
+void renderer::internal_time_filter(std::tm const &t,string &out,uint16_t filter,uint16_t param)
 {
 	using namespace details;
 	char const *format=NULL;
@@ -345,12 +355,14 @@ void renderer::internal_time_filter(std::tm const &t,string out,uint16_t filter,
 	if(format) {
 		char buf[128];
 		strftime(buf,sizeof(buf),format,&t);
+		out.append(buf);
 	}
 }
 
 void renderer::any_filter(boost::any const &a,string &out,uint16_t filter,uint16_t param)
 {
 	using namespace details;
+
 	if(filter>=FLT_INTERNAL && filter<FLT_EXTERNAL) {
 		if(a.type()==typeid(string)) {
 			internal_string_filter(boost::any_cast<string const &>(a),out,filter,param);
@@ -360,6 +372,9 @@ void renderer::any_filter(boost::any const &a,string &out,uint16_t filter,uint16
 		}
 		else if(a.type()==typeid(int)) {
 			internal_int_filter(boost::any_cast<int>(a),out,filter,param);
+		}
+		else if(filter==FLT_RAW){
+			usertype_to_string(a,out);
 		}
 	}
 	else if(filter & FLT_EXTERNAL){
@@ -454,11 +469,11 @@ void renderer::display(boost::any const &a,string &out,uint16_t filter,uint16_t 
 		}
 		else {
 			any_filter(a,tmp,chain[0].filter,chain[0].parameter);
-			for(i==1;i<chain.size()-1;i++){
+			for(i=1;i<chain.size()-1;i++){
 				str_filter(tmp,tmp_out,chain[i].filter,chain[i].parameter);
 				tmp=tmp_out;
 			}
-			str_filter(tmp,out,chain.back().filter,chain.back().parameter);
+			str_filter(tmp,out,chain[i].filter,chain[i].parameter);
 		}
 		chain.clear();
 		chain.reserve(10);

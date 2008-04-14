@@ -1,0 +1,19 @@
+<% template main() %>
+<% if def str %>
+	Escaped: <% str %>
+<% end %>
+Raw: <% str | raw %>
+Escaped: <% str | escape %>
+Full Date: <% d %>
+Date: <% d | date %>
+Time: <% d | time %>
+Time Seconds: <% d | timesec %>
+Timef '< %D, %Y >': <% d | strftime('\l%D, \'%Y\'\r') %>
+Timef escaped '< %D, %Y >': <% d | strftime('\l%D, \'%Y\'\r') | escape %>
+int dec <% i %>
+int hex <% i | intf('%x') %>
+int hexupper <% i | intf('%x') | ext toupper %>
+Complex <% c %>
+Complex toupper <% c | ext toupper %>
+Typename <% c | ext typename('The type is:') %>
+<% end %>
