@@ -24,7 +24,7 @@
 			<% end %>
 		</dt>
 		<dd>
-		<% comment.content %>
+		<% comment.content | ext markdown2html %>
 		</dd>
 	<% end %>
 	</dl>
