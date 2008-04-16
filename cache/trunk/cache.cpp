@@ -160,14 +160,16 @@ void base_cache::split_to_keys(string const &s,vector<string> &v)
 	for(i=0;i<s.size();i++) {
 		if(s[i]==',') n++;
 	}
-	v.resize(n);
+	v.reserve(n);
 	size_t p=0,pn=0;
-	for(i=0;i<n-1;n++){
+	for(i=0;i<n;n++){
 		pn=s.find(',',p);
-		v[i]=s.substr(p,pn-p);
+		string tmp=s.substr(p,pn-p);
+		if(tmp!="")
+			v.push_back(tmp);
 		p=pn+1;
 	}
-	v[n-1]=s.substr(p,s.size()-p);
+	v.push_back(s.substr(p,s.size()-p));
 }
 
 string thread_cache::insert(string const &key,string const &sec, string const &input,time_t timeout,bool no_gzip)
