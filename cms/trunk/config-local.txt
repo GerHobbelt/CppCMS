@@ -23,7 +23,8 @@ bdb.path="./db/"
 
 # Templates
 templates.file = "./templates/look.opcode"
-
+latex.script =  "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/latex.sh"
+latex.cache_path = "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/"
 # Markdown engine "old" or "discount"
 #
 markdown.engine="discount"

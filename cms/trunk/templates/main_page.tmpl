@@ -8,7 +8,7 @@
 				| <a href="<% post.edit_url | raw %>">edit</a>
 			<%end%>
 		</div>
-		<% post.abstract | ext markdown2html %>
+		<% post.abstract | ext latex | ext markdown2html %>
                 <% if post.has_content %>
                         <a href="<% post.permlink | raw %>#more">more...</a>
                 <% end %>

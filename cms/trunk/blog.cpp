@@ -1,11 +1,17 @@
 #include "blog.h"
-
 #include <time.h>
+#include <cppcms/text_tool.h>
 #include <boost/format.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
+#include <errno.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "error.h"
 #include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
+#include "md5.h"
 
 using namespace cgicc;
 using namespace dbixx;
@@ -51,6 +57,54 @@ static void old_markdown2html(string const &in,string &out)
 	string tmp;
 	tt.markdown2html(in.c_str(),tmp);
 	out.append(tmp);
+}
+
+static void create_gif(string const &tex,string const &fname)
+{
+	int pid;
+	string p=global_config.sval("latex.script");
+	if((pid=fork())<0) {
+		char buffer[256];
+		strerror_r(errno,buffer,sizeof(buffer));
+		throw std::runtime_error(string("Failed to fork! ")+buffer);
+	}
+	else if(pid==0) {
+		if(execl(p.c_str(),p.c_str(),tex.c_str(),fname.c_str(),NULL)<0) {
+			perror("exec");
+			exit(1);
+		}
+	}
+	else {
+		int stat;
+		cerr<<"A\n";
+		waitpid(pid,&stat,0);
+		cerr<<"B\n";
+	}
+}
+
+static void latex_filter(string const &in,string &out)
+{
+	string::size_type p_old=0,p1=0,p2=0;
+	while((p1=in.find("[tex]",p_old))!=string::npos && (p2=in.find("[/tex]",p_old))!=string::npos && p2>p1) {
+		out.append(in,p_old,p1-p_old);
+		p1+=5;
+		string tex;
+		tex.append(in,p1,p2-p1);
+		char md5[33];
+		md5_onepass(tex.c_str(),tex.size(),md5);
+		string file=global_config.sval("latex.cache_path")+ md5 +".gif";
+		string wwwfile=global_config.sval("blog.media_path")+"/latex/" + md5 +".gif";
+		struct stat tmp;
+		if(stat(file.c_str(),&tmp)<0) {
+			create_gif(tex,file);
+		}
+		string html_tex;
+		Text_Tool tt;
+		tt.text2html(tex,html_tex);
+		out.append(str(boost::format("<img src=\"%1%\" alt=\"%2%\" align=\"absmiddle\" />") % wwwfile % html_tex));
+		p_old=p2+6;
+	}
+	out.append(in,p_old,in.size()-p_old);
 }
 
 void Blog::init()
@@ -151,6 +205,10 @@ void Blog::init()
 		render.add_string_filter("markdown2html",
 			boost::bind(old_markdown2html,_1,_2));
 	}
+	render.add_string_filter("latex",
+		boost::bind(latex_filter,_1,_2));
+
+
 }
 
 

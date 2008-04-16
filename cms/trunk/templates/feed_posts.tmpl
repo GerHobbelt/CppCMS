@@ -14,7 +14,7 @@
 			<link>http://<% host | raw %><% post.permlink | raw %></link>
 			<guid>http://<% host | raw %><% post.permlink | raw %></guid>
 			<description>
-			<% post.abstract | ext markdown2html | escape %>
+			<% post.abstract | ext latex | ext markdown2html | escape %>
 			&lt;p&gt;
 			&lt;a href="<% post.permlink | raw %>"&gt;more...&lt;/a&gt;
 			&lt;/p&gt;
