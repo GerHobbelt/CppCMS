@@ -13,14 +13,14 @@ namespace cache {
 
 using boost::shared_ptr;
 using boost::shared_array;
-using namespace std; 
+using namespace std;
 
 class base_cache {
-protected:	
+protected:
 	string deflate(string const &s);
 	void split_to_keys(string const &s,vector<string> &v);
 public:
-	virtual string insert(string const &key,string const &sec, 
+	virtual string insert(string const &key,string const &sec,
 				string const &input,time_t timeout=365*24*3600,bool no_gzip=false)
 	{
 		return deflate(input);
@@ -32,20 +32,20 @@ public:
 	virtual ~base_cache(){};
 };
 
-class thread_cache : public base_cache 
+class thread_cache : public base_cache
 {
 	pthread_mutex_t lru_lock;
 	pthread_rwlock_t lock;
 	unsigned limit;
-	
+
 	struct container {
 		typedef map<string,container>::iterator primary_ptr;
 		typedef multimap<time_t,primary_ptr>::iterator timeout_ptr;
 		typedef list<primary_ptr>::iterator lru_ptr;
-		
+
 		string original,gzipped;
 		bool has_gzipped;
-		timeout_ptr time_entry; 
+		timeout_ptr time_entry;
 		lru_ptr lru_entry;
 	};
 
@@ -67,8 +67,8 @@ class thread_cache : public base_cache
 	bool fetch(string const &k,string &out,bool use_gzip);
 
 
-public:	
-	thread_cache(int size=1) : limit(size) 
+public:
+	thread_cache(int size=1) : limit(size)
 	{
 		pthread_mutex_init(&lru_lock,NULL);
 		pthread_rwlock_init(&lock,NULL);
@@ -81,7 +81,9 @@ public:
 	virtual bool fetch_gzip(string const &key,string &output);
 	virtual void drop_primary(string const &key);
 	virtual void drop_secondary(string const &key);
-
+#ifdef CACHE_DEBUG
+	void print_all();
+#endif
 	virtual ~thread_cache() {};
 };
 

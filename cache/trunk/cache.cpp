@@ -10,7 +10,7 @@ namespace cache {
 string base_cache::deflate(string const &text)
 {
 	using namespace boost::iostreams;
-	
+
 	ostringstream sstream;
 
 	filtering_ostream zstream;
@@ -22,7 +22,8 @@ string base_cache::deflate(string const &text)
 }
 
 #define TRY(x) x; try {
-#define FINALY(x) }catch(...){ x; throw; }
+#define FINALY(x) }catch(...){ x; throw; } x;
+
 
 bool thread_cache::fetch(string const &key,string & out,bool use_gzip)
 {
@@ -31,12 +32,12 @@ bool thread_cache::fetch(string const &key,string & out,bool use_gzip)
 	TRY(pthread_rwlock_rdlock(&lock))
 
 	primary_ptr p=primary.find(key);
-	if(p==primary.end()) {
+	if(p==primary.end() || p->second.time_entry->first < time(NULL)) {
 		res=false;
 	}
 	else {
 		res=true;
-		if(use_gzip) {
+		if(!use_gzip) {
 			out=p->second.original;
 		}
 		else if (p->second.has_gzipped){
@@ -77,6 +78,7 @@ void thread_cache::remove_prim(primary_ptr p)
 	if(p!=primary.end()) {
 		lru.erase(p->second.lru_entry);
 		timeout.erase(p->second.time_entry);
+		primary.erase(p);
 	}
 }
 
@@ -115,7 +117,7 @@ void thread_cache::insert(container &c, string const &k,vector<string> const &se
 	if(primary.size()>limit && (the_ptr=primary.find(k))==primary.end()) {
 		multimap<time_t,primary_ptr>::iterator p=timeout.begin();
 		if(p->first < time(NULL)) {
-			remove_prim_all(p->second);	
+			remove_prim_all(p->second);
 		}
 		else {
 			remove_prim_all(lru.back());
@@ -152,7 +154,7 @@ bool thread_cache::fetch_gzip(string const &key,string &out)
 {
 	return fetch(key,out,true);
 }
-	
+
 void base_cache::split_to_keys(string const &s,vector<string> &v)
 {
 	unsigned n=0;
@@ -162,7 +164,7 @@ void base_cache::split_to_keys(string const &s,vector<string> &v)
 	}
 	v.reserve(n);
 	size_t p=0,pn=0;
-	for(i=0;i<n;n++){
+	for(i=0;i<n;i++){
 		pn=s.find(',',p);
 		string tmp=s.substr(p,pn-p);
 		if(tmp!="")
@@ -191,4 +193,23 @@ string thread_cache::insert(string const &key,string const &sec, string const &i
 	return "";
 }
 
+#ifdef CACHE_DEBUG
+
+void thread_cache::print_all()
+{
+	primary_ptr p;
+	for(p=primary.begin();p!=primary.end();p++) {
+		cout<<"Key:"<<p->first<<":"<<p->second.original<<endl;
+	}
+	container::lru_ptr pl;
+	for(pl=lru.begin();pl!=lru.end();pl++) {
+		cout<<"Lru:"<<(*pl)->first<<endl;
+	}
+	container::timeout_ptr pt;
+	for(pt=timeout.begin();pt!=timeout.end();pt++) {
+		cout<<"time:"<<pt->second->first<<":"<<(pt->first-time(NULL))<<endl;
+	}
+}
+
+#endif
 }
