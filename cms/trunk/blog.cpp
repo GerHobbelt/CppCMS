@@ -29,7 +29,7 @@ struct In_Comment {
 
 bool In_Comment::load(const vector<FormEntry> &form)
 {
-	int i;
+	unsigned i;
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="username") {
@@ -350,7 +350,8 @@ int Blog::check_login( string username,string password)
 
 bool Blog::auth()
 {
-	int id,i;
+	int id;
+	unsigned i;
 	string tmp_username;
 	string tmp_password;
 
@@ -397,7 +398,7 @@ void Blog::set_login_cookies(string u,string p,int d)
 
 void Blog::login()
 {
-	int i;
+	unsigned i;
 	string tmp_username,tmp_password;
 	const vector<FormEntry> &form=cgi->getElements();
 
@@ -457,13 +458,14 @@ void Blog::get_post(string sid)
 {
 	auth_or_throw();
 
-	int i;
+	unsigned i;
 	int id=sid=="new" ? -1 : atoi(sid.c_str());
 	const vector<FormEntry> &form=cgi->getElements();
 
 	string title,abstract,content;
 
 	enum { SAVE, PUBLISH, PREVIEW } type;
+	type = SAVE;
 
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
@@ -511,7 +513,6 @@ void Blog::save_post(int &id,string &title,
 	int is_open = pub ? 1: 0;
 
 	if(id==-1) {
-		int i;
 		sql<<	"INSERT INTO posts (author_id,title,abstract,content,is_open,publish) "
 			"VALUES(?,?,?,?,?,?)",
 			userid,title,abstract,
