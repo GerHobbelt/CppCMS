@@ -8,6 +8,16 @@ AM_INIT_AUTOMAKE([1.9 foreign])
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+
+AC_ARG_ENABLE([pch],
+    AC_HELP_STRING([--enable-pch=@<:@yes|no@:>@],
+        [Use Precompiled Headers]
+    ),
+    [pch=yes],
+    [pch=no]
+)
+AM_CONDITIONAL([USE_PCH], [test x$pch = xyes])
+
 AC_SUBST(LIBTOOL_DEPS)
 
 AC_LANG_CPLUSPLUS

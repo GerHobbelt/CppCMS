@@ -1,15 +1,6 @@
+#include "pch.h"
 #include "blog.h"
-#include <time.h>
-#include <cppcms/text_tool.h>
-#include <boost/format.hpp>
-#include <cgicc/HTTPRedirectHeader.h>
-#include <errno.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include "error.h"
-#include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
 

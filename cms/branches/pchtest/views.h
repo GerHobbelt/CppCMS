@@ -12,12 +12,8 @@
 #ifndef VIEWS_H
 #define VIEWS_H
 
-#include <cppcms/templates.h>
-#include <boost/shared_ptr.hpp>
+#include "all.h"
 #include "data.h"
-#include <list>
-#include <vector>
-#include <tmpl/content.h>
 
 using boost::shared_ptr;
 using namespace tmpl;

@@ -9,8 +9,9 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include "pch.h"
+
 #include "views.h"
-#include <boost/format.hpp>
 #include "blog.h"
 #include "error.h"
 #include "cxxmarkdown/markdowncxx.h"

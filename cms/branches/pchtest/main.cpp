@@ -1,11 +1,5 @@
-#include <iostream>
-#include <memory>
+#include "pch.h"
 #include "blog.h"
-#include <cppcms/thread_pool.h>
-#include <cppcms/global_config.h>
-#include <cppcms/url.h>
-#include <dbi/dbixx.h>
-#include <cppcms/templates.h>
 
 using namespace std;
 

@@ -9,7 +9,7 @@ mysql.database="cppcms"
 
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/cppblog.socket"
+server.socket = "127.0.0.1:8000"
 
 
 # Blog configuration
@@ -47,20 +47,14 @@ markdown.engine="discount"
 # Engine #
 ##########
 
-# soci.engine="mysql"
-# soci.connect="dbname=blog user=root password=root"
-
-# soci.engine="mysql"
-# soci.connect="dbname=cppcms user=root password=root"
-
 # soci.engine="postgresql"
 # soci.connect="dbname=cppcms"
 
-#soci.engine="sqlite3"
-#soci.connect="db/cppcms.db"
+# soci.engine="sqlite3"
+# soci.connect="db/cppcms.db"
 
-dbi.engine="mysql"
-# dbi.engine="sqlite3"
+# dbi.engine="mysql"
+ dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
@@ -72,5 +66,5 @@ sqlite3.dir="./db/"
 
 
 pgsql.db="cppcms"
-pgsql.user="artik"
+pgsql.user="a.tonkikh"
 
