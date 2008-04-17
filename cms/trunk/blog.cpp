@@ -76,9 +76,7 @@ static void create_gif(string const &tex,string const &fname)
 	}
 	else {
 		int stat;
-		cerr<<"A\n";
 		waitpid(pid,&stat,0);
-		cerr<<"B\n";
 	}
 }
 
