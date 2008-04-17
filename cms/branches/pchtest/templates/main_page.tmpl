@@ -1,0 +1,24 @@
+<% template main_page() %>
+<% foreach post in posts %>
+	<% item %>
+		<h1><a href="<% post.permlink | raw %>"><% post.title %></a></h1>
+		<div class="published">
+			Publushed at <% post.date %>, by <% post.author %>
+			<% if def post.edit_url %>
+				| <a href="<% post.edit_url | raw %>">edit</a>
+			<%end%>
+		</div>
+		<% post.abstract | ext latex | ext markdown2html %>
+                <% if post.has_content %>
+                        <a href="<% post.permlink | raw %>#more">more...</a>
+                <% end %>
+	<% end %>
+	<% if def next_page_link %>
+                <div class="published">
+                        <a href="<% next_page_link | raw %>">next page</a>
+                </div>
+        <% end %>
+<% empty %>
+	<h1>There are no posts in the blog</h1>
+<%end%>
+<% end %>

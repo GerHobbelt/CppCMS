@@ -1,0 +1,42 @@
+<% template admin_main() %>
+<div id="menu">
+        <h2>Tasks</h2>
+        <ul>
+                <li><a href="<% base_url | raw %>">To The Blog</a></li>
+                <li><a href="<% new_post_url | raw  %>">New Post</a></li>
+<!--                <li><a href="#">Edit Posts</a></li>
+                <li><a href="#">Edit Comments</a></li>
+                <li><a href="#">Moderate New Comments</a></li>
+                <li><a href="#">Edit Options</a></li>  -->
+        </ul>
+        <h2>Unpublished Posts</h2>
+        <% foreach post in posts %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% post.edit_url | raw %>"><% post.title %></a></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p>No unpublished posts</p>
+	<% end%>
+</div>
+<div id="news">
+<h2>Latest Comments</h2>
+        <% foreach comment in comments %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% comment.post_permlink | raw %>"><% comment.username %></a></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p>No comments</p>
+	<% end%>
+<h2>Wait For Moderation</h2>
+<p>TODO</p>
+<!--        <ul>
+                <li><a href="#">Artyom</a> on <a href="#">Cool Article</a></li>
+                <li><a href="#">Maxim</a> on <a href="#">Best Article</a></li>
+                <li><a href="#">Eidth</a> on <a href="#">Best Article</a></li>
+        </ul> -->
+</div>
+<% end %>
