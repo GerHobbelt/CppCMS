@@ -30,6 +30,7 @@ void View_Comment::init(comment_t &com)
 	c["date"]=com.publish_time;
 	if(blog->userid!=-1){
 		c["delete_url"]=str(format(blog->fmt.del_comment) % com.id);
+		c["edit_url"]=str(format(blog->fmt.edit_comment) % com.id);
 	}
 }
 
@@ -269,6 +270,28 @@ void View_Admin::ini_login()
 	c["login_url"]=blog->fmt.login;
 }
 
+void View_Admin::ini_cedit(int id)
+{
+	ini_share();
+
+	c["master_content"]=string("admin_editcomment");
+	c["edit_comment_url"]=str(format(blog->fmt.update_comment) % id);
+	string author,url,content,email;
+	blog->sql<<
+		"SELECT author,url,email,content "
+		"FROM	comments "
+		"WHERE	id=?",id;
+	row r;
+	if(!blog->sql.single(r)) {
+		throw Error(Error::E404);
+	}
+	r>>author>>url>>email>>content;
+	c["author"]=author;
+	c["url"]=url;
+	c["content"]=content;
+	c["email"]=email;
+}
+
 void View_Admin::ini_edit(int id)
 {
 	ini_share();
@@ -308,7 +331,7 @@ void View_Admin_Main::ini()
 		unpublished_posts[i]["title"]=intitle;
 	}
 	blog->sql<<
-		"SELECT post_id,author "
+		"SELECT id,post_id,author "
 		"FROM comments "
 		"ORDER BY id DESC "
 		"LIMIT 10",rs;
@@ -316,12 +339,13 @@ void View_Admin_Main::ini()
 	content::vector_t &latest_comments=c.vector("comments",rs.rows());
 
 	for(i=0;rs.next(r);i++) {
-		int id;
+		int id,c_id;
 		string author;
-		r>>id>>author;
+		r>>c_id>>id>>author;
 		
 		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
 		latest_comments[i]["username"]=author;
+		latest_comments[i]["edit_url"]=str(format(blog->fmt.edit_comment) % c_id );
 	}
 }
 
