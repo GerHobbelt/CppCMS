@@ -23,8 +23,8 @@ bdb.path="./db/"
 
 # Templates
 templates.file = "./templates/look.opcode"
-latex.script =  "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/latex.sh"
-latex.cache_path = "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/"
+latex.script =  "/home/artyom/Projects/cppcms/cms/templates/latex/latex.sh"
+latex.cache_path = "/home/artyom/Projects/cppcms/cms/templates/latex/"
 # Markdown engine "old" or "discount"
 #
 markdown.engine="discount"
@@ -59,8 +59,8 @@ markdown.engine="discount"
 #soci.engine="sqlite3"
 #soci.connect="db/cppcms.db"
 
-dbi.engine="mysql"
-# dbi.engine="sqlite3"
+# dbi.engine="mysql"
+dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"

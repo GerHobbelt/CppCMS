@@ -21,6 +21,7 @@
  			at <% comment.date %>
 			<% if def comment.delete_url %>
 				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('Are you shure?'); " >delete</a>
+				| <a href="<% comment.edit_url | raw %>">edit</a>
 			<% end %>
 		</dt>
 		<dd>

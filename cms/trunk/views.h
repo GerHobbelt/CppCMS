@@ -88,6 +88,7 @@ public:
 	View_Admin(Blog *b,content &con) : blog(b),c(con) {};
 	void ini_main();
 	void ini_edit(int id=-1);
+	void ini_cedit(int id);
 	void ini_login();
 };
 

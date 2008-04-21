@@ -40,6 +40,7 @@ struct links_t {
 	string preview;
 	string del_comment;
 	string feed;
+	string update_comment;
 };
 
 struct post_content_t {
@@ -71,6 +72,8 @@ private:
 
 	void admin();
 	void edit_post(string id);
+	void edit_comment(string id);
+	void update_comment(string id);
 	void get_post(string id);
 	void login();
 	void logout();

@@ -136,9 +136,10 @@ void Blog::init()
 		boost::bind(&Blog::edit_post,this,$1));
 	fmt.edit_post=root+"/admin/edit_post/%1%";
 
-	//url.add("^/admin/edit_comment/(\\d+)$",
-	//	boost::bind(&Blog::edit_comment,this,$1));
-	//fmt.edit_comment=root+"/adin/edit_comment/%1%";
+	url.add("^/admin/edit_comment/(\\d+)$",
+		boost::bind(&Blog::edit_comment,this,$1));
+	fmt.edit_comment=root+"/admin/edit_comment/%1%";
+
 	// All incoming information
 
 	url.add("^/postback/comment/(\\d+)$",
@@ -152,6 +153,10 @@ void Blog::init()
 	url.add("^/postback/post/(\\d+)$",
 		boost::bind(&Blog::get_post,this,$1));
 	fmt.update_post=root+"/postback/post/%1%";
+
+	url.add("^/postback/update_comment/(\\d+)$",
+		boost::bind(&Blog::update_comment,this,$1));
+	fmt.update_comment=root+"/postback/update_comment/%1%";
 
 	//url.add("^/postback/approve$",
 	//	boost::bind(&Blog::approve,this));
@@ -438,6 +443,60 @@ void Blog::admin()
 
 }
 
+void Blog::update_comment(string sid)
+{
+	auth_or_throw();
+
+	int id=atoi(sid.c_str());
+
+	const vector<FormEntry> &form=cgi->getElements();
+	bool del=false;
+
+	string author,url,email,content;
+
+	int i;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="url") {
+			url=form[i].getValue();
+		}
+		else if(field=="author") {
+			author=form[i].getValue();
+		}
+		else if(field=="content") {
+			content=form[i].getValue();
+		}
+		else if(field=="email") {
+			email=form[i].getValue();
+		}
+		else if(field=="delete") {
+			del=true;
+		}
+	}
+	if(del) {
+		sql<<	"DELETE FROM comments "
+			"WHERE id=?",id,exec();
+	}
+	else {
+		sql<<	"UPDATE comments "
+			"SET	url=?,author=?,content=?,email=? "
+			"WHERE	id=?",
+				url,author,content,email,id,exec();
+	}
+	set_header(new HTTPRedirectHeader(fmt.admin));
+}
+
+void Blog::edit_comment(string sid)
+{
+	auth_or_throw();
+	int id=atoi(sid.c_str());
+	content c;
+
+	View_Admin view(this,c);
+	view.ini_cedit(id);
+	render.render(c,"admin",out.getstring());
+
+}
 void Blog::edit_post(string sid)
 {
 	auth_or_throw();

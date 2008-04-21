@@ -25,7 +25,8 @@
         <% foreach comment in comments %>
 	        <ul>
         	<% item %>
-			<li><a href="<% comment.post_permlink | raw %>"><% comment.username %></a></li>
+			<li><a href="<% comment.post_permlink | raw %>"><% comment.username %></a>, 
+			    <a href="<% comment.edit_url | raw %>">edit</a></li>
 		<% end %>
 		</ul>
 	<% empty %>
