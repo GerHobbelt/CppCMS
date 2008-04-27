@@ -6,7 +6,7 @@
 #ifdef DEBUG
 #include <iostream>
 static char const *names[] = { "inline", "display", "seq_start", "sto", "next" , "ch_def", "ch_true" ,
-	"jmp", "call", "call_ref", "ret" };
+	"jmp", "call", "call_ref", "ret","showf","gettext","ngettext" };
 #endif
 
 using namespace std;
@@ -143,7 +143,41 @@ void renderer::setup()
 	chain.reserve(10);
 }
 
-void renderer::render(content const &c,std::string const &func,string &out)
+void renderer::create_formated_string(string const &str,string &out,int const &n)
+{
+	unsigned i;
+	for(i=0;i<str.size();i++) {
+		if(str[i]=='%' && str[i+1]=='%') {
+			out+='%';
+			i++;
+		}
+		else if(str[i]=='%' && (str[i+1]=='d' || str[i+1]=='i')) {
+			char buf[16];
+			snprintf(buf,sizeof(buf),"%d",n);
+			out.append(buf);
+			i++;
+		}
+		else if(str[i]=='%' && isdigit(str[i+1])) {
+			char const *ptr=str.c_str()+i+1;
+			char *ptr2;
+			int pos=strtol(ptr,&ptr2,10);
+			if(*ptr2!='%') continue;
+			i+=ptr2-ptr;
+			if(pos>=0 && pos<=format_strings.size()) {
+				out.append(format_strings[pos]);
+			}
+		}
+		else {
+			out+=str[i];
+		}
+	}
+	format_strings.clear();
+	format_strings.reserve(10);
+}
+
+
+
+void renderer::render(content const &c,std::string const &func,string &out,transtext::trans const &tr)
 {
 	/* Reset state machine*/
 	flag=false;
@@ -239,6 +273,26 @@ void renderer::render(content const &c,std::string const &func,string &out)
 			break;
 		case 	OP_PUSH_CHAIN:
 			chain.push_back(filter_data(op.r0,op.jump));
+			break;
+		case	OP_DISPLAYF:
+			{
+				string tmp;
+				display(any_value(op,c),tmp,op.r2,op.jump);
+				format_strings.push_back(tmp);
+			}
+			break;
+		case	OP_GETTEXT:
+			{
+				create_formated_string(tr.gettext(texts[op.r0]),out);
+			};
+			break;
+		case	OP_NGETTEXT:
+			{
+				if(any_value(op,c).type()!=typeid(int))
+					break;
+				int n=boost::any_cast<int>(any_value(op,c));
+				create_formated_string(tr.ngettext(texts[op.r2],texts[op.jump],n),out,n);
+			};
 			break;
 		default:
 			throw tmpl_error((boost::format("Incorrect opcode %d at PC=%d")%op.opcode%pc).str());

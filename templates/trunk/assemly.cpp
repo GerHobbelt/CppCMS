@@ -28,6 +28,7 @@ map<uint32_t,string> references;
 	static boost::regex r_label("^\\s*(\\w+)\\s*:\\s*$");
 	static boost::regex r_extern("^\\s*extern\\s+(\\w+)\\s*$");
 	static boost::regex r_show("^\\s*show\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))(,((ext\\s)?\\w+(,.*)?))?\\s*$");
+	static boost::regex r_showf("^\\s*showf\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))(,((ext\\s)?\\w+(,.*)?))?\\s*$");
 	static boost::regex r_start_seq("^\\s*seqf\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+),(\\w+)\\s*$");
 	static boost::regex r_store("^\\s*sto\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),(\\d+)\\s*$");
 	static boost::regex r_next_seq("^\\s*seqn\\s+(\\d+),(\\w+)\\s*$");
@@ -37,6 +38,8 @@ map<uint32_t,string> references;
 	static boost::regex r_call_ref("^\\s*callr\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\))\\s*$");
 	static boost::regex r_ret("^\\s*ret\\s*$");
 	static boost::regex r_inline("^\\s*inline\\s+'([^']*)'\\s*$");
+	static boost::regex r_gettext("^\\s*gt\\s+'([^']*)'\\s*$");
+	static boost::regex r_ngettext("^\\s*ngt\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),'([^']*)','([^']*)'\\s*$");
 
 	static boost::regex r_var_glob("^([a-zA-Z]\\w*)$");
 	static boost::regex r_var_ref("^([a-zA-Z]\\w*)\\((\\d+)\\)$");
@@ -244,6 +247,13 @@ void process_command(char const *line)
 			setup_filter(m[3],op.r2,op.jump);
 		}
 	}
+	else if(boost::regex_match(line,m,r_showf)) {
+		op.opcode=OP_DISPLAYF;
+		setup_var_op(op,m[1]);
+		if(m[2]!="") {
+			setup_filter(m[3],op.r2,op.jump);
+		}
+	}
 	else if(boost::regex_match(line,m,r_start_seq)) {
 		op.opcode=OP_START_SEQ;
 		setup_var_op(op,m[1]);
@@ -299,6 +309,25 @@ void process_command(char const *line)
 		string tmp=make_string(m[1]);
 		op.r0=texts.size();
 		op.r1=tmp.size();
+		texts.push_back(tmp);
+	}
+	else if(boost::regex_match(line,m,r_gettext)){
+		op.opcode=OP_GETTEXT;
+		string tmp=make_string(m[1]);
+		op.r0=texts.size();
+		texts.push_back(tmp);
+	}
+	else if(boost::regex_match(line,m,r_ngettext)){
+		op.opcode=OP_NGETTEXT;
+		
+		setup_var_op(op,m[1]);
+
+		string tmp=make_string(m[2]);
+		op.r2=texts.size();
+		texts.push_back(tmp);
+
+		tmp=make_string(m[3]);
+		op.jump=texts.size();
 		texts.push_back(tmp);
 	}
 	else if(boost::regex_match(line,m,r_comment)){

@@ -5,6 +5,7 @@
 #include <boost/shared_array.hpp>
 #include <vector>
 #include "content.h"
+#include "transtext/transtext.h"
 
 namespace tmpl {
 
@@ -74,6 +75,11 @@ typedef enum {
 	OP_PUSH_CHAIN,	// r0 - filter_id
 			// jmp	filter_param
 			//
+	OP_DISPLAYF,	// Everything as in show
+	OP_GETTEXT,	// r0 - textid	
+	OP_NGETTEXT,	// (flag/r0/r1) -- number
+			// r2 - textid singl
+			// jump - textid plural
 };
 
 struct instruction {
@@ -195,6 +201,7 @@ private:
 	typedef boost::shared_ptr<filter> filter_ptr;
 	std::map<std::string,filter_ptr> external_filters;
 	std::vector<filter_data> chain;
+	std::vector<std::string> format_strings;
 	
 	void external_str_filter(std::string const &s,std::string &out,uint16_t filter,uint16_t param);
 	void external_any_filter(boost::any const &a,std::string &out,uint16_t filter,uint16_t param);
@@ -208,10 +215,11 @@ private:
 	void default_filter(boost::any const &a,std::string &out);
 	void text2html(std::string const &str,std::string &content);
 	void usertype_to_string(boost::any const &a,std::string &out);
-
+	void create_formated_string(std::string const &str,std::string &out,int const &n=0);
 public:
 	renderer(template_data const &tmpl) : view(&tmpl) { setup(); };
-	void render(content const &c,std::string const &func,std::string &out);
+	void render(content const &c,std::string const &func,std::string &out,
+			transtext::trans const &tr=transtext::trans());
 	void add_converter(std::type_info const &type,converter_t::slot_type slot);
 	void add_string_filter(std::string const &name,str_filter_t::slot_type slot);
 	void add_any_filter(std::string const &name,any_filter_t::slot_type slot);
