@@ -44,13 +44,12 @@ int main()
 	try{
 		
 		content c;
-		template_data tmpl("t.tmpl");
+		template_data tmpl("test.look");
 
 		renderer r(tmpl);
 
 		string out;
 		
-
 		c["str"]=string("<test>");
 		std::tm t;
 		time_t t2;
@@ -59,14 +58,24 @@ int main()
 		c["d"]=t;
 		c["i"]=32767;
 		c["c"]=comp(1,0);
+		c["n1"]=1;
+		c["n2"]=2;
+		c["n3"]=3;
+		c["n11"]=11;
+		c["v1"]=string("var one");
+		c["v2"]=string("var two");
 		
 		r.add_converter( typeid(comp),boost::bind(&my_conv,_1,_2));
 		r.add_string_filter("toupper",boost::bind(ToUpper,_1,_2,_3));
 		r.add_any_filter("typename",boost::bind(TypeName,_1,_2,_3));
 		//c.signal("count",boost::bind(counter,_1,i));
 
+	//	transtext::trans_gnu tr;
+		transtext::trans_thread_safe tr;
 
-		r.render(c,"main",out);
+		tr.load("he","test","./transtext/locale");
+
+		r.render(c,"main",out,tr);
 		cout<<out<<endl;
 	}
 	catch(std::exception &e){

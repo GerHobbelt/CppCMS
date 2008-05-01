@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
+#include <set>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -55,6 +56,62 @@ map<uint32_t,string> references;
 int cur_line=0;
 int error=0;
 
+FILE *pot_file=NULL;
+set<string> xgotten_strings;
+
+string potstring(string in)
+{
+	unsigned i;
+	char buf[8];
+	string result;
+	for(i=0;i<in.size();i++) {
+		char c=in[i];
+		char const *tmp=NULL;
+		switch(c) {
+		case '\n': 
+			if(i==in.size()-1)
+				tmp="\\n";
+			else
+				tmp="\\n\"\n\""; 
+			break;
+		case '\t': tmp="\\t"; break;
+		case '\v': tmp="\\v"; break;
+		case '\b': tmp="\\b"; break;
+		case '\r': tmp="\\r"; break;
+		case '\f': tmp="\\f"; break;
+		case '\a': tmp="\\a"; break;
+		case '\\': tmp="\\\\"; break;
+		case '\"': tmp="\\\""; break;
+		default:
+			if(c>=0 && c<32) {
+				snprintf(buf,sizeof(buf),"\\x%02x",c);
+				tmp=buf;
+			}
+		}
+		if(tmp)
+			result+=tmp;
+		else
+			result+=c;
+	}
+	return result;
+}
+
+void xgettext(string s)
+{
+	if(!pot_file) return;
+	if(xgotten_strings.find(s)!=xgotten_strings.end()) return;
+	fprintf(pot_file,"msgid \"%s\"\nmsgstr \"\"\n\n",potstring(s).c_str());
+	xgotten_strings.insert(s);
+}
+
+void xngettext(string s,string p)
+{
+	if(!pot_file) return;
+	if(xgotten_strings.find(s)!=xgotten_strings.end()) return;
+	fprintf(pot_file,"msgid \"%s\"\nmsgid_plural \"%s\"\nmsgstr[0] \"\"\nmsgstr[1] \"\"\n\n",
+			potstring(s).c_str(),potstring(p).c_str());
+	xgotten_strings.insert(s);
+}
 
 string make_string(string inp)
 {
@@ -314,6 +371,7 @@ void process_command(char const *line)
 	else if(boost::regex_match(line,m,r_gettext)){
 		op.opcode=OP_GETTEXT;
 		string tmp=make_string(m[1]);
+		xgettext(tmp);
 		op.r0=texts.size();
 		texts.push_back(tmp);
 	}
@@ -322,13 +380,15 @@ void process_command(char const *line)
 		
 		setup_var_op(op,m[1]);
 
-		string tmp=make_string(m[2]);
+		string single=make_string(m[2]);
 		op.r2=texts.size();
-		texts.push_back(tmp);
+		texts.push_back(single);
 
-		tmp=make_string(m[3]);
+		string plural=make_string(m[3]);
 		op.jump=texts.size();
-		texts.push_back(tmp);
+		texts.push_back(plural);
+
+		xngettext(single,plural);
 	}
 	else if(boost::regex_match(line,m,r_comment)){
 		return;
@@ -425,8 +485,8 @@ void write_file(void)
 
 int main(int argc,char **argv)
 {
-	if(argc!=2) {
-		cerr<<"Usage: assembly file.template\n";
+	if(argc!=2 && argc!=3) {
+		cerr<<"Usage: assembly file.template [file.pot]\n";
 		return 1;
 	}
 
@@ -434,6 +494,15 @@ int main(int argc,char **argv)
 	if(!fout) {
 		cerr<<"Failed to open file"<<argv[1]<<endl;
 		return 1;
+	}
+
+	if(argc==3) {
+		pot_file=fopen(argv[2],"w");
+		if(!pot_file) {
+			cerr<<"Failed to open file"<<argv[2]<<endl;
+			return 1;
+		}
+		
 	}
 
 	string line;
@@ -454,5 +523,6 @@ int main(int argc,char **argv)
 	}
 #endif
 	fclose(fout);
+	if(pot_file) fclose(pot_file);
 	return error;
 }

@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include <boost/format.hpp>
+#include <iostream>
 
 //#define DEBUG
 
@@ -160,10 +161,10 @@ void renderer::create_formated_string(string const &str,string &out,int const &n
 		else if(str[i]=='%' && isdigit(str[i+1])) {
 			char const *ptr=str.c_str()+i+1;
 			char *ptr2;
-			int pos=strtol(ptr,&ptr2,10);
+			int pos=strtol(ptr,&ptr2,10)-1; // Index starts from 1
 			if(*ptr2!='%') continue;
-			i+=ptr2-ptr;
-			if(pos>=0 && pos<=format_strings.size()) {
+			i+=ptr2-ptr+1;
+			if(pos>=0 && pos<format_strings.size()) {
 				out.append(format_strings[pos]);
 			}
 		}

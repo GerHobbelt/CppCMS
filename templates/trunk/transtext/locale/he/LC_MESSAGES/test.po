@@ -17,16 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural= n!=1 ? n>10 ? 3 : n==2 ? 2 : 1 : 0 ;\n"
 
-#: test.cpp:16
-#, c-format
 msgid "hello\n"
-msgstr "שלום\n"
+msgstr "shalom\n"
 
-#: test.cpp:20
-#, c-format
+msgid "Hello [%2%] [%1%] [%3%]\n"
+msgstr "Shalom [%2%] [%1%] [%3%]\n"
+
 msgid "passed one day\n"
 msgid_plural "passed %d days\n"
-msgstr[0] "עבר יום אחד\n"
-msgstr[1] "עברו %d ימים\n"
-msgstr[2] "עברו יומיים\n"
-msgstr[3] "עברו %d יום\n"
+msgstr[0] "avar yom ehad\n"
+msgstr[1] "avru %d yamim\n"
+msgstr[2] "avru yomaim\n"
+msgstr[3] "avru %d yom\n"
