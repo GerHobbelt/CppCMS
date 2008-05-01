@@ -80,6 +80,7 @@ typedef enum {
 	OP_NGETTEXT,	// (flag/r0/r1) -- number
 			// r2 - textid singl
 			// jump - textid plural
+	OP_CHECK_RTL,	// sets FLAG to true if text is RTL
 };
 
 struct instruction {

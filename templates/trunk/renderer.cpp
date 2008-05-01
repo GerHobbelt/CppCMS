@@ -7,7 +7,7 @@
 #ifdef DEBUG
 #include <iostream>
 static char const *names[] = { "inline", "display", "seq_start", "sto", "next" , "ch_def", "ch_true" ,
-	"jmp", "call", "call_ref", "ret","showf","gettext","ngettext" };
+	"jmp", "call", "call_ref", "ret","showf","gettext","ngettext","ch_rtl" };
 #endif
 
 using namespace std;
@@ -237,6 +237,9 @@ void renderer::render(content const &c,std::string const &func,string &out,trans
 			break;
 		case	OP_CHECK_TRUE:
 			flag=bool_value(op,c);
+			break;
+		case	OP_CHECK_RTL:
+			flag=(strcmp(tr("LTR"),"RTL") == 0);
 			break;
 		case	OP_STORE:
 			if(op.r2<=local_variables)

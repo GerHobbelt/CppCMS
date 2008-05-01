@@ -41,6 +41,8 @@ map<uint32_t,string> references;
 	static boost::regex r_inline("^\\s*inline\\s+'([^']*)'\\s*$");
 	static boost::regex r_gettext("^\\s*gt\\s+'([^']*)'\\s*$");
 	static boost::regex r_ngettext("^\\s*ngt\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),'([^']*)','([^']*)'\\s*$");
+	static boost::regex r_rtl("^\\s*rtl\\s*$");
+
 
 	static boost::regex r_var_glob("^([a-zA-Z]\\w*)$");
 	static boost::regex r_var_ref("^([a-zA-Z]\\w*)\\((\\d+)\\)$");
@@ -336,6 +338,9 @@ void process_command(char const *line)
 		else
 			op.opcode=OP_CHECK_TRUE;
 		setup_var_op(op,m[2]);
+	}
+	else if(boost::regex_match(line,m,r_rtl)) {
+		op.opcode=OP_CHECK_RTL;
 	}
 	else if(boost::regex_match(line,m,r_jmp)) {
 		op.opcode=OP_JMP;

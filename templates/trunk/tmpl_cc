@@ -216,7 +216,10 @@ class if_block:
 		if self.has_def:
 			print "\tdef\t%s" % ident_str
 		else:
-			print "\ttrue\t%s" % ident_str
+			if ident_str=='rtl':
+				print "\trtl"
+			else:
+				print "\ttrue\t%s" % ident_str
 		if self.has_not:
 			print "\tjmp\tt,%s" % self.label
 		else:
@@ -266,30 +269,35 @@ class error_com:
 	def use(self,m):
 		error_exit("unknown command %s" % m.group(1))
 
-class show_block:
-	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*%>$'
+
+def make_filter_param(param):
+	res=''
+	for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
+		s=m.group(1)
+		if s==r"\'":
+			res+="'"
+		elif s==r"\l":
+			res+="<"
+		elif s==r"\r":
+			res+=">"
+		elif s=='<' or s=='>':
+			error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
+		else:
+			res+=s
+	res="'"+to_string(res)+"'"
+	return res
+
+
+	
+
+class base_show:
+	mark=r'\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*'
 	def make_filter_id(self,str):
 		if str in [ 'raw' ,'escape', 'raw','date','time','timesec','strftime','intf' ]:
 			return str;
 		else:
 			error_exit("Unkown internal filter %s" % str);
 			return 'raw';
-	def make_filter_param(self,param):
-		res=''
-		for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
-			s=m.group(1)
-			if s==r"\'":
-				res+="'"
-			elif s==r"\l":
-				res+="<"
-			elif s==r"\r":
-				res+=">"
-			elif s=='<' or s=='>':
-				error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
-			else:
-				res+=s
-		res="'"+to_string(res)+"'"
-		return res
 
 	def make_filters_list(self,filter_def):
 		lst=[];
@@ -303,22 +311,62 @@ class show_block:
 			else:
 				res+=self.make_filter_id(m.group(2))
 			if m.group(4):
-				res+=','+self.make_filter_param(m.group(4))
+				res+=','+make_filter_param(m.group(4))
 			lst.append(res);
 		return lst
 
-	def use(self,m):
+	def prepare(self,m,name):
 		idnt=make_ident(m.group(1))
 		if not m.group(4) or len(m.group(4))==0:
-			print "\tshow\t%s" % idnt
+			print "\t%s\t%s" % (name,idnt)
 			return
 		filters=self.make_filters_list(m.group(4))
 		if len(filters)==1:
-			print "\tshow\t%s,%s" % (idnt , filters[0])
+			print "\t%s\t%s,%s" % (name,idnt , filters[0])
 		else:
 			for filter in filters:
 				print "\tfilter\t%s" % filter
-			print "\tshow\t%s,chain" % idnt
+			print "\t%s\t%s,chain" % (name,idnt)
+
+def split_gt_params(s):
+	m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	while m.group(1):
+		bs=base_show()
+		mtmp=re.match(bs.mark,m.group(1));
+		if not mtmp:
+			error_exit("Expected variable/filter");
+			return;
+		bs.prepare(mtmp,'showf');
+		if not m.group(5):
+			return
+		s=m.group(5)
+		m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	error_exit("Sytax error");
+
+class ngettext_block:
+	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(.*[^\s].*)?\s*%>$"
+	def use(self,m):
+		s1=make_filter_param(m.group(1))
+		s2=make_filter_param(m.group(3))
+		idt=make_ident(m.group(5))
+		if m.group(6):
+			split_gt_params(m.group(6))
+		print "\tngt\t%s,%s,%s" % (idt,s1,s2)
+
+
+class gettext_block:
+	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(.*[^\s].*)?\s*%>$"
+	def use(self,m):
+		s=m.group(1)
+		if m.group(3):
+			split_gt_params(m.group(3))
+		print "\tgt\t%s" % make_filter_param(s)
+
+class show_block(base_show):
+	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*%>$'
+	def use(self,m):
+		self.prepare(m,'show');
+
 
 class include_block:
 	pattern=r'^<%\s*include\s+(([a-zA_Z]\w*)(\s+using(.*))?|ref\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$';
@@ -389,6 +437,7 @@ def main():
 					continue
 			matched=0
 			for c in [  if_block(), template_block(), end_block(), else_block(), \
+					gettext_block(),ngettext_block(),\
 					foreach_block(), item_block(), empty_block(),separator_block(),\
 					include_block(),\
 					show_block(), error_com()]:
