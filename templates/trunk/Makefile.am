@@ -1,4 +1,4 @@
-SUBDIRS = transtext
+SUBDIRS = ./transtext
 
 noinst_PROGRAMS = test test_f
 test_SOURCES = test.cpp 

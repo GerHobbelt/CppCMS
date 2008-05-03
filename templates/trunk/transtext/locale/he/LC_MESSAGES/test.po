@@ -20,6 +20,9 @@ msgstr ""
 msgid "hello\n"
 msgstr "shalom\n"
 
+msgid "LTR"
+msgstr "RTL"
+
 msgid "Hello %1%, %2%"
 msgstr "Shalom %1%, %2%"
 

@@ -11,7 +11,8 @@ AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
 AC_LANG_CPLUSPLUS
-AC_CONFIG_FILES([Makefile transtext/Makefile])
+AC_CONFIG_FILES([Makefile 
+		transtext/Makefile])
 AC_CHECK_LIB(intl,main,[],[])
 AC_CHECK_LIB(boost_regex,main,[],[AC_CHECK_LIB(boost_regex-gcc-mt,main,[],[ echo "boost::regex not found" ; exit -1])])
 AC_CHECK_LIB(boost_signals,main,[],[AC_CHECK_LIB(boost_signals-gcc-mt,main,[],[ echo "boost::signals not found" ; exit -1])])
