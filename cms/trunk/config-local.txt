@@ -74,3 +74,5 @@ sqlite3.dir="./db/"
 pgsql.db="cppcms"
 pgsql.user="artik"
 
+locale.dir = "./locale"
+locale.lang = "he"

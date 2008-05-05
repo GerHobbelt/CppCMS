@@ -3,22 +3,22 @@
 	<% item %>
 		<h1><a href="<% post.permlink | raw %>"><% post.title %></a></h1>
 		<div class="published">
-			Publushed at <% post.date %>, by <% post.author %>
+			<% gt 'Publushed at %1%, by %2%' using post.date, post.author %>
 			<% if def post.edit_url %>
-				| <a href="<% post.edit_url | raw %>">edit</a>
+				| <a href="<% post.edit_url | raw %>"><% gt 'edit' %></a>
 			<%end%>
 		</div>
 		<% post.abstract | ext latex | ext markdown2html %>
                 <% if post.has_content %>
-                        <a href="<% post.permlink | raw %>#more">more...</a>
+                        <a href="<% post.permlink | raw %>#more"><% gt 'more...' %></a>
                 <% end %>
 	<% end %>
 	<% if def next_page_link %>
                 <div class="published">
-                        <a href="<% next_page_link | raw %>">next page</a>
+                        <a href="<% next_page_link | raw %>"><% gt 'next page' %></a>
                 </div>
         <% end %>
 <% empty %>
-	<h1>There are no posts in the blog</h1>
+	<h1><% gt 'There are no posts in the blog' %></h1>
 <%end%>
 <% end %>

@@ -6,16 +6,22 @@
 #include <cppcms/url.h>
 #include <dbi/dbixx.h>
 #include <cppcms/templates.h>
+#include <tmpl/transtext.h>
 
 using namespace std;
 
 tmpl::template_data global_template;
+transtext::trans_thread_safe tr;
 
 int main(int argc,char **argv)
 {
 	try{
 		global_config.load(argc,argv);
 		global_template.load(global_config.sval("templates.file"));
+
+		tr.load(global_config.sval("locale.lang","none").c_str(),
+			"cppblog",
+			global_config.sval("locale.dir","./locale").c_str());
 
 		Run_Application<Blog>(argc,argv);
 

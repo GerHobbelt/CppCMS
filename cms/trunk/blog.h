@@ -16,11 +16,13 @@
 #include <dbi/dbixx.h>
 #include <tmpl/renderer.h>
 #include <tmpl/content.h>
+#include <tmpl/transtext.h>
 #include "views.h"
 #include "data.h"
 
 
 extern tmpl::template_data global_template;
+extern transtext::trans_thread_safe tr;
 
 struct links_t {
 	string media;

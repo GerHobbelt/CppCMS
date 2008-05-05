@@ -11,11 +11,6 @@
 * Version: 1.01 (May 17, 2006)                                             *
 ***************************************************************************/
 
-*{
-	padding:0;
-	margin:0;
-}
-
 #page {
 	color: #222222;
 	background-color:#FFFFFF;
@@ -27,8 +22,6 @@
 	padding-right:10px;
 }
 
-h1, h2, h3, h4, h5, h6, p, pre, blockquote, label, ul, ol, dl, 
-fieldset, address, pre { margin:0.75em 0;}
 
 h1 {font-size:167%; border-bottom: #999999 solid thin;}
 
@@ -38,9 +31,7 @@ h3 {font-size:120%;}
 
 h4 {font-size:100%;}
 
-li, dd { 
-	margin-left:2em;
-}
+
 
 a {
 	color: #CC0000;
@@ -222,12 +213,6 @@ ul#nav a.selected {
 	float:right;
 }
 
-blockquote, pre {
-        margin-left:20px;
-        margin-right:20px;
-        padding-left:5px;
-        border-left: #999999 solid thin;
-}
 
 .published {
         font-size:80%;

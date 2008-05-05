@@ -6,6 +6,11 @@
 <title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" />
+<% if rtl %>
+	<link href="<% media | raw %>/style-rtl.css" rel="stylesheet" type="text/css" />
+<% else %>
+	<link href="<% media | raw %>/style-ltr.css" rel="stylesheet" type="text/css" />
+<% end %>
 <link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_posts |raw%>" />
 
 </head>
@@ -27,13 +32,13 @@
 
 <div id="path">
 
-<a href="<% base_url | raw %>">Home</a>
+<a href="<% base_url | raw %>"><% gt 'Home' %></a>
 &nbsp;/&nbsp;
-<a href="<% rss_posts | raw %>">RSS</a>
+<a href="<% rss_posts | raw %>"><% gt 'RSS' %></a>
 &nbsp;/&nbsp;
-<a href="http://cppcms.sourceforge.net/">Project Site</a>
+<a href="http://cppcms.sourceforge.net/"><% gt 'Project Site' %></a>
 &nbsp;/&nbsp;
-<a href="<% admin_url %>">Enter</a>
+<a href="<% admin_url %>"><% gt 'Enter' %></a>
 </div>
 
 <div id="maincontent">
@@ -46,11 +51,11 @@
 
 <div id="footer">
 	<div id="copyrightdesign">
-		Copyright &copy; 2007 Artyom Tonkikh
-		| Based on Design by <a href="http://ContentedDesigns.com">Contented Designs</a>
+		<% gt 'Copyright &copy; 2007 Artyom Tonkikh' %>
+		| <% gt 'Based on Design by \la href="http://ContentedDesigns.com"\rContented Designs\l/a\r' %>
 	</div>
 	<div id="footercontact">
-		<a href="#">Contact</a>
+		<a href="#"><% gt 'Contact' %></a>
 	</div>
 </div>
 </div>

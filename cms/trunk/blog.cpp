@@ -13,7 +13,10 @@
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
 
-using namespace cgicc;
+using cgicc::FormEntry;
+using cgicc::HTTPContentHeader;
+using cgicc::HTTPRedirectHeader;
+using cgicc::HTTPCookie;
 using namespace dbixx;
 using boost::format;
 using boost::str;
@@ -226,7 +229,7 @@ void Blog::post(string s_id,bool preview)
 	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
 
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out.getstring(),tr);
 }
 
 void Blog::main_page(string from)
@@ -241,7 +244,7 @@ void Blog::main_page(string from)
 	else {
 		view.ini_main(atoi(from.c_str()));
 	}
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out.getstring(),tr);
 }
 
 void Blog::date(tm t,string &d)
@@ -321,12 +324,12 @@ void Blog::error_page(int what)
 	if(what==Error::AUTH) {
 		View_Admin view(this,c);
  		view.ini_login();
-		render.render(c,"admin",out.getstring());
+		render.render(c,"admin",out.getstring(),tr);
 	}
 	else {
 		View_Main_Page view(this,c);
 		view.ini_error(what);
-		render.render(c,"master",out.getstring());
+		render.render(c,"master",out.getstring(),tr);
 	}
 }
 
@@ -439,7 +442,7 @@ void Blog::admin()
 
 	View_Admin view(this,c);
 	view.ini_main();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out.getstring(),tr);
 
 }
 
@@ -494,7 +497,7 @@ void Blog::edit_comment(string sid)
 
 	View_Admin view(this,c);
 	view.ini_cedit(id);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out.getstring(),tr);
 
 }
 void Blog::edit_post(string sid)
@@ -507,7 +510,7 @@ void Blog::edit_post(string sid)
 
 	View_Admin view(this,c);
 	view.ini_edit(id);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out.getstring(),tr);
 
 }
 
@@ -623,7 +626,7 @@ void Blog::feed()
 
 	View_Main_Page view(this,c);
 	view.ini_main(-1,true);
-	render.render(c,"feed_posts",out.getstring());
+	render.render(c,"feed_posts",out.getstring(),tr);
 }
 
 

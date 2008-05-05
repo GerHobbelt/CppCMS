@@ -1,4 +1,4 @@
-SUBDIRS = cxxmarkdown templates
+SUBDIRS = ./cxxmarkdown templates
 
 sbin_PROGRAMS = cppblog
 cppblog_SOURCES = main.cpp blog.cpp views.cpp md5.c

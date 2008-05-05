@@ -16,7 +16,7 @@
 			<description>
 			<% post.abstract | ext latex | ext markdown2html | escape %>
 			&lt;p&gt;
-			&lt;a href="<% post.permlink | raw %>"&gt;more...&lt;/a&gt;
+			&lt;a href="<% post.permlink | raw %>"&gt;<% gt 'more...' %>&lt;/a&gt;
 			&lt;/p&gt;
 			</description>
 		</item>

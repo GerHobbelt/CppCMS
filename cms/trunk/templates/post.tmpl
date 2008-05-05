@@ -1,9 +1,9 @@
 <% template post() %>
 <h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
-	Publushed at <% date %>, by <% author %>
+	<% gt 'Publushed at %1%, by %2%' using date, author %>
 	<% if def edit_url %>
-		| <a href="<% edit_url | raw %>">edit</a>
+		| <a href="<% edit_url | raw %>"><% gt 'edit' %></a>
 	<%end%>
 </div>
 <% abstract | ext latex | ext markdown2html %>
@@ -13,15 +13,15 @@
 <% end %>
 <div id="comments">
 <% foreach comment in comments %>
-	<h2>Comments</h2>
+	<h2><% gt 'Comments' %></h2>
 	<dl>
 	<% item %>
 		<dt>
 			<%if def comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
  			at <% comment.date %>
 			<% if def comment.delete_url %>
-				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('Are you shure?'); " >delete</a>
-				| <a href="<% comment.edit_url | raw %>">edit</a>
+				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('<% gt 'Are you shure?' %>'); " ><% gt 'delete' %></a>
+				| <a href="<% comment.edit_url | raw %>"><% gt 'edit' %></a>
 			<% end %>
 		</dt>
 		<dd>
@@ -30,7 +30,7 @@
 	<% end %>
 	</dl>
 <% end %>
-	<h2>Add Comment:</h2>
+	<h2><% gt 'Add Comment:' %></h2>
 	<script type="text/javascript">
 	<!--
                 /*  Form validation and simple-antispam */
@@ -61,7 +61,7 @@
                            || form.email.value.length == 0
                            || form.message.value.length  == 0)
                         {
-                                alert('Name, E-Mail, Message content are mandatory!');
+                                alert('<% gt 'Name, E-Mail, Message content are mandatory!' %>');
                                 return false; 
                         }
                         else {
@@ -84,15 +84,15 @@
 	</script>
 		<table>
 			<tr>
-				<td>Name:</td>
+				<td><% gt 'Name:' %></td>
 				<td><input type="text" name="username" /></td>
 			</tr>
 			<tr>
-				<td>E-Mail:</td>
+				<td><% gt 'E-Mail:' %></td>
 				<td><input type="text" name="email" /></td>
 			</tr>
 			<tr>
-				<td>Site:</td>
+				<td><% gt 'Site:' %></td>
 				<td><input type="text" name="url" /></td>
 			</tr>
 	 	</table>
@@ -106,7 +106,7 @@
 	</script>
 	<div id="removecomment">
 		<p>
-		You must enable JavaScript in order to post comments.
+		<% gt 'You must enable JavaScript in order to post comments.' %>
 		</p>
 	</div>
 	<script type="text/javascript">

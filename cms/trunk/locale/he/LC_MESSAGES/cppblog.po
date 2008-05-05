@@ -1,0 +1,186 @@
+# translation of cppblog.po to Hebrew
+# artik <artyomtnk@yahoo.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: cppblog\n"
+"PO-Revision-Date: 2008-05-06 00:48+0300\n"
+"Last-Translator: artik <artyomtnk@yahoo.com>\n"
+"Language-Team: Hebrew <en@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KBabel 1.11.4\n"
+
+msgid "Title and Abstract are mandatory!"
+msgstr "כותרת ותקציר הם שדות חובה!"
+
+msgid "Edit Post No."
+msgstr "ערוך מאמר מס'"
+
+msgid "preview..."
+msgstr "תצוגה מקדימה..."
+
+msgid "New Post"
+msgstr "מאמר חדש"
+
+msgid "Title:"
+msgstr "כותרת:"
+
+msgid "Abstract:"
+msgstr "תקציר:"
+
+msgid "Content:"
+msgstr "תוכן:"
+
+msgid "Tasks"
+msgstr "משימות"
+
+msgid "To The Blog"
+msgstr "לבלוג"
+
+msgid "Unpublished Posts"
+msgstr "מאמרים שלא פורסמו"
+
+msgid "No unpublished posts"
+msgstr "אין מאמרים שלא פורסמו"
+
+msgid "Latest Comments"
+msgstr "תגובות אחרונות"
+
+msgid "edit"
+msgstr "ערוך"
+
+msgid "No comments"
+msgstr "אין תגובות"
+
+msgid "Wait For Moderation"
+msgstr "מחכה לאישור"
+
+msgid "TODO"
+msgstr "יושלם בהמשך "
+
+msgid "Error"
+msgstr "שגיאה"
+
+msgid "The page you had looked for not found"
+msgstr "הדף שחיפשת לא נמצא"
+
+msgid "Not all mandatory fields were filled:"
+msgstr "לא כל שדות החובה הושלמו:"
+
+msgid "Name"
+msgstr "שם"
+
+msgid "E-Mail, it will not be disclosed in the comment text"
+msgstr "כותבת דוא\"ל לא תפורסם עם ההערה"
+
+msgid "Message Body"
+msgstr "גוף ההודעה"
+
+msgid "Press \"back\" browser button and fix the form"
+msgstr "לחץ מקש \"חזרה\" בדפדפן על מנת לתקן את הבעיה."
+
+msgid "Publushed at %1%, by %2%"
+msgstr "פורסם ב־%1%, ע\"י %2%"
+
+msgid "more..."
+msgstr "המשך..."
+
+msgid "next page"
+msgstr "הדף הבא"
+
+msgid "There are no posts in the blog"
+msgstr "אין מאמרים בבלוג"
+
+msgid "Comments"
+msgstr "הערות"
+
+msgid "Are you shure?"
+msgstr "האם אתה בטוח?"
+
+msgid "delete"
+msgstr "מחק"
+
+msgid "Add Comment:"
+msgstr "הוסף הערה:"
+
+msgid "Name, E-Mail, Message content are mandatory!"
+msgstr "שם, כתובת דוא\"ל וגוף ההודעה הם שדות חובה!"
+
+msgid "Name:"
+msgstr "שם:"
+
+msgid "E-Mail:"
+msgstr "כתובת דוא\"ל"
+
+msgid "Site:"
+msgstr "אתר:"
+
+msgid "You must enable JavaScript in order to post comments."
+msgstr "חובה להפעיל JavaScript כדי לפרסם הערות."
+
+msgid "Username:"
+msgstr "שם משתמש:"
+
+msgid "Password:"
+msgstr "ססמה:"
+
+msgid "Admin Protal"
+msgstr "אתר הניהול"
+
+msgid "Blog"
+msgstr "בלוג"
+
+msgid "Admin"
+msgstr "ניהול"
+
+msgid "Logout"
+msgstr "יציאה"
+
+msgid "Administration Panel"
+msgstr "פנל ניהול"
+
+msgid "CppBlog is a high performance blog written in C++."
+msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
+
+msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
+msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
+
+msgid "Home"
+msgstr "בית"
+
+msgid "RSS"
+msgstr "רסס"
+
+msgid "Project Site"
+msgstr "אתר הפרויקט"
+
+msgid "Enter"
+msgstr "כניסה"
+
+msgid "Copyright &copy; 2007 Artyom Tonkikh"
+msgstr "זכויות שמורות 2007 ארתיום טונקיך"
+
+msgid ""
+"Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+"מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
+"a>"
+
+msgid "Contact"
+msgstr "צור קשר"
+
+msgid "Edit Comment No."
+msgstr "ערוך הערה מס':"
+
+msgid "Author:"
+msgstr "מחבר:"
+
+msgid "Url:"
+msgstr "קישור:"
+
+msgid "LTR"
+msgstr "RTL"
+
