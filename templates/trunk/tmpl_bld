@@ -24,7 +24,6 @@ SNAME=${TNAME%.opcode}.s
 
 RES=0
 
-shift
 if $TMPL_CC $@ >"$SNAME" ; then
 	if [ "$POT" == "" ] && $TMPL_AS "$TNAME" <"$SNAME" ; then
 		RES=0
