@@ -5,7 +5,7 @@ TEMPLATES=admin_editpost.tmpl admin_main.tmpl error.tmpl main_page.tmpl post.tmp
 	admin_editcomment.tmpl
 
 look.opcode: ${TEMPLATES}
-	tmpl_bld look.opcode ${TEMPLATES}
+	tmpl_bld -o look.opcode ${TEMPLATES}
 
 clean-local:
 	rm -f look.opcode look.s
