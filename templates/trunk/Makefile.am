@@ -1,8 +1,8 @@
-SUBDIRS = transtext
+SUBDIRS = ./transtext
 
 noinst_PROGRAMS = test test_f
 test_SOURCES = test.cpp 
-test_LDADD = libtmpl.la 
+test_LDADD = libtmpl.la
 test_CXXFLAGS = -Itranstext -Wall
 test_f_SOURCES = test_f.cpp
 test_f_LDADD = libtmpl.la
