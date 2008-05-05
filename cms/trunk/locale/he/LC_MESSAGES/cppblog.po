@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-06 00:48+0300\n"
+"PO-Revision-Date: 2008-05-06 01:07+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -11,6 +11,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: KBabel 1.11.4\n"
+
+msgid "LTR"
+msgstr "RTL"
 
 msgid "Title and Abstract are mandatory!"
 msgstr "כותרת ותקציר הם שדות חובה!"
@@ -32,6 +35,15 @@ msgstr "תקציר:"
 
 msgid "Content:"
 msgstr "תוכן:"
+
+msgid "Save"
+msgstr "שמור"
+
+msgid "Publish"
+msgstr "פרסם"
+
+msgid "Preview"
+msgstr "תצוגה מקדימה"
 
 msgid "Tasks"
 msgstr "משימות"
@@ -96,6 +108,9 @@ msgstr "אין מאמרים בבלוג"
 msgid "Comments"
 msgstr "הערות"
 
+msgid "at "
+msgstr "ב־"
+
 msgid "Are you shure?"
 msgstr "האם אתה בטוח?"
 
@@ -116,6 +131,9 @@ msgstr "כתובת דוא\"ל"
 
 msgid "Site:"
 msgstr "אתר:"
+
+msgid "Submit"
+msgstr "שלח"
 
 msgid "You must enable JavaScript in order to post comments."
 msgstr "חובה להפעיל JavaScript כדי לפרסם הערות."
@@ -181,6 +199,6 @@ msgstr "מחבר:"
 msgid "Url:"
 msgstr "קישור:"
 
-msgid "LTR"
-msgstr "RTL"
+msgid "Delete"
+msgstr "מחק"
 

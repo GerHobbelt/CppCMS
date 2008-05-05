@@ -18,7 +18,7 @@
 	<% item %>
 		<dt>
 			<%if def comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
- 			at <% comment.date %>
+ 			<% gt 'at ' %><% comment.date %>
 			<% if def comment.delete_url %>
 				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('<% gt 'Are you shure?' %>'); " ><% gt 'delete' %></a>
 				| <a href="<% comment.edit_url | raw %>"><% gt 'edit' %></a>
@@ -97,7 +97,7 @@
 			</tr>
 	 	</table>
 		<p><textarea name="message" cols="80" rows="10"></textarea></p>
-		<p><input type="submit" value="Submit" /></p>
+		<p><input type="submit" value="<% gt 'Submit' %>" /></p>
 	<script type="text/javascript">
 	<!--
 		document.write('<')
