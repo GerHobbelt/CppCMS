@@ -99,14 +99,6 @@ void View_Post::ini_short(post_t &p)
 	c["has_content"]=(bool)p.has_content;
 }
 
-
-void View_Post::ini_feed(post_t &p)
-{
-	ini_share(p);
-	c["abstract"]=p.abstract;
-	c["has_content"]=(bool)p.has_content;
-}
-
 void View_Main_Page::ini_share()
 {
 	int id;
@@ -185,12 +177,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		r>>post.publish;
 
 		View_Post post_v(blog,latest_posts[n]);
-		if(feed){
-			post_v.ini_feed(post);
-		}
-		else {
-			post_v.ini_short(post);
-		}
+		post_v.ini_short(post);
 		n++;
 	}
 	if(n<max_posts){

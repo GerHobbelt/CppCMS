@@ -41,7 +41,6 @@ class View_Post {
 
 public:
 	View_Post(Blog *b,content &con): c(con) { blog=b; };
-	void ini_feed(post_t &p);
 	void ini_short(post_t &p);
 	void ini_full(post_t &p);
 };
