@@ -5,7 +5,7 @@
 #include <boost/shared_array.hpp>
 #include <vector>
 #include "content.h"
-#include "transtext/transtext.h"
+#include "transtext.h"
 
 namespace tmpl {
 

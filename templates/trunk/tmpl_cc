@@ -344,22 +344,22 @@ def split_gt_params(s):
 	error_exit("Sytax error");
 
 class ngettext_block:
-	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(.*[^\s].*)?\s*%>$"
+	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(using(.*))?\s*%>$"
 	def use(self,m):
 		s1=make_filter_param(m.group(1))
 		s2=make_filter_param(m.group(3))
 		idt=make_ident(m.group(5))
 		if m.group(6):
-			split_gt_params(m.group(6))
+			split_gt_params(m.group(7))
 		print "\tngt\t%s,%s,%s" % (idt,s1,s2)
 
 
 class gettext_block:
-	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(.*[^\s].*)?\s*%>$"
+	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(using(.*))?\s*%>$"
 	def use(self,m):
 		s=m.group(1)
 		if m.group(3):
-			split_gt_params(m.group(3))
+			split_gt_params(m.group(4))
 		print "\tgt\t%s" % make_filter_param(s)
 
 class show_block(base_show):

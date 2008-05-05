@@ -1,6 +1,6 @@
 <% template main() %>
-	<% gt 'Hello %1%, %2%' v1,v2 %>
-	<% ngt 'passed one day','passed %d days',n1  %>
+	<% gt 'Hello %1%, %2%' using v1,v2 %>
+	<% ngt 'passed one day','passed %d days',n1 using v1 %>
 	<% ngt 'passed one day','passed %d days',n2  %>
 	<% ngt 'passed one day','passed %d days',n3  %>
 	<% ngt 'passed one day','passed %d days',n11  %>
