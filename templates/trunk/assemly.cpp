@@ -102,7 +102,7 @@ void xgettext(string s)
 {
 	if(!pot_file) return;
 	if(xgotten_strings.find(s)!=xgotten_strings.end()) return;
-	fprintf(pot_file,"msgid \"%s\"\nmsgstr \"\"\n\n",potstring(s).c_str());
+	fprintf(pot_file,"msgid \"%s\"\nmsgstr \"\"\n\n\n",potstring(s).c_str());
 	xgotten_strings.insert(s);
 }
 
@@ -110,7 +110,7 @@ void xngettext(string s,string p)
 {
 	if(!pot_file) return;
 	if(xgotten_strings.find(s)!=xgotten_strings.end()) return;
-	fprintf(pot_file,"msgid \"%s\"\nmsgid_plural \"%s\"\nmsgstr[0] \"\"\nmsgstr[1] \"\"\n\n",
+	fprintf(pot_file,"msgid \"%s\"\nmsgid_plural \"%s\"\nmsgstr[0] \"\"\nmsgstr[1] \"\"\n\n\n",
 			potstring(s).c_str(),potstring(p).c_str());
 	xgotten_strings.insert(s);
 }
@@ -507,6 +507,10 @@ int main(int argc,char **argv)
 			cerr<<"Failed to open file"<<argv[2]<<endl;
 			return 1;
 		}
+
+		fprintf(pot_file,"# Please translate as RTL for Right-to-Left languages like Hebrew or Arabic\n"
+				"msgid \"LTR\"\nmsgstr \"\"\n\n");
+		xgotten_strings.insert("LTR");
 		
 	}
 
