@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-06 01:07+0300\n"
+"PO-Revision-Date: 2008-05-06 08:40+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -144,6 +144,9 @@ msgstr "שם משתמש:"
 msgid "Password:"
 msgstr "ססמה:"
 
+msgid "Login"
+msgstr "כניסה"
+
 msgid "Admin Protal"
 msgstr "אתר הניהול"
 
@@ -165,17 +168,26 @@ msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
 msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
 msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
 
+msgid "Project"
+msgstr "פרויקט"
+
+msgid "Downloads"
+msgstr "הורדות"
+
 msgid "Home"
 msgstr "בית"
 
 msgid "RSS"
-msgstr "רסס"
+msgstr "עדכוני RSS"
 
 msgid "Project Site"
 msgstr "אתר הפרויקט"
 
 msgid "Enter"
 msgstr "כניסה"
+
+msgid "Contact"
+msgstr "צור קשר"
 
 msgid "Copyright &copy; 2007 Artyom Tonkikh"
 msgstr "זכויות שמורות 2007 ארתיום טונקיך"
@@ -186,9 +198,6 @@ msgid ""
 msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
-
-msgid "Contact"
-msgstr "צור קשר"
 
 msgid "Edit Comment No."
 msgstr "ערוך הערה מס':"

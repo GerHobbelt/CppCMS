@@ -26,20 +26,14 @@ a:hover {
 #header {
 	padding-left:10px;
 	padding-right:10px;
-	text-align:left;
 	border-bottom:5px solid #333;
 }
 
 #news {
-        float: right;
         width:300px;
-        margin-right:5px;
 }
 #menu {
-        margin-left:5px;
-        float: left;
         width:300px;
-        padding:5px;
 }
 
 #footer {
@@ -51,8 +45,6 @@ a:hover {
 	clear:both;
 }
 #footer p { margin:3px; }
-
-#logout { float:right;}
 
 #form textarea {
 	width:98%

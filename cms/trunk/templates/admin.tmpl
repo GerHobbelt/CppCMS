@@ -14,11 +14,17 @@
 </head>
 <body>
 <div id="header">
+
 <div id="logout">
-        <p><a href="<% base_url | raw%>"><% gt 'Blog' %></a> | <a href="<% admin_url| raw %>"><% gt 'Admin' %></a> | <a href="<%logout_url | raw %>"><% gt 'Logout' %></a></p>
+<p>
+        	<a href="<% base_url | raw%>"><% gt 'Blog' %></a> | <a href="<% admin_url| raw %>"><% gt 'Admin' %></a> | <a href="<%logout_url | raw %>"><% gt 'Logout' %></a>
+</p>
 </div>
+
+
 <h1><a href="<% base_url | raw %>"><% blog_name %></a></h1>
 <h2><% gt 'Administration Panel' %></h2>
+
 </div>
 
 <% include ref master_content %>

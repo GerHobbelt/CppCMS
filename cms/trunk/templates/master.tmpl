@@ -17,16 +17,21 @@
 <body>
 <div id="page">
 <div id="header">
+<% if rtl %>
+<div id="title"><% blog_name %></div>
+<div id="slogan"><% blog_description %></div>
+<% end %>
 
-<ul id="nav">
-<li><a href="http://cppcms.sourceforge.net/">Project</a></li>
-<li><a href="http://cppcms.sourceforge.net/#downloads">Downloads</a></li>
-<li><a class="selected" href="<% base_url | raw %>">Home</a></li>
+<ul id="nav" >
+<li><a href="http://cppcms.sourceforge.net/"><% gt 'Project' %></a></li>
+<li><a href="http://cppcms.sourceforge.net/#downloads"><% gt 'Downloads' %></a></li>
+<li><a class="selected" href="<% base_url | raw %>"><% gt 'Home' %></a></li>
 </ul>
 
+<% if not rtl %>
 <div id="title"><% blog_name %></div>
-
 <div id="slogan"><% blog_description %></div>
+<% end %>
 
 </div> <!-- end header -->
 
@@ -41,22 +46,37 @@
 <a href="<% admin_url %>"><% gt 'Enter' %></a>
 </div>
 
-<div id="maincontent">
-<% include ref master_content %>
-</div>
-
-<div id="sidecontent">
-<% include sidebar %>
-</div>
+<% if not rtl %>
+	<div id="maincontent">
+	<% include ref master_content %>
+	</div>
+	<div id="sidecontent">
+	<% include sidebar %>
+	</div>
+<% else %>
+	<div id="sidecontent">
+	<% include sidebar %>
+	</div>
+	<div id="maincontent">
+	<% include ref master_content %>
+	</div>
+<% end %>
 
 <div id="footer">
+	<% if rtl %>
+		<div id="footercontact">
+			<a href="#"><% gt 'Contact' %></a>
+		</div>
+	<% end %>
 	<div id="copyrightdesign">
 		<% gt 'Copyright &copy; 2007 Artyom Tonkikh' %>
 		| <% gt 'Based on Design by \la href="http://ContentedDesigns.com"\rContented Designs\l/a\r' %>
 	</div>
-	<div id="footercontact">
-		<a href="#"><% gt 'Contact' %></a>
-	</div>
+	<% if not rtl %>
+		<div id="footercontact">
+			<a href="#"><% gt 'Contact' %></a>
+		</div>
+	<% end %>
 </div>
 </div>
 </body>
