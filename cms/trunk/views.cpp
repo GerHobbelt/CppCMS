@@ -263,6 +263,7 @@ void View_Admin::ini_cedit(int id)
 
 	c["master_content"]=string("admin_editcomment");
 	c["edit_comment_url"]=str(format(blog->fmt.update_comment) % id);
+	c["id"]=id;
 	string author,url,content,email;
 	blog->sql<<
 		"SELECT author,url,email,content "
