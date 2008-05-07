@@ -166,6 +166,9 @@ class renderer
 	bool bool_value(details::instruction const &op,content const &c);
 	void setup();
 
+	transtext::trans const *current_tr;
+	
+
 public:
 	typedef boost::signal<void (boost::any const &val,std::string &out)> converter_t;
 	typedef boost::shared_ptr<converter_t>	converter_ptr;
@@ -218,9 +221,10 @@ private:
 	void usertype_to_string(boost::any const &a,std::string &out);
 	void create_formated_string(std::string const &str,std::string &out,int const &n=0);
 public:
-	renderer(template_data const &tmpl) : view(&tmpl) { setup(); };
-	void render(content const &c,std::string const &func,std::string &out,
-			transtext::trans const &tr=transtext::trans());
+	renderer(template_data const &tmpl) : view(&tmpl), current_tr(NULL) { setup(); };
+	void set_translator(transtext::trans const &t) { current_tr=&t; };
+	void reset_translator() { current_tr=NULL; };
+	void render(content const &c,std::string const &func,std::string &out);
 	void add_converter(std::type_info const &type,converter_t::slot_type slot);
 	void add_string_filter(std::string const &name,str_filter_t::slot_type slot);
 	void add_any_filter(std::string const &name,any_filter_t::slot_type slot);

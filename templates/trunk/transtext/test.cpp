@@ -7,16 +7,15 @@ using namespace transtext;
 
 int main(int argc,char **argv)
 {
-	trans_thread_safe t1;
-	trans_gnu t2;
-
-	t1.load("he","test","./locale");
-	t2.load("he_IL.UTF-8","test","./locale");
+	trans_factory tf;
+	tf.load("en,he","test","./locale");
 
 	int i;
 	for(i=0;i<15;i++) {
-		printf(t1.ngettext("passed one day\n","passed %d days\n",i),i);
-		printf(t2.ngettext("passed one day\n","passed %d days\n",i),i);
+		printf(tf["he"].ngettext("passed one day","passed %d days",i),i);
+		putchar('\n');
+		printf(tf["en"].ngettext("passed one day","passed %d days",i),i);
+		putchar('\n');
 	}
 
 	return 0;

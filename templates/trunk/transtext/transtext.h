@@ -1,7 +1,11 @@
 #ifndef TMPL_LAMBDA_H
 #define TMPL_LAMBDA_H
 
+#include <map>
+#include <string>
+
 namespace transtext {
+using namespace std;
 
 namespace lambda {
 	struct plural { // INTERFACE 
@@ -46,6 +50,16 @@ public:
 	
 };
 
+class trans_factory {
+	map<string,trans *> langs;
+	map<string,string>  names;
+public:
+	trans const &get(string const &lang) const;
+	trans const &operator[](string const &lang) const { return get(lang); };
+	void load(string const &locale_list,string const &domain,string const &dir);
+	map<string,string> const &get_names() const { return names; };
+	~trans_factory();
+};
 
 }
 

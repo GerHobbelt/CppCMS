@@ -74,8 +74,8 @@ int main()
 		transtext::trans_thread_safe tr;
 
 		tr.load("he","test","./transtext/locale");
-
-		r.render(c,"main",out,tr);
+		r.set_translator(tr);
+		r.render(c,"main",out);
 		cout<<out<<endl;
 	}
 	catch(std::exception &e){

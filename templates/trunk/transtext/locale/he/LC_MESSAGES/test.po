@@ -23,6 +23,9 @@ msgstr "shalom\n"
 msgid "LTR"
 msgstr "RTL"
 
+msgid "LANG"
+msgstr "Hebrew"
+
 msgid "Hello %1%, %2%"
 msgstr "Shalom %1%, %2%"
 

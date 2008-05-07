@@ -178,9 +178,13 @@ void renderer::create_formated_string(string const &str,string &out,int const &n
 
 
 
-void renderer::render(content const &c,std::string const &func,string &out,transtext::trans const &tr)
+void renderer::render(content const &c,std::string const &func,string &out)
 {
 	/* Reset state machine*/
+	static const transtext::trans default_tr;
+
+	transtext::trans const &tr=current_tr ? *current_tr : default_tr;
+
 	flag=false;
 	pc=0;
 	local.assign(local_variables,NULL);
