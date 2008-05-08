@@ -510,6 +510,8 @@ int main(int argc,char **argv)
 
 		fprintf(pot_file,"# Please translate as RTL for Right-to-Left languages like Hebrew or Arabic\n"
 				"msgid \"LTR\"\nmsgstr \"\"\n\n");
+		fprintf(pot_file,"# Please translate LANG as native name of language, for example for French -- `Français'\n"
+				"msgid \"LANG\"\nmsgstr \"\"\n\n");
 		xgotten_strings.insert("LTR");
 		
 	}
