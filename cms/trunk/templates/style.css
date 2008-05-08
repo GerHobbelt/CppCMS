@@ -89,15 +89,17 @@ a:hover {
 	width:55%;
 }
 
-ul#nav {
+#navall {width:40%;}
+#nav {
 	line-height:125%;
 	height:3em;
 	list-style: none;
 	text-align: left;
-	width:40%;
 }
 
-ul#nav li a {
+#nav ul {list-style: none; }
+
+#nav li a {
 	display: block;
 	font-size: small;
 	color: #CC0000;
@@ -106,13 +108,15 @@ ul#nav li a {
 	text-decoration: none;
 }
 
-ul#nav li a:hover { 
+#nav li a:hover { 
 	border-bottom:3px solid #CC0000;
 }
 
-ul#nav a.selected { 
+#nav a.selected { 
 	border-bottom:3px solid #CC0000;
 }
+
+
 
 #path {
 	width:760px;

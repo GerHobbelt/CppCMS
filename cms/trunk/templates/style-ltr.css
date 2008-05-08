@@ -48,7 +48,7 @@ blockquote, pre {
 	float:left;
 }
 
-ul#nav li {
+#nav li {
 	float: right;
 }
 
@@ -58,14 +58,19 @@ ul#nav li {
 	float:left;
 }
 
-ul#nav {
-	float:right;
+#navall { float:right; }
+
+#nav {
 	text-align: right;
 	margin: 0px 0px 0px 0px;
-	padding: 10px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
 }
 
 #header{
 	padding:5px 0px 10px 0px;
 	margin:0px 0px 0px 0px;
+}
+
+#langlist {
+	text-align: right;
 }

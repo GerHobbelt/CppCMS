@@ -17,3 +17,7 @@ li, dd { margin-left:2em;}
         float: left;
         padding:5px;
 }
+
+#langlist {
+	text-align: right;
+}

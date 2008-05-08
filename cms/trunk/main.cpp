@@ -11,7 +11,7 @@
 using namespace std;
 
 tmpl::template_data global_template;
-transtext::trans_thread_safe tr;
+transtext::trans_factory tr;
 
 int main(int argc,char **argv)
 {
@@ -19,7 +19,7 @@ int main(int argc,char **argv)
 		global_config.load(argc,argv);
 		global_template.load(global_config.sval("templates.file"));
 
-		tr.load(global_config.sval("locale.lang","none").c_str(),
+		tr.load(global_config.sval("locale.supported","en").c_str(),
 			"cppblog",
 			global_config.sval("locale.dir","./locale").c_str());
 

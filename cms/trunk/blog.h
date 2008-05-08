@@ -22,7 +22,7 @@
 
 
 extern tmpl::template_data global_template;
-extern transtext::trans_thread_safe tr;
+extern transtext::trans_factory tr;
 
 struct links_t {
 	string media;
@@ -43,6 +43,7 @@ struct links_t {
 	string del_comment;
 	string feed;
 	string update_comment;
+	string lang_switch;
 };
 
 struct post_content_t {
@@ -87,7 +88,10 @@ private:
 	void del_comment(string id);
 	bool auth();
 	void feed();
-	tmpl::renderer		render;
+	tmpl::renderer render;
+	void set_lang();
+
+	content c;
 
 public:
 	links_t fmt;

@@ -16,6 +16,7 @@
 <div id="header">
 
 <div id="logout">
+	<% if def langlist %><% include lnglst %><% end %>
 <p>
         	<a href="<% base_url | raw%>"><% gt 'Blog' %></a> | <a href="<% admin_url| raw %>"><% gt 'Admin' %></a> | <a href="<%logout_url | raw %>"><% gt 'Logout' %></a>
 </p>

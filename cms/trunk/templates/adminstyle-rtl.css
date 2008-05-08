@@ -20,3 +20,7 @@ fieldset, address, pre { margin:5px;}
         float: right;
         padding:5px;
 }
+
+#langlist {
+	text-align: left;
+}

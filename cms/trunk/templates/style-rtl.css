@@ -1,10 +1,11 @@
 body {direction:rtl}
 
+
 h1, h2, h3, h4, h5, h6, p, pre, blockquote, label, ul, ol, dl, 
 fieldset, address, pre { margin-right:0.0em;}
 
 li, dd { 
-	margin-right:0.5em;
+	margin-right:0.1em;
 }
 
 blockquote, pre {
@@ -45,7 +46,7 @@ blockquote, pre {
 	float:right;
 }
 
-ul#nav li {
+#nav li {
 	float: left;
 	margin-right:1em;
 }
@@ -56,8 +57,10 @@ ul#nav li {
 	float:right;
 }
 
-ul#nav {
-	float:left;
+#navall { float:left; }
+
+
+#nav {
 	text-align: left;
 	margin: 0px 0px 0px 0px;
 	padding: 0px 0px 0px 0px;
@@ -66,4 +69,8 @@ ul#nav {
 #header{
 	padding:5px 0px 10px 0px;
 	margin:0px 0px 0px 0px;
+}
+
+#langlist {
+	text-align: left;
 }

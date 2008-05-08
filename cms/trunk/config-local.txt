@@ -18,7 +18,7 @@ blog.media_path = "/templates"
 blog.script_path = "/blog"
 blog.host = "localhost:8080"
 
-# bdb 
+# bdb
 bdb.path="./db/"
 
 # Templates
@@ -75,4 +75,6 @@ pgsql.db="cppcms"
 pgsql.user="artik"
 
 locale.dir = "./locale"
-locale.lang = "he"
+locale.supported = "en,he"
+locale.default = "he"
+locale.multiple = 1

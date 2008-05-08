@@ -224,18 +224,15 @@ void Blog::post(string s_id,bool preview)
 		auth_or_throw();
 	}
 	int id=atoi(s_id.c_str());
-	content c;
 
 	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
 
-	render.render(c,"master",out.getstring(),tr);
+	render.render(c,"master",out.getstring());
 }
 
 void Blog::main_page(string from)
 {
-
-	content c;
 
 	View_Main_Page view(this,c);
 	if(from=="end") {
@@ -244,7 +241,7 @@ void Blog::main_page(string from)
 	else {
 		view.ini_main(atoi(from.c_str()));
 	}
-	render.render(c,"master",out.getstring(),tr);
+	render.render(c,"master",out.getstring());
 }
 
 void Blog::date(tm t,string &d)
@@ -256,13 +253,45 @@ void Blog::date(tm t,string &d)
 	d=buf;
 }
 
+void Blog::set_lang()
+{
+	string default_locale=global_config.sval("locale.default","en");
+
+	if(global_config.lval("locale.multiple",0)==0) {
+		render.set_translator(tr[default_locale]);
+	}
+	else {
+		const vector<HTTPCookie> &cookies = env->getCookieList();
+		unsigned i;
+		render.set_translator(tr[default_locale]);
+		for(i=0;i!=cookies.size();i++) {
+			if(cookies[i].getName()=="lang") {
+				string lang=cookies[i].getValue();
+				render.set_translator(tr[lang]);
+				break;
+			}
+		}
+
+		content::vector_t &langlist=c.vector("langlist",tr.get_names().size());
+		map<string,string>::const_iterator p;
+		map<string,string> const &names=tr.get_names();
+		for(i=0,p=names.begin();p!=names.end();p++,i++) {
+			langlist[i]["code"]=p->first;
+			langlist[i]["name"]=p->second;
+		}
+
+	}
+}
+
 void Blog::main()
 {
 	try {
 		try{
 			if(!connected)
 				sql.reconnect();
+			c.clear();
 			auth();
+			set_lang();
 			if(url.parse()==-1){
 				throw Error(Error::E404);
 			}
@@ -319,17 +348,15 @@ void Blog::add_comment(string &postid)
 
 void Blog::error_page(int what)
 {
-	content c;
-
 	if(what==Error::AUTH) {
 		View_Admin view(this,c);
  		view.ini_login();
-		render.render(c,"admin",out.getstring(),tr);
+		render.render(c,"admin",out.getstring());
 	}
 	else {
 		View_Main_Page view(this,c);
 		view.ini_error(what);
-		render.render(c,"master",out.getstring(),tr);
+		render.render(c,"master",out.getstring());
 	}
 }
 
@@ -438,11 +465,9 @@ void Blog::admin()
 {
 	auth_or_throw();
 
-	content c;
-
 	View_Admin view(this,c);
 	view.ini_main();
-	render.render(c,"admin",out.getstring(),tr);
+	render.render(c,"admin",out.getstring());
 
 }
 
@@ -457,7 +482,7 @@ void Blog::update_comment(string sid)
 
 	string author,url,email,content;
 
-	int i;
+	unsigned i;
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="url") {
@@ -493,11 +518,10 @@ void Blog::edit_comment(string sid)
 {
 	auth_or_throw();
 	int id=atoi(sid.c_str());
-	content c;
 
 	View_Admin view(this,c);
 	view.ini_cedit(id);
-	render.render(c,"admin",out.getstring(),tr);
+	render.render(c,"admin",out.getstring());
 
 }
 void Blog::edit_post(string sid)
@@ -506,11 +530,9 @@ void Blog::edit_post(string sid)
 
 	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
 
-	content c;
-
 	View_Admin view(this,c);
 	view.ini_edit(id);
-	render.render(c,"admin",out.getstring(),tr);
+	render.render(c,"admin",out.getstring());
 
 }
 
@@ -620,13 +642,11 @@ void Blog::del_comment(string sid)
 void Blog::feed()
 {
 
-	content c;
-
 	set_header(new HTTPContentHeader("text/xml"));
 
 	View_Main_Page view(this,c);
 	view.ini_main(-1,true);
-	render.render(c,"feed_posts",out.getstring(),tr);
+	render.render(c,"feed_posts",out.getstring());
 }
 
 

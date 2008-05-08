@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-06 08:40+0300\n"
+"PO-Revision-Date: 2008-05-08 13:46+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -14,6 +14,10 @@ msgstr ""
 
 msgid "LTR"
 msgstr "RTL"
+
+# Please translate LANG as native name of language, for example for French -- `Français'
+msgid "LANG"
+msgstr "עברית"
 
 msgid "Title and Abstract are mandatory!"
 msgstr "כותרת ותקציר הם שדות חובה!"
