@@ -1,0 +1,20 @@
+<% template lnglst() %>
+<div id="langlist">
+	<script type="text/javascript">
+	<!--
+	        function setlang(locale)
+                {
+                        var exdate=new Date();
+                        exdate.setDate(exdate.getDate()+365);
+                        document.cookie='lang=' +escape(locale)+';path=/;expires='+exdate.toGMTString();
+                        location.reload(true);
+                }
+	-->
+	</script>
+<% foreach lang in langlist %>
+<p>
+<% separator %> | <% item %><a href="javascript:setlang('<% lang.code %>');"><% lang.name %></a><% end %>
+</p>
+<% end %> 
+</div>
+<% end %>
