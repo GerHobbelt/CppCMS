@@ -65,7 +65,7 @@ class View_Admin_Post {
 	Blog *blog;
 	content &c;
 public:
-	View_Admin_Post(Blog *b,content &con) : c(con), blog(b) {};
+	View_Admin_Post(Blog *b,content &con) : c(con) { blog=b;};
 	void ini(int id=-1);
 };
 
