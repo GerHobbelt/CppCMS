@@ -99,6 +99,78 @@ void View_Post::ini_short(post_t &p)
 	c["has_content"]=(bool)p.has_content;
 }
 
+void View_Main_Page::ini_sidebar()
+{
+	result res;
+	blog->sql<<
+		"SELECT	id,title,content "
+		"FROM	pages "
+		"WHERE	id in (1,2)",res;
+	row r;
+	while(res.next(r)) {
+		int id;
+		string title;
+		string content;
+		r>>id>>title>>content;
+		if(id==1){
+			if(title!="") {
+				c["top_page_title"]=title;
+			}
+			if(content!="") {
+				c["top_page_content"]=content;
+			}
+		}
+		else {
+			if(title!="") {
+				c["bot_page_title"]=title;
+			}
+			if(content!="") {
+				c["bot_page_content"]=content;
+			}
+		}
+	}
+	blog->sql<<
+		"SELECT id,title "
+		"FROM	pages "
+		"WHERE	id>2 ",res;
+	content::vector_t &pages=c.vector("pages",res.rows());
+	int i;
+	for(i=0;res.next(r);i++) {
+		int id;
+		string title;
+		r>>id>>title;
+		pages[i]["title"]=title;
+		pages[i]["link"]=str(boost::format(blog->fmt.page) % id);
+	}
+
+	blog->sql<<
+		"SELECT link_cats.id,name,title,url,description "
+		"FROM link_cats,links "
+		"WHERE links.cat_id=link_cats.id "
+		"ORDER BY link_cats.id",res;
+
+	content::list_t &link_cats=c.list("link_cats");
+	int previd=-1;
+	content::list_t *lptr=NULL;
+	while(res.next(r)){
+		int id;
+		string gname,title,url,descr;
+		r>>id>>gname>>title>>url>>descr;
+		if(previd==-1 || id!=previd) {
+			link_cats.push_back(content());
+			link_cats.back()["title"]=gname;
+			lptr=&(link_cats.back().list("links"));
+			previd=id;
+		}
+		lptr->push_back(content());
+		content &ctmp=lptr->back();
+		ctmp["href"]=url;
+		ctmp["title"]=title;
+		if(descr!="")
+			ctmp["description"]=descr;
+	}
+}
+
 void View_Main_Page::ini_share()
 {
 	int id;
@@ -119,6 +191,32 @@ void View_Main_Page::ini_share()
 	c["base_url"]=global_config.sval("blog.script_path");
 	c["host"]=global_config.sval("blog.host");
 	c["rss_posts"]=blog->fmt.feed;
+	c["rss_comments"]=blog->fmt.feed_comments;
+
+	ini_sidebar();
+}
+
+void View_Main_Page::ini_rss_comments()
+{
+	ini_share();
+	result res;
+	blog->sql<<
+		"SELECT id,post_id,author,content "
+		"FROM comments "
+		"ORDER BY id DESC "
+		"LIMIT 10",res;
+	content::vector_t &comments=c.vector("comments",res.rows());
+	row r;
+	int i;
+	for(i=0;res.next(r);i++){
+		int id,pid;
+		string author,content;
+		r>>id>>pid>>author>>content;
+		comments[i]["permlink"]=str(boost::format(blog->fmt.post) % pid);
+		comments[i]["author"]=author;
+		comments[i]["content"]=content;
+		comments[i]["id"]=id;
+	}
 }
 
 void View_Main_Page::ini_main(int id,bool feed)
@@ -184,6 +282,26 @@ void View_Main_Page::ini_main(int id,bool feed)
 		latest_posts.resize(n);
 	}
 	c["master_content"]=string("main_page");
+}
+
+void View_Main_Page::ini_page(int id)
+{
+	ini_share();
+	c["master_content"]=string("page");
+	row r;
+	blog->sql<<
+		"SELECT title,content,is_open "
+		"FROM	pages "
+		"WHERE	id=?",id;
+	if(!blog->sql.single(r))
+		throw Error(Error::E404);
+	string title;
+	string content;
+	int is_open;
+	r >> title>>content>>is_open;
+	if(!is_open) throw Error(Error::E404);
+	c["content"]=content;
+	c["title"]=title;
 }
 
 void View_Main_Page::ini_post(int id,bool preview)
@@ -330,7 +448,7 @@ void View_Admin_Main::ini()
 		int id,c_id;
 		string author;
 		r>>c_id>>id>>author;
-		
+
 		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
 		latest_comments[i]["username"]=author;
 		latest_comments[i]["edit_url"]=str(format(blog->fmt.edit_comment) % c_id );

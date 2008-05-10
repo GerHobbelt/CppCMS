@@ -23,12 +23,14 @@
 
 extern tmpl::template_data global_template;
 extern transtext::trans_factory tr;
+extern transtext::trans_gnu gnugt;
 
 struct links_t {
 	string media;
 	string main;
 	string main_from;
 	string post;
+	string page;
 	string admin;
 	string new_post;
 	string edit_post;
@@ -42,6 +44,7 @@ struct links_t {
 	string preview;
 	string del_comment;
 	string feed;
+	string feed_comments;
 	string update_comment;
 	string lang_switch;
 };
@@ -61,6 +64,7 @@ class Blog : public Worker_Thread {
 // Member functions:
 	void main_page(string s);
 	void post(string s,bool preview);
+	void page(string s);
 	void add_comment(string &postid);
 	void error_page(int);
 
@@ -88,6 +92,7 @@ private:
 	void del_comment(string id);
 	bool auth();
 	void feed();
+	void feed_comments();
 	tmpl::renderer render;
 	void set_lang();
 

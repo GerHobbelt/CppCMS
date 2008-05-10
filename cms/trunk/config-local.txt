@@ -74,7 +74,10 @@ sqlite3.dir="./db/"
 pgsql.db="cppcms"
 pgsql.user="artik"
 
+#locale.gnugettext=1
+#locale.default = "he_IL.UTF-8"
+#
+locale.default = "he"
 locale.dir = "./locale"
 locale.supported = "en,he"
-locale.default = "he"
-locale.multiple = 1
+locale.multiple = 0

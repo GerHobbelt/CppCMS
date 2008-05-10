@@ -12,6 +12,7 @@
 	<link href="<% media | raw %>/style-ltr.css" rel="stylesheet" type="text/css" />
 <% end %>
 <link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_posts |raw%>" />
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_comments |raw%>" />
 
 </head>
 <body>
@@ -36,6 +37,8 @@
 <a href="<% base_url | raw %>"><% gt 'Home' %></a>
 &nbsp;/&nbsp;
 <a href="<% rss_posts | raw %>"><% gt 'RSS' %></a>
+&nbsp;/&nbsp;
+<a href="<% rss_comments | raw %>"><% gt 'RSS Comments' %></a>
 &nbsp;/&nbsp;
 <a href="http://cppcms.sourceforge.net/"><% gt 'Project Site' %></a>
 &nbsp;/&nbsp;

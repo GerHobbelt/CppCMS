@@ -1,7 +1,7 @@
 <% template post() %>
 <h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
-	<% gt 'Publushed at %1%, by %2%' using date, author %>
+	<% gt 'Publushed at %1%, by %2%' using date | strftime('%H:%M %d/%m/%y'), author %>
 	<% if def edit_url %>
 		| <a href="<% edit_url | raw %>"><% gt 'edit' %></a>
 	<%end%>
@@ -18,7 +18,7 @@
 	<% item %>
 		<dt>
 			<%if def comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
- 			<% gt 'at ' %><% comment.date %>
+ 			<% gt 'at ' %><% comment.date | strftime('%H:%M %d/%m/%y') %>
 			<% if def comment.delete_url %>
 				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('<% gt 'Are you shure?' %>'); " ><% gt 'delete' %></a>
 				| <a href="<% comment.edit_url | raw %>"><% gt 'edit' %></a>

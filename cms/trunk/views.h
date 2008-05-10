@@ -50,6 +50,7 @@ class View_Main_Page {
 	Blog *blog;
 	int error_code;
 	void ini_share();
+	void ini_sidebar();
 	content &c;
 public:
 	View_Main_Page(Blog *blog,content &con) : c(con)
@@ -57,8 +58,10 @@ public:
 		this->blog=blog;
 	};
 	void ini_post(int id,bool preview);
+	void ini_page(int id);
 	void ini_main(int id=-1,bool feed=false);
 	void ini_error(int what);
+	void ini_rss_comments();
 };
 
 class View_Admin_Post {

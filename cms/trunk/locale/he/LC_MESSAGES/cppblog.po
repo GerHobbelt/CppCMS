@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-08 13:46+0300\n"
+"PO-Revision-Date: 2008-05-09 09:34+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -110,7 +110,7 @@ msgid "There are no posts in the blog"
 msgstr "אין מאמרים בבלוג"
 
 msgid "Comments"
-msgstr "הערות"
+msgstr "תגובות"
 
 msgid "at "
 msgstr "ב־"
@@ -122,7 +122,7 @@ msgid "delete"
 msgstr "מחק"
 
 msgid "Add Comment:"
-msgstr "הוסף הערה:"
+msgstr "הוסף תגובה:"
 
 msgid "Name, E-Mail, Message content are mandatory!"
 msgstr "שם, כתובת דוא\"ל וגוף ההודעה הם שדות חובה!"
@@ -172,6 +172,9 @@ msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
 msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
 msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
 
+msgid "comments"
+msgstr "תגובות"
+
 msgid "Project"
 msgstr "פרויקט"
 
@@ -182,7 +185,10 @@ msgid "Home"
 msgstr "בית"
 
 msgid "RSS"
-msgstr "עדכוני RSS"
+msgstr "מאמרים ב־RSS"
+
+msgid "RSS Comments"
+msgstr "תגובות ב־RSS"
 
 msgid "Project Site"
 msgstr "אתר הפרויקט"
@@ -202,6 +208,15 @@ msgid ""
 msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
+
+msgid "Pages"
+msgstr "עמודים"
+
+msgid "There are no pages"
+msgstr "אין עמודים"
+
+msgid "No links"
+msgstr "אין קישורים"
 
 msgid "Edit Comment No."
 msgstr "ערוך הערה מס':"

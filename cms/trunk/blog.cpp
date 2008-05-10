@@ -123,6 +123,11 @@ void Blog::init()
 	url.add("^/post/(\\d+)$",
 		boost::bind(&Blog::post,this,$1,false));
 	fmt.post=root + "/post/%1%";
+
+	url.add("^/page/(\\d+)$",
+		boost::bind(&Blog::page,this,$1));
+	fmt.page=root + "/page/%1%";
+
 	url.add("^/post/preview/(\\d+)$",
 		boost::bind(&Blog::post,this,$1,true));
 	fmt.preview=root + "/post/preview/%1%";
@@ -180,6 +185,9 @@ void Blog::init()
 	url.add("^/rss$",boost::bind(&Blog::feed,this));
 	fmt.feed=root+"/rss";
 
+	url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
+	fmt.feed_comments=root+"/rss/comments";
+
 	try {
 		string engine=global_config.sval("dbi.engine");
 		sql.driver(engine);
@@ -218,6 +226,16 @@ void Blog::init()
 }
 
 
+void Blog::page(string s_id)
+{
+	int id=atoi(s_id.c_str());
+
+	View_Main_Page view(this,c);
+ 	view.ini_page(id);
+
+	render.render(c,"master",out.getstring());
+}
+
 void Blog::post(string s_id,bool preview)
 {
 	if(preview) {
@@ -255,6 +273,10 @@ void Blog::date(tm t,string &d)
 
 void Blog::set_lang()
 {
+	if(global_config.lval("locale.gnugettext",0)==1) {
+		render.set_translator(gnugt);
+		return;
+	}
 	string default_locale=global_config.sval("locale.default","en");
 
 	if(global_config.lval("locale.multiple",0)==0) {
@@ -647,6 +669,15 @@ void Blog::feed()
 	View_Main_Page view(this,c);
 	view.ini_main(-1,true);
 	render.render(c,"feed_posts",out.getstring());
+}
+
+void Blog::feed_comments()
+{
+	set_header(new HTTPContentHeader("text/xml"));
+
+	View_Main_Page view(this,c);
+	view.ini_rss_comments();
+	render.render(c,"feed_comments",out.getstring());
 }
 
 

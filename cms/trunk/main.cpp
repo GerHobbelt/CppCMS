@@ -11,6 +11,7 @@
 using namespace std;
 
 tmpl::template_data global_template;
+transtext::trans_gnu gnugt;
 transtext::trans_factory tr;
 
 int main(int argc,char **argv)
@@ -19,9 +20,16 @@ int main(int argc,char **argv)
 		global_config.load(argc,argv);
 		global_template.load(global_config.sval("templates.file"));
 
-		tr.load(global_config.sval("locale.supported","en").c_str(),
-			"cppblog",
-			global_config.sval("locale.dir","./locale").c_str());
+		if(global_config.lval("locale.gnugettext",0)==1) {
+			gnugt.load(global_config.sval("locale.default","").c_str(),
+				   "cppblog",
+				   global_config.sval("locale.dir","./locale").c_str());
+		}
+		else {
+			tr.load(global_config.sval("locale.supported","en").c_str(),
+				"cppblog",
+				global_config.sval("locale.dir","./locale").c_str());
+		}
 
 		Run_Application<Blog>(argc,argv);
 

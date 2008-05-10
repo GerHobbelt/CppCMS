@@ -1,0 +1,24 @@
+<% template feed_comments() %><?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	<title><% blog_name %>::<% gt 'comments' %> </title>
+	<link>http://<% host | raw %><% base_url | raw %></link>
+	<description><% blog_description %></description>
+	<atom:link 
+		href="http://<% host | raw %><% rss_comments | raw %>" 
+		rel="self" type="application/rss+xml" />
+	<% foreach comment in comments %>
+		<% item %>
+		<item>
+			<title><% comment.author %></title>
+			<link>http://<% host | raw %><% comment.permlink | raw %></link>
+			<guid>http://<% host | raw %><% comment.permlink | raw %>/<% comment.id %></guid>
+			<description>
+			<% comment.content | ext markdown2html | escape %>
+			</description>
+		</item>
+		<% end %>
+	<% end %>
+</channel>
+</rss>
+<% end %>

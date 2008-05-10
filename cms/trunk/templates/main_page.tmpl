@@ -3,7 +3,7 @@
 	<% item %>
 		<h1><a href="<% post.permlink | raw %>"><% post.title %></a></h1>
 		<div class="published">
-			<% gt 'Publushed at %1%, by %2%' using post.date, post.author %>
+			<% gt 'Publushed at %1%, by %2%' using post.date | strftime('%H:%M %d/%m/%y'), post.author %>
 			<% if def post.edit_url %>
 				| <a href="<% post.edit_url | raw %>"><% gt 'edit' %></a>
 			<%end%>
