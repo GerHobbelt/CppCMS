@@ -38,7 +38,7 @@ blockquote, pre {
 	float:right;
 }
 
-.published {
+.published, .nextpage{
         text-align:right;
 }
 

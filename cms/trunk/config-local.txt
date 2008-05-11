@@ -22,7 +22,11 @@ blog.host = "localhost:8080"
 bdb.path="./db/"
 
 # Templates
-templates.file = "./templates/look.opcode"
+
+# templates.file = "./templates/look.opcode"
+ templates.file = "./templates/os.opcode"
+
+
 latex.script =  "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/latex.sh"
 latex.cache_path = "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/"
 # Markdown engine "old" or "discount"

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-09 09:34+0300\n"
+"PO-Revision-Date: 2008-05-10 23:15+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -175,6 +175,27 @@ msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות �
 msgid "comments"
 msgstr "תגובות"
 
+msgid "Pages"
+msgstr "עמודים"
+
+msgid "There are no pages"
+msgstr "אין עמודים"
+
+msgid "No links"
+msgstr "אין קישורים"
+
+msgid "Edit Comment No."
+msgstr "ערוך הערה מס':"
+
+msgid "Author:"
+msgstr "מחבר:"
+
+msgid "Url:"
+msgstr "קישור:"
+
+msgid "Delete"
+msgstr "מחק"
+
 msgid "Project"
 msgstr "פרויקט"
 
@@ -209,24 +230,6 @@ msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
 
-msgid "Pages"
-msgstr "עמודים"
-
-msgid "There are no pages"
-msgstr "אין עמודים"
-
-msgid "No links"
-msgstr "אין קישורים"
-
-msgid "Edit Comment No."
-msgstr "ערוך הערה מס':"
-
-msgid "Author:"
-msgstr "מחבר:"
-
-msgid "Url:"
-msgstr "קישור:"
-
-msgid "Delete"
-msgstr "מחק"
+msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
 

@@ -169,10 +169,12 @@ a:hover {
 
 
 
-.published {
+.published, .nextpage {
         font-size:80%;
         font-style:italic;
 }
+
+
 
 #comments {
         border-top: #999999 solid thin;
