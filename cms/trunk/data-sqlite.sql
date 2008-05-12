@@ -50,9 +50,10 @@ create table post2cat (
 	post_id integer not null,
 	cat_id integer not null,
 	publish datetime not null,
-	is_open integer not null,
+	is_open integer not null
 );
-create index posts_in_cat on post2cat (is_open,cat,publish);
+
+create index posts_in_cat on post2cat (is_open,cat_id,publish);
 
 
 create table link_cats (
@@ -65,7 +66,7 @@ create table links (
 	cat_id integer not null,
 	title varchar(128) unique not null,
 	url varchar(128) not null,
-	description text not null,
+	description text not null
 );
 
 create table pages (
@@ -74,5 +75,5 @@ create table pages (
 	title varchar(256) not null,
 	content text not null,
 	is_open integer not null,
-	is_rtl integer not null default 0,
+	is_rtl integer not null default 0
 );

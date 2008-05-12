@@ -67,6 +67,7 @@ class Blog : public Worker_Thread {
 	void page(string s);
 	void add_comment(string &postid);
 	void error_page(int);
+	void setup_blog();
 
 public:
 	string username;

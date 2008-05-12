@@ -114,79 +114,87 @@ void Blog::init()
 
 	fmt.media=global_config.sval("blog.media_path");
 
-	url.add("^/?$",
-		boost::bind(&Blog::main_page,this,"end"));
-	fmt.main=root + "/";
-	url.add("^/from/(\\d+)$",
-		boost::bind(&Blog::main_page,this,$1));
-	fmt.main_from=root + "/from/%1%";
-	url.add("^/post/(\\d+)$",
-		boost::bind(&Blog::post,this,$1,false));
-	fmt.post=root + "/post/%1%";
+	if(global_config.lval("blog.configure",0)==1) {
+		url.add("^/?$",
+			boost::bind(&Blog::setup_blog,this));
+		fmt.admin=root + "/";
+	}
+	else {
+		url.add("^/?$",
+			boost::bind(&Blog::main_page,this,"end"));
+		fmt.main=root + "/";
+		url.add("^/from/(\\d+)$",
+			boost::bind(&Blog::main_page,this,$1));
+		fmt.main_from=root + "/from/%1%";
+		url.add("^/post/(\\d+)$",
+			boost::bind(&Blog::post,this,$1,false));
+		fmt.post=root + "/post/%1%";
+	
+		url.add("^/page/(\\d+)$",
+			boost::bind(&Blog::page,this,$1));
+		fmt.page=root + "/page/%1%";
 
-	url.add("^/page/(\\d+)$",
-		boost::bind(&Blog::page,this,$1));
-	fmt.page=root + "/page/%1%";
+		url.add("^/post/preview/(\\d+)$",
+			boost::bind(&Blog::post,this,$1,true));
+		fmt.preview=root + "/post/preview/%1%";
 
-	url.add("^/post/preview/(\\d+)$",
-		boost::bind(&Blog::post,this,$1,true));
-	fmt.preview=root + "/post/preview/%1%";
+		url.add("^/admin$",
+			boost::bind(&Blog::admin,this));
+		fmt.admin=root + "/admin";
 
-	url.add("^/admin$",
-		boost::bind(&Blog::admin,this));
-	fmt.admin=root + "/admin";
+		url.add("^/admin/new_post$",
+			boost::bind(&Blog::edit_post,this,"new"));
+		fmt.new_post=root + "/admin/new_post";
 
-	url.add("^/admin/new_post$",
-		boost::bind(&Blog::edit_post,this,"new"));
-	fmt.new_post=root + "/admin/new_post";
+		url.add("^/admin/edit_post/(\\d+)$",
+			boost::bind(&Blog::edit_post,this,$1));
+		fmt.edit_post=root+"/admin/edit_post/%1%";
 
-	url.add("^/admin/edit_post/(\\d+)$",
-		boost::bind(&Blog::edit_post,this,$1));
-	fmt.edit_post=root+"/admin/edit_post/%1%";
+		url.add("^/admin/edit_comment/(\\d+)$",
+			boost::bind(&Blog::edit_comment,this,$1));
+		fmt.edit_comment=root+"/admin/edit_comment/%1%";
 
-	url.add("^/admin/edit_comment/(\\d+)$",
-		boost::bind(&Blog::edit_comment,this,$1));
-	fmt.edit_comment=root+"/admin/edit_comment/%1%";
+		// All incoming information
 
-	// All incoming information
-
-	url.add("^/postback/comment/(\\d+)$",
-		boost::bind(&Blog::add_comment,this,$1));
-	fmt.add_comment=root+"/postback/comment/%1%";
-
-	url.add("^/postback/post/new$",
-		boost::bind(&Blog::get_post,this,"new"));
-	fmt.add_post=root+"/postback/post/new";
-
-	url.add("^/postback/post/(\\d+)$",
-		boost::bind(&Blog::get_post,this,$1));
-	fmt.update_post=root+"/postback/post/%1%";
-
-	url.add("^/postback/update_comment/(\\d+)$",
-		boost::bind(&Blog::update_comment,this,$1));
-	fmt.update_comment=root+"/postback/update_comment/%1%";
-
-	//url.add("^/postback/approve$",
-	//	boost::bind(&Blog::approve,this));
-	fmt.approve=root+"/postback/approve";
-
-	url.add("^/admin/login$",
-		boost::bind(&Blog::login,this));
-	fmt.login=root+"/admin/login";
-
-	url.add("^/admin/logout$",
-		boost::bind(&Blog::logout,this));
-	fmt.logout=root+"/admin/logout";
-
-	url.add("^/postback/delete/comment/(\\d+)$",
-		boost::bind(&Blog::del_comment,this,$1));
-	fmt.del_comment=
-		root+"/postback/delete/comment/%1%";
-	url.add("^/rss$",boost::bind(&Blog::feed,this));
-	fmt.feed=root+"/rss";
-
-	url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
-	fmt.feed_comments=root+"/rss/comments";
+		url.add("^/postback/comment/(\\d+)$",
+			boost::bind(&Blog::add_comment,this,$1));
+		fmt.add_comment=root+"/postback/comment/%1%";
+	
+		url.add("^/postback/post/new$",
+			boost::bind(&Blog::get_post,this,"new"));
+		fmt.add_post=root+"/postback/post/new";
+	
+		url.add("^/postback/post/(\\d+)$",
+			boost::bind(&Blog::get_post,this,$1));
+		fmt.update_post=root+"/postback/post/%1%";
+	
+		url.add("^/postback/update_comment/(\\d+)$",
+			boost::bind(&Blog::update_comment,this,$1));
+		fmt.update_comment=root+"/postback/update_comment/%1%";
+	
+		//url.add("^/postback/approve$",
+		//	boost::bind(&Blog::approve,this));
+		fmt.approve=root+"/postback/approve";
+	
+		url.add("^/admin/login$",
+			boost::bind(&Blog::login,this));
+		fmt.login=root+"/admin/login";
+	
+		url.add("^/admin/logout$",
+			boost::bind(&Blog::logout,this));
+		fmt.logout=root+"/admin/logout";
+	
+		url.add("^/postback/delete/comment/(\\d+)$",
+			boost::bind(&Blog::del_comment,this,$1));
+		fmt.del_comment=
+			root+"/postback/delete/comment/%1%";
+		url.add("^/rss$",boost::bind(&Blog::feed,this));
+		fmt.feed=root+"/rss";
+	
+		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
+		fmt.feed_comments=root+"/rss/comments";
+	
+	}
 
 	try {
 		string engine=global_config.sval("dbi.engine");
@@ -491,6 +499,85 @@ void Blog::admin()
 	view.ini_main();
 	render.render(c,"admin",out.getstring());
 
+}
+
+void Blog::setup_blog()
+{
+	const vector<FormEntry> &form=cgi->getElements();
+
+
+	View_Admin view(this,c);
+	view.ini_share();
+
+	string name,description,author,pass1,pass2;
+
+	unsigned i;
+	bool submit;
+
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="name") {
+			name=form[i].getValue();
+		}
+		else if(field=="author") {
+			author=form[i].getValue();
+		}
+		else if(field=="description") {
+			description=form[i].getValue();
+		}
+		else if(field=="pass1") {
+			pass1=form[i].getValue();
+		}
+		else if(field=="pass2") {
+			pass2=form[i].getValue();
+		}
+	}
+
+	submit=form.size()>0;
+
+	row r;
+	sql<<"SELECT count(*) FROM users",r;
+	int n;
+	r>>n;
+	
+	c["password_error"]=false;
+	c["configured"]=false;
+	c["field_error"]=false;
+	c["blog_name"]=string("CppBlog");
+	c["submit"]=fmt.admin;
+
+	if(n!=0) {
+		c["configured"]=true;
+	}
+	else if(submit) {
+		if(pass1!=pass2) {
+			c["password_error"]=true;
+		}
+		else if(name=="" || author=="" || description=="" || pass1=="") {
+			c["field_error"]=true;
+		}
+		else {
+			sql<<"begin",exec();
+			sql<<	"INSERT INTO options(id,value) "
+				"VALUES(?,?)",BLOG_TITLE,name,exec();
+			sql<<	"INSERT INTO options(id,value) "
+				"VALUES(?,?)",BLOG_DESCRIPTION,description,exec();
+			sql<<	"INSERT INTO users(username,password) "
+				"VALUES(?,?)",author,pass1,exec();
+			int rowid=sql.rowid();
+			sql<<	"INSERT INTO pages(author_id,title,content,is_open) "
+				"VALUES (?,?,?,1)",rowid,name,description,exec();
+			sql<<	"INSERT INTO link_cats(name) VALUES('Links')",exec();
+			rowid=sql.rowid();
+			sql<<	"INSERT INTO links(cat_id,title,url,description) "
+				"VALUES (?,'CppCMS','http://cppcms.sourceforge.net/','') ",rowid,exec();
+			sql<<"commit",exec();
+			c["configured"]=true;
+		}
+	}
+	
+	c["master_content"]=string("setup_blog");
+	render.render(c,"admin",out.getstring());
 }
 
 void Blog::update_comment(string sid)

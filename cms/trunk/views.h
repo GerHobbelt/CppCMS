@@ -84,10 +84,10 @@ public:
 
 class View_Admin {
 	Blog *blog;
-	void ini_share();
 	content &c;
 public:
 	View_Admin(Blog *b,content &con) : blog(b),c(con) {};
+	void ini_share();
 	void ini_main();
 	void ini_edit(int id=-1);
 	void ini_cedit(int id);
