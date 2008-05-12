@@ -27,7 +27,7 @@ h1, h2, h3, h4, h5, h6 {
 	}
 
 #sidecontent ul li, #pagecontent ul li {
-	list-style-image: url(img/os_sidearrow.gif);
+	list-style-image: url(img/os_sidearrow.gif) 100% 3px no-repeat;;
 	list-style-type: none;
 	padding-right:1.5em;
 	margin-right:1em;
