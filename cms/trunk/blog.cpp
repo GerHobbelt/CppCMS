@@ -131,8 +131,12 @@ void Blog::init()
 		fmt.post=root + "/post/%1%";
 	
 		url.add("^/page/(\\d+)$",
-			boost::bind(&Blog::page,this,$1));
+			boost::bind(&Blog::page,this,$1,false));
 		fmt.page=root + "/page/%1%";
+
+		url.add("^/page/preview/(\\d+)$",
+			boost::bind(&Blog::page,this,$1,true));
+		fmt.page_preview=root + "/page/preview/%1%";
 
 		url.add("^/post/preview/(\\d+)$",
 			boost::bind(&Blog::post,this,$1,true));
@@ -142,12 +146,20 @@ void Blog::init()
 			boost::bind(&Blog::admin,this));
 		fmt.admin=root + "/admin";
 
+		url.add("^/admin/new_page$",
+			boost::bind(&Blog::edit_post,this,"new","page"));
+		fmt.new_page=root + "/admin/new_page";
+
+		url.add("^/admin/edit_page/(\\d+)$",
+			boost::bind(&Blog::edit_post,this,$1,"page"));
+		fmt.edit_page=root+"/admin/edit_page/%1%";
+
 		url.add("^/admin/new_post$",
-			boost::bind(&Blog::edit_post,this,"new"));
+			boost::bind(&Blog::edit_post,this,"new","post"));
 		fmt.new_post=root + "/admin/new_post";
 
 		url.add("^/admin/edit_post/(\\d+)$",
-			boost::bind(&Blog::edit_post,this,$1));
+			boost::bind(&Blog::edit_post,this,$1,"post"));
 		fmt.edit_post=root+"/admin/edit_post/%1%";
 
 		url.add("^/admin/edit_comment/(\\d+)$",
@@ -160,21 +172,25 @@ void Blog::init()
 			boost::bind(&Blog::add_comment,this,$1));
 		fmt.add_comment=root+"/postback/comment/%1%";
 	
+		url.add("^/postback/page/new$",
+			boost::bind(&Blog::get_post,this,"new","page"));
+		fmt.add_page=root+"/postback/page/new";
+	
+		url.add("^/postback/page/(\\d+)$",
+			boost::bind(&Blog::get_post,this,$1,"page"));
+		fmt.update_page=root+"/postback/page/%1%";
+
 		url.add("^/postback/post/new$",
-			boost::bind(&Blog::get_post,this,"new"));
+			boost::bind(&Blog::get_post,this,"new","post"));
 		fmt.add_post=root+"/postback/post/new";
 	
 		url.add("^/postback/post/(\\d+)$",
-			boost::bind(&Blog::get_post,this,$1));
+			boost::bind(&Blog::get_post,this,$1,"post"));
 		fmt.update_post=root+"/postback/post/%1%";
 	
 		url.add("^/postback/update_comment/(\\d+)$",
 			boost::bind(&Blog::update_comment,this,$1));
 		fmt.update_comment=root+"/postback/update_comment/%1%";
-	
-		//url.add("^/postback/approve$",
-		//	boost::bind(&Blog::approve,this));
-		fmt.approve=root+"/postback/approve";
 	
 		url.add("^/admin/login$",
 			boost::bind(&Blog::login,this));
@@ -234,12 +250,12 @@ void Blog::init()
 }
 
 
-void Blog::page(string s_id)
+void Blog::page(string s_id,bool preview)
 {
 	int id=atoi(s_id.c_str());
 
 	View_Main_Page view(this,c);
- 	view.ini_page(id);
+ 	view.ini_page(id,preview);
 
 	render.render(c,"master",out.getstring());
 }
@@ -567,6 +583,8 @@ void Blog::setup_blog()
 			int rowid=sql.rowid();
 			sql<<	"INSERT INTO pages(author_id,title,content,is_open) "
 				"VALUES (?,?,?,1)",rowid,name,description,exec();
+			sql<<	"INSERT INTO pages(author_id,title,content,is_open) "
+				"VALUES (?,'Copyright','All rights reserved',1)",rowid,exec();
 			sql<<	"INSERT INTO link_cats(name) VALUES('Links')",exec();
 			rowid=sql.rowid();
 			sql<<	"INSERT INTO links(cat_id,title,url,description) "
@@ -633,19 +651,19 @@ void Blog::edit_comment(string sid)
 	render.render(c,"admin",out.getstring());
 
 }
-void Blog::edit_post(string sid)
+void Blog::edit_post(string sid,string ptype)
 {
 	auth_or_throw();
 
 	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
 
 	View_Admin view(this,c);
-	view.ini_edit(id);
+	view.ini_edit(id,ptype);
 	render.render(c,"admin",out.getstring());
 
 }
 
-void Blog::get_post(string sid)
+void Blog::get_post(string sid,string ptype)
 {
 	auth_or_throw();
 
@@ -680,17 +698,60 @@ void Blog::get_post(string sid)
 		}
 	}
 
-	save_post(id,title,abstract,content,type==PUBLISH);
+	if(ptype=="post")
+		save_post(id,title,abstract,content,type==PUBLISH);
+	else
+		save_page(id,title,content,type==PUBLISH);
 
 	if(type==SAVE){
 		set_header(new HTTPRedirectHeader(fmt.admin));
 	}
 	else if(type==PUBLISH){
-		string redirect=str(format(fmt.post)%id);
+		string redirect;
+		if(ptype=="post")
+			redirect=str(format(fmt.post)%id);
+		else
+			redirect=str(format(fmt.page)%id);
+
 		set_header(new HTTPRedirectHeader(redirect));
 	}
 	else if(type==PREVIEW) {
-		edit_post(str(format("%1%") % id));
+		edit_post(str(format("%1%") % id),ptype);
+	}
+}
+
+void Blog::save_page(int &id,string &title,
+		     string &content,bool pub)
+{
+	int is_open = pub ? 1: 0;
+
+	if(id==-1) {
+		sql<<	"INSERT INTO pages (author_id,title,content,is_open) "
+			"VALUES(?,?,?,?)",
+			userid,title,content,is_open;
+		sql.exec();
+		id=sql.rowid("page_id_seq");
+		// The parameter is relevant for PgSQL only
+	}
+	else {
+		if(pub)	{
+			sql<<	"UPDATE pages "
+				"SET	title= ?,"
+				"	content=?,"
+				"	is_open=1 "
+				"WHERE id=?",
+			title,content,id;
+			sql.exec();
+		}
+		else {
+			sql<<	"UPDATE pages "
+				"SET	title= ?,"
+				"	content=? "
+				"WHERE id=?",
+			title,content,
+			id;
+			sql.exec();
+		}
 	}
 }
 

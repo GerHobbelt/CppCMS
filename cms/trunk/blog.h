@@ -33,15 +33,20 @@ struct links_t {
 	string page;
 	string admin;
 	string new_post;
+	string new_page;
 	string edit_post;
+	string edit_page;
 	string edit_comment;
 	string add_comment;
 	string add_post;
+	string add_page;
 	string update_post;
+	string update_page;
 	string approve;
 	string login;
 	string logout;
 	string preview;
+	string page_preview;
 	string del_comment;
 	string feed;
 	string feed_comments;
@@ -64,7 +69,7 @@ class Blog : public Worker_Thread {
 // Member functions:
 	void main_page(string s);
 	void post(string s,bool preview);
-	void page(string s);
+	void page(string s,bool preview);
 	void add_comment(string &postid);
 	void error_page(int);
 	void setup_blog();
@@ -79,14 +84,16 @@ private:
 	void auth_or_throw();
 
 	void admin();
-	void edit_post(string id);
+	void edit_post(string id,string ptype);
 	void edit_comment(string id);
 	void update_comment(string id);
-	void get_post(string id);
+	void get_post(string id,string type);
 	void login();
 	void logout();
 	void save_post(int &id,string &title,
 		       string &abstract,string &content,bool pub);
+	void save_page(int &id,string &title,
+		       string &content,bool pub);
 
 	void set_login_cookies(string username,string password,int days);
 	int check_login(string username,string password);

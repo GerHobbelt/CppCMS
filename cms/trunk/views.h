@@ -58,7 +58,7 @@ public:
 		this->blog=blog;
 	};
 	void ini_post(int id,bool preview);
-	void ini_page(int id);
+	void ini_page(int id,bool preview);
 	void ini_main(int id=-1,bool feed=false);
 	void ini_error(int what);
 	void ini_rss_comments();
@@ -69,7 +69,7 @@ class View_Admin_Post {
 	content &c;
 public:
 	View_Admin_Post(Blog *b,content &con) : c(con) { blog=b;};
-	void ini(int id=-1);
+	void ini(int id,string ptype);
 };
 
 class View_Admin_Main
@@ -89,7 +89,7 @@ public:
 	View_Admin(Blog *b,content &con) : blog(b),c(con) {};
 	void ini_share();
 	void ini_main();
-	void ini_edit(int id=-1);
+	void ini_edit(int id,string ptype);
 	void ini_cedit(int id);
 	void ini_login();
 };

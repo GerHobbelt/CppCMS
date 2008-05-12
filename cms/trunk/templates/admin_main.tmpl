@@ -4,6 +4,7 @@
         <ul>
                 <li><a href="<% base_url | raw %>"><% gt 'To The Blog' %></a></li>
                 <li><a href="<% new_post_url | raw  %>"><% gt 'New Post' %></a></li>
+                <li><a href="<% new_page_url | raw  %>"><% gt 'New Page' %></a></li>
 <!--                <li><a href="#">Edit Posts</a></li>
                 <li><a href="#">Edit Comments</a></li>
                 <li><a href="#">Moderate New Comments</a></li>
@@ -18,6 +19,16 @@
 		</ul>
 	<% empty %>
 		<p><% gt 'No unpublished posts' %></p>
+	<% end%>
+        <h2><% gt 'Pages' %></h2>
+        <% foreach page in pages %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% page.edit_url | raw %>"><% page.title %></a><% if not page.published %> <% gt '(not published)' %><%end%></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p><% gt 'No pages' %></p>
 	<% end%>
 </div>
 <div id="news">

@@ -5,9 +5,13 @@
 	function testform()
 	{
 		var form=document.getElementById('inp');
-		if(form.title.value.length == 0 || form.abstract.value.length  == 0)
+		if(form.title.value.length == 0 || form.<% if is_page %>content<% else %>abstract<% end %>.value.length  == 0)
 		{
+			<% if is_page %>
+			alert('<% gt 'Title and Content are mandatory!' %>');
+			<% else %>
 			alert('<% gt 'Title and Abstract are mandatory!' %>');
+			<% end %>
 			return false;
 		}
 		else {
@@ -18,22 +22,24 @@
 </script>
 <div id="form">
 <% if def post_id %>
-<h2><% gt 'Edit Post No.' %> <% post_id %></h2>
+<h2><% if is_page %><%gt 'Edit Page No.' %><%else%><% gt 'Edit Post No.' %><% end %><% post_id %></h2>
 <p><a href="<% preview_url | raw %>"><% gt 'preview...' %></a></p>
 <% else %>
-<h2><% gt 'New Post' %></h2>
+<h2><% if is_page %><%gt 'New Page' %><%else%><% gt 'New Post' %><% end %></h2>
 <% end %>
 
-<form id="inp" action="<% submit_post_url | raw %>" method="post" onsubmit="return testform();">
+<form id="inp" action="<% submit_post_url | raw %>" method="post" onsubmit="return testform();" >
         <dl>
         <dt><% gt 'Title:'%></dt>
         <dd><input type="text" name="title" size="80" <% if def post_title %>value="<%post_title%>"<% end %> /></dd>
+	<% if not is_page %>
         <dt><% gt 'Abstract:'%></dt>
         <dd>
                 <fieldset><div> <!-- IE Textarea ugly hack -->
                         <textarea name="abstract" cols="80" rows="10"><% if def abstract %><% abstract %><% end %></textarea>
                 </div></fieldset>
         </dd>
+	<% end %>
         <dt><% gt 'Content:' %></dt>
         <dd>
                 <fieldset><div> <!-- IE Textarea ugly hack -->

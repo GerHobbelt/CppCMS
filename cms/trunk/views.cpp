@@ -132,7 +132,7 @@ void View_Main_Page::ini_sidebar()
 	blog->sql<<
 		"SELECT id,title "
 		"FROM	pages "
-		"WHERE	id>2 ",res;
+		"WHERE	id>2 AND is_open==1",res;
 	content::vector_t &pages=c.vector("pages",res.rows());
 	int i;
 	for(i=0;res.next(r);i++) {
@@ -284,7 +284,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 	c["master_content"]=string("main_page");
 }
 
-void View_Main_Page::ini_page(int id)
+void View_Main_Page::ini_page(int id,bool preview)
 {
 	ini_share();
 	c["master_content"]=string("page");
@@ -299,7 +299,7 @@ void View_Main_Page::ini_page(int id)
 	string content;
 	int is_open;
 	r >> title>>content>>is_open;
-	if(!is_open) throw Error(Error::E404);
+	if(!is_open && !preview) throw Error(Error::E404);
 	c["content"]=content;
 	c["title"]=title;
 }
@@ -366,6 +366,7 @@ void View_Admin::ini_share()
 	c["admin_url"]=blog->fmt.admin;
 	c["logout_url"]=blog->fmt.logout;
 	c["new_post_url"]=blog->fmt.new_post;
+	c["new_page_url"]=blog->fmt.new_page;
 }
 
 void View_Admin::ini_login()
@@ -398,12 +399,12 @@ void View_Admin::ini_cedit(int id)
 	c["email"]=email;
 }
 
-void View_Admin::ini_edit(int id)
+void View_Admin::ini_edit(int id,string ptype)
 {
 	ini_share();
 	c["master_content"]=string("admin_editpost");
 	View_Admin_Post post(blog,c);
-	post.ini(id);
+	post.ini(id,ptype);
 }
 
 void View_Admin::ini_main()
@@ -434,7 +435,27 @@ void View_Admin_Main::ini()
 		string edit_url=str(format(blog->fmt.edit_post) % id);
 
 		unpublished_posts[i]["edit_url"]=edit_url;
-		unpublished_posts[i]["title"]=intitle;
+		if(intitle!="")
+			unpublished_posts[i]["title"]=intitle;
+	}
+
+	blog->sql<<
+		"SELECT id,title,is_open "
+		"FROM	pages ";
+	blog->sql.fetch(rs);
+
+	content::vector_t &pages=c.vector("pages",rs.rows());
+
+	for(i=0;rs.next(r);i++) {
+		int id,is_open;
+		string title;
+		r>>id>>title>>is_open;
+		string edit_url=str(format(blog->fmt.edit_page) % id);
+
+		pages[i]["edit_url"]=edit_url;
+		if(title!="")
+			pages[i]["title"]=title;
+		pages[i]["published"]=bool(is_open);
 	}
 	blog->sql<<
 		"SELECT id,post_id,author "
@@ -455,32 +476,54 @@ void View_Admin_Main::ini()
 	}
 }
 
-void View_Admin_Post::ini( int id)
+void View_Admin_Post::ini(int id,string ptype)
 {
+	bool is_post=ptype=="post";
 	post_t post_data;
+	c["is_page"]=(bool)(!is_post);
 	if(id!=-1) {
 		c["post_id"]=id;
-		c["submit_post_url"]=str(format(blog->fmt.update_post) % id);
-		c["preview_url"]=str(format(blog->fmt.preview) % id);
+		c["submit_post_url"]=str(format( is_post ? blog->fmt.update_post : blog->fmt.update_page) % id);
+		if(is_post)
+			c["preview_url"]=str(format(blog->fmt.preview) % id);
+		else
+			c["preview_url"]=str(format(blog->fmt.page_preview) % id);
 	}
 	else {
-		c["submit_post_url"]=blog->fmt.add_post;
+		if(is_post)
+			c["submit_post_url"]=blog->fmt.add_post;
+		else
+			c["submit_post_url"]=blog->fmt.add_page;
 		return;
 	}
 	post_data.id=-1;
 	row r;
-	blog->sql<<
-		"SELECT id,title,abstract,content "
-		"FROM posts "
-		"WHERE id=?",
-		id;
-	if(!blog->sql.single(r)){
-		throw Error(Error::E404);
+	if(is_post){
+		blog->sql<<
+			"SELECT id,title,abstract,content "
+			"FROM posts "
+			"WHERE id=?",
+			id;
+		if(!blog->sql.single(r)){
+			throw Error(Error::E404);
+		}
+		r>>	post_data.id>>post_data.title>>
+			post_data.abstract>>post_data.content;
 	}
-	r>>	post_data.id>>post_data.title>>
-		post_data.abstract>>post_data.content;
+	else {
+		blog->sql<<
+			"SELECT id,title,content "
+			"FROM pages "
+			"WHERE id=?",
+			id;
+		if(!blog->sql.single(r)){
+			throw Error(Error::E404);
+		}
+		r>>	post_data.id>>post_data.title>>post_data.content;
+	}
 
 	c["post_title"]=post_data.title;
-	c["abstract"]=post_data.abstract;
+	if(is_post)
+		c["abstract"]=post_data.abstract;
 	c["content"]=post_data.content;
 }
