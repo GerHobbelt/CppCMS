@@ -87,6 +87,23 @@ int main()
 				id,uid,title,abstract,content,pub,(status=="publish" ? 1 : 0);
 			sql.exec();
 		}
+
+		wp<<	"select ID,post_author,post_title,post_content "
+			"from wp_posts where post_type='page'";
+		wp.fetch(res);
+		while(res.next(r)) {
+			int uid,id;
+			string title;
+			string content;
+			r>>id>>uid>>title>>content;
+			remove_tabs(content);
+			sql<<"Insert into pages(id,author_id,title,content,is_open) "
+				"values(?,?,?,?,1)",id,uid,title,content;
+			sql.exec();
+		}
+
+		
+
 		wp<<"select comment_ID,comment_post_ID,comment_author,comment_author_email,"
 			"comment_author_url,comment_date,comment_content from "
 			"wp_comments where comment_approved=1;";

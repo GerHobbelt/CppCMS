@@ -349,7 +349,12 @@ void Blog::main()
 	catch (dbixx_error &err) {
 		sql.close();
 		connected=false;
-		throw HTTP_Error(err.what());
+		string error_message=err.what();
+		if(global_config.lval("dbi.debug",0)==1) {
+			error_message+=":";
+			error_message+=err.query();
+		}
+		throw HTTP_Error(error_message);
 	}
 	catch(char const *s) {
 		throw HTTP_Error(s);
@@ -580,13 +585,8 @@ void Blog::setup_blog()
 				"VALUES(?,?)",BLOG_DESCRIPTION,description,exec();
 			sql<<	"INSERT INTO users(username,password) "
 				"VALUES(?,?)",author,pass1,exec();
-			int rowid=sql.rowid();
-			sql<<	"INSERT INTO pages(author_id,title,content,is_open) "
-				"VALUES (?,?,?,1)",rowid,name,description,exec();
-			sql<<	"INSERT INTO pages(author_id,title,content,is_open) "
-				"VALUES (?,'Copyright','All rights reserved',1)",rowid,exec();
 			sql<<	"INSERT INTO link_cats(name) VALUES('Links')",exec();
-			rowid=sql.rowid();
+			int rowid=sql.rowid();
 			sql<<	"INSERT INTO links(cat_id,title,url,description) "
 				"VALUES (?,'CppCMS','http://cppcms.sourceforge.net/','') ",rowid,exec();
 			sql<<"commit",exec();

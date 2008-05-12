@@ -102,37 +102,21 @@ void View_Post::ini_short(post_t &p)
 void View_Main_Page::ini_sidebar()
 {
 	result res;
-	blog->sql<<
-		"SELECT	id,title,content "
-		"FROM	pages "
-		"WHERE	id in (1,2)",res;
 	row r;
-	while(res.next(r)) {
-		int id;
-		string title;
-		string content;
-		r>>id>>title>>content;
-		if(id==1){
-			if(title!="") {
-				c["top_page_title"]=title;
-			}
-			if(content!="") {
-				c["top_page_content"]=content;
-			}
-		}
-		else {
-			if(title!="") {
-				c["bot_page_title"]=title;
-			}
-			if(content!="") {
-				c["bot_page_content"]=content;
-			}
-		}
+	blog->sql<<
+		"SELECT	value "
+		"FROM	text_options "
+		"WHERE	id='copyright'";
+	if(blog->sql.single(r)){
+		string val;
+		r>>val;
+		c["copyright_string"]=val;
 	}
+
 	blog->sql<<
 		"SELECT id,title "
 		"FROM	pages "
-		"WHERE	id>2 AND is_open==1",res;
+		"WHERE	is_open=1",res;
 	content::vector_t &pages=c.vector("pages",res.rows());
 	int i;
 	for(i=0;res.next(r);i++) {

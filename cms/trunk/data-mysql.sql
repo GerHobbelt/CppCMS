@@ -7,6 +7,7 @@ drop table if exists post2cat;
 drop table if exists cats;
 drop table if exists posts;
 drop table if exists users;
+drop table if exists text_options;
 
 create table users (
 	id  integer auto_increment primary key not null,
@@ -44,6 +45,11 @@ create table options (
 	value varchar(128) not null
 ) Engine = InnoDB;
 
+create table text_options (
+	id varchar(64) primary key not null,
+	value text not null
+) Engine = InnoDB;
+
 create table cats (
 	id integer auto_increment primary key not null,
 	name varchar(64) not null
@@ -57,7 +63,7 @@ create table post2cat (
 	FOREIGN KEY (post_id) REFERENCES posts(id),
 	FOREIGN KEY (cat_id) REFERENCES cats(id)
 ) Engine = InnoDB;
-create index posts_in_cat on post2cat (is_open,cat,publish);
+create index posts_in_cat on post2cat (is_open,cat_id,publish);
 
 
 create table link_cats (

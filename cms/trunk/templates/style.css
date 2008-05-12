@@ -218,3 +218,8 @@ a:hover {
 	width:180px;
 	border: #999999 solid thin;
 }
+
+#copyright {
+	margin-top:15px;
+	padding:15px
+} 

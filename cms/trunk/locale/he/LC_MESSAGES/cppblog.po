@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-10 23:15+0300\n"
+"PO-Revision-Date: 2008-05-12 23:15+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -19,14 +19,23 @@ msgstr "RTL"
 msgid "LANG"
 msgstr "עברית"
 
+msgid "Title and Content are mandatory!"
+msgstr "כותרת ותוכן הם שדות חובה!"
+
 msgid "Title and Abstract are mandatory!"
 msgstr "כותרת ותקציר הם שדות חובה!"
+
+msgid "Edit Page No."
+msgstr "ערוך עמוד מס'"
 
 msgid "Edit Post No."
 msgstr "ערוך מאמר מס'"
 
 msgid "preview..."
 msgstr "תצוגה מקדימה..."
+
+msgid "New Page"
+msgstr "עמוד חדש"
 
 msgid "New Post"
 msgstr "מאמר חדש"
@@ -55,11 +64,23 @@ msgstr "משימות"
 msgid "To The Blog"
 msgstr "לבלוג"
 
+msgid "Edit Links"
+msgstr "ערוך קישורים"
+
 msgid "Unpublished Posts"
 msgstr "מאמרים שלא פורסמו"
 
 msgid "No unpublished posts"
 msgstr "אין מאמרים שלא פורסמו"
+
+msgid "Pages"
+msgstr "עמודים"
+
+msgid "(not published)"
+msgstr "(לא פורסם)"
+
+msgid "No pages"
+msgstr "אין עמודים"
 
 msgid "Latest Comments"
 msgstr "תגובות אחרונות"
@@ -175,14 +196,11 @@ msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות �
 msgid "comments"
 msgstr "תגובות"
 
-msgid "Pages"
-msgstr "עמודים"
-
-msgid "There are no pages"
-msgstr "אין עמודים"
-
 msgid "No links"
 msgstr "אין קישורים"
+
+msgid "© All Rights Reserved"
+msgstr "© כל הזכויות שמורות"
 
 msgid "Edit Comment No."
 msgstr "ערוך הערה מס':"
@@ -195,6 +213,24 @@ msgstr "קישור:"
 
 msgid "Delete"
 msgstr "מחק"
+
+msgid "The passwords are not identical!"
+msgstr "הססמאות לא זהות"
+
+msgid "Configuration is complete"
+msgstr "הגדרות הושלמו"
+
+msgid "Not all fields are filled"
+msgstr "לא כל שדות החובה מולאו "
+
+msgid "Blog Name:"
+msgstr "שם הבלוג:"
+
+msgid "Blog Description:"
+msgstr "תיאור הבלוג:"
+
+msgid "Confirm Password:"
+msgstr "אמת ססמה:"
 
 msgid "Project"
 msgstr "פרויקט"
