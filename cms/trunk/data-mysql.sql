@@ -3,6 +3,8 @@ drop table if exists links;
 drop table if exists link_cats;
 drop table if exists options;
 drop table if exists comments;
+drop table if exists post2cat;
+drop table if exists cats;
 drop table if exists posts;
 drop table if exists users;
 
@@ -41,6 +43,22 @@ create table options (
 	id integer unique primary key not null,
 	value varchar(128) not null
 ) Engine = InnoDB;
+
+create table cats (
+	id integer auto_increment primary key not null,
+	name varchar(64) not null
+) Engine = InnoDB;
+
+create table post2cat (
+	post_id integer not null references posts(id),
+	cat_id integer not null references cats(id),
+	publish datetime not null,
+	is_open integer not null,
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (cat_id) REFERENCES cats(id)
+) Engine = InnoDB;
+create index posts_in_cat on post2cat (is_open,cat,publish);
+
 
 create table link_cats (
 	id integer auto_increment primary key not null,
