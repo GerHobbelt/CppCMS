@@ -40,7 +40,10 @@ create table options (
 	id integer unique primary key not null,
 	value varchar(128) not null
 );
-
+create table text_options (
+	id varchar(64) primary key not null,
+	value text not null
+); 
 create table cats (
 	id integer auto_increment primary key not null,
 	name varchar(64) not null
