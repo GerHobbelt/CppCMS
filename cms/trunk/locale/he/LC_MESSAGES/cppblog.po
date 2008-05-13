@@ -64,9 +64,6 @@ msgstr "משימות"
 msgid "To The Blog"
 msgstr "לבלוג"
 
-msgid "Edit Links"
-msgstr "ערוך קישורים"
-
 msgid "Unpublished Posts"
 msgstr "מאמרים שלא פורסמו"
 
@@ -187,10 +184,20 @@ msgstr "יציאה"
 msgid "Administration Panel"
 msgstr "פנל ניהול"
 
+msgid "main"
+msgstr "ראשי"
+
+msgid "write post"
+msgstr "כתיבת מאמר"
+
+msgid "write page"
+msgstr "כתיבת עמוד"
+
 msgid "CppBlog is a high performance blog written in C++."
 msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
 
-msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
+msgid ""
+"This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
 msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
 
 msgid "comments"
@@ -266,6 +273,9 @@ msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
 
-msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgid ""
+"The template design based on WordPress OrangeSky template by Naoko McCracken"
 msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
 
+msgid "Edit Links"
+msgstr "ערוך קישורים"

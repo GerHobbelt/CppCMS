@@ -13,6 +13,7 @@
 <% end %>
 </head>
 <body>
+<div id="page">
 <div id="header">
 
 <div id="logout">
@@ -27,7 +28,13 @@
 <h2><% gt 'Administration Panel' %></h2>
 
 </div>
-
+<div id="path">
+	<a href="<% admin_url | raw %>"><% gt 'main' %></a>
+	&nbsp;/&nbsp;
+	<a href="<% new_post_url | raw  %>"><% gt 'write post' %></a>
+	&nbsp;/&nbsp;
+	<a href="<% new_page_url | raw  %>"><% gt 'write page' %></a>
+</div>
 <% include ref master_content %>
 
 <div id="footer">
@@ -37,6 +44,7 @@
 <p>
 <% gt 'This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh.' %>
 </p>
+</div>
 </div>
 </body>
 </html>
