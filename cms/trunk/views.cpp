@@ -351,6 +351,34 @@ void View_Admin::ini_share()
 	c["logout_url"]=blog->fmt.logout;
 	c["new_post_url"]=blog->fmt.new_post;
 	c["new_page_url"]=blog->fmt.new_page;
+	c["edit_options_url"]=blog->fmt.edit_options;
+	c["edit_links_url"]=blog->fmt.edit_links;
+}
+
+void View_Admin::ini_options()
+{
+	ini_share();
+	result res;
+	blog->sql<<"SELECT id,value FROM options WHERE id in (?,?)",
+		BLOG_TITLE,BLOG_DESCRIPTION,res;
+	row r;
+	while(res.next(r)) {
+		int id;
+		string val;
+		r>>id>>val;
+		if(id==BLOG_TITLE)
+			c["blog_name"]=val;
+		if(id==BLOG_DESCRIPTION)
+			c["blog_description"]=val;
+	}
+	blog->sql<<"SELECT value FROM text_options WHERE id='copyright'";
+	if(blog->sql.single(r)) {
+		string val;
+		r>>val;
+		c["copyright_string"]=val;
+	}
+	c["master_content"]=string("admin_editoptions");
+	c["post_options_url"]=blog->fmt.edit_options;
 }
 
 void View_Admin::ini_login()
@@ -402,6 +430,7 @@ void View_Admin::ini_main()
 void View_Admin_Main::ini()
 {
 	result rs;
+
 	blog->sql<<
 		"SELECT id,title "
 		"FROM posts "
@@ -510,4 +539,45 @@ void View_Admin_Post::ini(int id,string ptype)
 	if(is_post)
 		c["abstract"]=post_data.abstract;
 	c["content"]=post_data.content;
+}
+
+
+void View_Admin::ini_links()
+{
+	ini_share();
+	result res;
+	row r;
+	blog->sql<<
+		"SELECT id,name FROM link_cats",res;
+	content::vector_t &cats=c.vector("link_cats",res.rows());
+	int i;
+	for(i=0;res.next(r);i++) {
+		int id;
+		string name;
+		r>>id>>name;
+		cats[i]["id"]=id;
+		cats[i]["del"]=true;
+		cats[i]["name"]=name;
+	}
+
+	c["master_content"]=string("admin_editlinks");
+	c["submit_url"]=blog->fmt.edit_links;
+
+	blog->sql<<
+		"SELECT id,cat_id,title,url,description "
+		"FROM links "
+		"ORDER BY cat_id",res;
+	content::vector_t &links=c.vector("links",res.rows());
+
+	for(i=0;res.next(r);i++) {
+		int id,cat_id;
+		string title,url,description;
+		r>>id>>cat_id>>title>>url>>description;
+		links[i]["id"]=id;
+		links[i]["cat_id"]=cat_id;
+		links[i]["name"]=title;
+		links[i]["url"]=url;
+		if(description!="")
+			links[i]["descr"]=description;
+	}
 }

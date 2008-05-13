@@ -5,10 +5,8 @@
                 <li><a href="<% base_url | raw %>"><% gt 'To The Blog' %></a></li>
                 <li><a href="<% new_post_url | raw  %>"><% gt 'New Post' %></a></li>
                 <li><a href="<% new_page_url | raw  %>"><% gt 'New Page' %></a></li>
-<!--                <li><a href="#">Edit Posts</a></li>
-                <li><a href="#">Edit Comments</a></li>
-                <li><a href="#">Moderate New Comments</a></li>
-                <li><a href="#">Edit Options</a></li>  -->
+                <li><a href="<% edit_links_url | raw  %>"><% gt 'Edit Links' %></a></li>
+                <li><a href="<% edit_options_url | raw  %>"><% gt 'Edit Options' %></a></li>
         </ul>
         <h2><% gt 'Unpublished Posts' %></h2>
         <% foreach post in posts %>
@@ -20,6 +18,8 @@
 	<% empty %>
 		<p><% gt 'No unpublished posts' %></p>
 	<% end%>
+</div>
+<div id="news">
         <h2><% gt 'Pages' %></h2>
         <% foreach page in pages %>
 	        <ul>
@@ -30,8 +30,6 @@
 	<% empty %>
 		<p><% gt 'No pages' %></p>
 	<% end%>
-</div>
-<div id="news">
 <h2><% gt 'Latest Comments' %></h2>
         <% foreach comment in comments %>
 	        <ul>
@@ -43,12 +41,5 @@
 	<% empty %>
 		<p><% gt 'No comments' %></p>
 	<% end%>
-<h2><% gt 'Wait For Moderation' %></h2>
-<p><% gt 'TODO' %></p>
-<!--        <ul>
-                <li><a href="#">Artyom</a> on <a href="#">Cool Article</a></li>
-                <li><a href="#">Maxim</a> on <a href="#">Best Article</a></li>
-                <li><a href="#">Eidth</a> on <a href="#">Best Article</a></li>
-        </ul> -->
 </div>
 <% end %>

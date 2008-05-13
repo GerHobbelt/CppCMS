@@ -37,6 +37,7 @@ struct links_t {
 	string edit_post;
 	string edit_page;
 	string edit_comment;
+	string edit_links;
 	string add_comment;
 	string add_post;
 	string add_page;
@@ -52,6 +53,7 @@ struct links_t {
 	string feed_comments;
 	string update_comment;
 	string lang_switch;
+	string edit_options;
 };
 
 struct post_content_t {
@@ -73,6 +75,7 @@ class Blog : public Worker_Thread {
 	void add_comment(string &postid);
 	void error_page(int);
 	void setup_blog();
+	void edit_links();
 
 public:
 	string username;
@@ -103,6 +106,7 @@ private:
 	void feed_comments();
 	tmpl::renderer render;
 	void set_lang();
+	void edit_options();
 
 	content c;
 

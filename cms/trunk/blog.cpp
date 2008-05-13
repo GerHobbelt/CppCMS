@@ -129,7 +129,7 @@ void Blog::init()
 		url.add("^/post/(\\d+)$",
 			boost::bind(&Blog::post,this,$1,false));
 		fmt.post=root + "/post/%1%";
-	
+
 		url.add("^/page/(\\d+)$",
 			boost::bind(&Blog::page,this,$1,false));
 		fmt.page=root + "/page/%1%";
@@ -171,11 +171,11 @@ void Blog::init()
 		url.add("^/postback/comment/(\\d+)$",
 			boost::bind(&Blog::add_comment,this,$1));
 		fmt.add_comment=root+"/postback/comment/%1%";
-	
+
 		url.add("^/postback/page/new$",
 			boost::bind(&Blog::get_post,this,"new","page"));
 		fmt.add_page=root+"/postback/page/new";
-	
+
 		url.add("^/postback/page/(\\d+)$",
 			boost::bind(&Blog::get_post,this,$1,"page"));
 		fmt.update_page=root+"/postback/page/%1%";
@@ -183,33 +183,42 @@ void Blog::init()
 		url.add("^/postback/post/new$",
 			boost::bind(&Blog::get_post,this,"new","post"));
 		fmt.add_post=root+"/postback/post/new";
-	
+
 		url.add("^/postback/post/(\\d+)$",
 			boost::bind(&Blog::get_post,this,$1,"post"));
 		fmt.update_post=root+"/postback/post/%1%";
-	
+
 		url.add("^/postback/update_comment/(\\d+)$",
 			boost::bind(&Blog::update_comment,this,$1));
 		fmt.update_comment=root+"/postback/update_comment/%1%";
-	
+
 		url.add("^/admin/login$",
 			boost::bind(&Blog::login,this));
 		fmt.login=root+"/admin/login";
-	
+
+		url.add("^/admin/options?$",
+			boost::bind(&Blog::edit_options,this));
+		fmt.edit_options=root + "/admin/options";
+
+		url.add("^/admin/links?$",
+			boost::bind(&Blog::edit_links,this));
+		fmt.edit_links=root + "/admin/links";
+
+
 		url.add("^/admin/logout$",
 			boost::bind(&Blog::logout,this));
 		fmt.logout=root+"/admin/logout";
-	
+
 		url.add("^/postback/delete/comment/(\\d+)$",
 			boost::bind(&Blog::del_comment,this,$1));
 		fmt.del_comment=
 			root+"/postback/delete/comment/%1%";
 		url.add("^/rss$",boost::bind(&Blog::feed,this));
 		fmt.feed=root+"/rss";
-	
+
 		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
 		fmt.feed_comments=root+"/rss/comments";
-	
+
 	}
 
 	try {
@@ -259,6 +268,125 @@ void Blog::page(string s_id,bool preview)
 
 	render.render(c,"master",out.getstring());
 }
+
+void Blog::edit_options()
+{
+	auth_or_throw();
+
+	const vector<FormEntry> &form=cgi->getElements();
+
+	string name,desc,copyright;
+
+	unsigned i;
+
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="name") {
+			name=form[i].getValue();
+		}
+		else if(field=="desc") {
+			desc=form[i].getValue();
+		}
+		else if(field=="copyright") {
+			copyright=form[i].getValue();
+		}
+	}
+
+	if(form.size()>0){
+		sql<<"begin",exec();
+		sql<<"DELETE FROM text_options WHERE id='copyright'",exec();
+		sql<<"DELETE FROM options WHERE id=? OR id=?",
+			BLOG_TITLE,BLOG_DESCRIPTION,exec();
+		if(copyright!=""){
+			sql<<	"INSERT INTO text_options(id,value) "
+				"VALUES('copyright',?)",
+					copyright,exec();
+		}
+		sql<<"INSERT INTO options(id,value) VALUES(?,?)",
+			BLOG_TITLE,name,exec();
+		sql<<"INSERT INTO options(id,value) VALUES(?,?)",
+			BLOG_DESCRIPTION,desc,exec();
+		sql<<"commit",exec();
+	}
+
+	View_Admin view(this,c);
+	view.ini_options();
+	render.render(c,"admin",out.getstring());
+}
+
+void Blog::edit_links()
+{
+	auth_or_throw();
+
+	const vector<FormEntry> &form=cgi->getElements();
+
+	if(form.size()>0) {
+		unsigned i;
+		int id=-1,cat_id=-1;
+		string url,name,descr,type;
+		for(i=0;i<form.size();i++) {
+			string const &field=form[i].getName();
+			if(field=="del_link") {
+				id=form[i].getIntegerValue();
+				sql<<"DELETE FROM links WHERE id=?",id,exec();
+				break;
+			}
+			if(field=="del_cat") {
+				id=form[i].getIntegerValue();
+				try {
+					sql<<"DELETE FROM link_cats WHERE id=?",id,exec();
+				}
+				catch (dbixx_error const &e) {
+					c["not_empty"]=true;
+				}
+				break;
+			}
+			else if(field=="id") {
+				id=form[i].getIntegerValue();
+			}
+			else if(field=="cat") {
+				cat_id=form[i].getIntegerValue();
+			}
+			else if(field=="type") {
+				type=form[i].getValue();
+			}
+			else if(field=="name") {
+				name=form[i].getValue();
+			}
+			else if(field=="url") {
+				url=form[i].getValue();
+			}
+			else if(field=="descr") {
+				descr=form[i].getValue();
+			}
+		}
+		if(type=="newcat" && name!="") {
+			sql<<"INSERT INTO link_cats(name) values(?)",name,exec();
+		}
+		else if(type=="newlink" && cat_id!=-1 && name!="" && url!="") {
+			try {
+				sql<<	"INSERT INTO links(cat_id,title,url,description) "
+					"VALUES(?,?,?,?)",cat_id,name,url,descr,exec();
+			}
+			catch(dbixx_error const &e) {}
+		}
+		else if(type=="cat" && id!=-1) {
+			sql<<"UPDATE link_cats SET name=? WHERE id=?",name,id,exec();
+		}
+		else if(type=="link" && id!=-1) {
+			try{
+			sql<<"UPDATE links SET cat_id=?,title=?,url=?,description=? WHERE id=?",
+				cat_id,name,url,descr,id,exec();
+			}
+			catch(dbixx_error const &e) {}
+		}
+	}
+
+	View_Admin view(this,c);
+	view.ini_links();
+	render.render(c,"admin",out.getstring());
+}
+
 
 void Blog::post(string s_id,bool preview)
 {
@@ -560,7 +688,7 @@ void Blog::setup_blog()
 	sql<<"SELECT count(*) FROM users",r;
 	int n;
 	r>>n;
-	
+
 	c["password_error"]=false;
 	c["configured"]=false;
 	c["field_error"]=false;
@@ -593,7 +721,7 @@ void Blog::setup_blog()
 			c["configured"]=true;
 		}
 	}
-	
+
 	c["master_content"]=string("setup_blog");
 	render.render(c,"admin",out.getstring());
 }

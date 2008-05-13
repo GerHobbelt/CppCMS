@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-12 23:15+0300\n"
+"PO-Revision-Date: 2008-05-14 00:44+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -63,6 +63,12 @@ msgstr "משימות"
 
 msgid "To The Blog"
 msgstr "לבלוג"
+
+msgid "Edit Links"
+msgstr "ערוך קישורים"
+
+msgid "Edit Options"
+msgstr "ערוך אפשרויות"
 
 msgid "Unpublished Posts"
 msgstr "מאמרים שלא פורסמו"
@@ -193,11 +199,16 @@ msgstr "כתיבת מאמר"
 msgid "write page"
 msgstr "כתיבת עמוד"
 
+msgid "links"
+msgstr "קישורים"
+
+msgid "options"
+msgstr "אפשרויות"
+
 msgid "CppBlog is a high performance blog written in C++."
 msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
 
-msgid ""
-"This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
+msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
 msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
 
 msgid "comments"
@@ -239,6 +250,33 @@ msgstr "תיאור הבלוג:"
 msgid "Confirm Password:"
 msgstr "אמת ססמה:"
 
+msgid "Options"
+msgstr "אפשרויות"
+
+msgid "Copyright Text (markdown):"
+msgstr "זכויות היוצרים (markdown):"
+
+msgid "The category you try to delete is not empty!"
+msgstr "הנושא שניסית למחוק אינו ריק!"
+
+msgid "Categories"
+msgstr "נושאים"
+
+msgid "No categories"
+msgstr "אין נושאים"
+
+msgid "New Category"
+msgstr "נושא חדש"
+
+msgid "Links"
+msgstr "קישורים"
+
+msgid "Description:"
+msgstr "תיאור:"
+
+msgid "New Link"
+msgstr "קישור חדש"
+
 msgid "Project"
 msgstr "פרויקט"
 
@@ -273,9 +311,6 @@ msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
 
-msgid ""
-"The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
 msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
 
-msgid "Edit Links"
-msgstr "ערוך קישורים"

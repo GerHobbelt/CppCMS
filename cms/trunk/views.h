@@ -90,6 +90,8 @@ public:
 	void ini_share();
 	void ini_main();
 	void ini_edit(int id,string ptype);
+	void ini_options();
+	void ini_links();
 	void ini_cedit(int id);
 	void ini_login();
 };
