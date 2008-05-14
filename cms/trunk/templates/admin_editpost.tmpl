@@ -48,8 +48,16 @@
         </dd>
         <dd>
                 <input type="submit" name="save" value="<% gt 'Save' %>" />
-                <input type="submit" name="publish" value="<% gt 'Publish' %>" />
-                <input type="submit" name="preview" value="<% gt 'Preview' %>" />
+                <input type="submit" name="preview" value="<% gt 'Save and Continue' %>" />
+                <% if not is_open %>
+               		<input type="submit" name="publish" value="<% gt 'Publish' %>" />
+               	<% else %>
+               		<input type="submit" name="unpublish" value="<% gt 'Unpublish' %>" />
+               	<% end %>
+                <% if def post_id %>
+                <input type="submit" name="delete" value="<% gt 'Delete' %>"
+                	onclick="return confirm('<% gt 'Are you shure?' %>');" />
+                <% end %>
         </dd>
         </dl>
 </form>

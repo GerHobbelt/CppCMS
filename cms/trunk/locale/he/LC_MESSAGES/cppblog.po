@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-14 00:44+0300\n"
+"PO-Revision-Date: 2008-05-14 23:48+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -52,11 +52,20 @@ msgstr "תוכן:"
 msgid "Save"
 msgstr "שמור"
 
+msgid "Save and Continue"
+msgstr "שמור והמשך"
+
 msgid "Publish"
 msgstr "פרסם"
 
-msgid "Preview"
-msgstr "תצוגה מקדימה"
+msgid "Unpublish"
+msgstr "הסר פרסום"
+
+msgid "Delete"
+msgstr "מחק"
+
+msgid "Are you shure?"
+msgstr "האם אתה בטוח?"
 
 msgid "Tasks"
 msgstr "משימות"
@@ -93,12 +102,6 @@ msgstr "ערוך"
 
 msgid "No comments"
 msgstr "אין תגובות"
-
-msgid "Wait For Moderation"
-msgstr "מחכה לאישור"
-
-msgid "TODO"
-msgstr "יושלם בהמשך "
 
 msgid "Error"
 msgstr "שגיאה"
@@ -138,9 +141,6 @@ msgstr "תגובות"
 
 msgid "at "
 msgstr "ב־"
-
-msgid "Are you shure?"
-msgstr "האם אתה בטוח?"
 
 msgid "delete"
 msgstr "מחק"
@@ -228,9 +228,6 @@ msgstr "מחבר:"
 
 msgid "Url:"
 msgstr "קישור:"
-
-msgid "Delete"
-msgstr "מחק"
 
 msgid "The passwords are not identical!"
 msgstr "הססמאות לא זהות"

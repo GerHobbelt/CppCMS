@@ -94,9 +94,9 @@ private:
 	void login();
 	void logout();
 	void save_post(int &id,string &title,
-		       string &abstract,string &content,bool pub);
+		       string &abstract,string &content,int pub);
 	void save_page(int &id,string &title,
-		       string &content,bool pub);
+		       string &content,int pub);
 
 	void set_login_cookies(string username,string password,int days);
 	int check_login(string username,string password);

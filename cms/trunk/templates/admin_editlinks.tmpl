@@ -1,0 +1,117 @@
+<% template select_cat(opt) %>
+<select name="cat" >
+	<% foreach cat in link_cats %>
+	<% item %> 
+		<script language="javascript">
+<!--
+		document.write('<option value="<% cat.id %>" ');
+		<% if def opt %>
+		if(<% cat.id %>==<% opt %>) {
+			document.write('selected="selected"');
+		}
+		<% end %>
+		document.write(' ><% cat.name %></option>');
+-->
+		</script>
+	<% end %>
+	<% end %>
+</select>
+<% end %>
+<% template admin_editlinks() %>
+<% if not_empty %><h2><% gt 'The category you try to delete is not empty!' %></h2><% end %>
+<script language="javascript">
+<!--
+function switchvis(id)
+{
+	val=document.getElementById(id).style.display;
+	if(val=='inline') 
+		val='none';
+	else
+		val='inline';
+	document.getElementById(id).style.display=val;
+}
+-->
+</script>
+
+<h2><% gt 'Categories' %></h2>
+<% foreach cat in link_cats %>
+	<ol>
+	<% item %>
+	<li>
+		<p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');"><% gt 'edit' %></a>
+			<% if def cat.del %> | <a href="<% submit_url %>?del_cat=<% cat.id %>"><% gt 'Delete' %><% end %></a></p>
+		<div id="cat<% cat.id %>" style="display:none">
+			<p>
+				<form action="<% submit_url %>" method="post" >
+				<input type="hidden" name="type" value="cat" />
+				<input type="hidden" name="id" value="<% cat.id %>" />
+				<input type="text" name="name" size="20" value="<% cat.name %>" />
+				<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+				</form>
+			</p>
+		</div>
+	</li>
+	<% end %>
+	</ol>
+<% empty %>
+	<p><% gt 'No categories' %></p>
+<% end %> 
+<p><a href="javascript:switchvis('catnew')"><% gt 'New Category' %></a></p>
+<div id="catnew" style="display:none">
+	<form action="<% submit_url %>" method="post" >
+	<p>
+		<input type="hidden" name="type" value="newcat" />
+		<input type="text" name="name" size="20" />
+		<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+	</p>
+	</form>
+</div>
+
+
+<h2><% gt 'Links' %></h2>
+<% foreach link in links %>
+	<ol>
+	<% item %>
+	<li>
+		<a href="<% link.url %>"><% link.name %></a><% if def link.descr %> &mdash; <% link.descr %><% end %> | <a href="javascript:switchvis('link<% link.id %>');"><% gt 'edit' %></a>
+			| <a href="<% submit_url %>?del_link=<% link.id %>"><% gt 'Delete' %></a></p>
+		<div id="link<% link.id %>" style="display:none">
+			<p>
+				<form action="<% submit_url %>" method="post" >
+				<input type="hidden" name="type" value="link" />
+				<input type="hidden" name="id" value="<% link.id %>" />
+				<% gt 'Name:' %>
+				<input type="text" name="name" size="15" value="<% link.name %>" />
+				<% gt 'Url:' %>
+				<input type="text" name="url" size="15" value="<% link.url %>" />
+				<% gt 'Description:' %>
+				<input type="text" name="descr" size="30" value="<% link.descr %>" />
+				<% include select_cat using link.cat_id %>
+				<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+				</form>
+			</p>
+		</div>
+	</li>
+	<% end %>
+	</ol>
+<% empty %>
+	<p><% gt 'No links' %></p>
+<% end %> 
+<p><a href="javascript:switchvis('linknew')"><% gt 'New Link' %></a></p>
+<div id="linknew" style="display:none">
+	<p>
+		<form action="<% submit_url %>" method="post" >
+		<input type="hidden" name="type" value="newlink" />
+		<% gt 'Name:' %>
+		<input type="text" name="name" size="15" />
+		<% gt 'Url:' %>
+		<input type="text" name="url"  size="15" />
+		<% gt 'Description:' %>
+		<input type="text" name="descr" size="30" />
+		<% include select_cat %>
+		<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+		</form>
+	</p>
+</div>
+
+<% end %>

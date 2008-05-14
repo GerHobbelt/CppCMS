@@ -801,7 +801,7 @@ void Blog::get_post(string sid,string ptype)
 
 	string title,abstract,content;
 
-	enum { SAVE, PUBLISH, PREVIEW } type;
+	enum { SAVE, PUBLISH, UNPUBLISH, PREVIEW, DELETE } type;
 	type = SAVE;
 
 	for(i=0;i<form.size();i++) {
@@ -818,23 +818,49 @@ void Blog::get_post(string sid,string ptype)
 		else if(field=="publish") {
 			type=PUBLISH;
 		}
+		else if(field=="unpublish") {
+			type=UNPUBLISH;
+		}
 		else if(field=="save") {
 			type=SAVE;
+		}
+		else if(field=="delete") {
+			type=DELETE;
 		}
 		else if(field=="preview") {
 			type=PREVIEW;
 		}
 	}
 
-	if(ptype=="post")
-		save_post(id,title,abstract,content,type==PUBLISH);
-	else
-		save_page(id,title,content,type==PUBLISH);
-
-	if(type==SAVE){
+	if(id!=-1 && type==DELETE) {
+		if(ptype=="post") {
+			sql<<"DELETE FROM posts WHERE id=?",id,exec();
+		}
+		else {
+			sql<<"DELETE FROM pages WHERE id=?",id,exec();
+		}
+	}
+	else {
+		int p;
+		if(type==PUBLISH)
+			p=1;
+		else if(type==UNPUBLISH)
+			p=-1;
+		else {
+			p=0;
+		}
+		if(ptype=="post")
+			save_post(id,title,abstract,content,p);
+		else
+			save_page(id,title,content,p);
+	}
+	if(type==SAVE || type==DELETE ){
 		set_header(new HTTPRedirectHeader(fmt.admin));
 	}
-	else if(type==PUBLISH){
+	else if(type==PREVIEW || type==UNPUBLISH) {
+		edit_post(str(format("%1%") % id),ptype);
+	}
+	else /*(type==PUBLISH )*/{
 		string redirect;
 		if(ptype=="post")
 			redirect=str(format(fmt.post)%id);
@@ -843,13 +869,10 @@ void Blog::get_post(string sid,string ptype)
 
 		set_header(new HTTPRedirectHeader(redirect));
 	}
-	else if(type==PREVIEW) {
-		edit_post(str(format("%1%") % id),ptype);
-	}
 }
 
 void Blog::save_page(int &id,string &title,
-		     string &content,bool pub)
+		     string &content,int pub)
 {
 	int is_open = pub ? 1: 0;
 
@@ -862,13 +885,13 @@ void Blog::save_page(int &id,string &title,
 		// The parameter is relevant for PgSQL only
 	}
 	else {
-		if(pub)	{
+		if(pub){
 			sql<<	"UPDATE pages "
 				"SET	title= ?,"
 				"	content=?,"
-				"	is_open=1 "
+				"	is_open=? "
 				"WHERE id=?",
-			title,content,id;
+			title,content,(pub>0?1:0),id;
 			sql.exec();
 		}
 		else {
@@ -884,7 +907,7 @@ void Blog::save_page(int &id,string &title,
 }
 
 void Blog::save_post(int &id,string &title,
-		     string &abstract,string &content,bool pub)
+		     string &abstract,string &content,int pub)
 {
 	tm t;
 	time_t tt=time(NULL);
@@ -902,26 +925,27 @@ void Blog::save_post(int &id,string &title,
 		// The parameter is relevant for PgSQL only
 	}
 	else {
-		if(pub)	{
+		if(pub==0)	{
 			sql<<	"UPDATE posts "
 				"SET	title= ?,"
 				"	abstract= ?,"
-				"	content=?,"
-				"	is_open=1,"
-				"	publish=? "
+				"	content=?"
 				"WHERE id=?",
-			title,abstract,content,
-			t,id;
+			title,abstract,content,id;
+			sql.exec();
+		}
+		else if(pub>0)	{
+			sql<<	"UPDATE posts "
+				"SET	title=?,abstract=?,content=?,is_open=1,publish=? "
+				"WHERE id=?",
+				title,abstract,content,t,id;
 			sql.exec();
 		}
 		else {
 			sql<<	"UPDATE posts "
-				"SET	title= ?,"
-				"	abstract= ?,"
-				"	content=? "
+				"SET	title=?,abstract=?,content=?,is_open=0 "
 				"WHERE id=?",
-			title,abstract,content,
-			id;
+				title,abstract,content,id;
 			sql.exec();
 		}
 	}

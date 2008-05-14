@@ -511,9 +511,10 @@ void View_Admin_Post::ini(int id,string ptype)
 	}
 	post_data.id=-1;
 	row r;
+	int is_open;
 	if(is_post){
 		blog->sql<<
-			"SELECT id,title,abstract,content "
+			"SELECT id,title,abstract,content,is_open "
 			"FROM posts "
 			"WHERE id=?",
 			id;
@@ -521,24 +522,25 @@ void View_Admin_Post::ini(int id,string ptype)
 			throw Error(Error::E404);
 		}
 		r>>	post_data.id>>post_data.title>>
-			post_data.abstract>>post_data.content;
+			post_data.abstract>>post_data.content>>is_open;
 	}
 	else {
 		blog->sql<<
-			"SELECT id,title,content "
+			"SELECT id,title,content,is_open "
 			"FROM pages "
 			"WHERE id=?",
 			id;
 		if(!blog->sql.single(r)){
 			throw Error(Error::E404);
 		}
-		r>>	post_data.id>>post_data.title>>post_data.content;
+		r>>	post_data.id>>post_data.title>>post_data.content>>is_open;
 	}
 
 	c["post_title"]=post_data.title;
 	if(is_post)
 		c["abstract"]=post_data.abstract;
 	c["content"]=post_data.content;
+	c["is_open"]=bool(is_open);
 }
 
 
