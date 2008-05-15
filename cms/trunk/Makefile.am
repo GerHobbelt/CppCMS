@@ -16,3 +16,8 @@ all: locale/he/LC_MESSAGES/cppblog.mo
 
 locale/he/LC_MESSAGES/cppblog.mo: locale/he/LC_MESSAGES/cppblog.po
 	msgfmt locale/he/LC_MESSAGES/cppblog.po -o locale/he/LC_MESSAGES/cppblog.mo
+
+update-pot:
+	msgcat templates/messages-os.pot templates/messages.pot >messages.pot
+	msgmerge -U locale/he/LC_MESSAGES/cppblog.po messages.pot
+
