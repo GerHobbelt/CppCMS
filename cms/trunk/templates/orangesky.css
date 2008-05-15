@@ -845,3 +845,11 @@ margin-top:-35px;
 #copyright {
 	margin-top:15px;
 } 
+
+#footercontact {
+	float:left;
+}
+
+#footerdesign {
+	float:right;
+}

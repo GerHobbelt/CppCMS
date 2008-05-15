@@ -45,7 +45,7 @@ struct comment_t {
 	std::string	content;
 };
 
-typedef enum { BLOG_TITLE, BLOG_DESCRIPTION } case_t;
+typedef enum { BLOG_TITLE, BLOG_DESCRIPTION, BLOG_CONTACT } case_t;
 
 struct option_t {
 	int		id;

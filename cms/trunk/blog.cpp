@@ -275,7 +275,7 @@ void Blog::edit_options()
 
 	const vector<FormEntry> &form=cgi->getElements();
 
-	string name,desc,copyright;
+	string name,desc,copyright,contact;
 
 	unsigned i;
 
@@ -287,6 +287,9 @@ void Blog::edit_options()
 		else if(field=="desc") {
 			desc=form[i].getValue();
 		}
+		else if(field=="contact") {
+			contact=form[i].getValue();
+		}
 		else if(field=="copyright") {
 			copyright=form[i].getValue();
 		}
@@ -295,8 +298,8 @@ void Blog::edit_options()
 	if(form.size()>0){
 		transaction tr(sql);
 		sql<<"DELETE FROM text_options WHERE id='copyright'",exec();
-		sql<<"DELETE FROM options WHERE id=? OR id=?",
-			BLOG_TITLE,BLOG_DESCRIPTION,exec();
+		sql<<"DELETE FROM options WHERE id=? OR id=? OR id=?",
+			BLOG_TITLE,BLOG_DESCRIPTION,BLOG_CONTACT,exec();
 		if(copyright!=""){
 			sql<<	"INSERT INTO text_options(id,value) "
 				"VALUES('copyright',?)",
@@ -306,6 +309,8 @@ void Blog::edit_options()
 			BLOG_TITLE,name,exec();
 		sql<<"INSERT INTO options(id,value) VALUES(?,?)",
 			BLOG_DESCRIPTION,desc,exec();
+		sql<<"INSERT INTO options(id,value) VALUES(?,?)",
+			BLOG_CONTACT,contact,exec();
 		tr.commit();
 	}
 

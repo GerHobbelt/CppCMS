@@ -169,6 +169,8 @@ void View_Main_Page::ini_share()
 			c["blog_name"]=val;
 		else if(id==BLOG_DESCRIPTION)
 			c["blog_description"]=val;
+		else if(id==BLOG_CONTACT && val!="")
+			c["blog_contact"]=val;
 	}
 	c["media"]=blog->fmt.media;
 	c["admin_url"]=blog->fmt.admin;
@@ -359,8 +361,7 @@ void View_Admin::ini_options()
 {
 	ini_share();
 	result res;
-	blog->sql<<"SELECT id,value FROM options WHERE id in (?,?)",
-		BLOG_TITLE,BLOG_DESCRIPTION,res;
+	blog->sql<<"SELECT id,value FROM options",res;
 	row r;
 	while(res.next(r)) {
 		int id;
@@ -368,8 +369,10 @@ void View_Admin::ini_options()
 		r>>id>>val;
 		if(id==BLOG_TITLE)
 			c["blog_name"]=val;
-		if(id==BLOG_DESCRIPTION)
+		else if(id==BLOG_DESCRIPTION)
 			c["blog_description"]=val;
+		else if(id==BLOG_CONTACT)
+			c["blog_contact"]=val;
 	}
 	blog->sql<<"SELECT value FROM text_options WHERE id='copyright'";
 	if(blog->sql.single(r)) {

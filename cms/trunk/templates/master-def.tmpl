@@ -20,13 +20,13 @@
 <div id="header">
 <div id="navall" >
 	<% if def langlist %><% include lnglst %><% end %>
-	<div id="nav">
+<!--	<div id="nav">
 		<ul>
 			<li><a href="http://cppcms.sourceforge.net/"><% gt 'Project' %></a></li>
 			<li><a href="http://cppcms.sourceforge.net/#downloads"><% gt 'Downloads' %></a></li>
 			<li><a class="selected" href="<% base_url | raw %>"><% gt 'Home' %></a></li>
 		</ul>
-	</div>
+	</div>-->
 </div>
 <div id="title"><% blog_name %></div>
 <div id="slogan"><% blog_description %></div>
@@ -62,20 +62,11 @@
 <% end %>
 
 <div id="footer">
-	<% if rtl %>
-		<div id="footercontact">
-			<a href="#"><% gt 'Contact' %></a>
-		</div>
-	<% end %>
-	<div id="copyrightdesign">
-		<% gt 'Copyright &copy; 2007 Artyom Tonkikh' %>
-		| <% gt 'Based on Design by \la href="http://ContentedDesigns.com"\rContented Designs\l/a\r' %>
+	<div id="copyrightdesign" ><% gt 'Based on Design by \la href="http://ContentedDesigns.com"\rContented Designs\l/a\r' %>
 	</div>
-	<% if not rtl %>
-		<div id="footercontact">
-			<a href="#"><% gt 'Contact' %></a>
-		</div>
-	<% end %>
+	<div id="footercontact">
+		<a href="<% if def blog_contact %><% blog_contact %><% else %>#<% end %>"><% gt 'Contact' %></a>
+	</div>
 </div>
 </div>
 </body>

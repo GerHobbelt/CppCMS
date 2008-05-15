@@ -36,7 +36,12 @@
 		<% include sidebar %>
 	</div>
 	<div id="footer">
-	<% gt 'The template design based on WordPress OrangeSky template by Naoko McCracken' %>
+		<div id="footercontact">
+			<a href="<% if def blog_contact %><% blog_contact %><% else %>#<% end %>"><% gt 'Contact' %></a>
+		</div>
+		<div id="#footerdesign">
+			<% gt 'The template design based on WordPress OrangeSky template by Naoko McCracken' %>
+		</div>
 	</div> <!-- footer -->
 </div>
 </body>
