@@ -17,57 +17,8 @@
 	<% end %>
 </select>
 <% end %>
-<% template admin_editlinks() %>
-<% if not_empty %><h2><% gt 'The category you try to delete is not empty!' %></h2><% end %>
-<script language="javascript">
-<!--
-function switchvis(id)
-{
-	val=document.getElementById(id).style.display;
-	if(val=='inline') 
-		val='none';
-	else
-		val='inline';
-	document.getElementById(id).style.display=val;
-}
--->
-</script>
 
-<h2><% gt 'Categories' %></h2>
-<% foreach cat in link_cats %>
-	<ol>
-	<% item %>
-	<li>
-		<p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');"><% gt 'edit' %></a>
-			<% if def cat.del %> | <a href="<% submit_url %>?del_cat=<% cat.id %>"><% gt 'Delete' %><% end %></a></p>
-		<div id="cat<% cat.id %>" style="display:none">
-			<p>
-				<form action="<% submit_url %>" method="post" >
-				<input type="hidden" name="type" value="cat" />
-				<input type="hidden" name="id" value="<% cat.id %>" />
-				<input type="text" name="name" size="20" value="<% cat.name %>" />
-				<input type="submit" name="submit" value="<% gt 'Submit' %>" />
-				</form>
-			</p>
-		</div>
-	</li>
-	<% end %>
-	</ol>
-<% empty %>
-	<p><% gt 'No categories' %></p>
-<% end %> 
-<p><a href="javascript:switchvis('catnew')"><% gt 'New Category' %></a></p>
-<div id="catnew" style="display:none">
-	<form action="<% submit_url %>" method="post" >
-	<p>
-		<input type="hidden" name="type" value="newcat" />
-		<input type="text" name="name" size="20" />
-		<input type="submit" name="submit" value="<% gt 'Submit' %>" />
-	</p>
-	</form>
-</div>
-
-
+<% template admin_editlinks_int() %>
 <h2><% gt 'Links' %></h2>
 <% foreach link in links %>
 	<ol>
@@ -113,5 +64,62 @@ function switchvis(id)
 		</form>
 	</p>
 </div>
+<% end %>
 
+
+<% template admin_new_cat() %>
+<p><a href="javascript:switchvis('catnew')"><% gt 'New Category' %></a></p>
+<div id="catnew" style="display:none">
+	<form action="<% submit_url %>" method="post" >
+	<p>
+		<input type="hidden" name="type" value="newcat" />
+		<input type="text" name="name" size="20" />
+		<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+	</p>
+	</form>
+</div>
+<% end %>
+
+<% template admin_editlinks() %>
+<% if not_empty %><h2><% gt 'The category you try to delete is not empty!' %></h2><% end %>
+<script language="javascript">
+<!--
+function switchvis(id)
+{
+	val=document.getElementById(id).style.display;
+	if(val=='inline') 
+		val='none';
+	else
+		val='inline';
+	document.getElementById(id).style.display=val;
+}
+-->
+</script>
+
+<h2><% gt 'Categories' %></h2>
+<% foreach cat in link_cats %>
+	<ol>
+	<% item %>
+	<li>
+		<p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');"><% gt 'edit' %></a>
+			<% if def cat.del %> | <a href="<% submit_url %>?del_cat=<% cat.id %>"><% gt 'Delete' %><% end %></a></p>
+		<div id="cat<% cat.id %>" style="display:none">
+			<p>
+				<form action="<% submit_url %>" method="post" >
+				<input type="hidden" name="type" value="cat" />
+				<input type="hidden" name="id" value="<% cat.id %>" />
+				<input type="text" name="name" size="20" value="<% cat.name %>" />
+				<input type="submit" name="submit" value="<% gt 'Submit' %>" />
+				</form>
+			</p>
+		</div>
+	</li>
+	<% end %>
+	</ol>
+	<% include admin_new_cat  %>
+	<% include admin_editlinks_int  %>
+<% empty %>
+	<p><% gt 'No categories' %></p>
+	<% include admin_new_cat %>
+<% end %> 
 <% end %>

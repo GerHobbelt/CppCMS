@@ -333,11 +333,19 @@ void Blog::edit_links()
 			}
 			if(field=="del_cat") {
 				id=form[i].getIntegerValue();
-				try {
+				row r;
+				int num;
+				sql<<"BEGIN",exec();
+				sql<<"SELECT count(*) from links WHERE cat_id=?",id;
+				sql.single(r);
+				r>>num;
+				if(num==0){
 					sql<<"DELETE FROM link_cats WHERE id=?",id,exec();
+					sql<<"COMMIT",exec();
 				}
-				catch (dbixx_error const &e) {
+				else {
 					c["not_empty"]=true;
+					sql<<"ROLLBACK",exec();
 				}
 				break;
 			}
@@ -364,21 +372,33 @@ void Blog::edit_links()
 			sql<<"INSERT INTO link_cats(name) values(?)",name,exec();
 		}
 		else if(type=="newlink" && cat_id!=-1 && name!="" && url!="") {
-			try {
+			sql<<"BEGIN";
+			sql<<"SELECT id FROM link_cats WHERE id=?",cat_id;
+			row r;
+			if(sql.single(r)){
 				sql<<	"INSERT INTO links(cat_id,title,url,description) "
 					"VALUES(?,?,?,?)",cat_id,name,url,descr,exec();
+				sql<<"COMMIT";
 			}
-			catch(dbixx_error const &e) {}
+			else {
+				sql<<"ROLLBACK",exec();
+			}
 		}
 		else if(type=="cat" && id!=-1) {
 			sql<<"UPDATE link_cats SET name=? WHERE id=?",name,id,exec();
 		}
 		else if(type=="link" && id!=-1) {
-			try{
-			sql<<"UPDATE links SET cat_id=?,title=?,url=?,description=? WHERE id=?",
-				cat_id,name,url,descr,id,exec();
+			sql<<"BEGIN";
+			sql<<"SELECT id FROM link_cats WHERE id=?",cat_id;
+			row r;
+			if(sql.single(r)){
+				sql<<"UPDATE links SET cat_id=?,title=?,url=?,description=? WHERE id=?",
+					cat_id,name,url,descr,id,exec();
+				sql<<"COMMIT";
 			}
-			catch(dbixx_error const &e) {}
+			else {
+				sql<<"ROLLBACK";
+			}
 		}
 	}
 
@@ -480,7 +500,7 @@ void Blog::main()
 		string error_message=err.what();
 		if(global_config.lval("dbi.debug",0)==1) {
 			error_message+=":";
-			error_message+=err.query();
+//			error_message+=err.query();
 		}
 		throw HTTP_Error(error_message);
 	}
