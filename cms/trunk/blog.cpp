@@ -538,10 +538,17 @@ void Blog::add_comment(string &postid)
 		post_id,incom.author,incom.url,
 		incom.email,t,incom.message;
 	sql.exec();
+	count_comments(post_id);
 	tr.commit();
 
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
+}
+void Blog::count_comments(int id)
+{
+	sql<<	"UPDATE posts "
+		"SET	comment_count=(SELECT count(*) FROM comments WHERE post_id=?) "
+		"WHERE	id=?",id,id,exec();
 }
 
 void Blog::error_page(int what)
@@ -776,8 +783,7 @@ void Blog::update_comment(string sid)
 		}
 	}
 	if(del) {
-		sql<<	"DELETE FROM comments "
-			"WHERE id=?",id,exec();
+		del_single_comment(id);
 	}
 	else {
 		sql<<	"UPDATE comments "
@@ -853,7 +859,10 @@ void Blog::get_post(string sid,string ptype)
 
 	if(id!=-1 && type==DELETE) {
 		if(ptype=="post") {
+			transaction tr(sql);
+			sql<<"DELETE FROM comments WHERE post_id=?",id,exec();
 			sql<<"DELETE FROM posts WHERE id=?",id,exec();
+			tr.commit();
 		}
 		else {
 			sql<<"DELETE FROM pages WHERE id=?",id,exec();
@@ -970,12 +979,26 @@ void Blog::save_post(int &id,string &title,
 	}
 }
 
+void Blog::del_single_comment(int id)
+{
+	transaction tr(sql);
+	row r;
+	sql<<	"SELECT post_id FROM comments WHERE id=?",id;
+	if(sql.single(r)) {
+		int post_id;
+		r>>post_id;
+		sql<<	"DELETE FROM comments "
+			"WHERE id=?",id,exec();
+		count_comments(post_id);
+	}
+	tr.commit();
+}
+
 void Blog::del_comment(string sid)
 {
 	auth_or_throw();
 	int id=atoi(sid.c_str());
-	sql<<"DELETE FROM comments WHERE id=?",id;
-	sql.exec();
+	del_single_comment(id);
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
 }
 

@@ -23,7 +23,7 @@ create table posts (
 	content text not null,
 	publish datetime not null,
 	is_open integer not null,
-	is_rtl integer not null default 0,
+	comment_count integer not null default 0,
 	FOREIGN KEY (author_id) REFERENCES users(id)
 ) Engine = InnoDB;
 create index posts_pub on posts (is_open,publish);
@@ -86,6 +86,5 @@ create table pages (
 	title varchar(256) not null,
 	content text not null,
 	is_open integer not null,
-	is_rtl integer not null default 0,
 	FOREIGN KEY (author_id) REFERENCES users(id)
 ) Engine = InnoDB;

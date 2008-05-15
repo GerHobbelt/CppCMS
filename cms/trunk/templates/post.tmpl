@@ -2,6 +2,7 @@
 <h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
 	<% gt 'Publushed at %1%, by %2%' using date | strftime('%H:%M %d/%m/%y'), author %>
+	| <a href="#comments_pos"><% ngt 'one comment','%1% comments', comment_count using comment_count %></a>
 	<% if def edit_url %>
 		| <a href="<% edit_url | raw %>"><% gt 'edit' %></a>
 	<%end%>
@@ -12,6 +13,7 @@
 	<% content | ext latex | ext markdown2html %>
 <% end %>
 <div id="comments">
+<span id="comments_pos"></span>
 <% foreach comment in comments %>
 	<h2><% gt 'Comments' %></h2>
 	<dl>

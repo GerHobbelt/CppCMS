@@ -4,6 +4,7 @@
 		<h1><a href="<% post.permlink | raw %>"><% post.title %></a></h1>
 		<div class="published">
 			<% gt 'Publushed at %1%, by %2%' using post.date | strftime('%H:%M %d/%m/%y'), post.author %>
+			| <a href="<% post.permlink | raw %>#comments_pos"><% ngt 'one comment','%1% comments', post.comment_count using post.comment_count %></a>
 			<% if def post.edit_url %>
 				| <a href="<% post.edit_url | raw %>"><% gt 'edit' %></a>
 			<%end%>

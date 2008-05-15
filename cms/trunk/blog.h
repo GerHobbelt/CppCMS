@@ -101,12 +101,14 @@ private:
 	void set_login_cookies(string username,string password,int days);
 	int check_login(string username,string password);
 	void del_comment(string id);
+	void del_single_comment(int id);
 	bool auth();
 	void feed();
 	void feed_comments();
 	tmpl::renderer render;
 	void set_lang();
 	void edit_options();
+	void count_comments(int id);
 
 	content c;
 

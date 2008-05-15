@@ -45,6 +45,7 @@ void View_Post::ini_share(post_t &p)
 		c["edit_url"]=str(format(blog->fmt.edit_post) % p.id);
 	}
 	c["permlink"]=str(format(blog->fmt.post) % p.id);
+	c["comment_count"]=p.comment_count;
 }
 
 void View_Post::ini_full(post_t &p)
@@ -218,7 +219,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		blog->sql<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content !='', "
-			"	posts.publish "
+			"	posts.publish,posts.comment_count "
 			"FROM	posts "
 			"LEFT JOIN "
 			"	users ON users.id=posts.author_id "
@@ -232,7 +233,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		blog->sql<<
 			"SELECT posts.id,users.username,posts.title, "
 			"	posts.abstract, posts.content!='', "
-			"	posts.publish "
+			"	posts.publish,posts.comment_count "
 			"FROM	posts "
 			"LEFT JOIN "
 			"	users ON users.id=posts.author_id "
@@ -259,6 +260,7 @@ void View_Main_Page::ini_main(int id,bool feed)
 		r>>post.abstract;
 		r>>post.has_content;
 		r>>post.publish;
+		r>>post.comment_count;
 
 		View_Post post_v(blog,latest_posts[n]);
 		post_v.ini_short(post);
@@ -299,7 +301,7 @@ void View_Main_Page::ini_post(int id,bool preview)
 	blog->sql<<
 		"SELECT posts.id,users.username,posts.title, "
 		"	posts.abstract, posts.content, "
-		"	posts.publish,posts.is_open "
+		"	posts.publish,posts.is_open,posts.comment_count "
 		"FROM	posts "
 		"JOIN	users ON users.id=posts.author_id "
 		"WHERE	posts.id=? ",
@@ -309,7 +311,7 @@ void View_Main_Page::ini_post(int id,bool preview)
 	}
 	r>>	post.id>>post.author_name>>post.title>>
 		post.abstract>>post.content>>
-		post.publish>>post.is_open;
+		post.publish>>post.is_open>>post.comment_count;
 
 	if(post.id==-1 || (!post.is_open && !preview)){
 		throw Error(Error::E404);

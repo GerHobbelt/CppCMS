@@ -30,6 +30,7 @@ struct post_t {
 	std::string	content;
 	std::tm 	publish;
 	int 		is_open;
+	int		comment_count;
 	// Joined data
 	std::string	author_name;
 	int		has_content;

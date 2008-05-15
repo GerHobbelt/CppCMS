@@ -21,6 +21,7 @@ create table posts (
 	abstract text not null,
 	content text not null,
 	publish datetime not null,
+	comment_count integer not null default 0,
 	is_open integer not null
 );
 create index posts_pub on posts (is_open,publish);
