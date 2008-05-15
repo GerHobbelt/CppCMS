@@ -25,7 +25,7 @@
 	<% item %>
 	<li>
 		<a href="<% link.url %>"><% link.name %></a><% if def link.descr %> &mdash; <% link.descr %><% end %> | <a href="javascript:switchvis('link<% link.id %>');"><% gt 'edit' %></a>
-			| <a href="<% submit_url %>?del_link=<% link.id %>"><% gt 'Delete' %></a></p>
+			| <a href="<% submit_url %>?del_link=<% link.id %>"><% gt 'delete' %></a></p>
 		<div id="link<% link.id %>" style="display:none">
 			<p>
 				<form action="<% submit_url %>" method="post" >
@@ -102,7 +102,7 @@ function switchvis(id)
 	<% item %>
 	<li>
 		<p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');"><% gt 'edit' %></a>
-			<% if def cat.del %> | <a href="<% submit_url %>?del_cat=<% cat.id %>"><% gt 'Delete' %><% end %></a></p>
+			<% if def cat.del %> | <a href="<% submit_url %>?del_cat=<% cat.id %>"><% gt 'delete' %><% end %></a></p>
 		<div id="cat<% cat.id %>" style="display:none">
 			<p>
 				<form action="<% submit_url %>" method="post" >
