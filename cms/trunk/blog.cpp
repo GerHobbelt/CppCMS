@@ -372,13 +372,13 @@ void Blog::edit_links()
 			sql<<"INSERT INTO link_cats(name) values(?)",name,exec();
 		}
 		else if(type=="newlink" && cat_id!=-1 && name!="" && url!="") {
-			sql<<"BEGIN";
+			sql<<"BEGIN",exec();
 			sql<<"SELECT id FROM link_cats WHERE id=?",cat_id;
 			row r;
 			if(sql.single(r)){
 				sql<<	"INSERT INTO links(cat_id,title,url,description) "
 					"VALUES(?,?,?,?)",cat_id,name,url,descr,exec();
-				sql<<"COMMIT";
+				sql<<"COMMIT",exec();
 			}
 			else {
 				sql<<"ROLLBACK",exec();
@@ -388,16 +388,16 @@ void Blog::edit_links()
 			sql<<"UPDATE link_cats SET name=? WHERE id=?",name,id,exec();
 		}
 		else if(type=="link" && id!=-1) {
-			sql<<"BEGIN";
+			sql<<"BEGIN",exec();
 			sql<<"SELECT id FROM link_cats WHERE id=?",cat_id;
 			row r;
 			if(sql.single(r)){
 				sql<<"UPDATE links SET cat_id=?,title=?,url=?,description=? WHERE id=?",
 					cat_id,name,url,descr,id,exec();
-				sql<<"COMMIT";
+				sql<<"COMMIT",exec();
 			}
 			else {
-				sql<<"ROLLBACK";
+				sql<<"ROLLBACK",exec();
 			}
 		}
 	}
@@ -521,12 +521,12 @@ void Blog::add_comment(string &postid)
 	post_t post;
 	post.is_open=0;
 
+	sql<<"BEGIN",exec();
 	row r;
 	sql<<"SELECT is_open FROM posts WHERE id=?",
-		post_id,r;
-	r>>post.is_open;
-
-	if(!post.is_open) {
+		post_id;
+	if(!sql.single(r) || (r>>post.is_open , !post.is_open) ) {
+		sql<<"ROLLBACK",exec();
 		throw Error(Error::E404);
 	}
 
@@ -540,6 +540,7 @@ void Blog::add_comment(string &postid)
 		post_id,incom.author,incom.url,
 		incom.email,t,incom.message;
 	sql.exec();
+	sql<<"COMMIT",exec();
 
 	string redirect=str(format(fmt.post) % post_id);
 	set_header(new HTTPRedirectHeader(redirect));
