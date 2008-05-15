@@ -12,6 +12,15 @@
 	</ul>
 <% end %>
 
+<% foreach cat in cats %>
+<h2><% gt 'Categories' %></h2>
+	<ul>
+	<% item %>
+		<li><a href="<% cat.link %>"><% cat.name %></a></li>
+	<%end%>
+	</ul>
+<% end %>
+
 <% foreach cat in link_cats %>
 	<% item %>
 	<h2><% cat.title %></h2>

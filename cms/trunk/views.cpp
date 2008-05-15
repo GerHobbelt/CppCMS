@@ -154,6 +154,17 @@ void View_Main_Page::ini_sidebar()
 		if(descr!="")
 			ctmp["description"]=descr;
 	}
+
+	blog->sql<<"SELECT id,name FROM	cats",res;
+	content::vector_t &cats=c.vector("cats",res.rows());
+	for(i=0;res.next(r);i++) {
+		int id;
+		string name;
+		r>>id>>name;
+		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
+		cats[i]["name"]=name;
+	}
+	
 }
 
 void View_Main_Page::ini_share()
@@ -206,7 +217,73 @@ void View_Main_Page::ini_rss_comments()
 	}
 }
 
-void View_Main_Page::ini_main(int id,bool feed)
+void View_Main_Page::prepare_query(int cat_id,int id,int max_posts)
+{
+	if(cat_id==-1) {
+		if(id!=-1) {
+			blog->sql<<
+				"SELECT posts.id,users.username,posts.title, "
+				"	posts.abstract, posts.content !='', "
+				"	posts.publish,posts.comment_count "
+				"FROM	posts "
+				"LEFT JOIN "
+				"	users ON users.id=posts.author_id "
+				"WHERE	posts.publish <= "
+					"(SELECT publish FROM posts WHERE id=?) "
+				"	AND posts.is_open=1 "
+				"ORDER BY posts.publish DESC "
+				"LIMIT ?",
+				id,max_posts+1;
+		}
+		else {
+			blog->sql<<
+				"SELECT posts.id,users.username,posts.title, "
+				"	posts.abstract, posts.content!='', "
+				"	posts.publish,posts.comment_count "
+				"FROM	posts "
+				"LEFT JOIN "
+				"	users ON users.id=posts.author_id "
+				"WHERE	posts.is_open=1 "
+				"ORDER BY posts.publish DESC "
+				"LIMIT ?",(max_posts+1);
+		}
+	}
+	else {
+		if(id!=-1) {
+			blog->sql<<
+				"SELECT posts.id,users.username,posts.title, "
+				"	posts.abstract, posts.content !='', "
+				"	posts.publish,posts.comment_count "
+				"FROM	post2cat "
+				"LEFT JOIN	posts ON post2cat.post_id=posts.id "
+				"LEFT JOIN	users ON users.id=posts.author_id "
+				"WHERE	post2cat.cat_id=? "
+				"	AND post2cat.is_open=1 "
+				"	AND post2cat.publish <= "
+				"		(SELECT publish FROM posts WHERE id=?) "
+				"ORDER BY post2cat.publish DESC "
+				"LIMIT ?",
+				cat_id,id,max_posts;
+		}
+		else {
+			blog->sql<<
+				"SELECT posts.id,users.username,posts.title, "
+				"	posts.abstract, posts.content !='', "
+				"	posts.publish,posts.comment_count "
+				"FROM	post2cat "
+				"LEFT JOIN	posts ON post2cat.post_id=posts.id "
+				"LEFT JOIN	users ON users.id=posts.author_id "
+				"WHERE	post2cat.cat_id=? "
+				"	AND post2cat.is_open=1 "
+				"ORDER BY post2cat.publish DESC "
+				"LIMIT ?",
+				cat_id,max_posts;
+		}
+
+	}
+}
+
+void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 {
 	ini_share();
 
@@ -215,32 +292,9 @@ void View_Main_Page::ini_main(int id,bool feed)
 	content::vector_t &latest_posts=c.vector("posts",max_posts);
 
 	result rs;
-	if(id!=-1) {
-		blog->sql<<
-			"SELECT posts.id,users.username,posts.title, "
-			"	posts.abstract, posts.content !='', "
-			"	posts.publish,posts.comment_count "
-			"FROM	posts "
-			"LEFT JOIN "
-			"	users ON users.id=posts.author_id "
-			"WHERE	posts.publish <= (SELECT publish FROM posts WHERE id=?) "
-			"	AND posts.is_open=1 "
-			"ORDER BY posts.publish DESC "
-			"LIMIT ?",
-			id,max_posts+1;
-	}
-	else {
-		blog->sql<<
-			"SELECT posts.id,users.username,posts.title, "
-			"	posts.abstract, posts.content!='', "
-			"	posts.publish,posts.comment_count "
-			"FROM	posts "
-			"LEFT JOIN "
-			"	users ON users.id=posts.author_id "
-			"WHERE	posts.is_open=1 "
-			"ORDER BY posts.publish DESC "
-			"LIMIT ?",(max_posts+1);
-	}
+
+	prepare_query(cat_id,id,max_posts+1);
+
 	blog->sql.fetch(rs);
 
 	row r;

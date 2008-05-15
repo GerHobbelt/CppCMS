@@ -51,6 +51,7 @@ class View_Main_Page {
 	int error_code;
 	void ini_share();
 	void ini_sidebar();
+	void prepare_query(int,int,int);
 	content &c;
 public:
 	View_Main_Page(Blog *blog,content &con) : c(con)
@@ -59,7 +60,7 @@ public:
 	};
 	void ini_post(int id,bool preview);
 	void ini_page(int id,bool preview);
-	void ini_main(int id=-1,bool feed=false);
+	void ini_main(int id=-1,bool feed=false,int cat_id=-1);
 	void ini_error(int what);
 	void ini_rss_comments();
 };

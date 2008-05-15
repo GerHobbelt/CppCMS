@@ -27,6 +27,8 @@ extern transtext::trans_gnu gnugt;
 
 struct links_t {
 	string media;
+	string cat;
+	string cat_from;
 	string main;
 	string main_from;
 	string post;
@@ -50,6 +52,7 @@ struct links_t {
 	string page_preview;
 	string del_comment;
 	string feed;
+	string feed_cats;
 	string feed_comments;
 	string update_comment;
 	string lang_switch;
@@ -69,7 +72,7 @@ struct post_content_t {
 class Blog : public Worker_Thread {
 	URL_Parser url;
 // Member functions:
-	void main_page(string s);
+	void main_page(string s,string);
 	void post(string s,bool preview);
 	void page(string s,bool preview);
 	void add_comment(string &postid);
@@ -103,7 +106,7 @@ private:
 	void del_comment(string id);
 	void del_single_comment(int id);
 	bool auth();
-	void feed();
+	void feed(string scatid);
 	void feed_comments();
 	tmpl::renderer render;
 	void set_lang();

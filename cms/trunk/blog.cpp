@@ -121,11 +121,21 @@ void Blog::init()
 	}
 	else {
 		url.add("^/?$",
-			boost::bind(&Blog::main_page,this,"end"));
+			boost::bind(&Blog::main_page,this,"end","all"));
 		fmt.main=root + "/";
 		url.add("^/from/(\\d+)$",
-			boost::bind(&Blog::main_page,this,$1));
+			boost::bind(&Blog::main_page,this,$1,"all"));
 		fmt.main_from=root + "/from/%1%";
+
+		url.add("^/cat/(\\d+)$",
+			boost::bind(&Blog::main_page,this,"end",$1));
+		fmt.cat=root + "/cat/%1%";
+
+		url.add("^/cat/(\\d+)/from/(\\d+)$",
+			boost::bind(&Blog::main_page,this,$2,$1));
+		fmt.cat_from=root + "/cat/%1%/from/%2%";
+
+
 		url.add("^/post/(\\d+)$",
 			boost::bind(&Blog::post,this,$1,false));
 		fmt.post=root + "/post/%1%";
@@ -213,8 +223,11 @@ void Blog::init()
 			boost::bind(&Blog::del_comment,this,$1));
 		fmt.del_comment=
 			root+"/postback/delete/comment/%1%";
-		url.add("^/rss$",boost::bind(&Blog::feed,this));
+		url.add("^/rss$",boost::bind(&Blog::feed,this,"all"));
 		fmt.feed=root+"/rss";
+
+		url.add("^/rss/cat/(\\d+)$",boost::bind(&Blog::feed,this,$1));
+		fmt.feed_cats=root+"/rss/cat/%1%";
 
 		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
 		fmt.feed_comments=root+"/rss/comments";
@@ -419,16 +432,15 @@ void Blog::post(string s_id,bool preview)
 	render.render(c,"master",out.getstring());
 }
 
-void Blog::main_page(string from)
+void Blog::main_page(string from,string cat)
 {
 
 	View_Main_Page view(this,c);
-	if(from=="end") {
-		view.ini_main(-1);
-	}
-	else {
-		view.ini_main(atoi(from.c_str()));
-	}
+	int pid=from=="end" ? -1 : atoi(from.c_str());
+	int cid=cat =="all" ? -1 : atoi(cat.c_str());
+	
+	view.ini_main(pid,false,cid);
+
 	render.render(c,"master",out.getstring());
 }
 
@@ -1003,13 +1015,16 @@ void Blog::del_comment(string sid)
 }
 
 
-void Blog::feed()
+void Blog::feed(string cat)
 {
 
 	set_header(new HTTPContentHeader("text/xml"));
 
 	View_Main_Page view(this,c);
-	view.ini_main(-1,true);
+	if(cat=="all")
+		view.ini_main(-1,true);
+	else
+		view.ini_main(-1,true,atoi(cat.c_str()));
 	render.render(c,"feed_posts",out.getstring());
 }
 
