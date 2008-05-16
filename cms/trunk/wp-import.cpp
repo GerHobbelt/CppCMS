@@ -42,7 +42,7 @@ int main()
 		sql.param("password","root");
 		sql.connect();
 
-		sql<<"begin",exec();
+		transaction tr(sql);
 		row r;
 		string val;
 
@@ -69,22 +69,22 @@ int main()
 				id,name,pass,exec();
 		}
 
-		wp<<	"select ID,post_author,post_date,post_title,post_content,post_status "
+		wp<<	"select ID,post_author,post_date,post_title,post_content,post_status,comment_count "
 			"from wp_posts where post_type='post'";
 		wp.fetch(res);
 		while(res.next(r)) {
 			int id;
-			int uid;
+			int uid,count;
 			std::tm pub;
 			string title;
 			string content;
 			string status;
-			r>>id>>uid>>pub>>title>>content>>status;
+			r>>id>>uid>>pub>>title>>content>>status>>count;
 			string abstract;
 			prepare_post(abstract,content);
-			sql<<"Insert into posts(id,author_id,title,abstract,content,publish,is_open) "
-				"values(?,?,?,?,?,?,?)",
-				id,uid,title,abstract,content,pub,(status=="publish" ? 1 : 0);
+			sql<<"Insert into posts(id,author_id,title,abstract,content,publish,is_open,comment_count) "
+				"values(?,?,?,?,?,?,?,?)",
+				id,uid,title,abstract,content,pub,(status=="publish" ? 1 : 0),count;
 			sql.exec();
 		}
 
@@ -120,9 +120,63 @@ int main()
 			sql.exec();
 		}
 
+		wp<<"select wp_terms.term_id,wp_terms.name from wp_term_taxonomy join wp_terms on wp_terms.term_id=wp_term_taxonomy.term_id where taxonomy='category'",res;
+		wp.fetch(res);
+		while(res.next(r)) {
+			int id;
+			string name;
+			r>>id>>name;
+			sql<<"insert into cats(id,name) values(?,?)",id,name,exec();
+		}
+		
 
-		sql<<"commit",exec();
+		wp<<"select distinct wp_posts.ID,wp_posts.post_date,wp_terms.term_id,wp_posts.post_status from wp_term_taxonomy join wp_terms on wp_terms.term_id=wp_term_taxonomy.term_id left join wp_term_relationships on wp_term_taxonomy.term_taxonomy_id=wp_term_relationships.term_taxonomy_id join wp_posts on object_id=wp_posts.ID where taxonomy='category' and wp_posts.post_type='post' order by object_id";
+		wp.fetch(res);
+		while(res.next(r)) {
+			int id;
+			std::tm date;
+			int tid;
+			string status;
+			r>>id>>date>>tid>>status;
+			sql<<"insert into post2cat(cat_id,post_id,publish,is_open) values(?,?,?,?)",
+				tid,id,date,(status=="publish" ? 1:0),exec();
+		}
+		
+		wp<<"select distinct wp_posts.ID,wp_posts.post_date,wp_posts.post_status,wp_term_taxonomy.parent from wp_term_taxonomy join wp_terms on wp_terms.term_id=wp_term_taxonomy.term_id left join wp_term_relationships on wp_term_taxonomy.term_taxonomy_id=wp_term_relationships.term_taxonomy_id join wp_posts on object_id=wp_posts.ID where taxonomy='category' and wp_posts.post_type='post' order by object_id";
+		wp.fetch(res);
+		while(res.next(r)) {
+			int id;
+			std::tm date;
+			int tid;
+			string status;
+			r>>id>>date>>status>>tid;
+			sql<<"insert into post2cat(cat_id,post_id,publish,is_open) values(?,?,?,?)",
+				tid,id,date,(status=="publish" ? 1:0),exec();
+		}
 
+		wp<<"select wp_terms.term_id,wp_terms.name from wp_term_taxonomy join wp_terms on wp_terms.term_id=wp_term_taxonomy.term_id where taxonomy='link_category'",res;
+		wp.fetch(res);
+		while(res.next(r)) {
+			int id;
+			string name;
+			r>>id>>name;
+			sql<<"insert into link_cats(id,name) values(?,?)",id,name,exec();
+		}
+		
+		
+
+		wp<<"select distinct wp_links.link_id,wp_links.link_url,wp_terms.term_id,wp_links.link_name,wp_links.link_description from wp_term_taxonomy join wp_terms on wp_terms.term_id=wp_term_taxonomy.term_id left join wp_term_relationships on wp_term_taxonomy.term_taxonomy_id=wp_term_relationships.term_taxonomy_id join wp_links on object_id=wp_links.link_id where taxonomy='link_category' order by object_id";
+		wp.fetch(res);
+		while(res.next(r)) {
+			int id;
+			int tid;
+			string url,name,descr;
+			r>>id>>url>>tid>>name>>descr;
+			sql<<"insert into links(cat_id,id,title,url,description) values(?,?,?,?,?)",
+				tid,id,name,url,descr,exec();
+		}
+
+		tr.commit();
 	}
 	catch(dbixx_error const &e){
 		cerr<<e.what()<<endl;

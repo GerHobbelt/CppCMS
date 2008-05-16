@@ -19,6 +19,9 @@
 			<li><a href="<% base_url | raw %>"><% gt 'Home' %></a></li>
 			<li><a href="<% rss_posts | raw %>"><% gt 'RSS' %></a></li>
 			<li><a href="<% rss_comments | raw %>"><% gt 'RSS Comments' %></a></li>
+			<% if def category_name %>
+			<li><a href="<% category_rss %>"><% gt 'RSS for %1%' using category_name %></a></li>
+			<% end %>
 			<li><a href="<% admin_url %>"><% gt 'Enter' %></a></li>
 			</ul>
 		</div> <!-- menu -->

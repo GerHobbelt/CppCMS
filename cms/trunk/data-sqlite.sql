@@ -68,7 +68,7 @@ create table link_cats (
 create table links (
 	id integer primary key autoincrement not null,
 	cat_id integer not null,
-	title varchar(128) unique not null,
+	title varchar(128)  not null,
 	url varchar(128) not null,
 	description text not null
 );

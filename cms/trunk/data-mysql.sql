@@ -60,6 +60,7 @@ create table post2cat (
 	cat_id integer not null references cats(id),
 	publish datetime not null,
 	is_open integer not null,
+	constraint unique (post_id,cat_id),
 	FOREIGN KEY (post_id) REFERENCES posts(id),
 	FOREIGN KEY (cat_id) REFERENCES cats(id)
 ) Engine = InnoDB;
@@ -74,7 +75,7 @@ create table link_cats (
 create table links (
 	id integer auto_increment primary key not null,
 	cat_id integer not null references link_cats(id),
-	title varchar(128) unique not null,
+	title varchar(128) not null,
 	url varchar(128) not null,
 	description text not null,
 	FOREIGN KEY (cat_id) REFERENCES link_cats(id)

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-14 23:48+0300\n"
+"PO-Revision-Date: 2008-05-16 17:46+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -124,8 +124,16 @@ msgstr "גוף ההודעה"
 msgid "Press \"back\" browser button and fix the form"
 msgstr "לחץ מקש \"חזרה\" בדפדפן על מנת לתקן את הבעיה."
 
-msgid "Publushed at %1%, by %2%"
-msgstr "פורסם ב־%1%, ע\"י %2%"
+msgid "Posts in category &#8216;%1%&#8217;."
+msgstr "מאמרים בנושא \"%1%\""
+
+msgid "%1%, by %2% "
+msgstr "%1%, מאת %2%"
+
+msgid "one comment"
+msgid_plural "%1% comments"
+msgstr[0] "‏תגובה אחת"
+msgstr[1] "‏%1% תגובות"
 
 msgid "more..."
 msgstr "המשך..."
@@ -133,8 +141,14 @@ msgstr "המשך..."
 msgid "next page"
 msgstr "הדף הבא"
 
+msgid "There are not posts in category &#8216;%1%&#8217;"
+msgstr "אין מאמרים בנושא \"%1%\""
+
 msgid "There are no posts in the blog"
 msgstr "אין מאמרים בבלוג"
+
+msgid "Posted in:"
+msgstr "תחת נושאים:"
 
 msgid "Comments"
 msgstr "תגובות"
@@ -214,6 +228,9 @@ msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות �
 msgid "comments"
 msgstr "תגובות"
 
+msgid "Categories"
+msgstr "נושאים"
+
 msgid "No links"
 msgstr "אין קישורים"
 
@@ -250,20 +267,11 @@ msgstr "אמת ססמה:"
 msgid "Options"
 msgstr "אפשרויות"
 
+msgid "Contact:"
+msgstr "צור קשר:"
+
 msgid "Copyright Text (markdown):"
 msgstr "זכויות היוצרים (markdown):"
-
-msgid "The category you try to delete is not empty!"
-msgstr "הנושא שניסית למחוק אינו ריק!"
-
-msgid "Categories"
-msgstr "נושאים"
-
-msgid "No categories"
-msgstr "אין נושאים"
-
-msgid "New Category"
-msgstr "נושא חדש"
 
 msgid "Links"
 msgstr "קישורים"
@@ -274,11 +282,14 @@ msgstr "תיאור:"
 msgid "New Link"
 msgstr "קישור חדש"
 
-msgid "Project"
-msgstr "פרויקט"
+msgid "New Category"
+msgstr "נושא חדש"
 
-msgid "Downloads"
-msgstr "הורדות"
+msgid "The category you try to delete is not empty!"
+msgstr "הנושא שניסית למחוק אינו ריק!"
+
+msgid "No categories"
+msgstr "אין נושאים"
 
 msgid "Home"
 msgstr "בית"
@@ -289,8 +300,8 @@ msgstr "מאמרים ב־RSS"
 msgid "RSS Comments"
 msgstr "תגובות ב־RSS"
 
-msgid "Project Site"
-msgstr "אתר הפרויקט"
+msgid "RSS for %1%"
+msgstr "‏%1% ב־RSS"
 
 msgid "Enter"
 msgstr "כניסה"
@@ -298,8 +309,17 @@ msgstr "כניסה"
 msgid "Contact"
 msgstr "צור קשר"
 
-msgid "Copyright &copy; 2007 Artyom Tonkikh"
-msgstr "זכויות שמורות 2007 ארתיום טונקיך"
+msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
+
+msgid "Project"
+msgstr "פרויקט"
+
+msgid "Downloads"
+msgstr "הורדות"
+
+msgid "Project Site"
+msgstr "אתר הפרויקט"
 
 msgid ""
 "Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
@@ -307,7 +327,4 @@ msgid ""
 msgstr ""
 "מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
 "a>"
-
-msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
-msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
 

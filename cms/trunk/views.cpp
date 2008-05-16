@@ -90,6 +90,20 @@ void View_Post::ini_full(post_t &p)
 
 		com.init(comment);
 	}
+
+	blog->sql<<
+		"SELECT post2cat.cat_id,cats.name "
+		"FROM	post2cat "
+		"JOIN	cats ON post2cat.cat_id=cats.id "
+		"WHERE	post2cat.post_id=?",p.id,rs;
+	content::vector_t &cats=c.vector("post_cats",rs.rows());
+	for(i=0;rs.next(cur);i++) {
+		int id;
+		string name;
+		cur>>id>>name;
+		cats[i]["url"]=str(format(blog->fmt.cat) % id);
+		cats[i]["name"]=name;
+	}
 }
 
 
@@ -164,7 +178,7 @@ void View_Main_Page::ini_sidebar()
 		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
 		cats[i]["name"]=name;
 	}
-	
+
 }
 
 void View_Main_Page::ini_share()
@@ -299,11 +313,19 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 
 	row r;
 	int counter,n;
+
+	std::tm first,last;
+
+	std::map<int,content::list_t *> post2cat_list;
+
 	for(counter=1,n=0;rs.next(r);counter++) {
 		if(counter==max_posts+1) {
 			int id;
 			r>>id;
-			c["next_page_link"]=str(format(blog->fmt.main_from) % id);
+			if(cat_id==-1)
+				c["next_page_link"]=str(format(blog->fmt.main_from) % id);
+			else
+				c["next_page_link"]=str(format(blog->fmt.cat_from) % cat_id % id);
 			break;
 		}
 		post_t post;
@@ -316,6 +338,14 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 		r>>post.publish;
 		r>>post.comment_count;
 
+		if(!feed){
+			post2cat_list[post.id]=&(latest_posts[n].list("post_cats"));
+		}
+
+		if(counter==1)
+			first=post.publish;
+		last=post.publish;
+
 		View_Post post_v(blog,latest_posts[n]);
 		post_v.ini_short(post);
 		n++;
@@ -323,8 +353,61 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 	if(n<max_posts){
 		latest_posts.resize(n);
 	}
+
+	string cat_name;
+
+	if(n>0 && !feed) {
+		if(cat_id==-1){
+			blog->sql<<
+			"SELECT	list.pid,cats.id,cats.name "
+			"FROM	(	SELECT posts.id as pid"
+			"		FROM posts "
+			"		WHERE publish>=? and publish<=? and is_open=1)"
+			"	AS list"
+			"	JOIN post2cat ON list.pid=post2cat.post_id"
+			"	JOIN cats on post2cat.cat_id=cats.id",last,first;
+		}
+		else {
+			blog->sql<<
+			"SELECT	list.pid,cats.id,cats.name "
+			"FROM	(SELECT post2cat.post_id as pid "
+			"	FROM post2cat "
+			"	WHERE publish>=? and publish<=? and is_open=1 and cat_id=?)"
+			"	AS list"
+			"	JOIN post2cat ON list.pid=post2cat.post_id"
+			"	JOIN cats on post2cat.cat_id=cats.id",last,first,cat_id;
+		}
+		result res;
+		row r;
+		blog->sql.fetch(res);
+		while(res.next(r)) {
+			int cid,pid;
+			string name;
+			r>>pid>>cid>>name;
+			if(cid==cat_id && cat_name==""){
+				cat_name=name;
+			}
+			map<int,content::list_t *>::iterator ptr;
+			if((ptr=post2cat_list.find(pid))!=post2cat_list.end()) {
+				content::list_t &temp=(*(ptr->second));
+				temp.push_back(content());
+				temp.back()["name"]=name;
+				temp.back()["url"]=str(format(blog->fmt.cat) % cid);
+			}
+		}
+	}
+
+	if(cat_id!=-1) {
+		if(cat_name==""){
+			throw Error(Error::E404);
+		}
+		c["category_name"]=cat_name;
+		c["category_rss"]=str(format(blog->fmt.feed_cats) % cat_id);
+	}
+
 	c["master_content"]=string("main_page");
 }
+
 
 void View_Main_Page::ini_page(int id,bool preview)
 {

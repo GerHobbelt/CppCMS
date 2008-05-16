@@ -40,6 +40,10 @@
 &nbsp;/&nbsp;
 <a href="<% rss_comments | raw %>"><% gt 'RSS Comments' %></a>
 &nbsp;/&nbsp;
+<% if def category_name %>
+<a href="<% category_rss %>"><% gt 'RSS for %1%' using category_name %></a>
+&nbsp;/&nbsp;
+<% end %>
 <a href="http://cppcms.sourceforge.net/"><% gt 'Project Site' %></a>
 &nbsp;/&nbsp;
 <a href="<% admin_url %>"><% gt 'Enter' %></a>
