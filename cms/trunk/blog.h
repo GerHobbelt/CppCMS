@@ -17,6 +17,7 @@
 #include <tmpl/renderer.h>
 #include <tmpl/content.h>
 #include <tmpl/transtext.h>
+#include <set>
 #include "views.h"
 #include "data.h"
 
@@ -97,7 +98,8 @@ private:
 	void login();
 	void logout();
 	void save_post(int &id,string &title,
-		       string &abstract,string &content,int pub);
+		       string &abstract,string &content,int pub,
+		       set<int> &,set<int>&);
 	void save_page(int &id,string &title,
 		       string &content,int pub);
 

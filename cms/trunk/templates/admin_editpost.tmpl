@@ -18,6 +18,15 @@
 			return true;
 		}
 	}
+	function switchvis(id)
+	{
+		val=document.getElementById(id).style.display;
+		if(val=='inline') 
+			val='none';
+		else
+			val='inline';
+		document.getElementById(id).style.display=val;
+	}
 -->
 </script>
 <div id="form">
@@ -33,6 +42,36 @@
         <dt><% gt 'Title:'%></dt>
         <dd><input type="text" name="title" size="80" <% if def post_title %>value="<%post_title%>"<% end %> /></dd>
 	<% if not is_page %>
+	<dt><% gt 'Categories:' %></dt>
+	<dd>
+		<p>
+		<% foreach cat in cats_in %>
+		<% gt 'The post is published under catergories:'%>
+		<% separator %>, <% item %><% cat.name %><% end %>
+		<% empty %>
+		<% gt 'No categories assigned to this post.'%>
+		<% end %>
+		<a href="javascript:switchvis('editcats');"><% gt '(click to edit)' %></a>
+		</p>
+		<div id="editcats" style="display:none" >
+		<% foreach cat in cats_in %>
+			<p><strong><% gt 'Remove From Categories:' %></strong></p>
+			<ul class="catlist">
+			<% item %>
+			<li><input type="checkbox" name="del" value="<% cat.id %>"> <% cat.name %></li>
+			<% end %>
+			</ul>
+		<% end %>
+		<% foreach cat in cats_out %>
+			<p><strong><% gt 'Add To Categories:' %></strong></p>
+			<ul class="catlist">
+			<% item %>
+			<li><input type="checkbox" name="add" value="<% cat.id %>"> <% cat.name %></li>
+			<% end %>
+			</ul>
+		<% end %>
+		</div>		
+	</dd>
         <dt><% gt 'Abstract:'%></dt>
         <dd>
                 <fieldset><div> <!-- IE Textarea ugly hack -->

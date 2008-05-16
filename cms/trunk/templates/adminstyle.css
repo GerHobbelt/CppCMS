@@ -74,3 +74,5 @@ h3 {font-size:120%;}
 h4 {font-size:100%;}
 
 #path { margin-right:5px; margin-left:5px; font-size:80%; }
+
+.catlist { list-style:none; }

@@ -359,7 +359,7 @@ void Blog::edit_links()
 				r>>num;
 				if(num==0){
 					sql<<"DELETE FROM link_cats WHERE id=?",id,exec();
-					tr.commit();	
+					tr.commit();
 				}
 				else {
 					c["not_empty"]=true;
@@ -438,7 +438,7 @@ void Blog::main_page(string from,string cat)
 	View_Main_Page view(this,c);
 	int pid=from=="end" ? -1 : atoi(from.c_str());
 	int cid=cat =="all" ? -1 : atoi(cat.c_str());
-	
+
 	view.ini_main(pid,false,cid);
 
 	render.render(c,"master",out.getstring());
@@ -841,6 +841,9 @@ void Blog::get_post(string sid,string ptype)
 	enum { SAVE, PUBLISH, UNPUBLISH, PREVIEW, DELETE } type;
 	type = SAVE;
 
+	set<int> dellist;
+	set<int> addlist;
+
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="title") {
@@ -867,11 +870,18 @@ void Blog::get_post(string sid,string ptype)
 		else if(field=="preview") {
 			type=PREVIEW;
 		}
+		else if(field=="add") {
+			addlist.insert(form[i].getIntegerValue());
+		}
+		else if(field=="del") {
+			dellist.insert(form[i].getIntegerValue());
+		}
 	}
 
 	if(id!=-1 && type==DELETE) {
 		if(ptype=="post") {
 			transaction tr(sql);
+			sql<<"DELETE FROM post2cat WHERE post_id=?",id,exec();
 			sql<<"DELETE FROM comments WHERE post_id=?",id,exec();
 			sql<<"DELETE FROM posts WHERE id=?",id,exec();
 			tr.commit();
@@ -890,7 +900,7 @@ void Blog::get_post(string sid,string ptype)
 			p=0;
 		}
 		if(ptype=="post")
-			save_post(id,title,abstract,content,p);
+			save_post(id,title,abstract,content,p,addlist,dellist);
 		else
 			save_page(id,title,content,p);
 	}
@@ -947,13 +957,15 @@ void Blog::save_page(int &id,string &title,
 }
 
 void Blog::save_post(int &id,string &title,
-		     string &abstract,string &content,int pub)
+		     string &abstract,string &content,int pub,set<int> &addlist,set<int> &dellist)
 {
 	tm t;
 	time_t tt=time(NULL);
 
 	localtime_r(&tt,&t);
 	int is_open = pub ? 1: 0;
+
+	transaction tr(sql);
 
 	if(id==-1) {
 		sql<<	"INSERT INTO posts (author_id,title,abstract,content,is_open,publish) "
@@ -973,6 +985,11 @@ void Blog::save_post(int &id,string &title,
 				"WHERE id=?",
 			title,abstract,content,id;
 			sql.exec();
+			row r;
+			sql<<	"SELECT publish,is_open FROM posts WHERE id=?",id;
+			if(sql.single(r)) {
+				r>>t>>is_open;
+			}
 		}
 		else if(pub>0)	{
 			sql<<	"UPDATE posts "
@@ -980,6 +997,9 @@ void Blog::save_post(int &id,string &title,
 				"WHERE id=?",
 				title,abstract,content,t,id;
 			sql.exec();
+			sql<<	"UPDATE post2cat "
+				"SET	publish=?,is_open=1 "
+				"WHERE	post_id=?",t,id,exec();
 		}
 		else {
 			sql<<	"UPDATE posts "
@@ -987,8 +1007,28 @@ void Blog::save_post(int &id,string &title,
 				"WHERE id=?",
 				title,abstract,content,id;
 			sql.exec();
+			sql<<	"UPDATE post2cat "
+				"SET	is_open=0 "
+				"WHERE	post_id=?",id,exec();
+			row r;
+			sql<<	"SELECT publish FROM posts WHERE id=?",id;
+			if(sql.single(r)) {
+				r>>t;
+			}
 		}
 	}
+
+	set<int>::iterator p;
+	for(p=addlist.begin();p!=addlist.end();p++) {
+		sql<<	"INSERT INTO post2cat(post_id,cat_id,is_open,publish) "
+				"VALUES(?,?,?,?)",id,*p,is_open,t,exec();
+	}
+	for(p=dellist.begin();p!=dellist.end();p++) {
+		sql<<	"DELETE FROM post2cat WHERE post_id=? AND cat_id=?",
+		id,(*p),exec();
+	}
+
+	tr.commit();
 }
 
 void Blog::del_single_comment(int id)

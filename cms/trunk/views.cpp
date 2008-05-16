@@ -14,6 +14,8 @@
 #include "blog.h"
 #include "error.h"
 #include "cxxmarkdown/markdowncxx.h"
+#include <set>
+
 
 using boost::format;
 using boost::str;
@@ -665,6 +667,37 @@ void View_Admin_Post::ini(int id,string ptype)
 		}
 		r>>	post_data.id>>post_data.title>>
 			post_data.abstract>>post_data.content>>is_open;
+		blog->sql<<
+			"SELECT cats.id,cats.name "
+			"FROM	post2cat "
+			"JOIN	cats ON post2cat.cat_id=cats.id "
+			"WHERE	post2cat.post_id=?",id;
+		result res;
+		blog->sql.fetch(res);
+
+		set<int> inset;
+		content::vector_t &cats_in=c.vector("cats_in",res.rows());
+		int i;
+		for(i=0;res.next(r);i++) {
+			int cid;
+			string name;
+			r>>cid>>name;
+			inset.insert(cid);
+			cats_in[i]["id"]=cid;
+			cats_in[i]["name"]=name;
+		}
+		content::list_t &cats_out=c.list("cats_out");
+		blog->sql<<"SELECT id,name FROM cats",res;
+		while(res.next(r)) {
+			int cid;
+			string name;
+			r>>cid>>name;
+			if(inset.find(cid)==inset.end()) {
+				cats_out.push_back(content());
+				cats_out.back()["id"]=cid;
+				cats_out.back()["name"]=name;
+			}
+		}
 	}
 	else {
 		blog->sql<<

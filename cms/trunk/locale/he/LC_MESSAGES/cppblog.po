@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-16 17:46+0300\n"
+"PO-Revision-Date: 2008-05-17 01:18+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -42,6 +42,24 @@ msgstr "מאמר חדש"
 
 msgid "Title:"
 msgstr "כותרת:"
+
+msgid "Categories:"
+msgstr "נושאים:"
+
+msgid "The post is published under catergories:"
+msgstr "המאמר פורסם תחת הנושאים הבאים:"
+
+msgid "No categories assigned to this post."
+msgstr "אין נושאים משוייכים למאמר זה."
+
+msgid "(click to edit)"
+msgstr "(לחץ לעריכה)"
+
+msgid "Remove From Categories:"
+msgstr "הסר נושאים"
+
+msgid "Add To Categories:"
+msgstr "הוסף נושאים"
 
 msgid "Abstract:"
 msgstr "תקציר:"
@@ -130,6 +148,9 @@ msgstr "מאמרים בנושא \"%1%\""
 msgid "%1%, by %2% "
 msgstr "%1%, מאת %2%"
 
+msgid "Posted in:"
+msgstr "תחת נושאים:"
+
 msgid "one comment"
 msgid_plural "%1% comments"
 msgstr[0] "‏תגובה אחת"
@@ -146,9 +167,6 @@ msgstr "אין מאמרים בנושא \"%1%\""
 
 msgid "There are no posts in the blog"
 msgstr "אין מאמרים בבלוג"
-
-msgid "Posted in:"
-msgstr "תחת נושאים:"
 
 msgid "Comments"
 msgstr "תגובות"
