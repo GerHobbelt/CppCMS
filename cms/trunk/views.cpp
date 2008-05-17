@@ -400,8 +400,12 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 	}
 
 	if(cat_id!=-1) {
+		row r;
 		if(cat_name==""){
-			throw Error(Error::E404);
+			blog->sql<<"SELECT name FROM cats WHERE id=?",cat_id;
+			if(!blog->sql.single(r))
+				throw Error(Error::E404);
+			r>>cat_name;
 		}
 		c["category_name"]=cat_name;
 		c["category_rss"]=str(format(blog->fmt.feed_cats) % cat_id);

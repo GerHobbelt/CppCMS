@@ -2,17 +2,7 @@
 <select name="cat" >
 	<% foreach cat in link_cats %>
 	<% item %> 
-		<script language="javascript">
-<!--
-		document.write('<option value="<% cat.id %>" ');
-		<% if def opt %>
-		if(<% cat.id %>==<% opt %>) {
-			document.write('selected="selected"');
-		}
-		<% end %>
-		document.write(' ><% cat.name %></option>');
--->
-		</script>
+		<option value="<% cat.id %>" <% if def opt %><% if eq cat.id opt %> selected="selected" <% end %><% end %> ><% cat.name %></option>
 	<% end %>
 	<% end %>
 </select>

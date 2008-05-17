@@ -27,7 +27,7 @@
         <% end %>
 <% empty %>
 	<% if def category_name %>
-		<h1><% gt 'There are not posts in category &#8216;%1%&#8217;' %></h1>
+		<h1><% gt 'There are not posts in category &#8216;%1%&#8217;' using category_name %></h1>
 	<% else %>
 		<h1><% gt 'There are no posts in the blog' %></h1>
 	<% end %>
