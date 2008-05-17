@@ -245,6 +245,25 @@ void renderer::render(content const &c,std::string const &func,string &out)
 		case	OP_CHECK_RTL:
 			flag=(strcmp(tr("LTR"),"RTL") == 0);
 			break;
+		case	OP_CHECK_EQ:
+			flag=false;
+			if(op.r0<=local_variables && op.r1<=local_variables) {
+				boost::any const *a1,*a2;
+				if((a1=local[op.r0])!=NULL && (a2=local[op.r1])!=NULL) {
+					if(a1->type()==typeid(int) && a2->type()==typeid(int)) {
+						int v1=boost::any_cast<int const &>(*a1);
+						int v2=boost::any_cast<int const &>(*a2);
+						flag=v1==v2;
+					}
+					else if(a1->type()==typeid(string) && a2->type()==typeid(string)) {
+						flag=boost::any_cast<string const &>(*a1)==boost::any_cast<string const &>(*a2);
+					}
+					else if(a1->type()==typeid(bool) && a2->type()==typeid(bool)) {
+						flag=boost::any_cast<bool const &>(*a1)==boost::any_cast<bool const &>(*a2);
+					}
+				}
+			}
+			break;
 		case	OP_STORE:
 			if(op.r2<=local_variables)
 				local[op.r2]=&any_value(op,c);

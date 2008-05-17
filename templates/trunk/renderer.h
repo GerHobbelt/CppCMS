@@ -81,6 +81,7 @@ typedef enum {
 			// r2 - textid singl
 			// jump - textid plural
 	OP_CHECK_RTL,	// sets FLAG to true if text is RTL
+	OP_CHECK_EQ,	// r0 -- local ref v1, r1 -- local ref r2
 };
 
 struct instruction {

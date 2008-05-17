@@ -64,6 +64,8 @@ int main()
 		c["n11"]=11;
 		c["v1"]=string("var one");
 		c["v2"]=string("var two");
+		c["x1"]=string("yes");
+		c["x2"]=string("yes");
 		
 		r.add_converter( typeid(comp),boost::bind(&my_conv,_1,_2));
 		r.add_string_filter("toupper",boost::bind(ToUpper,_1,_2,_3));

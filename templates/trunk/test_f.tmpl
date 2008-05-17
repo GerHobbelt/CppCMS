@@ -1,3 +1,7 @@
+<% template a(x,y) %>A<% x %><% y %><% end %>
+<% template b(xx,yy,zz) %>B<% xx %><% yy %><% zz %><% end %>
+<% template c() %><% if eq x1 x2 %><% include a using x1,x2 %><%else%><% include b using x1,x2,x3 %><% end %><% end %>
+<% template d() %><% if not eq x1 x2 %><% include a using x1,x2 %><%else%><% include b using x1,x2,x3 %><% end %><% end %>
 <% template main() %>
 <% if def str %>
 	Escaped: <% str %>
@@ -16,4 +20,6 @@ int hexupper <% i | intf('%x') | ext toupper %>
 Complex <% c %>
 Complex toupper <% c | ext toupper %>
 Typename <% c | ext typename('The type is:') %>
+<% include c %>
+<% include d %>
 <% end %>

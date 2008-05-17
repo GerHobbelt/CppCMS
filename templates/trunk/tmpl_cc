@@ -207,15 +207,21 @@ class else_block:
 		print "%s:" % prev.label
 		stack.append(self)
 
-
 class if_block:
-	pattern=r'^<%\s*(if|elif)\s+((not)\s+)?((def)\s+)?([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
+	pattern=r'^<%\s*(if|elif)\s+((not)\s+)?(((def)\s+)?([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)|(eq)\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$'
 	type='if'
 	def prepare(self):
-		ident_str=make_ident(self.ident)
 		if self.has_def:
+			ident_str=make_ident(self.ident)
 			print "\tdef\t%s" % ident_str
+		elif self.eq:
+			il=make_ident(self.eql);
+			print "\tsto\t%s,0" % il
+			ir=make_ident(self.eqr);
+			print "\tsto\t%s,1" % ir
+			print "\teq\t0,1"
 		else:
+			ident_str=make_ident(self.ident)
 			if ident_str=='rtl':
 				print "\trtl"
 			else:
@@ -233,8 +239,11 @@ class if_block:
 		global stack
 		self.type=m.group(1)
 		self.has_not=m.group(3)
-		self.has_def=m.group(5)
-		self.ident=m.group(6)
+		self.has_def=m.group(6)
+		self.ident=m.group(7)
+		self.eq=m.group(10)
+		self.eql=m.group(11)
+		self.eqr=m.group(14)
 		self.label=new_label()
 		if self.type == 'if' :
 			self.final=new_label();
@@ -381,7 +390,7 @@ class include_block:
 			m=re.match(r'^\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*',var)
 			if m:
 				id=make_ident(m.group(1))
-				print "\tsto\t%s,%d" % (id,n)
+				print "\tsto\t%s,%d" % (id,start+n)
 				n+=1
 			else:
 				error_exit("Syntaxis error in param %s" % var)
@@ -462,7 +471,7 @@ labels_counter=0
 tmpl_seq={}
 template_parameters={}
 templates_map={}
-parameters_counter=0
+parameters_counter=2
 seq_no=0
 stack=[]
 exit_flag=0

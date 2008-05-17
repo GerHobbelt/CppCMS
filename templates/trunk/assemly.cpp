@@ -42,6 +42,7 @@ map<uint32_t,string> references;
 	static boost::regex r_gettext("^\\s*gt\\s+'([^']*)'\\s*$");
 	static boost::regex r_ngettext("^\\s*ngt\\s+([a-zA-Z]\\w*|\\d+|[a-zA-Z]\\w*\\(\\d+\\)),'([^']*)','([^']*)'\\s*$");
 	static boost::regex r_rtl("^\\s*rtl\\s*$");
+	static boost::regex r_eq("^\\s*eq\\s+(\\d+),(\\d+)\\s*$");
 
 
 	static boost::regex r_var_glob("^([a-zA-Z]\\w*)$");
@@ -359,6 +360,13 @@ void process_command(char const *line)
 		op.opcode=OP_PUSH_CHAIN;
 		setup_filter(m[1],op.r0,op.jump);
 	}
+	else if(boost::regex_match(line,m,r_eq)) {
+		op.opcode=OP_CHECK_EQ;
+		string p1=m[1];
+		string p2=m[2];
+		op.r0=atoi(p1.c_str());
+		op.r1=atoi(p2.c_str());
+	}
 	else if(boost::regex_match(line,m,r_call_ref)) {
 		op.opcode=OP_CALL_REF;
 		setup_var_op(op,m[1]);
@@ -508,6 +516,7 @@ int main(int argc,char **argv)
 			return 1;
 		}
 
+		fprintf(pot_file,"msgid \"\"\nmsgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\n\n");
 		fprintf(pot_file,"# Please translate as RTL for Right-to-Left languages like Hebrew or Arabic\n"
 				"msgid \"LTR\"\nmsgstr \"\"\n\n");
 		fprintf(pot_file,"# Please translate LANG as native name of language, for example for French -- `Français'\n"
