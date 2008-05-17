@@ -38,9 +38,14 @@ blockquote, pre {
 	float:right;
 }
 
-.published, .nextpage{
+.published{
+        text-align:left;
+}
+
+.nextpage{
         text-align:right;
 }
+
 
 #slogan {
 	padding:10px 20px 0px 0px;

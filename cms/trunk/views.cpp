@@ -496,6 +496,7 @@ void View_Admin::ini_share()
 	c["new_page_url"]=blog->fmt.new_page;
 	c["edit_options_url"]=blog->fmt.edit_options;
 	c["edit_links_url"]=blog->fmt.edit_links;
+	c["edit_cats_url"]=blog->fmt.edit_cats;
 }
 
 void View_Admin::ini_options()
@@ -766,4 +767,25 @@ void View_Admin::ini_links()
 		if(description!="")
 			links[i]["descr"]=description;
 	}
+}
+
+
+void View_Admin::ini_cats()
+{
+	ini_share();
+	result res;
+	row r;
+	blog->sql<<"SELECT id,name FROM cats",res;
+	content::vector_t &cats=c.vector("cats",res.rows());
+	int i;
+	for(i=0;res.next(r);i++) {
+		int id;
+		string name;
+		r>>id>>name;
+		cats[i]["id"]=id;
+		cats[i]["name"]=name;
+	}
+
+	c["master_content"]=string("admin_editcats");
+	c["submit_url"]=blog->fmt.edit_cats;
 }

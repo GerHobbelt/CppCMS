@@ -214,6 +214,10 @@ void Blog::init()
 			boost::bind(&Blog::edit_links,this));
 		fmt.edit_links=root + "/admin/links";
 
+		url.add("^/admin/categories?$",
+			boost::bind(&Blog::edit_cats,this));
+		fmt.edit_cats=root + "/admin/categories";
+
 
 		url.add("^/admin/logout$",
 			boost::bind(&Blog::logout,this));
@@ -417,6 +421,76 @@ void Blog::edit_links()
 	view.ini_links();
 	render.render(c,"admin",out.getstring());
 }
+
+
+
+void Blog::edit_cats()
+{
+	auth_or_throw();
+
+	c["constraint_error"]=false;
+
+	const vector<FormEntry> &form=cgi->getElements();
+
+	if(form.size()>0) {
+		unsigned i;
+		int id=-1;
+		string name;
+		bool recur=false;
+		bool del=false;
+		bool new_cat=false;
+		for(i=0;i<form.size();i++) {
+			string const &field=form[i].getName();
+			if(field=="id") {
+				id=form[i].getIntegerValue();
+			}
+			else if(field=="name") {
+				name=form[i].getValue();
+			}
+			else if(field=="new") {
+				new_cat=true;
+			}
+			else if(field=="delete") {
+				del=true;
+			}
+			else if(field=="recur") {
+				recur=true;
+			}
+		}
+		if(new_cat && name!="") {
+			sql<<"INSERT INTO cats(name) VALUES(?)",name,exec();
+		}
+		else if(del && id!=-1) {
+			transaction tr(sql);
+			if(recur) {
+				sql<<"DELETE FROM post2cat WHERE cat_id=?",id,exec();
+				sql<<"DELETE FROM cats WHERE id=?",id,exec();
+				tr.commit();
+			}
+			else {
+				row r;
+				sql<<"SELECT post_id FROM post2cat WHERE cat_id=? LIMIT 1",id;
+				if(sql.single(r)) {
+					c["constraint_error"]=true;
+					tr.rollback();
+				}
+				else {
+					sql<<"DELETE FROM cats WHERE id=?",id,exec();
+					tr.commit();
+				}
+			}
+		}
+		else if(id!=-1 && name!="") {
+			sql<<"UPDATE cats SET name=? WHERE id=?",name,id,exec();
+		}
+	}
+
+	View_Admin view(this,c);
+	view.ini_cats();
+	render.render(c,"admin",out.getstring());
+}
+
+
 
 
 void Blog::post(string s_id,bool preview)
@@ -1019,7 +1093,19 @@ void Blog::save_post(int &id,string &title,
 	}
 
 	set<int>::iterator p;
+	set<int> existing;
+	result res;
+	sql<<"SELECT id FROM cats",res;
+	row r;
+	while(res.next(r)) {
+		int id;
+		r>>id;
+		existing.insert(id);
+	}
 	for(p=addlist.begin();p!=addlist.end();p++) {
+		// Test if we not adding removed/not existing category
+		if(existing.find(*p)==existing.end())
+			continue;
 		sql<<	"INSERT INTO post2cat(post_id,cat_id,is_open,publish) "
 				"VALUES(?,?,?,?)",id,*p,is_open,t,exec();
 	}

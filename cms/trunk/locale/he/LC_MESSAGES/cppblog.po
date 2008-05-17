@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-17 01:18+0300\n"
+"PO-Revision-Date: 2008-05-17 17:10+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -93,6 +93,9 @@ msgstr "לבלוג"
 
 msgid "Edit Links"
 msgstr "ערוך קישורים"
+
+msgid "Edit Categories"
+msgstr "ערוך נושאים"
 
 msgid "Edit Options"
 msgstr "ערוך אפשרויות"
@@ -234,6 +237,9 @@ msgstr "כתיבת עמוד"
 msgid "links"
 msgstr "קישורים"
 
+msgid "categories"
+msgstr "נושאים"
+
 msgid "options"
 msgstr "אפשרויות"
 
@@ -308,6 +314,24 @@ msgstr "הנושא שניסית למחוק אינו ריק!"
 
 msgid "No categories"
 msgstr "אין נושאים"
+
+msgid "Cannot remove category!"
+msgstr "לא ניתן לחמוק נושא!"
+
+msgid "There are posts belongs to it. Maybe you need to mark \"delete from posts\"?"
+msgstr "יש מאמרים ששייכים לו. אולי שכחת לסמן \"מחק מהמאמרים\"?"
+
+msgid "Sumbit"
+msgstr "שלח"
+
+msgid "Delete from posts:"
+msgstr "מחק מהמאמרים:"
+
+msgid "There are no categories"
+msgstr "אין נושאים"
+
+msgid "New category:"
+msgstr "נושא חדש:"
 
 msgid "Home"
 msgstr "בית"

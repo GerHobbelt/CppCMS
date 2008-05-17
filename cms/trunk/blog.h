@@ -41,6 +41,7 @@ struct links_t {
 	string edit_page;
 	string edit_comment;
 	string edit_links;
+	string edit_cats;
 	string add_comment;
 	string add_post;
 	string add_page;
@@ -113,6 +114,7 @@ private:
 	tmpl::renderer render;
 	void set_lang();
 	void edit_options();
+	void edit_cats();
 	void count_comments(int id);
 
 	content c;
