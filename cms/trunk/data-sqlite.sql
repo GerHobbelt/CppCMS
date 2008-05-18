@@ -7,6 +7,7 @@ drop table if exists post2cat;
 drop table if exists cats;
 drop table if exists posts;
 drop table if exists users;
+drop table if exists text_options;
 
 create table users (
 	id  integer  primary key autoincrement not null,
@@ -54,7 +55,8 @@ create table post2cat (
 	post_id integer not null,
 	cat_id integer not null,
 	publish datetime not null,
-	is_open integer not null
+	is_open integer not null,
+	unique (post_id,cat_id)
 );
 
 create index posts_in_cat on post2cat (is_open,cat_id,publish);
