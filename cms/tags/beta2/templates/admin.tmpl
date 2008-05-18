@@ -1,0 +1,57 @@
+<% template admin() %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><% gt 'Admin Protal' %></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link href="<% media | raw %>/adminstyle.css" rel="stylesheet" type="text/css" />
+<% if rtl %>
+	<link href="<% media | raw %>/adminstyle-rtl.css" rel="stylesheet" type="text/css" />
+<% else %>
+	<link href="<% media | raw %>/adminstyle-ltr.css" rel="stylesheet" type="text/css" />
+<% end %>
+</head>
+<body>
+<div id="page">
+<div id="header">
+
+<div id="logout">
+	<% if def langlist %><% include lnglst %><% end %>
+<p>
+        	<a href="<% base_url | raw%>"><% gt 'Blog' %></a> | <a href="<% admin_url| raw %>"><% gt 'Admin' %></a> | <a href="<%logout_url | raw %>"><% gt 'Logout' %></a>
+</p>
+</div>
+
+
+<h1><a href="<% base_url | raw %>"><% blog_name %></a></h1>
+<h2><% gt 'Administration Panel' %></h2>
+
+</div>
+<div id="path">
+	<a href="<% admin_url | raw %>"><% gt 'main' %></a>
+	&nbsp;/&nbsp;
+	<a href="<% new_post_url | raw  %>"><% gt 'write post' %></a>
+	&nbsp;/&nbsp;
+	<a href="<% new_page_url | raw  %>"><% gt 'write page' %></a>
+	&nbsp;/&nbsp;
+        <a href="<% edit_links_url | raw  %>"><% gt 'links' %></a>
+	&nbsp;/&nbsp;
+        <a href="<% edit_cats_url | raw  %>"><% gt 'categories' %></a>
+	&nbsp;/&nbsp;
+        <a href="<% edit_options_url | raw  %>"><% gt 'options' %></a>
+</div>
+<% include ref master_content %>
+
+<div id="footer">
+<p>
+<% gt 'CppBlog is a high performance blog written in C++.' %>
+</p>
+<p>
+<% gt 'This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh.' %>
+</p>
+</div>
+</div>
+</body>
+</html>
+<% end %>

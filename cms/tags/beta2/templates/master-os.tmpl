@@ -1,0 +1,52 @@
+<% template master() %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- <link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" /> -->
+<link href="<% media | raw %>/orangesky.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_posts |raw%>" />
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="http://<%host|raw%><% rss_comments |raw%>" />
+
+</head>
+<body>
+<div id="page">
+	<div id="maincontent">
+		<div id="menu">
+			<ul>
+			<li><a href="<% base_url | raw %>"><% gt 'Home' %></a></li>
+			<li><a href="<% rss_posts | raw %>"><% gt 'RSS' %></a></li>
+			<li><a href="<% rss_comments | raw %>"><% gt 'RSS Comments' %></a></li>
+			<% if def category_name %>
+			<li><a href="<% category_rss %>"><% gt 'RSS for %1%' using category_name %></a></li>
+			<% end %>
+			<li><a href="<% admin_url %>"><% gt 'Enter' %></a></li>
+			</ul>
+		</div> <!-- menu -->
+		<div id="header">
+			<div id="headerimg">
+				<h1><% blog_name %></h1>
+				<p class="description"><% blog_description %></p>
+			</div>
+		</div> <!-- end header -->
+		<div id="pagecontent">
+			<% include ref master_content %>
+		</div> <!-- pagecontent -->
+	</div>
+	<div id="sidecontent">
+		<% include sidebar %>
+	</div>
+	<div id="footer">
+		<div id="footercontact">
+			<a href="<% if def blog_contact %><% blog_contact %><% else %>#<% end %>"><% gt 'Contact' %></a>
+		</div>
+		<div id="#footerdesign">
+			<% gt 'The template design based on WordPress OrangeSky template by Naoko McCracken' %>
+		</div>
+	</div> <!-- footer -->
+</div>
+</body>
+</html>
+<% end %>
