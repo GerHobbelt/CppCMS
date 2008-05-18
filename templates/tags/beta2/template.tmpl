@@ -1,0 +1,70 @@
+<% template foo1(x) %>
+<% x %>
+<% end %>
+<% template foo_ref(x) %>
+Hello
+<% end %>
+<% template main() %>
+	<% if def blabla %>
+		fail0
+	<% end %>
+	<% if def istrue %>
+		ok
+	<% else %>
+		fail0.1
+	<% end %>
+	<% if istrue %>
+		ok
+	<% else %>
+		fail1
+	<% end %>
+	<% if not isfalse %>
+		ok
+	<% else %>
+		fail2
+	<% end %>
+	<% if isfalse %>
+		fail3
+	<%end%>
+	<% if istrue %>
+		<% if isfalse %>
+		fail4
+		<% elif isfalse %>
+		fail5
+		<% else %>
+		ok
+		<% end %>
+	<% end %>
+	<% foreach x in list_1 %>
+		ok
+		<% item %>Only one ok<% end %>
+		ok
+	<% empty %>
+		fail6
+	<% end %>
+	<% foreach x in list_empty %>
+		fail7
+		<% item %>fail8<% end %>
+		fail9
+	<% end %>
+	<% foreach x in count %>
+		ok
+		<% separator %> less then <% item %><% x.val %><% end %>
+		ok
+	<% empty %>
+		fail10
+	<% end %>
+	START
+	<% include ref myref %>
+	END - if you not see HELLO there is a error
+	<% foreach x in count %>
+		START
+		<% item %><% include foo1 using x.val %><% end %>
+		END of non empty numbers
+	<% empty %>
+	fail11
+	<% end %>
+	START SHOULD SEE OK
+	<% include bar %>
+	END
+<% end %>

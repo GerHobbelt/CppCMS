@@ -1,0 +1,480 @@
+#!/usr/bin/env python
+
+import os
+import re
+import sys
+
+
+
+def interleave(*args):
+	for idx in range(0, max(len(arg) for arg in args)):
+		for arg in args:
+			try:
+				yield arg[idx]
+			except IndexError:
+				continue
+
+
+class tmpl_descr:
+	def __init__(self,start,size):
+		self.start_id=start
+		self.param_num=size
+
+class template_block:
+	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*\((.*)\)\s*%>$'
+	type='template'
+	def use(self,m):
+		global template_parametes
+		global parameters_counter
+		template_parameters.clear()
+		self.name=m.group(1)
+		print "# template %s" % self.name
+		print "extern %s" % self.name
+		parameters=m.group(2)
+		start_id=parameters_counter
+		if not re.match(r'^\s*$',parameters):
+			for param in re.split(',',parameters):
+				m=re.match(r'^\s*([a-zA-Z]\w*)\s*$',param)
+				if not m:
+					error_exit("syntax error for paremeter %s" % param)
+				else:
+					pname=m.group(1)
+					template_parameters[pname]=parameters_counter
+					parameters_counter+=1
+		global	templates_map
+		if templates_map.has_key(self.name):
+			error_exit("Double definition of template %s" % self.name)
+		templates_map[self.name]=tmpl_descr(start_id,len(template_parameters));
+		global stack
+		if len(stack):
+			error_exit("Can not define template inside other template")
+		stack.append(self)
+		global current_template
+		current_template=self.name
+
+	def on_end(self):
+		print "\tret\n# End of template %s" % self.name
+
+		
+
+def inline_content(s):
+	print "\tinline '%s'" % to_string(s)
+
+def error_exit(x):
+	global exit_flag
+	global file_name
+	sys.stderr.write("Error: %s in file %s\n" % (x,file_name))
+	exit_flag=1
+
+def new_label():
+	global labels_counter
+	s="LBL_%d" % labels_counter
+	labels_counter+=1
+	return s
+
+def to_string(s):
+	res=''
+	for ch in s:
+		if ord(ch) < 32 or ch=='\'':
+			if ord(ch) == 0:
+				error_exit("charrecter \\0 is not allowed")
+			else:
+				res+=("\\x%02x" % ord(ch))
+		else:
+			res+=ch
+	return res
+
+
+def sequence(seq_name):
+	if tmpl_seq.has_key(seq_name):
+		return tmpl_seq[seq_name]
+	error_exit("Undefined sequence %s" % seq_name)
+	return 0
+
+def make_ident(val):
+	m=re.match(r'^\w+$',val)
+	if m:
+		global template_parameters
+		if template_parameters.has_key(val):
+			return str(template_parameters[val])
+		return val
+	m=re.match(r'^(\w+)\.(\w+)$',val)
+	seq_id=sequence(m.group(1))
+	return "%s(%d)" % ( m.group(2),seq_id )
+
+class foreach_block:
+	pattern=r'^<%\s*foreach\s+([a-zA-Z]\w*)\s+in\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*%>$'
+	type='foreach'
+	has_item=0
+	has_separator=0
+	separator_label=''
+	on_first_label=''
+	def use(self,m):
+		self.empty=new_label()
+		self.end=new_label()
+		ident=make_ident(m.group(2))
+		self.seq_name=m.group(1);
+		if tmpl_seq.has_key(self.seq_name):
+			error_exit("Nested sequences with same name")
+		global seq_no
+		self.seq=seq_no
+		tmpl_seq[self.seq_name]=seq_no;
+		seq_no+=1
+		print "\tseqf\t%s,%d,%s" % ( ident,self.seq,self.empty );
+		global stack
+		stack.append(self)
+
+	def on_end(self):
+		if not self.has_item:
+			error_exit("foreach without item")
+		print "%s:" % self.end
+		print "%s:" % self.empty
+		del tmpl_seq[self.seq_name]
+
+class separator_block:
+	pattern=r'^<%\s*separator\s*%>'
+	type='separator'
+	def use(self,m):
+		global stack
+		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+			error_exit("separator without foreach")
+			return
+		foreachb=stack[len(stack)-1]
+		if foreachb.has_separator:
+			error_exit("two separators for one foreach")
+		foreachb.has_separator=1
+		foreachb.separator_label=new_label()
+		foreachb.on_first_label=new_label()
+		print "\tjmp\tu,%s" % foreachb.on_first_label
+		print "%s:" % foreachb.separator_label
+		
+
+class item_block:
+	pattern=r'^<%\s*item\s*%>'
+	type='item'
+	def use(self,m):
+		global stack
+		if not stack or stack[-1].type!='foreach':
+			error_exit("item without foreach")
+			return
+		foreachb=stack[-1]
+		self.seq=foreachb.seq
+		if foreachb.has_item:
+			error_exit("Two items for one foreach");
+		if foreachb.has_separator:
+			self.next=foreachb.separator_label
+			print "%s:" % foreachb.on_first_label
+		else:
+			self.next=new_label();
+			print "%s:" % self.next;
+		foreachb.has_item=1
+		stack.append(self)
+	def on_end(self):
+		print "\tseqn\t%d,%s" % (self.seq , self.next);
+
+class empty_block:
+	pattern=r'^<%\s*empty\s*%>'
+	type='empty'
+	def use(self,m):
+		global stack
+		if not stack or stack[-1].type!='foreach':
+			error_exit("empty without foreach")
+			return
+		forb=stack.pop()
+		if not forb.has_item:
+			error_exit("Unexpected empty - item missed?")
+		print "\tjmp\tu,%s" % forb.end
+		print "%s:" % forb.empty
+		self.end=forb.end
+		self.seq_name=forb.seq_name
+		stack.append(self)
+	def on_end(self):
+		print "%s:" % self.end
+		del tmpl_seq[self.seq_name]
+
+
+class else_block:
+	pattern=r'^<%\s*else\s*%>$'
+	type='else'
+	def on_end(self):
+		print "%s:" % self.final
+	def use(self,m):
+		prev=stack.pop()
+		if prev.type!='if' and prev.type!='elif':
+			error_exit("elif without if");
+		self.final=prev.final
+		print "\tjmp\tu,%s" % self.final
+		print "%s:" % prev.label
+		stack.append(self)
+
+class if_block:
+	pattern=r'^<%\s*(if|elif)\s+((not)\s+)?(((def)\s+)?([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)|(eq)\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$'
+	type='if'
+	def prepare(self):
+		if self.has_def:
+			ident_str=make_ident(self.ident)
+			print "\tdef\t%s" % ident_str
+		elif self.eq:
+			il=make_ident(self.eql);
+			print "\tsto\t%s,0" % il
+			ir=make_ident(self.eqr);
+			print "\tsto\t%s,1" % ir
+			print "\teq\t0,1"
+		else:
+			ident_str=make_ident(self.ident)
+			if ident_str=='rtl':
+				print "\trtl"
+			else:
+				print "\ttrue\t%s" % ident_str
+		if self.has_not:
+			print "\tjmp\tt,%s" % self.label
+		else:
+			print "\tjmp\tf,%s" % self.label
+
+	def on_end(self):
+		print "%s:" % self.label
+		print "%s:" % self.final
+
+	def use(self,m):
+		global stack
+		self.type=m.group(1)
+		self.has_not=m.group(3)
+		self.has_def=m.group(6)
+		self.ident=m.group(7)
+		self.eq=m.group(10)
+		self.eql=m.group(11)
+		self.eqr=m.group(14)
+		self.label=new_label()
+		if self.type == 'if' :
+			self.final=new_label();
+			stack.append(self)
+			self.prepare()
+		else: # type == elif
+			if stack :
+				prev=stack.pop()
+				if prev.type!='if' and prev.type!='elif':
+					error_exit("elif without if");
+				self.final=prev.final
+				print "\tjmp\tu,%s" % self.final
+				print "%s:" % prev.label
+				stack.append(self)
+				self.prepare()
+			else:
+				error_exit("Unexpeced elif");
+# END ifop				
+			
+
+class end_block:
+	pattern=r'^<%\s*end\s*%>';
+	def use(self,m):
+		global stack
+		if not stack:
+			error_exit("Unexpeced 'end'");
+		else:
+			stack.pop().on_end()
+
+class error_com:
+	pattern=r'^<%(.*)%>$'
+	def use(self,m):
+		error_exit("unknown command %s" % m.group(1))
+
+
+def make_filter_param(param):
+	res=''
+	for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
+		s=m.group(1)
+		if s==r"\'":
+			res+="'"
+		elif s==r"\l":
+			res+="<"
+		elif s==r"\r":
+			res+=">"
+		elif s=='<' or s=='>':
+			error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
+		else:
+			res+=s
+	res="'"+to_string(res)+"'"
+	return res
+
+
+	
+
+class base_show:
+	mark=r'\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*'
+	def make_filter_id(self,str):
+		if str in [ 'raw' ,'escape', 'raw','date','time','timesec','strftime','intf' ]:
+			return str;
+		else:
+			error_exit("Unkown internal filter %s" % str);
+			return 'raw';
+
+	def make_filters_list(self,filter_def):
+		lst=[];
+		if not re.match(r"^(\s*\|\s*(ext\s*)?([a-zA-Z]\w*)(\('([^']|\\')*'\))?\s*)+$",filter_def):
+			error_exit("Syntax error in filter definition %s" % filter_def);
+			return [ 'raw' ];
+		for m in re.finditer(r"\s*\|\s*(ext\s*)?([a-zA-Z]\w*)(\('(([^'><]|\\')*)'\))?\s*",filter_def):
+			res=''
+			if m.group(1):
+				res+='ext '+m.group(2)
+			else:
+				res+=self.make_filter_id(m.group(2))
+			if m.group(4):
+				res+=','+make_filter_param(m.group(4))
+			lst.append(res);
+		return lst
+
+	def prepare(self,m,name):
+		idnt=make_ident(m.group(1))
+		if not m.group(4) or len(m.group(4))==0:
+			print "\t%s\t%s" % (name,idnt)
+			return
+		filters=self.make_filters_list(m.group(4))
+		if len(filters)==1:
+			print "\t%s\t%s,%s" % (name,idnt , filters[0])
+		else:
+			for filter in filters:
+				print "\tfilter\t%s" % filter
+			print "\t%s\t%s,chain" % (name,idnt)
+
+def split_gt_params(s):
+	m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	while m.group(1):
+		bs=base_show()
+		mtmp=re.match(bs.mark,m.group(1));
+		if not mtmp:
+			error_exit("Expected variable/filter");
+			return;
+		bs.prepare(mtmp,'showf');
+		if not m.group(5):
+			return
+		s=m.group(5)
+		m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	error_exit("Sytax error");
+
+class ngettext_block:
+	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(using(.*))?\s*%>$"
+	def use(self,m):
+		s1=make_filter_param(m.group(1))
+		s2=make_filter_param(m.group(3))
+		idt=make_ident(m.group(5))
+		if m.group(6):
+			split_gt_params(m.group(7))
+		print "\tngt\t%s,%s,%s" % (idt,s1,s2)
+
+
+class gettext_block:
+	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(using(.*))?\s*%>$"
+	def use(self,m):
+		s=m.group(1)
+		if m.group(3):
+			split_gt_params(m.group(4))
+		print "\tgt\t%s" % make_filter_param(s)
+
+class show_block(base_show):
+	pattern=r'^<%\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)((\s*\|\s*.*)*)?\s*%>$'
+	def use(self,m):
+		self.prepare(m,'show');
+
+
+class include_block:
+	pattern=r'^<%\s*include\s+(([a-zA_Z]\w*)(\s+using(.*))?|ref\s+([a-zA-Z]\w*(\.([a-zA-Z]\w*))?))\s*%>$';
+	def setup_store(self,list,tmpl):
+		if not templates_map.has_key(tmpl):
+			error_exit("Undefined template %s" % tmpl)
+			return
+		start=templates_map[tmpl].start_id
+		num=templates_map[tmpl].param_num
+		n=0
+		for var in re.split(',',list):
+			m=re.match(r'^\s*([a-zA-Z]\w*(\.([a-zA-Z]\w*))?)\s*',var)
+			if m:
+				id=make_ident(m.group(1))
+				print "\tsto\t%s,%d" % (id,start+n)
+				n+=1
+			else:
+				error_exit("Syntaxis error in param %s" % var)
+		if n>num:
+			error_exit("Too many parameters for template %s" % tmpl)
+		elif n<num:
+			error_exit("Too few parameters for template %s" % tmpl)
+				
+			
+	def use(self,m):
+		if m.group(2):
+			ref=m.group(2)
+			global current_template
+			if ref==current_template:
+				error_exit("Recurtion is not allowed")
+			if m.group(4):
+				self.setup_store(m.group(4),ref)
+			print "\tcall\t%s" % ref
+		elif m.group(5):
+			ref=make_ident(m.group(5))
+			print "\tcallr\t%s" % ref
+		else:
+			error_exit("Internal error")
+
+def fetch_content(content):
+	tmp=''
+	for row in re.split('\n',content):
+		l1=re.split(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row)
+		n=0
+		for l2 in re.finditer(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row):
+			yield tmp+l1[n]
+			tmp=''
+			yield l2.group(0)
+			n+=3
+		tmp+=l1[n]+'\n'
+	yield tmp
+
+def main():
+	global stack
+	for file in os.sys.argv[1:]:
+		global file_name
+		file_name=file
+		f=open(file,'r')
+		content=f.read()
+		f.close()
+		for x in fetch_content(content):
+			if x=='' : continue
+			if len(stack)==0:
+				if re.match(r"^\s*$",x):
+					continue
+				elif not re.match(r"<\%.*\%>",x):
+					error_exit("Content is not allowed outside template blocks")
+					continue
+			matched=0
+			for c in [  if_block(), template_block(), end_block(), else_block(), \
+					gettext_block(),ngettext_block(),\
+					foreach_block(), item_block(), empty_block(),separator_block(),\
+					include_block(),\
+					show_block(), error_com()]:
+				m = re.match(c.pattern,x)
+				if m :
+					c.use(m)
+					matched=1
+					break
+			if not matched:
+				inline_content(x)
+
+
+		if stack:
+			error_exit("Unexpected end of file %s" % file)
+
+#######################
+# MAIN
+#######################
+
+file_name=''
+labels_counter=0
+tmpl_seq={}
+template_parameters={}
+templates_map={}
+parameters_counter=2
+seq_no=0
+stack=[]
+exit_flag=0
+current_template=''
+main()
+sys.exit(exit_flag)
