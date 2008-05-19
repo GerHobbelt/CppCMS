@@ -47,7 +47,7 @@ create table text_options (
 	value text not null
 ); 
 create table cats (
-	id integer auto_increment primary key not null,
+	id integer primary key autoincrement not null,
 	name varchar(64) not null
 );
 
