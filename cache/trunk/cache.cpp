@@ -21,15 +21,34 @@ string base_cache::deflate(string const &text)
 	return sstream.str();
 }
 
-#define TRY(x) x; try {
-#define FINALY(x) }catch(...){ x; throw; } x;
+
+class mutex_lock {
+	pthread_mutex_t &m;
+public:
+	mutex_lock(pthread_mutex_t &p): m(p) { pthread_mutex_lock(&m); };
+	~mutex_lock() { pthread_mutex_unlock(&m); };
+};
+
+class rwlock_rdlock {
+	pthread_rwlock_t &m;
+public:
+	rwlock_rdlock(pthread_rwlock_t &p): m(p) { pthread_rwlock_rdlock(&m); };
+	~rwlock_rdlock() { pthread_rwlock_unlock(&m); };
+};
+
+class rwlock_wrlock {
+	pthread_rwlock_t &m;
+	public:
+	rwlock_wrlock(pthread_rwlock_t &p): m(p) { pthread_rwlock_wrlock(&m); };
+	~rwlock_wrlock() { pthread_rwlock_unlock(&m); };
+};
 
 
 bool thread_cache::fetch(string const &key,string & out,bool use_gzip)
 {
 	bool res;
 
-	TRY(pthread_rwlock_rdlock(&lock))
+	rwlock_rdlock dolock(lock);
 
 	primary_ptr p=primary.find(key);
 	if(p==primary.end() || p->second.time_entry->first < time(NULL)) {
@@ -47,17 +66,13 @@ bool thread_cache::fetch(string const &key,string & out,bool use_gzip)
 			res=false;
 		}
 		if(res) {
-			TRY(pthread_mutex_lock(&lru_lock));
+			mutex_lock m(lru_lock);
 
 			lru.erase(p->second.lru_entry);
 			lru.push_front(p);
 			p->second.lru_entry=lru.begin();
-
-			FINALY(pthread_mutex_unlock(&lru_lock))
 		}
 	}
-
-	FINALY(pthread_rwlock_unlock(&lock));
 
 	return res;
 }
@@ -90,7 +105,7 @@ void thread_cache::remove_prim_all(primary_ptr p)
 
 void thread_cache::drop_secondary(string const &k)
 {
-	TRY(pthread_rwlock_wrlock(&lock))
+	rwlock_wrlock l(lock);
 	sec2prim_ptr p=sec2prim.find(k);
 	while(p!=sec2prim.end() && p->first==k){
 		sec2prim_ptr p_tmp=p;
@@ -99,20 +114,18 @@ void thread_cache::drop_secondary(string const &k)
 		remove_prim(p_tmp->second);
 		sec2prim.erase(p_tmp);
 	}
-	FINALY(pthread_rwlock_unlock(&lock))
 }
 
 void thread_cache::drop_primary(string const &key)
 {
-	TRY(pthread_rwlock_wrlock(&lock))
+	rwlock_wrlock l(lock);
 	remove_prim(primary.find(key));
 	remove_sec_by_prim(key);
-	FINALY(pthread_rwlock_unlock(&lock))
 }
 
 void thread_cache::insert(container &c, string const &k,vector<string> const &secondary,time_t lifetime)
 {
-	TRY(pthread_rwlock_wrlock(&lock))
+	rwlock_wrlock l(lock);
 	primary_ptr the_ptr=primary.end();
 	if(primary.size()>limit && (the_ptr=primary.find(k))==primary.end()) {
 		multimap<time_t,primary_ptr>::iterator p=timeout.begin();
@@ -143,7 +156,6 @@ void thread_cache::insert(container &c, string const &k,vector<string> const &se
 		sec2prim_ptr tmp=sec2prim.insert(make_pair(secondary[i],the_ptr));
 		prim2sec.insert(make_pair(k,tmp));
 	}
-	FINALY(pthread_rwlock_unlock(&lock))
 }
 
 bool thread_cache::fetch_string(string const &key,string &out)
