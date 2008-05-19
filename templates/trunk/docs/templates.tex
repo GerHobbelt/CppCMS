@@ -1,0 +1,196 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{url}
+\newcommand{\tw}[1]{\texttt{#1}}
+\title{CppCMS --- Templates Library}
+\author{Artyom Beilis (Tonkikh)}
+\begin{document}
+\maketitle
+\tableofcontents
+\lstlistoflistings
+\begin{abstract}
+This is full documentation of CppCMS templates library. This library was designed to work with CppCMS framework however
+it can be used for any other purposes that even not connected to HTML generation.
+\end{abstract}
+\section{Key Components}
+The templates system is build form several key components:
+\begin{description}
+\item[content] --- the object that holds all the information required for building the page.
+\item[renderer] --- the object that holds a template and creates the page form the content
+\item[template compiler] --- compiler that converts human readable template files to internal opcode that is used by renderer for generating pages.
+\item[translation framework] --- the gettext compatible libraries that allows internationalize the templates content in multi-thread environment.
+\end{description}
+
+We would explain this in a simple example.
+First of all we would create a text file \tw{test.tmpl} with the
+code displayed in listing~\ref{lst:firsttmpl} and create a C++ code file \tw{test.cpp}
+with the code in listing~\ref{lst:firstcpp}.
+
+\begin{figure}
+\begin{lstlisting}[label=lst:firsttmpl,caption=Frist Template]{}
+<% template test() %>
+Hello <% name %>!
+<% end %>
+\end{lstlisting}
+\end{figure}
+
+
+\begin{figure}
+\begin{lstlisting}[label=lst:firstcpp,caption=Frist C++ Code]{}
+#include <tmpl/content.h>
+#include <tmpl/renderer.h>
+#include <iostream>
+using namespace tmpl;
+using namespace std;
+
+int main()
+{
+	template_data data("test.opcode");
+	renderer rnd(data);
+	content  cnt;
+	string result;
+
+	cnt["name"]=string("John");
+	
+	rnd.render(cnt,"test",result);
+	cout<<result;
+	return 0;
+}
+\end{lstlisting}
+\end{figure}
+
+Now we should build templates opcode by running:
+
+\begin{verbatim}
+tmpl_bld -o test.opcode test.tmpl
+\end{verbatim}
+
+Then compile our test code
+
+\begin{verbatim}
+g++ test.cpp -ltmpl -o test
+\end{verbatim}
+
+And now we can run it \tw{./test}. If everything was OK we should see as output:
+
+\begin{quote}
+Hello John!
+\end{quote}
+
+Now lets see line after line what happens. First we declare a template called `test', it includes some
+text and special command \verb+<% name %>+ that displays the value of content variable `name'. When we run
+\verb+tmpl_bld+ we create from text file \verb+test.tmpl+ a binary file \verb+test.opcode+ that actually 
+includes a simple instructions for displaying the content. You can find an `assembly' code in file \verb+test.s+.
+
+In the C++ code, we first of all load the opcode file we created to an object `data' of
+type \verb+template_data+. It holds the content of the file and can be used by multiple 
+`renderer' objects. After that we can create an object `rnd' of type \verb+renderer+ that would use our opcode.
+
+The next step is setting up the content. We assign to a key \tw{name} value `John': 
+the value that would be displayed for this content variable.
+Now we are ready to render the output calling \verb+render+ method of renderer object.
+It receives 3 parameters: the content, the name of the template and the string that
+would be filled up with rendered content. And now we cat print it as usual.
+
+\section{Content}
+
+The \verb+tmpl::content+ class is actually derived from \verb+map<string,boost::any>+. It maps 
+string key to a container that is capable of holding any\footnote{For full documentation 
+of \tw{boost::any} refer to \url{http://www.boost.org/doc/html/any.html} } value.
+
+In order to add a pair key/value to the content, you just assign it as if it was an ordinary map. 
+Currently renderer supports \tw{int}, \tw{string}, \tw{bool} and \tw{std::tm} types that it is capable to display.
+However, it can be extended to any user defined type, see~\ref{ref:NewTypes}.
+
+The templates system is capable of representing sequence of data---iterate over them. For example see listing~\ref{lst:iter}.
+
+\begin{figure}
+\begin{lstlisting}[label=lst:iter,caption=Simple Iterating Over Sequences]{}
+<% foreach person in people %>
+<ul>
+	<% item %>
+	<li><% person.name %> is 
+		<% person.age %> year(s) old.</li>
+	<% end %> 
+</ul>
+<% end %>
+\end{lstlisting}
+\end{figure}
+
+In order to make a sequence of data we assign to a key `people' one of the following types:
+\begin{enumerate}
+\item \verb+vector_t+ of type \verb+vector<content>+
+\item \verb+list_t+ of type \verb+list<content>+
+\end{enumerate}
+It can be done using following methods:
+\begin{enumerate}
+\item \verb+vector_t &vector(string const &key, int size=0)+ 
+ method creates a vector of contents of size \tw{size} at given \tw{key} and returns it;
+\item \verb+list_t &list(string const &key)+ 
+ method creates a list of contents at required key as well;
+\end{enumerate}
+
+You can see an example of preparing a content for template~\ref{lst:iter} at listing~\ref{lst:VectoAndList}
+\begin{figure}
+\begin{lstlisting}[label=lst:VectoAndList,caption=Creating a Sequence of Contents]{}
+// Using Vector
+content::vector_t &vec = 
+	cnt.vector("people",people.size());
+for{i=0;i<people.size();i++) {
+	vec[i]["name"] = people[i].name;
+	vec[i]["age"]  = people[i].age;
+}
+
+// Using List
+content::list_t &lst = cnt.list("people");
+for{i=0;i<people.size();i++) {
+	lst.push_back(content());
+	lst.back()["name"] = people[i].name;
+	lst.back()["age"]  = people[i].age;
+}\end{lstlisting}
+\end{figure}
+
+This approach is good for most of cases. However in some cases, in order to prevent 
+a waste of memory resources, it is better to create
+a data `on-the-fly' using callback functions. This can be achieved using
+\tw{boost::signal} and \tw{boost::bind}\footnote{See: \url{http://www.boost.org/doc/html/signals.html}}.
+
+The method that attaches a callback is defined as following:
+
+\begin{verbatim}
+typedef boost::signal<bool (content &)> callback_t;
+void signal(string const &key,callback_t::slot_type slot);
+\end{verbatim}
+
+You actually should attach a function that receives as parameter and empty content and fills it up with data returning `true'. It should return `false' at the end of the sequence. See listing~\ref{lst:ContantCallback} for an example.
+
+Take a note, at the beginning the value of \tw{i} is 0. When we get to the end of the sequence, the callback function returns
+false and \emph{resets} the value of \tw{i} to 0 again. This is important in case, the template would try to iterate
+over the same sequence twice. If the value will not be reset, then other iterations over the same sequence will be
+treated as iteration over empty sequence.
+
+\begin{figure}
+\begin{lstlisting}[label=lst:ContantCallback,caption=Creating a Sequence With Callback]{}
+bool sequence(content &c,int &i)
+{
+	if(i>=people.size()) {
+		i=0;
+		return false;
+	}
+	c["name"]=people[i].name;
+	c["age"]=people[i].age;
+	i++;
+	return true;
+}
+...
+void setup()
+{
+	int i=0;
+	cnt.signal("people",boost::bind(sequence,_1,i));
+}
+\end{lstlisting}
+
+\end{figure}
+
+
+\end{document}
