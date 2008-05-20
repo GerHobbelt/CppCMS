@@ -36,10 +36,18 @@ int main()
 		wp.param("username","root");
 		wp.param("password","root");
 		wp.connect();
+		
 		session sql("mysql");
 		sql.param("dbname","cppcms");
 		sql.param("username","root");
 		sql.param("password","root");
+
+		/*
+		session sql("sqlite3");
+		sql.param("dbname","cppcms.db");
+		sql.param("sqlite3_dbdir","./db/");
+		*/
+
 		sql.connect();
 
 		transaction tr(sql);

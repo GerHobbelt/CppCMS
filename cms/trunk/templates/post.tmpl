@@ -1,3 +1,9 @@
+<% template comment_preview() %>
+	<% if def preview_message_content %>
+	<dt><strong><% gt 'Preview of message content:' %></strong></dt>
+	<dd><% preview_message_content | ext markdown2html %></dd>
+	<% end %>
+<% end %>
 <% template post() %>
 <h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
@@ -33,6 +39,11 @@
 		<% comment.content | ext markdown2html %>
 		</dd>
 	<% end %>
+		<% include comment_preview %>
+	</dl>
+<% empty %>
+	<dl>
+		<% include comment_preview %>
 	</dl>
 <% end %>
 	<h2><% gt 'Add Comment:' %></h2>
@@ -44,7 +55,8 @@
                         var exdate=new Date();
                         exdate.setDate(exdate.getDate()+expiredays);
                         document.cookie=c_name+ "=" +escape(value)+
-                        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString());
+                        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+
+                        ';path=/';
                 }
                 function get_cookie(c_name)
                 {
@@ -101,8 +113,14 @@
 				<td><input type="text" name="url" /></td>
 			</tr>
 	 	</table>
-		<p><textarea name="message" cols="80" rows="10"></textarea></p>
-		<p><input type="submit" value="<% gt 'Submit' %>" /></p>
+		<p>
+			<% gt 'You can write your messages using \la href="http://en.wikipedia.org/wiki/Markdown"\rMarkdown\l/a\r syntax.'%> 
+		</p>
+		<p><textarea name="message" cols="80" rows="10"><% preview_message_content %></textarea></p>
+		<p>
+			<input type="submit" name="submit" value="<% gt 'Submit' %>" /> 
+			<input type="submit" name="preview" value="<% gt 'Preview' %>" />
+		</p>
 	<script type="text/javascript">
 	<!--
 		document.write('<')

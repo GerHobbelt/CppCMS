@@ -22,37 +22,7 @@ using boost::format;
 using boost::str;
 using namespace tmpl;
 
-struct In_Comment {
-	string message;
-	string author;
-	string url;
-	string email;
-	bool load(const vector<FormEntry> &form);
-};
 
-bool In_Comment::load(const vector<FormEntry> &form)
-{
-	unsigned i;
-	for(i=0;i<form.size();i++) {
-		string const &field=form[i].getName();
-		if(field=="username") {
-			author=form[i].getValue();
-		}
-		else if(field=="email") {
-			email=form[i].getValue();
-		}
-		else if(field=="url") {
-			url=form[i].getValue();
-		}
-		else if(field=="message") {
-			message=form[i].getValue();
-		}
-	}
-	if(message.size()==0 || author.size()==0 || email.size()==0) {
-		return false;
-	}
-	return true;
-}
 
 static void old_markdown2html(string const &in,string &out)
 {
@@ -594,6 +564,43 @@ void Blog::main()
 
 }
 
+struct In_Comment {
+	string message;
+	string author;
+	string url;
+	string email;
+	bool preview;
+	bool load(const vector<FormEntry> &form);
+};
+
+bool In_Comment::load(const vector<FormEntry> &form)
+{
+	unsigned i;
+	preview=false;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="username") {
+			author=form[i].getValue();
+		}
+		else if(field=="email") {
+			email=form[i].getValue();
+		}
+		else if(field=="url") {
+			url=form[i].getValue();
+		}
+		else if(field=="message") {
+			message=form[i].getValue();
+		}
+		else if(field=="preview") {
+			preview=true;
+		}
+	}
+	if(message.size()==0 || author.size()==0 || email.size()==0) {
+		return false;
+	}
+	return true;
+}
+
 void Blog::add_comment(string &postid)
 {
 	int post_id=atoi(postid.c_str());
@@ -612,6 +619,12 @@ void Blog::add_comment(string &postid)
 		post_id;
 	if(!sql.single(r) || (r>>post.is_open , !post.is_open) ) {
 		throw Error(Error::E404);
+	}
+
+	if(incom.preview) {
+		c["preview_message_content"]=incom.message;
+		this->post(postid,false);
+		return;
 	}
 
 	tm t;

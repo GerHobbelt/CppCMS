@@ -409,6 +409,7 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 		}
 		c["category_name"]=cat_name;
 		c["category_rss"]=str(format(blog->fmt.feed_cats) % cat_id);
+		c["subtitle"]=cat_name;
 	}
 
 	c["master_content"]=string("main_page");

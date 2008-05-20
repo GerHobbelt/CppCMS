@@ -1,7 +1,7 @@
 <% template feed_posts() %><?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-	<title><% blog_name %></title>
+	<title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
 	<link>http://<% host | raw %><% base_url | raw %></link>
 	<description><% blog_description %></description>
 	<atom:link 

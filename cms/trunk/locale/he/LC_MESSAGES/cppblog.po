@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-17 17:10+0300\n"
+"PO-Revision-Date: 2008-05-20 23:14+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -171,6 +171,9 @@ msgstr "אין מאמרים בנושא \"%1%\""
 msgid "There are no posts in the blog"
 msgstr "אין מאמרים בבלוג"
 
+msgid "Preview of message content:"
+msgstr "תצוגה מקדימה של תוכן ההודעה:"
+
 msgid "Comments"
 msgstr "תגובות"
 
@@ -195,8 +198,18 @@ msgstr "כתובת דוא\"ל"
 msgid "Site:"
 msgstr "אתר:"
 
+msgid ""
+"You can write your messages using <a href=\"http://en.wikipedia.org/wiki/"
+"Markdown\">Markdown</a> syntax."
+msgstr ""
+"ניתן להשתמש בתחביר <a href=\"http://en.wikipedia.org/wiki/"
+"Markdown\">Markdown</a> לכתיבת ההודעות."
+
 msgid "Submit"
 msgstr "שלח"
+
+msgid "Preview"
+msgstr "תצוגה מקדימה"
 
 msgid "You must enable JavaScript in order to post comments."
 msgstr "חובה להפעיל JavaScript כדי לפרסם הערות."
