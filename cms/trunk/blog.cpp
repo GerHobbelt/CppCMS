@@ -512,8 +512,9 @@ void Blog::set_lang()
 		const vector<HTTPCookie> &cookies = env->getCookieList();
 		unsigned i;
 		render.set_translator(tr[default_locale]);
+		string blog_id=global_config.sval("blog.id","");
 		for(i=0;i!=cookies.size();i++) {
-			if(cookies[i].getName()=="lang") {
+			if(cookies[i].getName()==blog_id + "lang") {
 				string lang=cookies[i].getValue();
 				render.set_translator(tr[lang]);
 				break;
@@ -694,11 +695,13 @@ bool Blog::auth()
 
 	const vector<HTTPCookie> &cookies = env->getCookieList();
 
+	string blog_id=global_config.sval("blog.id","");
+
 	for(i=0;i!=cookies.size();i++) {
-		if(cookies[i].getName()=="username") {
+		if(cookies[i].getName()==blog_id + "username") {
 			tmp_username=cookies[i].getValue();
 		}
-		else if(cookies[i].getName()=="password") {
+		else if(cookies[i].getName()==blog_id + "password") {
 			tmp_password=cookies[i].getValue();
 		}
 	}
@@ -727,9 +730,10 @@ void Blog::set_login_cookies(string u,string p,int d)
 	else {
 		d*=24*3600;
 	}
-	HTTPCookie u_c("username",u,"","",d,"/",false);
+	string blog_id=global_config.sval("blog.id","");
+	HTTPCookie u_c(blog_id + "username",u,"","",d,"/",false);
 	response_header->setCookie(u_c);
-	HTTPCookie p_c("password",p,"","",d,"/",false);
+	HTTPCookie p_c(blog_id + "password",p,"","",d,"/",false);
 	response_header->setCookie(p_c);
 }
 

@@ -6,7 +6,7 @@
                 {
                         var exdate=new Date();
                         exdate.setDate(exdate.getDate()+365);
-                        document.cookie='lang=' +escape(locale)+';path=/;expires='+exdate.toGMTString();
+                        document.cookie='<% cookie_prefix %>lang=' +escape(locale)+';path=/;expires='+exdate.toGMTString();
                         location.reload(true);
                 }
 	-->

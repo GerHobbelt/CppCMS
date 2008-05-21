@@ -206,6 +206,7 @@ void View_Main_Page::ini_share()
 	c["host"]=global_config.sval("blog.host");
 	c["rss_posts"]=blog->fmt.feed;
 	c["rss_comments"]=blog->fmt.feed_comments;
+	c["cookie_prefix"]=global_config.sval("blog.id","");
 
 	ini_sidebar();
 }
@@ -502,6 +503,7 @@ void View_Admin::ini_share()
 	c["edit_options_url"]=blog->fmt.edit_options;
 	c["edit_links_url"]=blog->fmt.edit_links;
 	c["edit_cats_url"]=blog->fmt.edit_cats;
+	c["cookie_prefix"]=global_config.sval("blog.id","");
 }
 
 void View_Admin::ini_options()
