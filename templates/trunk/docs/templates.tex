@@ -199,7 +199,69 @@ void setup()
 
 \end{figure}
 
-\section{Renderer}
+\section{Templates}
 
+\subsection{Basics}
+The syntax of templates engine is quite simple. Everything is separated to content---the normal text and commands---the
+text between \verb+<%+ and \verb+%>+ marks. Each single command should be enclosed with these marks, even if two commands follow each other:
+
+\begin{verbatim}
+<% if x %><% x %><% end %> - correct
+<% if x ; x ; end %>       - wrong
+<% x
+   %>                      - wrong
+\end{verbatim}
+
+Each command consists of tokens separated by blanks, the number of blanks inside command is not limited: \verb+<%x%>+ 
+and \verb+<% x    %>+ are both correct.
+
+The template names and variables are represented by case sensitive
+English words that may start with a letter and may include numbers and underscore~`\tw{\_}' symbol. 
+For example: command \verb+<% template me_1234() %>+ is legal, when \verb+<% template 1ab() %>+ is illegal.
+All commands are represented using small letters like \tw{if}.
+
+In this manual, when the syntax is described, all variable and template names are displayed as tokens 
+with \tw{CAPITAL} letters. For example: \verb+<% if def VARIABLE %>+ describes command \tw{if~def} and \tw{VARIABLE} 
+is general name for a token. 
+
+We can divide commands into two categories: `block commands' and `content' commands. The first one usually end with \verb+<% end %>+ commands and used for change control flow, and the second one used to display the content. 
+
+\subsection{Template Declarations}
+
+The final template opcode can be build from many template files, where each of them and consists of several template declarations. However if one template, makes include to other, the second should be declared/build before the first one. Thus if template declared in \tw{b.tmpl} includes template from \tw{a.tmpl} they must be compiled with:
+
+\begin{verbatim}
+tmpl_bld -o look.opcode a.tmpl b.tmpl
+\end{verbatim}
+
+If the order of files is changed, the compilation will fail. 
+Another important restriction that comes from this is that recursion is not allowed.
+
+Each template, is declared with command:
+
+\begin{verbatim}
+<% template TEMPLATE_NAME(PARAMETER1,PARAMETER2) %>
+\end{verbatim}
+
+The parameters list is not mandatory, however parenthesis~`\tw{()}' should always present. 
+For example: \verb+<% template my(name) %>+, \verb+<% template mynoparam() %>+.
+
+Template definition ends with \verb+<% end %>+ statement. The template definition is the topmost block. No template can be declared inside other templates, no commands and content should be included between declarations. For example:
+
+\begin{verbatim}
+<% template first() %>
+Legal content <% legal_command %>
+<% end %>
+Illegal content <% illegal_command %>
+<% template second() %>
+Legal content <% legal_command %>
+<% end %>
+\end{verbatim}
+
+\subsection{Content Commands} 
+These are non block commands, that used to display template content.
+
+\subsubsection{Variable and Filters}
+The variable content is displayed by enclosing its name with \verb+<% NAME %>+. 
 
 \end{document}
