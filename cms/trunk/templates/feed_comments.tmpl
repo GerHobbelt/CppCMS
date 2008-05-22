@@ -14,7 +14,9 @@
 			<link>http://<% host | raw %><% comment.permlink | raw %></link>
 			<guid>http://<% host | raw %><% comment.permlink | raw %>/<% comment.id %></guid>
 			<description>
+			&lt;div style=&quot;direction:<% if rtl %>rtl<% else %>ltr<% end %>&quot;&gt;
 			<% comment.content | ext markdown2html | escape %>
+			&lt;/div&gt;
 			</description>
 		</item>
 		<% end %>
