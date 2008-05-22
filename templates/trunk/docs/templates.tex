@@ -1,7 +1,7 @@
 \documentclass{article}
-\usepackage{listings}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{html}
 \hypersetup{colorlinks,%
 citecolor=red,%
 filecolor=red,%
@@ -9,12 +9,35 @@ linkcolor=red,%
 urlcolor=green,%
 pdftex}
 \newcommand{\tw}[1]{\texttt{#1}}
+\usepackage{float}
+ 
+\floatstyle{ruled}
+\newfloat{program}{thp}{lop}
+\floatname{program}{Listing}
+
 \title{CppCMS --- Templates Library}
 \author{Artyom Beilis (Tonkikh)}
 \begin{document}
 \maketitle
 \tableofcontents
-\lstlistoflistings
+
+%begin{latexonly}
+\listof{program}{List of Listings}
+%end{latexonly}
+
+\begin{htmlonly}
+	\newenvironment{\program}{
+		\begin{rawhtml}
+		<div style="float:right; clear:right; width:500px; padding-left:20px">
+		\end{rawhtml}
+		}{
+		\begin{rawhtml}
+		</div>
+		\end{rawhtml}
+		}
+	\renewcommand{\caption}[1]{\textbf{#1}}
+\end{htmlonly}
+
 \begin{abstract}
 This is full documentation of CppCMS templates library. This library was designed to work with CppCMS framework however
 it can be used for any other purposes that even not connected to HTML generation.
@@ -22,10 +45,10 @@ it can be used for any other purposes that even not connected to HTML generation
 \section{Key Components}
 The templates system is build form several key components:
 \begin{description}
-\item[Content] --- the object that holds all the information required for building the page.
-\item[Renderer] --- the object that holds a template and creates the page form the content
-\item[Template Compiler] --- compiler that converts human readable template files to internal opcode that is used by renderer for generating pages.
-\item[Internationalization Framework] --- the gettext compatible library that allows internationalize the templates content in multi-thread environment.
+\item[Content:] the object that holds all the information required for building the page.
+\item[Renderer:] the object that holds a template and creates the page form the content
+\item[Template Compiler:] compiler that converts human readable template files to internal opcode that is used by renderer for generating pages.
+\item[Internationalization Framework:] the gettext compatible library that allows internationalize the templates content in multi-thread environment.
 \end{description}
 
 We would explain this in a simple example.
@@ -33,17 +56,19 @@ First of all we would create a text file \tw{test.tmpl} with the
 code displayed in listing~\ref{lst:firsttmpl} and create a C++ code file \tw{test.cpp}
 with the code in listing~\ref{lst:firstcpp}.
 
-\begin{figure}
-\begin{lstlisting}[label=lst:firsttmpl,caption=First Template]{}
+\begin{program}
+\caption{First Template\label{lst:firsttmpl}}
+\begin{verbatim}
 <% template test() %>
 Hello <% name %>!
 <% end %>
-\end{lstlisting}
-\end{figure}
+\end{verbatim}
+\end{program}
 
 
-\begin{figure}
-\begin{lstlisting}[label=lst:firstcpp,caption=Frist C++ Code]{}
+\begin{program}
+\caption{Frist C++ Code\label{lst:firstcpp}}
+\begin{verbatim}
 #include <tmpl/content.h>
 #include <tmpl/renderer.h>
 #include <iostream>
@@ -52,19 +77,19 @@ using namespace std;
 
 int main()
 {
-	template_data data("test.opcode");
-	renderer rnd(data);
-	content  cnt;
-	string result;
+    template_data data("test.opcode");
+    renderer rnd(data);
+    content  cnt;
+    string result;
 
-	cnt["name"]=string("John");
-	
-	rnd.render(cnt,"test",result);
-	cout<<result;
-	return 0;
+    cnt["name"]=string("John");
+    
+    rnd.render(cnt,"test",result);
+    cout<<result;
+    return 0;
 }
-\end{lstlisting}
-\end{figure}
+\end{verbatim}
+\end{program}
 
 Now we should build templates opcode by running:
 
@@ -111,18 +136,19 @@ However, it can be extended to any user defined type, see~\ref{ref:NewTypes}.
 
 The templates system is capable of representing sequence of data---iterate over them. For example see listing~\ref{lst:iter}.
 
-\begin{figure}
-\begin{lstlisting}[label=lst:iter,caption=Simple Iterating Over Sequences]{}
+\begin{program}
+\caption{Simple Iterating Over Sequences\label{lst:iter}}
+\begin{verbatim}
 <% foreach person in people %>
 <ul>
-	<% item %>
-	<li><% person.name %> is 
-		<% person.age %> year(s) old.</li>
-	<% end %> 
+    <% item %>
+    <li><% person.name %> is 
+        <% person.age %> year(s) old.</li>
+    <% end %> 
 </ul>
 <% end %>
-\end{lstlisting}
-\end{figure}
+\end{verbatim}
+\end{program}
 
 In order to make a sequence of data we assign to a key `people' one of the following types:
 \begin{enumerate}
@@ -138,24 +164,25 @@ It can be done using following methods:
 \end{enumerate}
 
 You can see an example of preparing a content for template~\ref{lst:iter} at listing~\ref{lst:VectoAndList}
-\begin{figure}
-\begin{lstlisting}[label=lst:VectoAndList,caption=Creating a Sequence of Contents]{}
+\begin{program}
+\caption{Creating a Sequence of Contents\label{lst:VectoAndList}}
+\begin{verbatim}
 // Using Vector
 content::vector_t &vec = 
-	cnt.vector("people",people.size());
+    cnt.vector("people",people.size());
 for{i=0;i<people.size();i++) {
-	vec[i]["name"] = people[i].name;
-	vec[i]["age"]  = people[i].age;
+    vec[i]["name"] = people[i].name;
+    vec[i]["age"]  = people[i].age;
 }
 
 // Using List
 content::list_t &lst = cnt.list("people");
 for{i=0;i<people.size();i++) {
-	lst.push_back(content());
-	lst.back()["name"] = people[i].name;
-	lst.back()["age"]  = people[i].age;
-}\end{lstlisting}
-\end{figure}
+    lst.push_back(content());
+    lst.back()["name"] = people[i].name;
+    lst.back()["age"]  = people[i].age;
+}\end{verbatim}
+\end{program}
 
 This approach is good for most of cases. However in some cases, in order to prevent 
 a waste of memory resources, it is better to create
@@ -176,28 +203,29 @@ false and \emph{resets} the value of \tw{i} to 0 again. This is important in cas
 over the same sequence twice. If the value will not be reset, then other iterations over the same sequence will be
 treated as iteration over empty sequence.
 
-\begin{figure}
-\begin{lstlisting}[label=lst:ContantCallback,caption=Creating a Sequence With Callback]{}
+\begin{program}
+\caption{Creating a Sequence With Callback\label{lst:ContantCallback}}
+\begin{verbatim}
 bool sequence(content &c,int &i)
 {
-	if(i>=people.size()) {
-		i=0;
-		return false;
-	}
-	c["name"]=people[i].name;
-	c["age"]=people[i].age;
-	i++;
-	return true;
+    if(i>=people.size()) {
+        i=0;
+        return false;
+    }
+    c["name"]=people[i].name;
+    c["age"]=people[i].age;
+    i++;
+    return true;
 }
 ...
 void setup()
 {
-	int i=0;
-	cnt.signal("people",boost::bind(sequence,_1,i));
+    int i=0;
+    cnt.signal("people",boost::bind(sequence,_1,i));
 }
-\end{lstlisting}
+\end{verbatim}
 
-\end{figure}
+\end{program}
 
 \section{Templates}
 

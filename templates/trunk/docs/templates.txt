@@ -1,0 +1,298 @@
+============================
+CppCMS -- Templates Library
+============================
+
+:Author:
+    Artyom Beilis(Tonkikh)
+
+This is full documentation of CppCMS templates library. This library was designed to work with CppCMS framework however
+it can be used for any other purposes that even not connected to HTML generation.
+
+--------------
+Key Components
+--------------
+
+The templates system is build form several key components:
+
+Content
+    the object that holds all the information required for building the page.
+
+Renderer
+    the object that holds a template and creates the page form the content
+
+Template Compiler
+    compiler that converts human readable template files to internal opcode that is used by renderer for generating pages.
+
+Internationalization Framework
+    the gettext compatible library that allows internationalize the templates content in multi-thread environment.
+
+We would explain this in a simple example.
+First of all we would create a text file ``test.tmpl`` with the
+code displayed in `listing 1`_ and create a C++ code file ``test.cpp`` with the code in `listing 2`_
+
+.. sidebar ::  First Template
+
+    .. _`listing 1`:
+
+    ::
+
+        <% template test() %>
+        Hello <% name %>!
+        <% end %>
+
+.. sidebar :: Frist C++ Code
+
+    .. _`listing 2`:
+
+    ::
+    
+        #include <tmpl/content.h>
+        #include <tmpl/renderer.h>
+        #include <iostream>
+        using namespace tmpl;
+        using namespace std;
+        
+        int main()
+        {
+            template_data data("test.opcode");
+            renderer rnd(data);
+            content  cnt;
+            string result;
+        
+            cnt["name"]=string("John");
+           
+            rnd.render(cnt,"test",result);
+            cout<<result;
+            return 0;
+        }
+
+    
+
+Now we should build templates opcode by running:
+
+::
+
+    tmpl_bld -o test.opcode test.tmpl
+
+Then compile our test code
+
+
+::
+
+    g++ test.cpp -ltmpl -o test
+
+And now we can run it ``./test``. If everything was OK we should see as output:
+
+    Hello John!
+
+Now lets see line after line what happens. First we declare a template called 'test', it includes some
+text and special command ``<% name %>`` that displays the value of content variable 'name'. When we run
+``tmpl_bld`` we create from text file ``test.tmpl`` a binary file ``test.opcode`` that actually 
+includes a simple instructions for displaying the content. You can find an 'assembly' code in file ``test.s``.
+
+In the C++ code, we first of all load the opcode file we created to an object 'data' of
+type ``template_data``. It holds the content of the file and can be used by multiple 
+'renderer' objects. After that we can create an object 'rnd' of type ``renderer`` that would use our opcode.
+
+The next step is setting up the content. We assign to a key ``name`` value 'John': 
+the value that would be displayed for this content variable.
+Now we are ready to render the output calling ``render`` method of renderer object.
+It receives 3 parameters: the content, the name of the template and the string that
+would be filled up with rendered content. And now we cat print it as usual.
+
+-------
+Content
+-------
+
+The ``tmpl::content`` class is actually derived from ``map<string,boost::any>``. It maps 
+string key to a container that is capable of holding any [1]_ value.
+
+In order to add a pair key/value to the content, you just assign it as if it was an ordinary map. 
+Currently renderer supports ``int``, ``string``, ``bool`` and ``std::tm`` types that it is capable to display.
+However, it can be extended to any user defined type, see `New Types`_.
+
+The templates system is capable of representing sequence of data---iterate over them. For example see `listing 3`_.
+
+.. sidebar :: Simple Iterating Over Sequences.
+    
+    .. _`listing 3`:
+    
+    ::
+    
+        <% foreach person in people %>
+        <ul>
+            <% item %>
+            <li><% person.name %> is 
+                <% person.age %> year(s) old.</li>
+            <% end %> 
+        </ul>
+        <% end %>
+
+
+In order to make a sequence of data we assign to a key 'people' one of the following types:
+
+1. ``vector_t`` of type ``vector<content>``
+2. ``list_t`` of type ``verb+list<content>``
+
+It can be done using following methods:
+
+1. ``vector_t &vector(string const &key, int size=0)``
+    method creates a vector of contents of size ``size`` at given ``key`` and returns it;
+2. ``list_t &list(string const &key)``
+    method creates a list of contents at required key as well;
+
+You can see at `listing 4`_ an example of preparing a content for template at `listing 3`_.
+
+.. sidebar:: Creating a Sequence of Contents
+    
+    .. _`listing 4`:
+
+    ::
+
+        // Using Vector l
+        content::vector_t &vec = 
+            cnt.vector("people",people.size());
+        for{i=0;i<people.size();i++) {
+            vec[i]["name"] = people[i].name;
+            vec[i]["age"]  = people[i].age;
+        }
+        
+        // Using List
+        content::list_t &lst = cnt.list("people");
+        for{i=0;i<people.size();i++) {
+            lst.push_back(content());
+            lst.back()["name"] = people[i].name;
+            lst.back()["age"]  = people[i].age;
+        }
+
+This approach is good for most of cases. However in some cases, in order to prevent 
+a waste of memory resources, it is better to create
+a data 'on-the-fly' using callback functions. This can be achieved using
+``boost::signal`` and ``boost::bind``, see [2]_.
+
+The method that attaches a callback is defined as following:
+
+::
+
+    typedef boost::signal<bool (content &)> callback_t;
+    void signal(string const &key,callback_t::slot_type slot);
+
+You actually should attach a function that receives as parameter and empty content and fills it up with data returning 'true'. It should return 'false' at the end of the sequence. See `listing 5` for an example.
+
+Take a note, at the beginning the value of ``i`` is 0. When we get to the end of the sequence, the callback function returns
+false and *resets* the value of ``i`` to 0 again. This is important in case, the template would try to iterate
+over the same sequence twice. If the value will not be reset, then other iterations over the same sequence will be
+treated as iteration over empty sequence.
+
+.. sidebar:: Creating a Sequence With Callback
+    
+    .. _`listing 5`:
+
+    ::
+    
+        bool sequence(content &c,int &i)
+        {
+            if(i>=people.size()) {
+                i=0;
+                return false;
+            }
+            c["name"]=people[i].name;
+            c["age"]=people[i].age;
+            i++;
+            return true;
+        }
+        ...
+        void setup()
+        {
+            int i=0;
+            cnt.signal("people",boost::bind(sequence,_1,i));
+        }
+
+---------
+Templates
+---------
+
+Basics
+======
+
+The syntax of templates engine is quite simple. Everything is separated to content---the normal text and commands---the
+text between ``<%`` and ``%>`` marks. Each single command should be enclosed with these marks, even if two commands follow each other:
+
+::
+
+    <% if x %><% x %><% end %> - correct
+    <% if x ; x ; end %>       - wrong
+    <% x
+       %>                      - wrong
+
+Each command consists of tokens separated by blanks, the number of blanks inside command is not limited: ``<%x%>`` 
+and ``+<% x    %>`` are both correct.
+
+The template names and variables are represented by case sensitive
+English words that may start with a letter and may include numbers and underscore '``_``' symbol. 
+For example: command ``<% template me_1234() %>`` is legal, when ``<% template 1ab() %>`` is illegal.
+All commands are represented using small letters like ``if``.
+
+In this manual, when the syntax is described, all variable and template names are displayed as tokens 
+with ``CAPITAL`` letters. For example: ``<% if def VARIABLE %>`` describes command ``if def`` and ``VARIABLE``
+is general name for a token. 
+
+We can divide commands into two categories: 'block commands' and 'content' commands. The first one usually end with ``<% end %>`` commands and used for change control flow, and the second one used to display the content. 
+
+Template Declarations
+=====================
+
+The final template opcode can be build from many template files, where each of them and consists of several template declarations. However if one template, makes include to other, the second should be declared/build before the first one. Thus if template declared in ``b.tmpl`` includes template from ``a.tmpl`` they must be compiled with:
+
+::
+
+    tmpl_bld -o look.opcode a.tmpl b.tmpl
+
+If the order of files is changed, the compilation will fail. 
+Another important restriction that comes from this is that recursion is not allowed.
+
+Each template, is declared with command:
+
+::
+
+    <% template TEMPLATE_NAME(PARAMETER1,PARAMETER2) %>
+
+The parameters list is not mandatory, however parenthesis ``()`` should always present. 
+For example: ``<% template my(name) %>``, ``<% template mynoparam() %>``.
+
+Template definition ends with ``<% end %>`` statement. The template definition is the topmost block. No template can be declared inside other templates, no commands and content should be included between declarations. For example:
+
+::
+
+    <% template first() %>
+      Legal content <% legal_command %>
+    <% end %>
+    
+    Illegal content <% illegal_command %>
+
+    <% template second() %>
+      Legal content <% legal_command %>
+    <% end %>
+
+Content Commands
+================
+
+These are non block commands, that used to display template content.
+
+Variable and Filters
+====================
+
+The variable content is displayed by enclosing its name with ``<% NAME %>``. 
+
+Renderer
+---------
+
+.. _`New Types` :
+
+User types
+==========
+
+
+.. [1] For full documentation of ``boost::any`` refer to http://www.boost.org/doc/html/any.html
+.. [2] http://www.boost.org/doc/html/signals.html
+
