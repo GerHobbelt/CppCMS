@@ -3,7 +3,7 @@ pkgdata_DATA = look.opcode style.css adminstyle.css os.opcode
 TEMPLATES= lnglst.tmpl admin_editpost.tmpl admin_main.tmpl error.tmpl main_page.tmpl page.tmpl post.tmpl\
 	admin_login.tmpl admin.tmpl feed_comments.tmpl feed_posts.tmpl  sidebar.tmpl\
 	admin_editcomment.tmpl setup_blog.tmpl admin_editoptions.tmpl admin_editlinks.tmpl \
-	admin_editcats.tmpl
+	admin_editcats.tmpl trackback.tmpl
 
 look.opcode: ${TEMPLATES} master-def.tmpl
 	tmpl_bld -o look.opcode -p messages.pot ${TEMPLATES} master-def.tmpl

@@ -110,6 +110,10 @@ void Blog::init()
 			boost::bind(&Blog::post,this,$1,false));
 		fmt.post=root + "/post/%1%";
 
+		url.add("^/trackback/(\\d+)$",
+			boost::bind(&Blog::trackback,this,$1));
+		fmt.trackback=root + "/trackback/%1%";
+
 		url.add("^/page/(\\d+)$",
 			boost::bind(&Blog::page,this,$1,false));
 		fmt.page=root + "/page/%1%";
@@ -461,6 +465,71 @@ void Blog::edit_cats()
 }
 
 
+void Blog::trackback(string sid)
+{
+	int id=atoi(sid.c_str());
+
+	string title;
+	string excerpt;
+	string url;
+	string blog_name;
+
+	const vector<FormEntry> &form=cgi->getElements();
+	unsigned i;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="title") title=form[i].getValue();
+		else if(field=="excerpt") excerpt=form[i].getValue();
+		else if(field=="url") url=form[i].getValue();
+		else if(field=="blog_name") blog_name=form[i].getValue();
+	}
+
+	cout<<'['<<cgi->getEnvironment().getRequestMethod()<<']'<<endl;
+	cout<<'['<<url<<']'<<endl;
+	
+	if(url!="" && cgi->getEnvironment().getRequestMethod()=="POST"){	
+		if(excerpt=="" && title=="" && blog_name=="") {
+			c["error"]=1;
+			c["message"]=string("Too few parameters given");
+		}
+		else {
+			if(blog_name=="") blog_name="-";
+			string content;
+			if(title!="")
+				content+="#### "+title+"\n\n";
+			content+=excerpt;
+			if(content==""){
+				content=blog_name;
+			}
+			transaction tr(sql);
+			sql<<"SELECT id FROM posts WHERE id=?",id;
+			row r;
+			tm t;
+			time_t tt=time(NULL);
+			localtime_r(&tt,&t);
+	
+			if(sql.single(r)) {
+				sql<<	"INSERT INTO comments(post_id,author,email,url,publish_time,content) "
+					"VALUES(?,?,'none',?,?,?)",
+					id,blog_name,url,t,content,exec();
+				c["error"]=0;
+				tr.commit();
+			}
+			else {
+				c["error"]=1;
+				c["message"]=string("This post not exists");
+				tr.rollback();
+			}
+		}
+	}
+	else {
+		c["error"]=1;
+		c["message"]=string("Trackback specifications violation not POST method used or no url given");
+	}
+
+	set_header(new HTTPContentHeader("text/xml"));
+	render.render(c,"trackback",out.getstring());
+}
 
 
 void Blog::post(string s_id,bool preview)

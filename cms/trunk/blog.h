@@ -59,6 +59,7 @@ struct links_t {
 	string update_comment;
 	string lang_switch;
 	string edit_options;
+	string trackback;
 };
 
 struct post_content_t {
@@ -116,6 +117,7 @@ private:
 	void edit_options();
 	void edit_cats();
 	void count_comments(int id);
+	void trackback(string sid);
 
 	content c;
 

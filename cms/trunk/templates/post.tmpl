@@ -46,6 +46,17 @@
 		<% include comment_preview %>
 	</dl>
 <% end %>
+	<p><% gt 'You can send a trackback to following url:' %>
+		<script type="text/javascript">
+		<!--
+		document.write('<a href')
+		document.write('="<% trackback_part_1 %>')
+		document.write('<% trackback_part_2 %>" >')
+		document.write('<% gt 'trackback' %>')
+		document.write('</a>')
+		-->
+		</script>
+	</p>
 	<h2><% gt 'Add Comment:' %></h2>
 	<script type="text/javascript">
 	<!--

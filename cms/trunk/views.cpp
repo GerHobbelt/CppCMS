@@ -62,12 +62,20 @@ void View_Post::ini_full(post_t &p)
 		c["has_content"]=false;
 	}
 
+	// Simple ANTI SPAM protection
 	string post_comment=str(format(blog->fmt.add_comment) % p.id);
 	int n=post_comment.size()/2;
 	string post_comment_url_2=post_comment.substr(n);
 	string post_comment_url_1=post_comment.substr(0,n);
 	c["post_comment_url_1"]=post_comment_url_1;
 	c["post_comment_url_2"]=post_comment_url_2;
+
+	string trackback=str(format(blog->fmt.trackback) % p.id);
+	n=trackback.size()/2;
+	string tb_2=trackback.substr(n);
+	string tb_1=trackback.substr(0,n);
+	c["trackback_part_1"]=tb_1;
+	c["trackback_part_2"]=tb_2;
 
 	result rs;
 	blog->sql<<
