@@ -38,7 +38,7 @@ int main()
 		wp.connect();
 		
 		session sql("mysql");
-		sql.param("dbname","cppcms");
+		sql.param("dbname","newpress");
 		sql.param("username","root");
 		sql.param("password","root");
 

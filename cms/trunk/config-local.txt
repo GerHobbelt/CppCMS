@@ -6,8 +6,10 @@ server.socket = "/tmp/cppblog.socket"
 # Blog configuration
 blog.media_path = "/templates"
 blog.script_path = "/blog"
+blog.id = "new_wp_"
 blog.host = "localhost:8080"
 blog.configure = 0
+blog.charset="utf-8"
 
 # Templates
 
@@ -16,31 +18,24 @@ blog.configure = 0
 
 
 # LaTeX equations support
-latex.script =  "./templates/latex/latex.sh"
-latex.cache_path = "./templates/latex/"
+
+latex.script =  "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/latex.sh"
+latex.cache_path = "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/"
 
 # Markdown engine "old" or "discount"
 #
+
 markdown.engine="discount"
 
-# gzip
 # gzip - default disabled
 gzip.enable=1
-
-
-# For fastest compression gzip.level=1
-#
- gzip.level = 1
-
-# Use other buffer size then default
-# gzip.buffer=256
-
 
 ##########
 # Engine #
 ##########
 
 dbi.engine="mysql"
+# dbi.debug=1
 # dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 

@@ -12,6 +12,7 @@
 #include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
+#include <iconv.h>
 
 using cgicc::FormEntry;
 using cgicc::HTTPContentHeader;
@@ -465,6 +466,69 @@ void Blog::edit_cats()
 }
 
 
+static bool cxx_iconv(string &s,string const &charset_in,string const &charset_out)
+{
+	iconv_t d=iconv_open(charset_out.c_str(),charset_in.c_str());
+	if(d==(iconv_t)-1) {
+		return false;
+	}
+	char *in=NULL;
+	char *out=NULL;
+	bool res=true;
+	try{
+		size_t size=s.size();
+
+		size_t size_in=size;
+		in=new char[size_in];
+
+		size_t size_out=size*8;
+		out=new char[size_out];
+
+		char *rolling_in=in;
+		char *rolling_out=out;
+		memcpy(in,s.c_str(),size);
+		size_t n;
+		if((n=iconv(d,&rolling_in,&size_in,&rolling_out,&size_out))==(size_t)(-1)) {
+			res=false;
+		}
+		else {
+			s="";
+			s.append(out,rolling_out-out);
+		}
+	}
+	catch(...){
+		delete [] in;
+		delete [] out;
+		iconv_close(d);
+	}
+	delete [] in;
+	delete [] out;
+	iconv_close(d);
+	return res;
+}
+
+static string get_charset(string const &content)
+{
+	size_t p=content.find("charset=");
+	if(p==string::npos)
+		return "utf-8";
+	p+=8;
+	size_t p2=p;
+	if(	(p2=content.find(' ',p))==string::npos &&
+		(p2=content.find('\t',p))==string::npos &&
+		(p2=content.find('\n',p))==string::npos &&
+		(p2=content.find('\r',p))==string::npos &&
+		(p2=content.find(';',p))==string::npos
+	  )
+	{
+		return content.substr(p);
+	}
+	else {
+		return content.substr(p,p2-p);
+	}
+
+}
+
 void Blog::trackback(string sid)
 {
 	int id=atoi(sid.c_str());
@@ -484,11 +548,18 @@ void Blog::trackback(string sid)
 		else if(field=="blog_name") blog_name=form[i].getValue();
 	}
 
-	cout<<'['<<cgi->getEnvironment().getRequestMethod()<<']'<<endl;
-	cout<<'['<<url<<']'<<endl;
-	
-	if(url!="" && cgi->getEnvironment().getRequestMethod()=="POST"){	
-		if(excerpt=="" && title=="" && blog_name=="") {
+	if(url!="" && cgi->getEnvironment().getRequestMethod()=="POST"){
+		string charset=get_charset(cgi->getEnvironment().getContentType());
+		string mycharset=global_config.sval("blog.charset","utf-8");
+		if(	!cxx_iconv(title,charset,mycharset)
+			|| !cxx_iconv(excerpt,charset,mycharset)
+			|| !cxx_iconv(blog_name,charset,mycharset))
+		{
+			perror("iconv");
+			c["message"]=string("Failed to transcode from ")+charset+" to "+mycharset;
+			c["error"]=1;
+		}
+		else if(excerpt=="" && title=="" && blog_name=="") {
 			c["error"]=1;
 			c["message"]=string("Too few parameters given");
 		}
@@ -507,7 +578,7 @@ void Blog::trackback(string sid)
 			tm t;
 			time_t tt=time(NULL);
 			localtime_r(&tt,&t);
-	
+
 			if(sql.single(r)) {
 				sql<<	"INSERT INTO comments(post_id,author,email,url,publish_time,content) "
 					"VALUES(?,?,'none',?,?,?)",
