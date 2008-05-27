@@ -697,8 +697,10 @@ void View_Admin_Post::ini(int id,string ptype)
 	if(id!=-1) {
 		c["post_id"]=id;
 		c["submit_post_url"]=str(format( is_post ? blog->fmt.update_post : blog->fmt.update_page) % id);
-		if(is_post)
+		if(is_post) {
 			c["preview_url"]=str(format(blog->fmt.preview) % id);
+			c["send_trackback_url"]=blog->fmt.send_trackback;
+		}
 		else
 			c["preview_url"]=str(format(blog->fmt.page_preview) % id);
 	}

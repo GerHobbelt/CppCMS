@@ -100,5 +100,15 @@
         </dd>
         </dl>
 </form>
+	<% if not is_page %><% if is_open %>
+	<h2><% gt 'Send Trackback:' %></h2>
+	<form action="<% send_trackback_url %>" method="post">
+	<p><% gt 'Trackback URL:' %>
+		<input type="text" name="url" size="40" />
+		<input type="hidden" name="id" value="<% post_id %>" />
+	</p>
+	<p><input type="submit" name="send" value="<% gt 'Send' %>" /></p>
+	</form>
+	<% end %><% end %>
 </div>
 <% end %>

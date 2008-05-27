@@ -60,6 +60,7 @@ struct links_t {
 	string lang_switch;
 	string edit_options;
 	string trackback;
+	string send_trackback;
 };
 
 struct post_content_t {
@@ -118,6 +119,7 @@ private:
 	void edit_cats();
 	void count_comments(int id);
 	void trackback(string sid);
+	void send_trackback();
 
 	content c;
 

@@ -14,6 +14,8 @@
 #include "md5.h"
 #include <iconv.h>
 
+#include "trackback.h"
+
 using cgicc::FormEntry;
 using cgicc::HTTPContentHeader;
 using cgicc::HTTPRedirectHeader;
@@ -210,6 +212,9 @@ void Blog::init()
 
 		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
 		fmt.feed_comments=root+"/rss/comments";
+		
+		url.add("^/admin/sendtrackback$",boost::bind(&Blog::send_trackback,this));
+		fmt.send_trackback=root+"/admin/sendtrackback";
 
 	}
 
@@ -260,6 +265,75 @@ void Blog::page(string s_id,bool preview)
 
 	render.render(c,"master",out.getstring());
 }
+
+void Blog::send_trackback()
+{
+	auth_or_throw();
+
+	const vector<FormEntry> &form=cgi->getElements();
+
+	unsigned i;
+	int id=-1;
+	string url;
+
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="url") {
+			url=form[i].getValue();
+		}
+		else if(field=="id") {
+			id=form[i].getIntegerValue();
+		}
+	}
+	if(url=="" || id==-1) {
+		c["error_no_url"]=true;
+	}
+	else{
+		sql<<"SELECT title,abstract FROM posts WHERE id=?",id;
+		row r;
+		if(!sql.single(r))
+			throw Error(Error::E404);
+		string title,abstract,blog_name;
+
+		r>>title>>abstract;
+
+		::trackback tb(url,global_config.sval("blog.charset","utf-8"));
+
+		tb.url(str(boost::format(fmt.post) % id));
+		tb.title(title);
+		sql<<"SELECT value FROM options WHERE id=?",BLOG_TITLE;
+		if(sql.single(r))
+			r>>blog_name;
+		tb.blog_name(blog_name);
+		string content;
+		markdown2html(abstract,content);
+		abstract=content;
+		content="";
+		bool code=false;
+		for(i=0;i<abstract.size() && !(content.size()>250 && isblank(abstract[i])) ;i++) {
+			char c=abstract[i];
+			if(c=='<')
+				code=true;
+			else if(c=='>')
+				code=false;
+			else if(!code)
+				content+=c;
+		}
+		tb.excerpt(content);
+		string error;
+		bool result=tb.post(error);
+		c["success"]=result;
+		if(!result)
+			c["error_message"]=error;
+		c["goback"]=str(boost::format(fmt.edit_post) % id);
+	}
+
+	View_Admin view(this,c);
+	view.ini_share();
+	c["master_content"]=string("admin_sendtrackback");
+	render.render(c,"admin",out.getstring());
+}
+
 
 void Blog::edit_options()
 {
@@ -488,7 +562,13 @@ static bool cxx_iconv(string &s,string const &charset_in,string const &charset_o
 		char *rolling_out=out;
 		memcpy(in,s.c_str(),size);
 		size_t n;
-		if((n=iconv(d,&rolling_in,&size_in,&rolling_out,&size_out))==(size_t)(-1)) {
+		#ifdef __CYGWIN__
+		n=iconv(d,(const char**)&rolling_in,&size_in,&rolling_out,&size_out);
+		#else
+		n=iconv(d,&rolling_in,&size_in,&rolling_out,&size_out);
+		#endif
+		
+		if(n==(size_t)(-1)) {
 			res=false;
 		}
 		else {
@@ -583,6 +663,7 @@ void Blog::trackback(string sid)
 				sql<<	"INSERT INTO comments(post_id,author,email,url,publish_time,content) "
 					"VALUES(?,?,'none',?,?,?)",
 					id,blog_name,url,t,content,exec();
+				count_comments(id);
 				c["error"]=0;
 				tr.commit();
 			}

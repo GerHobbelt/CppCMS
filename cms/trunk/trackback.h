@@ -1,4 +1,7 @@
+#ifndef TRACKBACK_H
+#define TRACKBACK_H
 #include <string>
+
 
 class trackback {
 	std::string post_data;
@@ -13,3 +16,5 @@ public:
 	void excerpt(std::string v){ set_data("excerpt",v); };
 	bool post(std::string &error_message);
 };
+
+#endif
