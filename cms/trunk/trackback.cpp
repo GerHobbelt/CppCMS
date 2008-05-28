@@ -40,8 +40,10 @@ static int post_data(string target,string post_data,string charset,string &resul
   CURLcode res;
 
   string buf="Content-Type: application/x-www-form-urlencoded; charset="+charset;
+  static const char expect[]="Expect:";
 
   curl_slist *headerlist = curl_slist_append(NULL, buf.c_str());
+  headerlist=curl_slist_append(headerlist,expect);
   curl = curl_easy_init();
   if(curl) {
     /* what URL that receives this POST */
@@ -52,11 +54,16 @@ static int post_data(string target,string post_data,string charset,string &resul
     curl_easy_setopt(curl, CURLOPT_WRITEDATA,&result);
     res = curl_easy_perform(curl);
 
+
     /* always cleanup */
     curl_easy_cleanup(curl);
 
     /* free slist */
     curl_slist_free_all (headerlist);
+  }
+  if(res!=CURLE_OK){
+  	result=curl_easy_strerror(res);
+	return 1;
   }
   return 0;
 }
@@ -72,10 +79,9 @@ void trackback::set_data(string n,string v)
 bool trackback::post(string &e)
 {
 	string result;
-	::post_data(target,post_data,charset,result);
-	if(result=="") {
-		e="No response";
-		return false;	
+	if(::post_data(target,post_data,charset,result)!=0) {
+		e=result;
+		return false;
 	}
 	if(result.find("<error>0</error>")!=string::npos){
 		return true;
@@ -85,6 +91,9 @@ bool trackback::post(string &e)
 	p2=result.find("</message>");
 	if(p1!=string::npos && p2!=string::npos && p1+9<p2) {
 		e=result.substr(p1+9,p2-(p1+9));
+	}
+	else {
+		e="Unreadable server respond";
 	}
 	return false;
 }

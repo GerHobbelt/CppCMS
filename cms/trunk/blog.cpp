@@ -299,7 +299,8 @@ void Blog::send_trackback()
 
 		::trackback tb(url,global_config.sval("blog.charset","utf-8"));
 
-		tb.url(str(boost::format(fmt.post) % id));
+		string myurl="http://"+global_config.sval("blog.host","")+str(boost::format(fmt.post) % id);
+		tb.url(myurl);
 		tb.title(title);
 		sql<<"SELECT value FROM options WHERE id=?",BLOG_TITLE;
 		if(sql.single(r))

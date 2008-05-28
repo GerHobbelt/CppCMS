@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-20 23:14+0300\n"
+"PO-Revision-Date: 2008-05-28 07:31+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -84,6 +84,15 @@ msgstr "מחק"
 
 msgid "Are you shure?"
 msgstr "האם אתה בטוח?"
+
+msgid "Send Trackback:"
+msgstr "שלח טראקבק:"
+
+msgid "Trackback URL:"
+msgstr "כתובת הטראקבק:"
+
+msgid "Send"
+msgstr "שלח"
 
 msgid "Tasks"
 msgstr "משימות"
@@ -183,6 +192,12 @@ msgstr "ב־"
 msgid "delete"
 msgstr "מחק"
 
+msgid "You can send a trackback to following url:"
+msgstr "ניתן לשלוח טראקבק לכתובת הבאה:"
+
+msgid "trackback"
+msgstr "טראקבק"
+
 msgid "Add Comment:"
 msgstr "הוסף תגובה:"
 
@@ -202,8 +217,8 @@ msgid ""
 "You can write your messages using <a href=\"http://en.wikipedia.org/wiki/"
 "Markdown\">Markdown</a> syntax."
 msgstr ""
-"ניתן להשתמש בתחביר <a href=\"http://en.wikipedia.org/wiki/"
-"Markdown\">Markdown</a> לכתיבת ההודעות."
+"ניתן להשתמש בתחביר <a href=\"http://en.wikipedia.org/wiki/Markdown"
+"\">Markdown</a> לכתיבת ההודעות."
 
 msgid "Submit"
 msgstr "שלח"
@@ -345,6 +360,18 @@ msgstr "אין נושאים"
 
 msgid "New category:"
 msgstr "נושא חדש:"
+
+msgid "No url given"
+msgstr "הקישור לא הוזן"
+
+msgid "The trackback was send sucessefully"
+msgstr "טראקבק נשלח בהצלחה"
+
+msgid "The send had failed with following message: %1%"
+msgstr "שליחה נכשלה בגלל הסיבה הבאה: %1%"
+
+msgid "Press here to return to post."
+msgstr "לחץ כאן כדי לחזור למאמר."
 
 msgid "Home"
 msgstr "בית"
