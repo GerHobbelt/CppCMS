@@ -37,7 +37,7 @@ static size_t write_function(void *ptr, size_t size, size_t nmemb, void *stream)
 static int post_data(string target,string post_data,string charset,string &result)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res=CURLE_OK;
 
   string buf="Content-Type: application/x-www-form-urlencoded; charset="+charset;
   static const char expect[]="Expect:";
