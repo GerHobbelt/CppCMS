@@ -124,7 +124,7 @@ void View_Post::ini_short(post_t &p)
 	c["has_content"]=(bool)p.has_content;
 }
 
-void View_Main_Page::ini_sidebar()
+void View_Main_Page::ini_sidebar(set<string> triggers,content &c)
 {
 	result res;
 	row r;
@@ -138,6 +138,8 @@ void View_Main_Page::ini_sidebar()
 		c["copyright_string"]=val;
 	}
 
+	triggers.insert("options");
+
 	blog->sql<<
 		"SELECT id,title "
 		"FROM	pages "
@@ -150,7 +152,9 @@ void View_Main_Page::ini_sidebar()
 		r>>id>>title;
 		pages[i]["title"]=title;
 		pages[i]["link"]=str(boost::format(blog->fmt.page) % id);
+		triggers.insert(str(boost::format("page_%1%") % id));
 	}
+	triggers.insert("pages");
 
 	blog->sql<<
 		"SELECT link_cats.id,name,title,url,description "
@@ -179,6 +183,8 @@ void View_Main_Page::ini_sidebar()
 			ctmp["description"]=descr;
 	}
 
+	triggers.insert("links");
+
 	blog->sql<<"SELECT id,name FROM	cats",res;
 	content::vector_t &cats=c.vector("cats",res.rows());
 	for(i=0;res.next(r);i++) {
@@ -188,6 +194,7 @@ void View_Main_Page::ini_sidebar()
 		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
 		cats[i]["name"]=name;
 	}
+	triggers.insert("cats");
 
 }
 
@@ -232,7 +239,18 @@ void View_Main_Page::ini_share()
 	c["rss_comments"]=blog->fmt.feed_comments;
 	c["cookie_prefix"]=global_config.sval("blog.id","");
 
-	ini_sidebar();
+	string sidebar;
+	if(blog->cache.fetch_frame("sidebar",sidebar)) {
+		c["sidebar"]=sidebar;
+	}
+	else {
+		content sbar_content;
+		set<string> triggers;
+		ini_sidebar(triggers,sbar_content);
+		blog->render(sbar_content,"sidebar",sidebar);
+		c["sidebar"]=sidebar;
+		blog->cache.store_frame("sidebar",sidebar,triggers);
+	}
 }
 
 void View_Main_Page::ini_rss_comments()
