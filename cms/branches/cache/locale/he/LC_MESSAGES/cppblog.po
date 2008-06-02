@@ -1,0 +1,412 @@
+# translation of cppblog.po to Hebrew
+# artik <artyomtnk@yahoo.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: cppblog\n"
+"PO-Revision-Date: 2008-05-28 07:31+0300\n"
+"Last-Translator: artik <artyomtnk@yahoo.com>\n"
+"Language-Team: Hebrew <en@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KBabel 1.11.4\n"
+
+msgid "LTR"
+msgstr "RTL"
+
+# Please translate LANG as native name of language, for example for French -- `Français'
+msgid "LANG"
+msgstr "עברית"
+
+msgid "Title and Content are mandatory!"
+msgstr "כותרת ותוכן הם שדות חובה!"
+
+msgid "Title and Abstract are mandatory!"
+msgstr "כותרת ותקציר הם שדות חובה!"
+
+msgid "Edit Page No."
+msgstr "ערוך עמוד מס'"
+
+msgid "Edit Post No."
+msgstr "ערוך מאמר מס'"
+
+msgid "preview..."
+msgstr "תצוגה מקדימה..."
+
+msgid "New Page"
+msgstr "עמוד חדש"
+
+msgid "New Post"
+msgstr "מאמר חדש"
+
+msgid "Title:"
+msgstr "כותרת:"
+
+msgid "Categories:"
+msgstr "נושאים:"
+
+msgid "The post is published under catergories:"
+msgstr "המאמר פורסם תחת הנושאים הבאים:"
+
+msgid "No categories assigned to this post."
+msgstr "אין נושאים משוייכים למאמר זה."
+
+msgid "(click to edit)"
+msgstr "(לחץ לעריכה)"
+
+msgid "Remove From Categories:"
+msgstr "הסר נושאים"
+
+msgid "Add To Categories:"
+msgstr "הוסף נושאים"
+
+msgid "Abstract:"
+msgstr "תקציר:"
+
+msgid "Content:"
+msgstr "תוכן:"
+
+msgid "Save"
+msgstr "שמור"
+
+msgid "Save and Continue"
+msgstr "שמור והמשך"
+
+msgid "Publish"
+msgstr "פרסם"
+
+msgid "Unpublish"
+msgstr "הסר פרסום"
+
+msgid "Delete"
+msgstr "מחק"
+
+msgid "Are you shure?"
+msgstr "האם אתה בטוח?"
+
+msgid "Send Trackback:"
+msgstr "שלח טראקבק:"
+
+msgid "Trackback URL:"
+msgstr "כתובת הטראקבק:"
+
+msgid "Send"
+msgstr "שלח"
+
+msgid "Tasks"
+msgstr "משימות"
+
+msgid "To The Blog"
+msgstr "לבלוג"
+
+msgid "Edit Links"
+msgstr "ערוך קישורים"
+
+msgid "Edit Categories"
+msgstr "ערוך נושאים"
+
+msgid "Edit Options"
+msgstr "ערוך אפשרויות"
+
+msgid "Unpublished Posts"
+msgstr "מאמרים שלא פורסמו"
+
+msgid "No unpublished posts"
+msgstr "אין מאמרים שלא פורסמו"
+
+msgid "Pages"
+msgstr "עמודים"
+
+msgid "(not published)"
+msgstr "(לא פורסם)"
+
+msgid "No pages"
+msgstr "אין עמודים"
+
+msgid "Latest Comments"
+msgstr "תגובות אחרונות"
+
+msgid "edit"
+msgstr "ערוך"
+
+msgid "No comments"
+msgstr "אין תגובות"
+
+msgid "Error"
+msgstr "שגיאה"
+
+msgid "The page you had looked for not found"
+msgstr "הדף שחיפשת לא נמצא"
+
+msgid "Not all mandatory fields were filled:"
+msgstr "לא כל שדות החובה הושלמו:"
+
+msgid "Name"
+msgstr "שם"
+
+msgid "E-Mail, it will not be disclosed in the comment text"
+msgstr "כותבת דוא\"ל לא תפורסם עם ההערה"
+
+msgid "Message Body"
+msgstr "גוף ההודעה"
+
+msgid "Press \"back\" browser button and fix the form"
+msgstr "לחץ מקש \"חזרה\" בדפדפן על מנת לתקן את הבעיה."
+
+msgid "Posts in category &#8216;%1%&#8217;."
+msgstr "מאמרים בנושא \"%1%\""
+
+msgid "%1%, by %2% "
+msgstr "%1%, מאת %2%"
+
+msgid "Posted in:"
+msgstr "תחת נושאים:"
+
+msgid "one comment"
+msgid_plural "%1% comments"
+msgstr[0] "‏תגובה אחת"
+msgstr[1] "‏%1% תגובות"
+
+msgid "more..."
+msgstr "המשך..."
+
+msgid "next page"
+msgstr "הדף הבא"
+
+msgid "There are not posts in category &#8216;%1%&#8217;"
+msgstr "אין מאמרים בנושא \"%1%\""
+
+msgid "There are no posts in the blog"
+msgstr "אין מאמרים בבלוג"
+
+msgid "Preview of message content:"
+msgstr "תצוגה מקדימה של תוכן ההודעה:"
+
+msgid "Comments"
+msgstr "תגובות"
+
+msgid "at "
+msgstr "ב־"
+
+msgid "delete"
+msgstr "מחק"
+
+msgid "You can send a trackback to following url:"
+msgstr "ניתן לשלוח טראקבק לכתובת הבאה:"
+
+msgid "trackback"
+msgstr "טראקבק"
+
+msgid "Add Comment:"
+msgstr "הוסף תגובה:"
+
+msgid "Name, E-Mail, Message content are mandatory!"
+msgstr "שם, כתובת דוא\"ל וגוף ההודעה הם שדות חובה!"
+
+msgid "Name:"
+msgstr "שם:"
+
+msgid "E-Mail:"
+msgstr "כתובת דוא\"ל"
+
+msgid "Site:"
+msgstr "אתר:"
+
+msgid ""
+"You can write your messages using <a href=\"http://en.wikipedia.org/wiki/"
+"Markdown\">Markdown</a> syntax."
+msgstr ""
+"ניתן להשתמש בתחביר <a href=\"http://en.wikipedia.org/wiki/Markdown"
+"\">Markdown</a> לכתיבת ההודעות."
+
+msgid "Submit"
+msgstr "שלח"
+
+msgid "Preview"
+msgstr "תצוגה מקדימה"
+
+msgid "You must enable JavaScript in order to post comments."
+msgstr "חובה להפעיל JavaScript כדי לפרסם הערות."
+
+msgid "Username:"
+msgstr "שם משתמש:"
+
+msgid "Password:"
+msgstr "ססמה:"
+
+msgid "Login"
+msgstr "כניסה"
+
+msgid "Admin Protal"
+msgstr "אתר הניהול"
+
+msgid "Blog"
+msgstr "בלוג"
+
+msgid "Admin"
+msgstr "ניהול"
+
+msgid "Logout"
+msgstr "יציאה"
+
+msgid "Administration Panel"
+msgstr "פנל ניהול"
+
+msgid "main"
+msgstr "ראשי"
+
+msgid "write post"
+msgstr "כתיבת מאמר"
+
+msgid "write page"
+msgstr "כתיבת עמוד"
+
+msgid "links"
+msgstr "קישורים"
+
+msgid "categories"
+msgstr "נושאים"
+
+msgid "options"
+msgstr "אפשרויות"
+
+msgid "CppBlog is a high performance blog written in C++."
+msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
+
+msgid "This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh."
+msgstr "התכנה הזו זמינה תחת רישיון GNU GPL. זכויות שמורות לארתיום טונקיך."
+
+msgid "comments"
+msgstr "תגובות"
+
+msgid "Categories"
+msgstr "נושאים"
+
+msgid "No links"
+msgstr "אין קישורים"
+
+msgid "© All Rights Reserved"
+msgstr "© כל הזכויות שמורות"
+
+msgid "Edit Comment No."
+msgstr "ערוך הערה מס':"
+
+msgid "Author:"
+msgstr "מחבר:"
+
+msgid "Url:"
+msgstr "קישור:"
+
+msgid "The passwords are not identical!"
+msgstr "הססמאות לא זהות"
+
+msgid "Configuration is complete"
+msgstr "הגדרות הושלמו"
+
+msgid "Not all fields are filled"
+msgstr "לא כל שדות החובה מולאו "
+
+msgid "Blog Name:"
+msgstr "שם הבלוג:"
+
+msgid "Blog Description:"
+msgstr "תיאור הבלוג:"
+
+msgid "Confirm Password:"
+msgstr "אמת ססמה:"
+
+msgid "Options"
+msgstr "אפשרויות"
+
+msgid "Contact:"
+msgstr "צור קשר:"
+
+msgid "Copyright Text (markdown):"
+msgstr "זכויות היוצרים (markdown):"
+
+msgid "Links"
+msgstr "קישורים"
+
+msgid "Description:"
+msgstr "תיאור:"
+
+msgid "New Link"
+msgstr "קישור חדש"
+
+msgid "New Category"
+msgstr "נושא חדש"
+
+msgid "The category you try to delete is not empty!"
+msgstr "הנושא שניסית למחוק אינו ריק!"
+
+msgid "No categories"
+msgstr "אין נושאים"
+
+msgid "Cannot remove category!"
+msgstr "לא ניתן לחמוק נושא!"
+
+msgid "There are posts belongs to it. Maybe you need to mark \"delete from posts\"?"
+msgstr "יש מאמרים ששייכים לו. אולי שכחת לסמן \"מחק מהמאמרים\"?"
+
+msgid "Sumbit"
+msgstr "שלח"
+
+msgid "Delete from posts:"
+msgstr "מחק מהמאמרים:"
+
+msgid "There are no categories"
+msgstr "אין נושאים"
+
+msgid "New category:"
+msgstr "נושא חדש:"
+
+msgid "No url given"
+msgstr "הקישור לא הוזן"
+
+msgid "The trackback was send sucessefully"
+msgstr "טראקבק נשלח בהצלחה"
+
+msgid "The send had failed with following message: %1%"
+msgstr "שליחה נכשלה בגלל הסיבה הבאה: %1%"
+
+msgid "Press here to return to post."
+msgstr "לחץ כאן כדי לחזור למאמר."
+
+msgid "Home"
+msgstr "בית"
+
+msgid "RSS"
+msgstr "מאמרים ב־RSS"
+
+msgid "RSS Comments"
+msgstr "תגובות ב־RSS"
+
+msgid "RSS for %1%"
+msgstr "‏%1% ב־RSS"
+
+msgid "Enter"
+msgstr "כניסה"
+
+msgid "Contact"
+msgstr "צור קשר"
+
+msgid "The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr "העיצוב מבוסס על תבנית וורדפרס OrangeSky של Naoko McCracken."
+
+msgid "Project"
+msgstr "פרויקט"
+
+msgid "Downloads"
+msgstr "הורדות"
+
+msgid "Project Site"
+msgstr "אתר הפרויקט"
+
+msgid ""
+"Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+"מבוסס על עיצוב של <a href=\"http://ContentedDesigns.com\">Contented Designs</"
+"a>"
+

@@ -1,0 +1,37 @@
+# MySQL Parameters
+
+mysql.host="localhost"
+mysql.username="root"
+mysql.password="root"
+mysql.database="cppcms"
+
+# FastCGI settings
+
+server.threads = 5
+server.buffer = 100
+server.socket = "/tmp/php-fastcgi.socket"
+
+
+# Blog configuration
+
+blog.media_path = "/media"
+blog.script_path = "/blog/test.fcgi"
+
+# bdb 
+bdb.path="./db/"
+
+# Templates
+templates.file = "./templates/look.template"
+
+# gzip
+
+# gzip - default disabled
+gzip.enable=1
+
+
+# For fastest compression gzip.level=1
+#
+ gzip.level = 1
+
+# Use other buffer size then default
+# gzip.buffer=256
