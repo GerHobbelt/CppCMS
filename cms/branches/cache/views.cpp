@@ -191,22 +191,38 @@ void View_Main_Page::ini_sidebar()
 
 }
 
+struct blog_options : public serializable 
+{
+	string name,description,contact;
+	virtual void load(archive const &a) { a>>name>>description>>contact; };
+	virtual void save(archive &a) const { a<<name<<description<<contact; };
+};
+
 void View_Main_Page::ini_share()
 {
 	int id;
 	string val;
 	result rs;
-	blog->sql<<"SELECT id,value FROM options";
-	blog->sql.fetch(rs);
-	row i;
-	for(;rs.next(i);){
-		i >>id>>val;
-		if(id==BLOG_TITLE)
-			c["blog_name"]=val;
-		else if(id==BLOG_DESCRIPTION)
-			c["blog_description"]=val;
-		else if(id==BLOG_CONTACT && val!="")
-			c["blog_contact"]=val;
+	blog_options options;
+	if(cache.fetch_data("options",options)){
+		c["blog_name"]=options.name;
+		c["blog_description"]=options.description;
+		c["blog_contact"]=options.contact;
+	}
+	else {
+		blog->sql<<"SELECT id,value FROM options";
+		blog->sql.fetch(rs);
+		row i;
+		for(;rs.next(i);){
+			i >>id>>val;
+			if(id==BLOG_TITLE)
+				c["blog_name"]=options.name=val;
+			else if(id==BLOG_DESCRIPTION)
+				c["blog_description"]=options.description=val;
+			else if(id==BLOG_CONTACT && val!="")
+				c["blog_contact"]=options.contact=val;
+		}
+		cache.store_data("options",options);
 	}
 	c["media"]=blog->fmt.media;
 	c["admin_url"]=blog->fmt.admin;
