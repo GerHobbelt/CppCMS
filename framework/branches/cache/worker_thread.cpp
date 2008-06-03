@@ -7,10 +7,6 @@
 using namespace cgicc;
 namespace cppcms {
 
-worker_thread::worker_thread()
-{
-}
-
 void worker_thread::main()
 {
 	out="<h1>Hello World</h2>\n";
@@ -47,9 +43,18 @@ void worker_thread::run(FCGX_Request *fcgi)
 
 	out.clear();
 	out.reserve(global_config.lval("performance.textalloc",65500));
+	cache.reset();
 
 	set_header(new HTTPHTMLHeader);
-	
+
+	gzip=gzip_done=false;
+	char *ptr;
+	if((ptr=FCGX_GetParam("HTTP_ACCEPT_ENCODING",fcgi->envp))!=NULL) {
+		if(strstr(ptr,"gzip")!=NULL) {
+			gzip=global_config.lval("gzip.enable",0);
+		}
+	}
+
 	try {
 		/**********/
 		main();
@@ -61,21 +66,17 @@ void worker_thread::run(FCGX_Request *fcgi)
 	catch(cppcms_error const &e) {
 		string msg=e.what();
 		set_header(new HTTPStatusHeader(500,msg));
-		out=msg;
+		out="<html><body><p>"+msg+"</p><body></html>";
 	}
 
-	char *ptr;
-	bool gzip=false;
-	if((ptr=FCGX_GetParam("HTTP_ACCEPT_ENCODING",fcgi->envp))!=NULL) {
-		if(strstr(ptr,"gzip")!=NULL) {
-			gzip=global_config.lval("gzip.enable",0);
-		}
-	}
 
 	if(gzip) {
 		*io<<"Content-Encoding: gzip\r\n";
 		*io<<*response_header;
-		deflate(*io,out);
+		if(gzip_done)
+			*io<<out;
+		else
+			deflate(*io,out);
 	}	
 	else {
 		*io<<*response_header;
