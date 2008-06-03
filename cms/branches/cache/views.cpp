@@ -124,7 +124,7 @@ void View_Post::ini_short(post_t &p)
 	c["has_content"]=(bool)p.has_content;
 }
 
-void View_Main_Page::ini_sidebar(set<string> triggers,content &c)
+void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 {
 	result res;
 	row r;

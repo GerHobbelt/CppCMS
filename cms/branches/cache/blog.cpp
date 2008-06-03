@@ -665,7 +665,7 @@ void Blog::trackback(string sid)
 					id,blog_name,url,t,content,exec();
 				count_comments(id);
 				c["error"]=0;
-				string tmp=str(boost::format("comments_%1%",id));
+				string tmp=str(boost::format("comments_%1%")%id);
 				cache.rise(tmp);
 				tr.commit();
 			}
@@ -692,12 +692,14 @@ void Blog::post(string s_id,bool preview)
 		auth_or_throw();
 	}
 	int id=atoi(s_id.c_str());
-	string key_admin,key_visitor;
+	string key_admin,key_visitor,key;
 	if(!preview){
-		key_visitor=str(boost::format("post_%1%") % id)
-		key_admin=str(boost::format("admin_post_%1%") % id)
-		if(cache.fetch_page(userid==-1? key_visitor : key_admin))
+		key_visitor=str(boost::format("post_%1%") % id);
+		key_admin=str(boost::format("admin_post_%1%") % id);
+		key=userid==-1? key_visitor : key_admin;
+		if(cache.fetch_page(key)){
 			return;
+		}
 	}
 
 	View_Main_Page view(this,c);
@@ -708,7 +710,7 @@ void Blog::post(string s_id,bool preview)
 		string s=str(boost::format("comments_%1%") % id);
 		cache.add_trigger(s);	
 		cache.add_trigger(key_visitor);
-		cache.store_page(tmp);
+		cache.store_page(key);
 	}
 }
 
@@ -928,7 +930,7 @@ int Blog::check_login( string username,string password)
 	string key=str(boost::format("user[%1%]") % username);
 	user_t user;
 	if(cache.fetch_data(key,user)) {
-		if(password=user.password)
+		if(password==user.password)
 			return user.id;
 	}
 

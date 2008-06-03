@@ -16,11 +16,13 @@
 #include <string>
 #include <ctime>
 
-struct user_t : public serializabe {
+using namespace cppcms;
+
+struct user_t : public serializable {
 	int 		id;
 	std::string	username;
 	std::string	password;
-	virtual void load(archive const &a) { a>>id>>username>>password; };
+	virtual void load(archive &a) { a>>id>>username>>password; };
 	virtual void save(archive &a) const { a<<id<<username<<password; };
 };
 

@@ -49,7 +49,7 @@ class View_Main_Page {
 	Blog *blog;
 	int error_code;
 	void ini_share();
-	void ini_sidebar();
+	void ini_sidebar(set<string> &triggers,content &c);
 	void prepare_query(int,int,int);
 	content &c;
 public:
