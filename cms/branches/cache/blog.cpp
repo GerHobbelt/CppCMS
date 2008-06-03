@@ -9,10 +9,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "error.h"
-#include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
 #include <iconv.h>
+#include <cppcms/global_config.h>
 
 #include "trackback.h"
 
@@ -25,15 +25,8 @@ using boost::format;
 using boost::str;
 using namespace tmpl;
 
+using namespace cppcms;
 
-
-static void old_markdown2html(string const &in,string &out)
-{
-	Text_Tool tt;
-	string tmp;
-	tt.markdown2html(in.c_str(),tmp);
-	out.append(tmp);
-}
 
 static void create_gif(string const &tex,string const &fname)
 {
@@ -73,8 +66,7 @@ static void latex_filter(string const &in,string &out)
 			create_gif(tex,file);
 		}
 		string html_tex;
-		Text_Tool tt;
-		tt.text2html(tex,html_tex);
+		texttool::text2html(tex,html_tex);
 		out.append(str(boost::format("<img src=\"%1%\" alt=\"%2%\" align=\"absmiddle\" />") % wwwfile % html_tex));
 		p_old=p2+6;
 	}
@@ -237,18 +229,12 @@ void Blog::init()
 		sql.connect();
 	}
 	catch(dbixx_error const &e){
-		throw HTTP_Error(string("Failed to access DB")+e.what());
+		throw cppcms_error(string("Failed to access DB")+e.what());
 	}
 	connected=true;
 	string e;
-	if((e=global_config.sval("markdown.engine","discount"))=="discount"){
-		render.add_string_filter("markdown2html",
+	render.add_string_filter("markdown2html",
 			boost::bind(markdown2html,_1,_2));
-	}
-	else {
-		render.add_string_filter("markdown2html",
-			boost::bind(old_markdown2html,_1,_2));
-	}
 	render.add_string_filter("latex",
 		boost::bind(latex_filter,_1,_2));
 
@@ -268,7 +254,7 @@ void Blog::page(string s_id,bool preview)
 	View_Main_Page view(this,c);
  	view.ini_page(id,preview);
 
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out);
 
 	cache.store_page(s);
 }
@@ -339,7 +325,7 @@ void Blog::send_trackback()
 	View_Admin view(this,c);
 	view.ini_share();
 	c["master_content"]=string("admin_sendtrackback");
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 }
 
 
@@ -390,7 +376,7 @@ void Blog::edit_options()
 
 	View_Admin view(this,c);
 	view.ini_options();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 	cache.rise("options");
 }
@@ -478,7 +464,7 @@ void Blog::edit_links()
 
 	View_Admin view(this,c);
 	view.ini_links();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 	cache.rise("links");
 }
@@ -548,7 +534,7 @@ void Blog::edit_cats()
 
 	View_Admin view(this,c);
 	view.ini_cats();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 	cache.rise("categories");
 }
@@ -696,7 +682,7 @@ void Blog::trackback(string sid)
 	}
 
 	set_header(new HTTPContentHeader("text/xml"));
-	render.render(c,"trackback",out.getstring());
+	render.render(c,"trackback",out);
 }
 
 
@@ -717,7 +703,7 @@ void Blog::post(string s_id,bool preview)
 	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
 
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out);
 	if(!preview) {
 		string s=str(boost::format("comments_%1%") % id);
 		cache.add_trigger(s);	
@@ -740,8 +726,7 @@ void Blog::main_page(string from,string cat)
 	}
 
 	view.ini_main(pid,false,cid);
-	render.render(c,"master",out.getstring());
-
+	render.render(c,"master",out);
 	cache.store_page(key);
 }
 
@@ -814,10 +799,7 @@ void Blog::main()
 			error_message+=":";
 //			error_message+=err.query();
 		}
-		throw HTTP_Error(error_message);
-	}
-	catch(char const *s) {
-		throw HTTP_Error(s);
+		throw cppcms_error(error_message);
 	}
 
 }
@@ -917,7 +899,7 @@ void Blog::error_page(int what)
 			return;
 		View_Admin view(this,c);
  		view.ini_login();
-		render.render(c,"admin",out.getstring());
+		render.render(c,"admin",out);
 		cache.store_page("login");
 	}
 	else {
@@ -927,7 +909,7 @@ void Blog::error_page(int what)
 		}
 		View_Main_Page view(this,c);
 		view.ini_error(what);
-		render.render(c,"master",out.getstring());
+		render.render(c,"master",out);
 		if(what==Error::E404) {
 			cache.store_page("404");
 		}
@@ -1056,7 +1038,7 @@ void Blog::admin()
 
 	View_Admin view(this,c);
 	view.ini_main();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 
@@ -1133,7 +1115,7 @@ void Blog::setup_blog()
 	}
 
 	c["master_content"]=string("setup_blog");
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 }
 
 void Blog::update_comment(string sid)
@@ -1185,7 +1167,7 @@ void Blog::edit_comment(string sid)
 
 	View_Admin view(this,c);
 	view.ini_cedit(id);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 void Blog::edit_post(string sid,string ptype)
@@ -1196,7 +1178,7 @@ void Blog::edit_post(string sid,string ptype)
 
 	View_Admin view(this,c);
 	view.ini_edit(id,ptype);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 
@@ -1464,7 +1446,7 @@ void Blog::feed(string cat)
 		view.ini_main(-1,true);
 	else
 		view.ini_main(-1,true,atoi(cat.c_str()));
-	render.render(c,"feed_posts",out.getstring());
+	render.render(c,"feed_posts",out);
 	cache.store_page(key);
 }
 
@@ -1474,7 +1456,7 @@ void Blog::feed_comments()
 
 	View_Main_Page view(this,c);
 	view.ini_rss_comments();
-	render.render(c,"feed_comments",out.getstring());
+	render.render(c,"feed_comments",out);
 }
 
 

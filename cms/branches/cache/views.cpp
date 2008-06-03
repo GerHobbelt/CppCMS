@@ -15,7 +15,7 @@
 #include "error.h"
 #include "cxxmarkdown/markdowncxx.h"
 #include <set>
-
+#include <cppcms/global_config.h>
 
 using boost::format;
 using boost::str;

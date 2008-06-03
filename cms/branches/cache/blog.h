@@ -21,6 +21,8 @@
 #include "views.h"
 #include "data.h"
 
+using namespace std;
+using namespace cppcms;
 
 extern tmpl::template_data global_template;
 extern transtext::trans_factory tr;
@@ -73,8 +75,8 @@ struct post_content_t {
 	string content;
 };
 
-class Blog : public Worker_Thread {
-	URL_Parser url;
+class Blog : public cppcms::worker_thread {
+	url_parser url;
 // Member functions:
 	void main_page(string s,string);
 	void post(string s,bool preview);

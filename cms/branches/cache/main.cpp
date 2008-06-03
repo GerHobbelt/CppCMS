@@ -5,10 +5,10 @@
 #include <cppcms/global_config.h>
 #include <cppcms/url.h>
 #include <dbi/dbixx.h>
-#include <cppcms/templates.h>
 #include <tmpl/transtext.h>
 
 using namespace std;
+using namespace cppcms;
 
 tmpl::template_data global_template;
 transtext::trans_gnu gnugt;
@@ -31,12 +31,12 @@ int main(int argc,char **argv)
 				global_config.sval("locale.dir","./locale").c_str());
 		}
 
-		Run_Application<Blog>(argc,argv);
+		run_application<Blog>(argc,argv);
 
 		cout<<"Exiting\n";
 	}
-	catch(HTTP_Error &s) {
-		cerr<<s.get()<<endl;
+	catch(cppcms_error &s) {
+		cerr<<s.what()<<endl;
 		return 1;
 	}
 	catch(dbixx::dbixx_error &e) {

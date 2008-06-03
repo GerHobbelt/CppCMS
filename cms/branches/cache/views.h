@@ -12,7 +12,6 @@
 #ifndef VIEWS_H
 #define VIEWS_H
 
-#include <cppcms/templates.h>
 #include <boost/shared_ptr.hpp>
 #include "data.h"
 #include <list>
@@ -21,7 +20,7 @@
 
 using boost::shared_ptr;
 using namespace tmpl;
-
+using namespace std;
 class Blog;
 
 class View_Comment {
