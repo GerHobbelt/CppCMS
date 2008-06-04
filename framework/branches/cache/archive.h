@@ -13,6 +13,9 @@ class archive {
 	size_t ptr;
 public:
 	archive() { ptr=0; };
+	archive(string const &s) : data(s) { ptr=0; };
+	void set(string const &s) { data=s; ptr=0; };
+	string const &get() const { return data; };
 	template<typename T>
 	archive &operator<<(T const &val) {
 		size_t size=sizeof(T);
