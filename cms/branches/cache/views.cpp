@@ -244,6 +244,7 @@ void View_Main_Page::ini_share()
 		c["sidebar"]=sidebar;
 	}
 	else {
+		sidebar.reserve(16000);
 		content sbar_content;
 		set<string> triggers;
 		ini_sidebar(triggers,sbar_content);
