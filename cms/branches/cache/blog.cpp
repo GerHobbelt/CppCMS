@@ -1456,9 +1456,15 @@ void Blog::feed_comments()
 {
 	set_header(new HTTPContentHeader("text/xml"));
 
+	string key="comments_feed";
+	if(cache.fetch_page(key))
+		return;
+
 	View_Main_Page view(this,c);
 	view.ini_rss_comments();
 	render.render(c,"feed_comments",out);
+	cache.add_trigger("comments");
+	cache.store_page(key);
 }
 
 

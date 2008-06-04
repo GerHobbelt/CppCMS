@@ -387,6 +387,8 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 			post2cat_list[post.id]=&(latest_posts[n].list("post_cats"));
 		}
 
+		blog->cache.add_trigger(str(boost::format("post_%1%") % post.id));
+
 		if(counter==1)
 			first=post.publish;
 		last=post.publish;
