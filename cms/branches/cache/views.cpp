@@ -201,7 +201,7 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 struct blog_options : public serializable 
 {
 	string name,description,contact;
-	virtual void load(archive const &a) { a>>name>>description>>contact; };
+	virtual void load(archive &a) { a>>name>>description>>contact; };
 	virtual void save(archive &a) const { a<<name<<description<<contact; };
 };
 
@@ -211,7 +211,7 @@ void View_Main_Page::ini_share()
 	string val;
 	result rs;
 	blog_options options;
-	if(cache.fetch_data("options",options)){
+	if(blog->cache.fetch_data("options",options)){
 		c["blog_name"]=options.name;
 		c["blog_description"]=options.description;
 		c["blog_contact"]=options.contact;
@@ -229,7 +229,7 @@ void View_Main_Page::ini_share()
 			else if(id==BLOG_CONTACT && val!="")
 				c["blog_contact"]=options.contact=val;
 		}
-		cache.store_data("options",options);
+		blog->cache.store_data("options",options);
 	}
 	c["media"]=blog->fmt.media;
 	c["admin_url"]=blog->fmt.admin;
@@ -247,7 +247,7 @@ void View_Main_Page::ini_share()
 		content sbar_content;
 		set<string> triggers;
 		ini_sidebar(triggers,sbar_content);
-		blog->render(sbar_content,"sidebar",sidebar);
+		blog->render.render(sbar_content,"sidebar",sidebar);
 		c["sidebar"]=sidebar;
 		blog->cache.store_frame("sidebar",sidebar,triggers);
 	}

@@ -76,6 +76,7 @@ struct post_content_t {
 };
 
 class Blog : public cppcms::worker_thread {
+	friend class View_Main_Page;
 	url_parser url;
 // Member functions:
 	void main_page(string s,string);

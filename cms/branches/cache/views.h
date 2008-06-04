@@ -17,6 +17,7 @@
 #include <list>
 #include <vector>
 #include <tmpl/content.h>
+#include <set>
 
 using boost::shared_ptr;
 using namespace tmpl;
