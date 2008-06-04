@@ -34,8 +34,9 @@ gzip.enable=1
 # Engine #
 ##########
 
-# dbi.engine="mysql"
-dbi.engine="sqlite3"
+dbi.engine="mysql"
+# dbi.debug=1
+# dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
