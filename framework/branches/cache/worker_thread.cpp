@@ -1,5 +1,6 @@
 #include "worker_thread.h"
 #include "global_config.h"
+#include "thread_cache.h"
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -91,4 +92,26 @@ void worker_thread::run(FCGX_Request *fcgi)
         FCGX_Finish_r(fcgi);
 }
 
+void worker_thread::init()
+{
+	string backend=global_config.sval("cache.backend","none");
+	if(backend=="threaded") {
+		static thread_cache tc;
+		tc.set_size(global_config.lval("cache.limit",100));
+	}
+	else {
+		base_cache bc;
+		caching_module=&bc;
+	}
 }
+
+worker_thread::~worker_thread()
+{
+}
+
+
+
+}
+
+
+

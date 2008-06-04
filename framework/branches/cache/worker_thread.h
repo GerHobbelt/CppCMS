@@ -42,7 +42,7 @@ protected:
 	// Output and Cahce
 
 	cache_iface cache;
-	auto_ptr<base_cache> caching_module;
+	base_cache *caching_module;
 	bool gzip;
 	bool gzip_done;
 	string out;
@@ -52,9 +52,9 @@ public:
 
 	void run(FCGX_Request *req);
 
-	worker_thread() : cache(this) { caching_module=auto_ptr<base_cache>(new base_cache()); } ;
-	virtual ~worker_thread(){};
-	virtual void init() { };
+	worker_thread() : cache(this) { } ;
+	virtual ~worker_thread();
+	virtual void init();
 };
 
 }
