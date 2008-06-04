@@ -11,29 +11,28 @@ using namespace std;
 
 static string deflate(string const &text)
 {
-	using namespace boost::iostreams;
-	gzip_params params;
-	long level,length;
-
-	if((level=global_config.lval("gzip.level",-1))!=-1){
-		params.level=level;
-	}		
-
-	filtering_ostream zstream;
-
-	if((length=global_config.lval("gzip.buffer",-1))!=-1){
-		zstream.push(gzip_compressor(params,length));
-	}
-	else {
-		zstream.push(gzip_compressor(params));
-	}
-
 	ostringstream sstream;
+	{
+		using namespace boost::iostreams;
+		gzip_params params;
+		long level,length;
 
-	zstream.push(gzip_compressor());
-	zstream.push(sstream);
-	zstream << text;
-	zstream.pop();
+		if((level=global_config.lval("gzip.level",-1))!=-1){
+			params.level=level;
+		}		
+	
+		filtering_ostream zstream;
+
+		if((length=global_config.lval("gzip.buffer",-1))!=-1){
+			zstream.push(gzip_compressor(params,length));
+		}
+		else {
+			zstream.push(gzip_compressor(params));
+		}
+
+		zstream.push(sstream);
+		zstream<<text;
+	}
 	return sstream.str();
 }
 
@@ -41,8 +40,8 @@ static string deflate(string const &text)
 bool cache_iface::fetch_page(string const &key)
 {
 	string tmp;
-	if(cms->caching_module->fetch_page(key,tmp,cms->gzip)) {
-		cms->out=tmp;
+	if(!cms->caching_module) return false;
+	if(cms->caching_module->fetch_page(key,cms->out,cms->gzip)) {
 		cms->gzip_done=true;
 		return true;
 	}
@@ -51,23 +50,32 @@ bool cache_iface::fetch_page(string const &key)
 
 void cache_iface::store_page(string const &key,time_t timeout)
 {
+	if(!cms->caching_module) return;
 	archive a;
-	a<<(cms->out)<<deflate(cms->out);
+	string compr=deflate(cms->out);
+	a<<(cms->out)<<compr;
+	if(cms->gzip){
+		cms->out=compr;
+		cms->gzip_done=true;
+	}
 	cms->caching_module->store(key,triggers,timeout,a);
 }
 
 void cache_iface::add_trigger(string const &t)
 {
+	if(!cms->caching_module) return;
 	triggers.insert(t);
 }
 
 void cache_iface::rise(string const &t)
 {
+	if(!cms->caching_module) return;
 	cms->caching_module->rise(t);
 }
 
 bool cache_iface::fetch_data(string const &key,serializable &data)
 {
+	if(!cms->caching_module) return false;
 	archive a;
 	set<string> new_trig;
 	if(cms->caching_module->fetch(key,a,new_trig)) {
@@ -82,6 +90,7 @@ void cache_iface::store_data(string const &key,serializable const &data,
 			set<string> const &triggers,
 			time_t timeout)
 {
+	if(!cms->caching_module) return;
 	archive a;
 	data.save(a);
 	this->triggers.insert(triggers.begin(),triggers.end());
@@ -90,6 +99,7 @@ void cache_iface::store_data(string const &key,serializable const &data,
 
 bool cache_iface::fetch_frame(string const &key,string &result)
 {
+	if(!cms->caching_module) return false;
 	archive a;
 	set<string> new_trig;
 	if(cms->caching_module->fetch(key,a,new_trig)) {
@@ -104,6 +114,7 @@ void cache_iface::store_frame(string const &key,string const &data,
 			set<string> const &triggers,
 			time_t timeout)
 {
+	if(!cms->caching_module) return;
 	archive a;
 	a<<data;
 		

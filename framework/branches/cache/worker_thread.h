@@ -46,15 +46,16 @@ protected:
 	bool gzip;
 	bool gzip_done;
 	string out;
+	void init_internal();
 public:
 	int id;
 	pthread_t pid;
 
 	void run(FCGX_Request *req);
 
-	worker_thread() : cache(this) { } ;
+	worker_thread() : cache(this) { init_internal(); } ;
 	virtual ~worker_thread();
-	virtual void init();
+	virtual void init() {};
 };
 
 }

@@ -59,14 +59,20 @@ bool thread_cache::fetch_page(string const &key,string &out,bool gzip)
 	rwlock_rdlock lock(access_lock);
 	string *r=get(key,NULL);
 	if(!r) return false;
-	archive a(*r);
-	if(!gzip) {
-		a>>out;
+	size_t size=r->size();
+	size_t s;
+	char const *ptr=r->c_str();
+	if(size<sizeof(size_t) || (s=*(size_t const *)ptr)>size-sizeof(size_t))
+		return false;
+	if(!gzip){
+		out.assign(ptr+sizeof(size_t),s);
 	}
 	else {
-		string tmp;
-		a>>tmp;
-		a>>out;
+		ptr+=s+sizeof(size_t);
+		size-=s+sizeof(size_t);
+		if(size<sizeof(size_t) || (s=*(size_t const *)ptr)!=size-sizeof(size_t))
+			return false;
+		out.assign(ptr+sizeof(size_t),s);
 	}
 	return true;
 }

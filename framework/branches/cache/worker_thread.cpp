@@ -92,16 +92,14 @@ void worker_thread::run(FCGX_Request *fcgi)
         FCGX_Finish_r(fcgi);
 }
 
-void worker_thread::init()
+void worker_thread::init_internal()
 {
 	string backend=global_config.sval("cache.backend","none");
+	caching_module=NULL;
 	if(backend=="threaded") {
 		static thread_cache tc;
 		tc.set_size(global_config.lval("cache.limit",100));
-	}
-	else {
-		base_cache bc;
-		caching_module=&bc;
+		caching_module=&tc;
 	}
 }
 
