@@ -729,6 +729,9 @@ void Blog::main_page(string from,string cat)
 
 	view.ini_main(pid,false,cid);
 	render.render(c,"master",out);
+	if(cid!=-1) {
+		cache.add_trigger(str(boost::format("cat_%1%") % cid));
+	}
 	cache.store_page(key);
 }
 
@@ -927,7 +930,13 @@ int Blog::check_login( string username,string password)
 	}
 	row r;
 	
-	string key=str(boost::format("user[%1%]") % username);
+	string key="user_";
+	char buf[16];
+	for(unsigned i=0;i<username.size();i++) {
+		unsigned char c=username[i];
+		snprintf(buf,sizeof(buf),"%02x",c);
+		key+=buf;
+	}
 	user_t user;
 	if(cache.fetch_data(key,user)) {
 		if(password==user.password)
@@ -1150,6 +1159,17 @@ void Blog::update_comment(string sid)
 			del=true;
 		}
 	}
+	row r;
+	sql<<"SELECT post_id FROM comments WHERE id=?",id;
+	if(sql.single(r)) {
+		int pid;
+		r>>pid;
+		if(del)
+			cache.rise(str(boost::format("comments_%1%") % pid));
+		else
+			cache.rise(str(boost::format("post_%1%") % pid));
+
+	}
 	if(del) {
 		del_single_comment(id);
 	}
@@ -1158,6 +1178,13 @@ void Blog::update_comment(string sid)
 			"SET	url=?,author=?,content=?,email=? "
 			"WHERE	id=?",
 				url,author,content,email,id,exec();
+		row r;
+		sql<<"SELECT post_id FROM comments WHERE id=?",id;
+		if(sql.single(r)) {
+			int pid;
+			r>>pid;
+			cache.rise(str(boost::format("post_%1%") % pid));
+		}
 	}
 	set_header(new HTTPRedirectHeader(fmt.admin));
 }
@@ -1400,10 +1427,12 @@ void Blog::save_post(int &id,string &title,
 			continue;
 		sql<<	"INSERT INTO post2cat(post_id,cat_id,is_open,publish) "
 				"VALUES(?,?,?,?)",id,*p,is_open,t,exec();
+		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
 	for(p=dellist.begin();p!=dellist.end();p++) {
 		sql<<	"DELETE FROM post2cat WHERE post_id=? AND cat_id=?",
 		id,(*p),exec();
+		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
 
 	tr.commit();
@@ -1414,13 +1443,14 @@ void Blog::del_single_comment(int id)
 	transaction tr(sql);
 	row r;
 	sql<<	"SELECT post_id FROM comments WHERE id=?",id;
+	int post_id;
 	if(sql.single(r)) {
-		int post_id;
 		r>>post_id;
 		sql<<	"DELETE FROM comments "
 			"WHERE id=?",id,exec();
 		count_comments(post_id);
 	}
+	cache.rise(str(boost::format("comments_%1%") % post_id));
 	tr.commit();
 }
 

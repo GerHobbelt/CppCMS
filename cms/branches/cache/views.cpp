@@ -194,7 +194,7 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
 		cats[i]["name"]=name;
 	}
-	triggers.insert("cats");
+	triggers.insert("categories");
 
 }
 
@@ -389,6 +389,8 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 		}
 
 		blog->cache.add_trigger(str(boost::format("post_%1%") % post.id));
+		if(!feed)
+			blog->cache.add_trigger(str(boost::format("comments_%1%") % post.id));
 
 		if(counter==1)
 			first=post.publish;
