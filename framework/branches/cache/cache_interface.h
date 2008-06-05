@@ -31,8 +31,14 @@ public:
 	void store_data(string const &key,serializable const &data,
 			set<string> const &triggers=set<string>(),
 			time_t timeout=infty);
+	void clear();
+	bool stats(unsigned &keys,unsigned &triggers);
 	
 };
+
+void deflate(string const &text,ostream &stream);
+string deflate(string const &text);
+
 
 }
 

@@ -13,28 +13,6 @@ void worker_thread::main()
 	out="<h1>Hello World</h2>\n";
 }
 
-static void deflate(FCgiIO &io,string const &out)
-{
-	using namespace boost::iostreams;
-	gzip_params params;
-	long level,length;
-
-	if((level=global_config.lval("gzip.level",-1))!=-1){
-		params.level=level;
-	}		
-
-	filtering_ostream zstream;
-
-	if((length=global_config.lval("gzip.buffer",-1))!=-1){
-		zstream.push(gzip_compressor(params,length));
-	}
-	else {
-		zstream.push(gzip_compressor(params));
-	}
-
-	zstream.push(io);
-	zstream<<out;
-}
 
 void worker_thread::run(FCGX_Request *fcgi)
 {
@@ -77,7 +55,7 @@ void worker_thread::run(FCGX_Request *fcgi)
 		if(gzip_done)
 			*io<<out;
 		else
-			deflate(*io,out);
+			deflate(out,*io);
 	}	
 	else {
 		*io<<*response_header;
@@ -100,6 +78,9 @@ void worker_thread::init_internal()
 		static thread_cache tc;
 		tc.set_size(global_config.lval("cache.limit",100));
 		caching_module=&tc;
+		if(global_config.lval("cache.debug",0)==1) {
+			tc.set_debug_mode(2);
+		}
 	}
 }
 

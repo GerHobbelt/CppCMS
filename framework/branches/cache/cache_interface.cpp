@@ -9,30 +9,32 @@
 namespace cppcms {
 using namespace std;
 
-static string deflate(string const &text)
+void deflate(string const &text,ostream &stream)
+{
+	using namespace boost::iostreams;
+	gzip_params params;
+	long level,length;
+	if((level=global_config.lval("gzip.level",-1))!=-1){
+		params.level=level;
+	}		
+	
+	filtering_ostream zstream;
+
+	if((length=global_config.lval("gzip.buffer",-1))!=-1){
+		zstream.push(gzip_compressor(params,length));
+	}
+	else {
+		zstream.push(gzip_compressor(params));
+	}
+
+	zstream.push(stream);
+	zstream<<text;
+}
+
+string deflate(string const &text)
 {
 	ostringstream sstream;
-	{
-		using namespace boost::iostreams;
-		gzip_params params;
-		long level,length;
-
-		if((level=global_config.lval("gzip.level",-1))!=-1){
-			params.level=level;
-		}		
-	
-		filtering_ostream zstream;
-
-		if((length=global_config.lval("gzip.buffer",-1))!=-1){
-			zstream.push(gzip_compressor(params,length));
-		}
-		else {
-			zstream.push(gzip_compressor(params));
-		}
-
-		zstream.push(sstream);
-		zstream<<text;
-	}
+	deflate(text,sstream);
 	return sstream.str();
 }
 
@@ -122,5 +124,18 @@ void cache_iface::store_frame(string const &key,string const &data,
 	cms->caching_module->store(key,triggers,timeout,a);
 }
 
+void cache_iface::clear()
+{
+	if(cms->caching_module)
+		cms->caching_module->clear();
+}
+
+bool cache_iface::stats(unsigned &k,unsigned &t)
+{
+	if(!cms->caching_module)
+		return false;
+	cms->caching_module->stats(k,t);
+	return true;
+}
 
 } // End of namespace cppcms
