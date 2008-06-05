@@ -550,6 +550,7 @@ void View_Admin::ini_share()
 	c["edit_options_url"]=blog->fmt.edit_options;
 	c["edit_links_url"]=blog->fmt.edit_links;
 	c["edit_cats_url"]=blog->fmt.edit_cats;
+	c["admin_cache_url"]=blog->fmt.admin_cache;
 	c["cookie_prefix"]=global_config.sval("blog.id","");
 }
 

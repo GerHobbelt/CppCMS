@@ -63,6 +63,7 @@ struct links_t {
 	string edit_options;
 	string trackback;
 	string send_trackback;
+	string admin_cache;
 };
 
 struct post_content_t {
@@ -123,6 +124,7 @@ private:
 	void count_comments(int id);
 	void trackback(string sid);
 	void send_trackback();
+	void admin_cache();
 
 	content c;
 

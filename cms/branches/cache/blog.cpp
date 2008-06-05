@@ -207,6 +207,9 @@ void Blog::init()
 		
 		url.add("^/admin/sendtrackback$",boost::bind(&Blog::send_trackback,this));
 		fmt.send_trackback=root+"/admin/sendtrackback";
+		
+		url.add("^/admin/cache$",boost::bind(&Blog::admin_cache,this));
+		fmt.admin_cache=root+"/admin/cache";
 
 	}
 
@@ -240,7 +243,6 @@ void Blog::init()
 
 
 }
-
 
 void Blog::page(string s_id,bool preview)
 {
@@ -328,6 +330,30 @@ void Blog::send_trackback()
 	render.render(c,"admin",out);
 }
 
+
+void Blog::admin_cache()
+{
+	auth_or_throw();
+
+	const vector<FormEntry> &form=cgi->getElements();
+	unsigned i;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="clear") {
+			cache.clear();
+		}
+	}
+	unsigned keys,triggers;
+	if(cache.stats(keys,triggers)) {
+		c["cache_keys"]=(int)keys;
+		c["submit_url"]=fmt.admin_cache;
+	}
+
+	View_Admin view(this,c);
+	view.ini_share();
+	c["master_content"]=string("admin_cache");
+	render.render(c,"admin",out);
+}
 
 void Blog::edit_options()
 {
