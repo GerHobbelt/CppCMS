@@ -486,12 +486,12 @@ void Blog::edit_links()
 				tr.commit();
 			}
 		}
-		render.render(c,"admin",out);
 		cache.rise("links");
 	}
 
 	View_Admin view(this,c);
 	view.ini_links();
+	render.render(c,"admin",out);
 
 }
 
@@ -499,7 +499,7 @@ void Blog::edit_links()
 
 void Blog::edit_cats()
 {
-	auth_or	_throw();
+	auth_or_throw();
 
 	c["constraint_error"]=false;
 
