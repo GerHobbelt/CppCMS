@@ -1,4 +1,4 @@
-Object oriented is usually slower then regular procedural approach. For example exception handling takes some of the speed, so does references of the object itself.
+<p>מזכיר לי משהו שקרה לי אתמול. התקנתי שרת דביאן, רק בשביל לגלות שהכרטיס רשת לא נתמך. חיפוש קצר בגוגל, העלה שהכרטיס רשת חדש מידי עבור הקרנל, ורק בלני יש תמיכה בשבילו בדביאן, אבל הקוד מלני דרש הרבה יותר מידי תלויות בשביל שאוכל להוריד ידנית (הרי אין לי רשת על המחשב), למזלי מצאתי גרסה מקורית שבאה עם הדיסק של הלוח אם, והשתמשתי בה בעצם, אבל אז אתה מגלה שאין לך כמעט כלי פיתוח, kernel header וכו,
+הורדתי רק את המינימום הנדרש בשביל להדר את מודול, ברגע שהיה לי את המודול בייד טענתי אותו, ויכולתי לעשות בדיוק את הצעדים האלו שאתה מציע.</p>
 
-So I think that it is problematic to compare two different approaches on the same level. I also believe that if you will develop a custom made engine that will suite only for your need, and you will write it in a very optimized way, it will be faster, so you must judge IMHO each engine on it's own criteria.
-
+<p>סתם הטריקים של אנשים שנתקעים בזמן אמת עם מצוקות בדביאן :)</p>

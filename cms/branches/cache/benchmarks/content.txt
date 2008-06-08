@@ -1,65 +1,39 @@
-First of all I had tested the SQL drivers: native driver and soci wrapper. I had found that soci was significantly slower. I could think that it was due to wrapping that can never be as fast
-as native version.
+למעשה יש מספר דרכים מקובלות להתמודד עם הבעיה:
 
-So I tested other library [dbi](http://libdbi.sourceforge.net) and I had written a little C++ wrapper I had called "[dbixx](http://cppcms.svn.sourceforge.net/viewvc/cppcms/dbixx/)". This wrapper mostly provides syntactic sugar, integration with C++ exceptions and allows auto escaping of input parameters -- all the job that [soci](http://soci.sourceforge.net) had done.
+1. לקמפל תוכנה בעצמך ולהתקין... לזה יש הרבה בעיות: כיצד לנהל קבצים? כיצד להסיר? מה אם תצא גרסה חדשה שבאה עם ההפצה ועוד.
+2. להתקין מ־backports.org. הבעיה היא, לא כל תוכנה נמצאת שם, רק התוכנות הפופולריות ביותר כמו, למשל, OpenOffice. לכן, זה לא תמיד פתרון.
+3. לעשות backport בעצמך. 
 
-I created a simple table:
-    CREATE TABLE numbers
-    (
-       id integer primary key not null,
-       number varchar(10) not null
-     );
-Filled it with 10,000 rows of type (N,'N')
-And run 10,000 queries:
+בדיוק פה, אספר על הפתרון השלישי שמאפשר בכמה פקודות פשוטות ליצור חבילת deb כשרה למהדרין עבור המערכת שלך.
 
-    SELECT id,number
-    FROM   numbers
-    WHERE  id>?
-    ORDER BY id DESC
-    LIMIT 10
+קודם כל נבין, מדוע זה בכלל אפשרי? הרי אם לקוחים חבילה מ־lenny כפי שהיא, בד"כ נקבל שנדרשות גרסאות חדשות יותר של חבילות בסיסיות.
 
-With "?" changing from 1 to 10,000.
+הסיבה היא שבפועל, אין צורך בספריות כל־כך עדכניות, רק שבעת קימפול, התלות נקבעת לפי גרסת הספריה שאנחנו מקמפלים מולה. לכן, בד"כ, כל מה שצריך לעשות זה לקמפל את התוכנה בסביבה של הספריות של ההפצה שלך.
 
-I measured overall run time of 10,000 queries using 4 drivers: native, soci, dbi and dbixx.
+ובכן, נתחיל. נדגים, כיצד אפשר לעשות backport למשחק flight-gear שהוא מקרה די מורכב.
 
-There are results:
+קודם כל, נוסיף מקור source packages של lenny לקובץ ‎/etc/apt/sources.list:
 
-    Driver   MySQL PgSQL  Sqlite3  MySQL PgSQL Sqlite3
-    --------------------------------------------------
-    native   0.62  2.04   0.76
-    --------------------------------------------------
-    soci     1.07  3.30   1.47     -42%  -38%  -48%
-    dbi      0.68  2.13   0.95     - 9%  - 4%  -20%
-    dbixx    0.73  2.22   0.97     -14%  - 8%  -22%
+    deb-src http://mirror.isoc.org.il/pub/debian/ lenny main contrib
 
-Any wrapper had introduced a performance reduction, however soci had reduced the performance
-by about 40%, when dbi had given much better result. C++ wrapper of dbi had increased a runtime a little by additional few percents however still had given much better results then soci.
+ואז נוריד 3 חבילות שקשורות אליו:
 
-I must admit that dbi hadn't given good results for sqlite3. But in overall it behaves better then soci.
+    apt-get source simgear flightgear fgfs-base
 
-When I had written dbixx wrapped I had taken may good ideas form soci, so it was quite
-simple to covert the code of *this* blog to dbixx from soci and I did it in about half an hour.
+כאשר simgear זו ספריה ש־fg משתמש בה, ו־fgfs-base זו חבילת נתונים.
 
-And then run new benchmarks (similar to these: [one](http://art-blog.no-ip.info/cppcms/blog/post/11), [two](http://art-blog.no-ip.info/cppcms/blog/post/4)):
+ניכנס לספריה simgear-1.0.0 שנוצרה ונריץ 
 
-    Data Base       gzip no gzip   gzip no gzip
-    -------------------------------------------
-    Berkeley DB     565  830                  
-    
-    MySQL    (dbi)  580  800       + 3%   - 4%
-    MySQL    (soci) 475  645       -16%   -22%
-    
-    Sqlite3  (dbi)  330  410       -42%   -51%
-    Sqlite3  (soci) 410  515       -27%   -38%
-    
-    PgSQL    (dbi)  350  430       -38%   -48%
-    PgSQL    (soci) 305  360       -46%   -57%
-    -------------------------------------------
+    dpkg-buildpackage -rfakeroot
 
-I still do not understand why, but sqlite3 does not behave well with dbixx driver,
-it had given lower results then soci one, the situation that contradicts driver benchmarks
-I did before.
+אם הוא יתלונן על חבילות חסרות (למשל openal) אז נתקין אותם כרגיל ממקורות etch.
 
-However it is clear, soci is not as fast as I expected. It is probably well suited
-for many purposes, but for high performance web framework it is not good enough (when
-there are some other alternatives).
+אחרי שבניה הסתיימה, נגלה שנוצרו שתי חבילות: simgear0 ו־simgear-dev: נתקין את שתיהן.
+
+לאחר מכן, נבצע אותו תהליך בניה עבור fgfs-base ו־flightgear. 
+
+מזל טוב, הרגע, קיבלנו משחק שמקומפל עבור debian etch, עדכני ממקורות של lenny.
+
+*גילוי נאות*: לא הכל הולך תמיד חלק, לפעמים הדרישות של הגרסאות העדכניות של ספריות הן אמיתיות והתליך עלול להכשל. אבל, בהרבה מאוד מקרים, ניתן להסב את החבילות בקלות רבה.
+
+_אלה היות שתי דקות על "כיצד לחיות עם Debian Stable"_
