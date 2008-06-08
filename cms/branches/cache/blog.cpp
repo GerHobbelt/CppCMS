@@ -692,6 +692,7 @@ void Blog::trackback(string sid)
 				count_comments(id);
 				c["error"]=0;
 				string tmp=str(boost::format("comments_%1%")%id);
+				cache.rise("comments");
 				cache.rise(tmp);
 				tr.commit();
 			}
@@ -911,6 +912,7 @@ void Blog::add_comment(string &postid)
 	count_comments(post_id);
 
 	cache.rise(str(boost::format("comments_%1%") % post_id));
+	cache.rise("comments");
 	tr.commit();
 
 	string redirect=str(format(fmt.post) % post_id);
@@ -1190,10 +1192,13 @@ void Blog::update_comment(string sid)
 	if(sql.single(r)) {
 		int pid;
 		r>>pid;
-		if(del)
+		cache.rise("comments");
+		if(del) {
 			cache.rise(str(boost::format("comments_%1%") % pid));
-		else
+		}
+		else {
 			cache.rise(str(boost::format("post_%1%") % pid));
+		}
 
 	}
 	if(del) {
@@ -1477,6 +1482,7 @@ void Blog::del_single_comment(int id)
 		count_comments(post_id);
 	}
 	cache.rise(str(boost::format("comments_%1%") % post_id));
+	cache.rise("comments");
 	tr.commit();
 }
 
