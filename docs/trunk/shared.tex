@@ -1,0 +1,29 @@
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{html}
+\hypersetup{colorlinks,%
+citecolor=red,%
+filecolor=red,%
+linkcolor=red,%
+urlcolor=green,%
+pdftex}
+\newcommand{\tw}[1]{\texttt{#1}}
+\usepackage{float}
+
+\floatstyle{ruled}
+\newfloat{program}{thp}{lop}
+\floatname{program}{Listing}
+
+\begin{htmlonly}
+	\newenvironment{\program}{
+		\begin{rawhtml}
+		<div class="figure" >
+		\end{rawhtml}
+		}{
+		\begin{rawhtml}
+		</div>
+		\end{rawhtml}
+		}
+	\renewcommand{\caption}[1]{\textbf{#1}}
+\end{htmlonly}
+
