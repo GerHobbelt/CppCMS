@@ -9,10 +9,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "error.h"
-#include <cppcms/text_tool.h>
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
 #include <iconv.h>
+#include <cppcms/global_config.h>
 
 #include "trackback.h"
 
@@ -25,15 +25,8 @@ using boost::format;
 using boost::str;
 using namespace tmpl;
 
+using namespace cppcms;
 
-
-static void old_markdown2html(string const &in,string &out)
-{
-	Text_Tool tt;
-	string tmp;
-	tt.markdown2html(in.c_str(),tmp);
-	out.append(tmp);
-}
 
 static void create_gif(string const &tex,string const &fname)
 {
@@ -73,8 +66,7 @@ static void latex_filter(string const &in,string &out)
 			create_gif(tex,file);
 		}
 		string html_tex;
-		Text_Tool tt;
-		tt.text2html(tex,html_tex);
+		texttool::text2html(tex,html_tex);
 		out.append(str(boost::format("<img src=\"%1%\" alt=\"%2%\" align=\"absmiddle\" />") % wwwfile % html_tex));
 		p_old=p2+6;
 	}
@@ -215,6 +207,9 @@ void Blog::init()
 		
 		url.add("^/admin/sendtrackback$",boost::bind(&Blog::send_trackback,this));
 		fmt.send_trackback=root+"/admin/sendtrackback";
+		
+		url.add("^/admin/cache$",boost::bind(&Blog::admin_cache,this));
+		fmt.admin_cache=root+"/admin/cache";
 
 	}
 
@@ -237,33 +232,33 @@ void Blog::init()
 		sql.connect();
 	}
 	catch(dbixx_error const &e){
-		throw HTTP_Error(string("Failed to access DB")+e.what());
+		throw cppcms_error(string("Failed to access DB")+e.what());
 	}
 	connected=true;
 	string e;
-	if((e=global_config.sval("markdown.engine","discount"))=="discount"){
-		render.add_string_filter("markdown2html",
+	render.add_string_filter("markdown2html",
 			boost::bind(markdown2html,_1,_2));
-	}
-	else {
-		render.add_string_filter("markdown2html",
-			boost::bind(old_markdown2html,_1,_2));
-	}
 	render.add_string_filter("latex",
 		boost::bind(latex_filter,_1,_2));
 
 
 }
 
-
 void Blog::page(string s_id,bool preview)
 {
 	int id=atoi(s_id.c_str());
 
+	string s=str(boost::format("page_%1%") % id);
+	if(cache.fetch_page(s)) {
+		return;
+	}
+
 	View_Main_Page view(this,c);
  	view.ini_page(id,preview);
 
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out);
+
+	cache.store_page(s);
 }
 
 void Blog::send_trackback()
@@ -332,9 +327,33 @@ void Blog::send_trackback()
 	View_Admin view(this,c);
 	view.ini_share();
 	c["master_content"]=string("admin_sendtrackback");
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 }
 
+
+void Blog::admin_cache()
+{
+	auth_or_throw();
+
+	const vector<FormEntry> &form=cgi->getElements();
+	unsigned i;
+	for(i=0;i<form.size();i++) {
+		string const &field=form[i].getName();
+		if(field=="clear") {
+			cache.clear();
+		}
+	}
+	unsigned keys,triggers;
+	if(cache.stats(keys,triggers)) {
+		c["cache_keys"]=(int)keys;
+		c["submit_url"]=fmt.admin_cache;
+	}
+
+	View_Admin view(this,c);
+	view.ini_share();
+	c["master_content"]=string("admin_cache");
+	render.render(c,"admin",out);
+}
 
 void Blog::edit_options()
 {
@@ -383,7 +402,9 @@ void Blog::edit_options()
 
 	View_Admin view(this,c);
 	view.ini_options();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
+
+	cache.rise("options");
 }
 
 void Blog::edit_links()
@@ -469,7 +490,9 @@ void Blog::edit_links()
 
 	View_Admin view(this,c);
 	view.ini_links();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
+
+	cache.rise("links");
 }
 
 
@@ -537,7 +560,9 @@ void Blog::edit_cats()
 
 	View_Admin view(this,c);
 	view.ini_cats();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
+
+	cache.rise("categories");
 }
 
 
@@ -666,6 +691,9 @@ void Blog::trackback(string sid)
 					id,blog_name,url,t,content,exec();
 				count_comments(id);
 				c["error"]=0;
+				string tmp=str(boost::format("comments_%1%")%id);
+				cache.rise("comments");
+				cache.rise(tmp);
 				tr.commit();
 			}
 			else {
@@ -681,7 +709,7 @@ void Blog::trackback(string sid)
 	}
 
 	set_header(new HTTPContentHeader("text/xml"));
-	render.render(c,"trackback",out.getstring());
+	render.render(c,"trackback",out);
 }
 
 
@@ -691,11 +719,26 @@ void Blog::post(string s_id,bool preview)
 		auth_or_throw();
 	}
 	int id=atoi(s_id.c_str());
+	string key_admin,key_visitor,key;
+	if(!preview){
+		key_visitor=str(boost::format("post_%1%") % id);
+		key_admin=str(boost::format("admin_post_%1%") % id);
+		key=userid==-1? key_visitor : key_admin;
+		if(cache.fetch_page(key)){
+			return;
+		}
+	}
 
 	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
 
-	render.render(c,"master",out.getstring());
+	render.render(c,"master",out);
+	if(!preview) {
+		string s=str(boost::format("comments_%1%") % id);
+		cache.add_trigger(s);	
+		cache.add_trigger(key_visitor);
+		cache.store_page(key);
+	}
 }
 
 void Blog::main_page(string from,string cat)
@@ -705,9 +748,18 @@ void Blog::main_page(string from,string cat)
 	int pid=from=="end" ? -1 : atoi(from.c_str());
 	int cid=cat =="all" ? -1 : atoi(cat.c_str());
 
-	view.ini_main(pid,false,cid);
+	string key=str(boost::format("%1%main_%2%_%3%")
+		% ( userid==-1? "" : "admin_" ) % pid % cid);
+	if(cache.fetch_page(key)) {
+		return;
+	}
 
-	render.render(c,"master",out.getstring());
+	view.ini_main(pid,false,cid);
+	render.render(c,"master",out);
+	if(cid!=-1) {
+		cache.add_trigger(str(boost::format("cat_%1%") % cid));
+	}
+	cache.store_page(key);
 }
 
 void Blog::date(tm t,string &d)
@@ -779,10 +831,7 @@ void Blog::main()
 			error_message+=":";
 //			error_message+=err.query();
 		}
-		throw HTTP_Error(error_message);
-	}
-	catch(char const *s) {
-		throw HTTP_Error(s);
+		throw cppcms_error(error_message);
 	}
 
 }
@@ -861,6 +910,9 @@ void Blog::add_comment(string &postid)
 		incom.email,t,incom.message;
 	sql.exec();
 	count_comments(post_id);
+
+	cache.rise(str(boost::format("comments_%1%") % post_id));
+	cache.rise("comments");
 	tr.commit();
 
 	string redirect=str(format(fmt.post) % post_id);
@@ -876,14 +928,24 @@ void Blog::count_comments(int id)
 void Blog::error_page(int what)
 {
 	if(what==Error::AUTH) {
+		if(cache.fetch_page("login"))
+			return;
 		View_Admin view(this,c);
  		view.ini_login();
-		render.render(c,"admin",out.getstring());
+		render.render(c,"admin",out);
+		cache.store_page("login");
 	}
 	else {
+		if(what==Error::E404) {
+			if(cache.fetch_page("404"))
+				return;
+		}
 		View_Main_Page view(this,c);
 		view.ini_error(what);
-		render.render(c,"master",out.getstring());
+		render.render(c,"master",out);
+		if(what==Error::E404) {
+			cache.store_page("404");
+		}
 	}
 }
 
@@ -895,6 +957,20 @@ int Blog::check_login( string username,string password)
 		return -1;
 	}
 	row r;
+	
+	string key="user_";
+	char buf[16];
+	for(unsigned i=0;i<username.size();i++) {
+		unsigned char c=username[i];
+		snprintf(buf,sizeof(buf),"%02x",c);
+		key+=buf;
+	}
+	user_t user;
+	if(cache.fetch_data(key,user)) {
+		if(password==user.password)
+			return user.id;
+	}
+
 	sql<<	"SELECT id,password FROM users WHERE username=?",
 		username;
 	if(!sql.single(r))
@@ -903,6 +979,10 @@ int Blog::check_login( string username,string password)
 	r>>id>>pass;
 
 	if(id!=-1 && password==pass) {
+		user.id=id;
+		user.username=username;
+		user.password=pass;
+		cache.store_data(key,user);
 		return id;
 	}
 	return -1;
@@ -997,7 +1077,7 @@ void Blog::admin()
 
 	View_Admin view(this,c);
 	view.ini_main();
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 
@@ -1074,7 +1154,7 @@ void Blog::setup_blog()
 	}
 
 	c["master_content"]=string("setup_blog");
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 }
 
 void Blog::update_comment(string sid)
@@ -1107,6 +1187,20 @@ void Blog::update_comment(string sid)
 			del=true;
 		}
 	}
+	row r;
+	sql<<"SELECT post_id FROM comments WHERE id=?",id;
+	if(sql.single(r)) {
+		int pid;
+		r>>pid;
+		cache.rise("comments");
+		if(del) {
+			cache.rise(str(boost::format("comments_%1%") % pid));
+		}
+		else {
+			cache.rise(str(boost::format("post_%1%") % pid));
+		}
+
+	}
 	if(del) {
 		del_single_comment(id);
 	}
@@ -1115,6 +1209,13 @@ void Blog::update_comment(string sid)
 			"SET	url=?,author=?,content=?,email=? "
 			"WHERE	id=?",
 				url,author,content,email,id,exec();
+		row r;
+		sql<<"SELECT post_id FROM comments WHERE id=?",id;
+		if(sql.single(r)) {
+			int pid;
+			r>>pid;
+			cache.rise(str(boost::format("post_%1%") % pid));
+		}
 	}
 	set_header(new HTTPRedirectHeader(fmt.admin));
 }
@@ -1126,7 +1227,7 @@ void Blog::edit_comment(string sid)
 
 	View_Admin view(this,c);
 	view.ini_cedit(id);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 void Blog::edit_post(string sid,string ptype)
@@ -1137,7 +1238,7 @@ void Blog::edit_post(string sid,string ptype)
 
 	View_Admin view(this,c);
 	view.ini_edit(id,ptype);
-	render.render(c,"admin",out.getstring());
+	render.render(c,"admin",out);
 
 }
 
@@ -1197,9 +1298,13 @@ void Blog::get_post(string sid,string ptype)
 			sql<<"DELETE FROM post2cat WHERE post_id=?",id,exec();
 			sql<<"DELETE FROM comments WHERE post_id=?",id,exec();
 			sql<<"DELETE FROM posts WHERE id=?",id,exec();
+			cache.rise("posts");
+			cache.rise(str(boost::format("post_%1%") % id));
 			tr.commit();
 		}
 		else {
+			cache.rise("pages");
+			cache.rise(str(boost::format("page_%1%") % id));
 			sql<<"DELETE FROM pages WHERE id=?",id,exec();
 		}
 	}
@@ -1212,10 +1317,16 @@ void Blog::get_post(string sid,string ptype)
 		else {
 			p=0;
 		}
-		if(ptype=="post")
+		if(ptype=="post") {
+			cache.rise(str(boost::format("post_%1%") % id));
+			if(p) cache.rise("posts");
 			save_post(id,title,abstract,content,p,addlist,dellist);
-		else
+		}
+		else {
+			cache.rise(str(boost::format("page_%1%") % id));
+			if(p) cache.rise("pages");
 			save_page(id,title,content,p);
+		}
 	}
 	if(type==SAVE || type==DELETE ){
 		set_header(new HTTPRedirectHeader(fmt.admin));
@@ -1347,10 +1458,12 @@ void Blog::save_post(int &id,string &title,
 			continue;
 		sql<<	"INSERT INTO post2cat(post_id,cat_id,is_open,publish) "
 				"VALUES(?,?,?,?)",id,*p,is_open,t,exec();
+		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
 	for(p=dellist.begin();p!=dellist.end();p++) {
 		sql<<	"DELETE FROM post2cat WHERE post_id=? AND cat_id=?",
 		id,(*p),exec();
+		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
 
 	tr.commit();
@@ -1361,13 +1474,15 @@ void Blog::del_single_comment(int id)
 	transaction tr(sql);
 	row r;
 	sql<<	"SELECT post_id FROM comments WHERE id=?",id;
+	int post_id;
 	if(sql.single(r)) {
-		int post_id;
 		r>>post_id;
 		sql<<	"DELETE FROM comments "
 			"WHERE id=?",id,exec();
 		count_comments(post_id);
 	}
+	cache.rise(str(boost::format("comments_%1%") % post_id));
+	cache.rise("comments");
 	tr.commit();
 }
 
@@ -1385,21 +1500,33 @@ void Blog::feed(string cat)
 
 	set_header(new HTTPContentHeader("text/xml"));
 
+	string key=str(boost::format("feed_%1%") % cat);
+	if(cache.fetch_page(key)) {
+		return;
+	}
+
 	View_Main_Page view(this,c);
 	if(cat=="all")
 		view.ini_main(-1,true);
 	else
 		view.ini_main(-1,true,atoi(cat.c_str()));
-	render.render(c,"feed_posts",out.getstring());
+	render.render(c,"feed_posts",out);
+	cache.store_page(key);
 }
 
 void Blog::feed_comments()
 {
 	set_header(new HTTPContentHeader("text/xml"));
 
+	string key="comments_feed";
+	if(cache.fetch_page(key))
+		return;
+
 	View_Main_Page view(this,c);
 	view.ini_rss_comments();
-	render.render(c,"feed_comments",out.getstring());
+	render.render(c,"feed_comments",out);
+	cache.add_trigger("comments");
+	cache.store_page(key);
 }
 
 

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cppblog\n"
-"PO-Revision-Date: 2008-05-28 07:31+0300\n"
+"PO-Revision-Date: 2008-06-07 15:04+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -108,6 +108,9 @@ msgstr "ערוך נושאים"
 
 msgid "Edit Options"
 msgstr "ערוך אפשרויות"
+
+msgid "Administrate Cache"
+msgstr "ניהול זכרון מטמון"
 
 msgid "Unpublished Posts"
 msgstr "מאמרים שלא פורסמו"
@@ -271,6 +274,9 @@ msgstr "נושאים"
 msgid "options"
 msgstr "אפשרויות"
 
+msgid "cache"
+msgstr "זכרון מטמון"
+
 msgid "CppBlog is a high performance blog written in C++."
 msgstr "CppBlog הוא בלוג מהיר הכתוב ב־++C."
 
@@ -372,6 +378,17 @@ msgstr "שליחה נכשלה בגלל הסיבה הבאה: %1%"
 
 msgid "Press here to return to post."
 msgstr "לחץ כאן כדי לחזור למאמר."
+
+msgid "Cached one entry."
+msgid_plural "Cached %1% entries."
+msgstr[0] "שמור ערך אחד"
+msgstr[1] "שמורים %1% ערכים"
+
+msgid "Clear Cache"
+msgstr "נקה זכרון"
+
+msgid "The caching system is disabled."
+msgstr "מערכת זכרון מטמון לא פעילה."
 
 msgid "Home"
 msgstr "בית"

@@ -12,14 +12,18 @@
 
 #ifndef DATA_H
 #define DATA_H
-
+#include <cppcms/archive.h>
 #include <string>
 #include <ctime>
 
-struct user_t {
+using namespace cppcms;
+
+struct user_t : public serializable {
 	int 		id;
 	std::string	username;
 	std::string	password;
+	virtual void load(archive &a) { a>>id>>username>>password; };
+	virtual void save(archive &a) const { a<<id<<username<<password; };
 };
 
 struct post_t {

@@ -15,7 +15,7 @@
 #include "error.h"
 #include "cxxmarkdown/markdowncxx.h"
 #include <set>
-
+#include <cppcms/global_config.h>
 
 using boost::format;
 using boost::str;
@@ -124,7 +124,7 @@ void View_Post::ini_short(post_t &p)
 	c["has_content"]=(bool)p.has_content;
 }
 
-void View_Main_Page::ini_sidebar()
+void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 {
 	result res;
 	row r;
@@ -138,6 +138,8 @@ void View_Main_Page::ini_sidebar()
 		c["copyright_string"]=val;
 	}
 
+	triggers.insert("options");
+
 	blog->sql<<
 		"SELECT id,title "
 		"FROM	pages "
@@ -150,7 +152,9 @@ void View_Main_Page::ini_sidebar()
 		r>>id>>title;
 		pages[i]["title"]=title;
 		pages[i]["link"]=str(boost::format(blog->fmt.page) % id);
+		triggers.insert(str(boost::format("page_%1%") % id));
 	}
+	triggers.insert("pages");
 
 	blog->sql<<
 		"SELECT link_cats.id,name,title,url,description "
@@ -179,6 +183,8 @@ void View_Main_Page::ini_sidebar()
 			ctmp["description"]=descr;
 	}
 
+	triggers.insert("links");
+
 	blog->sql<<"SELECT id,name FROM	cats",res;
 	content::vector_t &cats=c.vector("cats",res.rows());
 	for(i=0;res.next(r);i++) {
@@ -188,25 +194,42 @@ void View_Main_Page::ini_sidebar()
 		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
 		cats[i]["name"]=name;
 	}
+	triggers.insert("categories");
 
 }
+
+struct blog_options : public serializable 
+{
+	string name,description,contact;
+	virtual void load(archive &a) { a>>name>>description>>contact; };
+	virtual void save(archive &a) const { a<<name<<description<<contact; };
+};
 
 void View_Main_Page::ini_share()
 {
 	int id;
 	string val;
 	result rs;
-	blog->sql<<"SELECT id,value FROM options";
-	blog->sql.fetch(rs);
-	row i;
-	for(;rs.next(i);){
-		i >>id>>val;
-		if(id==BLOG_TITLE)
-			c["blog_name"]=val;
-		else if(id==BLOG_DESCRIPTION)
-			c["blog_description"]=val;
-		else if(id==BLOG_CONTACT && val!="")
-			c["blog_contact"]=val;
+	blog_options options;
+	if(blog->cache.fetch_data("options",options)){
+		c["blog_name"]=options.name;
+		c["blog_description"]=options.description;
+		c["blog_contact"]=options.contact;
+	}
+	else {
+		blog->sql<<"SELECT id,value FROM options";
+		blog->sql.fetch(rs);
+		row i;
+		for(;rs.next(i);){
+			i >>id>>val;
+			if(id==BLOG_TITLE)
+				c["blog_name"]=options.name=val;
+			else if(id==BLOG_DESCRIPTION)
+				c["blog_description"]=options.description=val;
+			else if(id==BLOG_CONTACT && val!="")
+				c["blog_contact"]=options.contact=val;
+		}
+		blog->cache.store_data("options",options);
 	}
 	c["media"]=blog->fmt.media;
 	c["admin_url"]=blog->fmt.admin;
@@ -216,7 +239,19 @@ void View_Main_Page::ini_share()
 	c["rss_comments"]=blog->fmt.feed_comments;
 	c["cookie_prefix"]=global_config.sval("blog.id","");
 
-	ini_sidebar();
+	string sidebar;
+	if(blog->cache.fetch_frame("sidebar",sidebar)) {
+		c["sidebar"]=sidebar;
+	}
+	else {
+		sidebar.reserve(16000);
+		content sbar_content;
+		set<string> triggers;
+		ini_sidebar(triggers,sbar_content);
+		blog->render.render(sbar_content,"sidebar",sidebar);
+		c["sidebar"]=sidebar;
+		blog->cache.store_frame("sidebar",sidebar,triggers);
+	}
 }
 
 void View_Main_Page::ini_rss_comments()
@@ -352,6 +387,10 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 		if(!feed){
 			post2cat_list[post.id]=&(latest_posts[n].list("post_cats"));
 		}
+
+		blog->cache.add_trigger(str(boost::format("post_%1%") % post.id));
+		if(!feed)
+			blog->cache.add_trigger(str(boost::format("comments_%1%") % post.id));
 
 		if(counter==1)
 			first=post.publish;
@@ -511,6 +550,7 @@ void View_Admin::ini_share()
 	c["edit_options_url"]=blog->fmt.edit_options;
 	c["edit_links_url"]=blog->fmt.edit_links;
 	c["edit_cats_url"]=blog->fmt.edit_cats;
+	c["admin_cache_url"]=blog->fmt.admin_cache;
 	c["cookie_prefix"]=global_config.sval("blog.id","");
 }
 

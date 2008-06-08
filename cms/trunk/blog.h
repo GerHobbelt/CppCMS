@@ -21,6 +21,8 @@
 #include "views.h"
 #include "data.h"
 
+using namespace std;
+using namespace cppcms;
 
 extern tmpl::template_data global_template;
 extern transtext::trans_factory tr;
@@ -61,6 +63,7 @@ struct links_t {
 	string edit_options;
 	string trackback;
 	string send_trackback;
+	string admin_cache;
 };
 
 struct post_content_t {
@@ -73,8 +76,9 @@ struct post_content_t {
 	string content;
 };
 
-class Blog : public Worker_Thread {
-	URL_Parser url;
+class Blog : public cppcms::worker_thread {
+	friend class View_Main_Page;
+	url_parser url;
 // Member functions:
 	void main_page(string s,string);
 	void post(string s,bool preview);
@@ -120,6 +124,7 @@ private:
 	void count_comments(int id);
 	void trackback(string sid);
 	void send_trackback();
+	void admin_cache();
 
 	content c;
 

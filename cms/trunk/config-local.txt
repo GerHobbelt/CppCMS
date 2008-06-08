@@ -29,6 +29,11 @@ markdown.engine="discount"
 
 # gzip - default disabled
 gzip.enable=1
+gzip.level=1
+
+# Cache
+cache.backend="threaded"
+cache.limit=1000
 
 ##########
 # Engine #

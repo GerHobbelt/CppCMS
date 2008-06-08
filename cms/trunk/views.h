@@ -12,16 +12,16 @@
 #ifndef VIEWS_H
 #define VIEWS_H
 
-#include <cppcms/templates.h>
 #include <boost/shared_ptr.hpp>
 #include "data.h"
 #include <list>
 #include <vector>
 #include <tmpl/content.h>
+#include <set>
 
 using boost::shared_ptr;
 using namespace tmpl;
-
+using namespace std;
 class Blog;
 
 class View_Comment {
@@ -50,7 +50,7 @@ class View_Main_Page {
 	Blog *blog;
 	int error_code;
 	void ini_share();
-	void ini_sidebar();
+	void ini_sidebar(set<string> &triggers,content &c);
 	void prepare_query(int,int,int);
 	content &c;
 public:

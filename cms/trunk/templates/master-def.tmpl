@@ -54,11 +54,11 @@
 	<% include ref master_content %>
 	</div>
 	<div id="sidecontent">
-	<% include sidebar %>
+	<% sidebar | raw %>
 	</div>
 <% else %>
 	<div id="sidecontent">
-	<% include sidebar %>
+	<% sidebar | raw %>
 	</div>
 	<div id="maincontent">
 	<% include ref master_content %>
