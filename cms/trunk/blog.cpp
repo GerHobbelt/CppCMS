@@ -397,6 +397,7 @@ void Blog::edit_options()
 			BLOG_DESCRIPTION,desc,exec();
 		sql<<"INSERT INTO options(id,value) VALUES(?,?)",
 			BLOG_CONTACT,contact,exec();
+		cache.rise("options");
 		tr.commit();
 	}
 
@@ -404,7 +405,6 @@ void Blog::edit_options()
 	view.ini_options();
 	render.render(c,"admin",out);
 
-	cache.rise("options");
 }
 
 void Blog::edit_links()
@@ -486,20 +486,20 @@ void Blog::edit_links()
 				tr.commit();
 			}
 		}
+		render.render(c,"admin",out);
+		cache.rise("links");
 	}
 
 	View_Admin view(this,c);
 	view.ini_links();
-	render.render(c,"admin",out);
 
-	cache.rise("links");
 }
 
 
 
 void Blog::edit_cats()
 {
-	auth_or_throw();
+	auth_or	_throw();
 
 	c["constraint_error"]=false;
 
@@ -556,13 +556,13 @@ void Blog::edit_cats()
 		else if(id!=-1 && name!="") {
 			sql<<"UPDATE cats SET name=? WHERE id=?",name,id,exec();
 		}
+		cache.rise("categories");
 	}
 
 	View_Admin view(this,c);
 	view.ini_cats();
 	render.render(c,"admin",out);
 
-	cache.rise("categories");
 }
 
 
