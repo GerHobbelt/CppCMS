@@ -1145,7 +1145,7 @@ void Blog::setup_blog()
 			sql<<	"INSERT INTO users(username,password) "
 				"VALUES(?,?)",author,pass1,exec();
 			sql<<	"INSERT INTO link_cats(name) VALUES('Links')",exec();
-			int rowid=sql.rowid();
+			int rowid=sql.rowid("link_cats_id_seq");
 			sql<<	"INSERT INTO links(cat_id,title,url,description) "
 				"VALUES (?,'CppCMS','http://cppcms.sourceforge.net/','') ",rowid,exec();
 			tr.commit();
