@@ -127,15 +127,17 @@ private:
 	void admin_cache();
 
 	content c;
+	void init();
 
 public:
 	links_t fmt;
-	virtual void init();
 	virtual void main();
 	void date(std::tm t,string &s);
 	Blog() :
 		url(this),
 		render(global_template)
-	{};
+	{
+		init();
+	};
 };
 #endif

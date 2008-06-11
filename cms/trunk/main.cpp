@@ -31,7 +31,7 @@ int main(int argc,char **argv)
 				global_config.sval("locale.dir","./locale").c_str());
 		}
 
-		run_application<Blog>(argc,argv);
+		run_application(argc,argv,simple_factory<Blog>());
 
 		cout<<"Exiting\n";
 	}

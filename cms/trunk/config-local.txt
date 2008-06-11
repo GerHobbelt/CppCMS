@@ -39,9 +39,9 @@ cache.limit=1000
 # Engine #
 ##########
 
-dbi.engine="mysql"
+# dbi.engine="mysql"
 # dbi.debug=1
-# dbi.engine="sqlite3"
+dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
