@@ -1,2 +1,2 @@
-#!/usr/bin/cgi-fcgi -f
--bind -connect 127.0.0.1:8000
+#!/bin/sh
+exec ./cppblog -c config-local.txt

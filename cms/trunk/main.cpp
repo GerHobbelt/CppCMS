@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 #include "blog.h"
-#include <cppcms/thread_pool.h>
+#include <cppcms/manager.h>
 #include <cppcms/global_config.h>
 #include <cppcms/url.h>
 #include <dbi/dbixx.h>
@@ -32,8 +32,6 @@ int main(int argc,char **argv)
 		}
 
 		run_application(argc,argv,simple_factory<Blog>());
-
-		cout<<"Exiting\n";
 	}
 	catch(cppcms_error &s) {
 		cerr<<s.what()<<endl;
