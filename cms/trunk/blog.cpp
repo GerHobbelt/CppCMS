@@ -895,7 +895,9 @@ void Blog::add_comment(string &postid)
 
 	if(incom.preview) {
 		c["preview_message_content"]=incom.message;
-		this->post(postid,false);
+		View_Main_Page view(this,c);
+		view.ini_post(post_id,true);
+		render.render(c,"master",out);
 		return;
 	}
 
