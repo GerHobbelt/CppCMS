@@ -756,9 +756,8 @@ void Blog::main_page(string from,string cat)
 
 	view.ini_main(pid,false,cid);
 	render.render(c,"master",out);
-	if(cid!=-1) {
-		cache.add_trigger(str(boost::format("cat_%1%") % cid));
-	}
+
+	cache.add_trigger(str(boost::format("cat_%1%") % cid));
 	cache.store_page(key);
 }
 
@@ -1467,6 +1466,7 @@ void Blog::save_post(int &id,string &title,
 		id,(*p),exec();
 		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
+	cache.rise("cat_-1");
 
 	tr.commit();
 }
@@ -1508,11 +1508,13 @@ void Blog::feed(string cat)
 	}
 
 	View_Main_Page view(this,c);
-	if(cat=="all")
-		view.ini_main(-1,true);
-	else
-		view.ini_main(-1,true,atoi(cat.c_str()));
+	int cid=cat == "all" ? -1 : atoi(cat.c_str());
+	
+	view.ini_main(-1,true,cid);
+
 	render.render(c,"feed_posts",out);
+	
+	cache.add_trigger(str(boost::format("cat_%1%") % cid));
 	cache.store_page(key);
 }
 
