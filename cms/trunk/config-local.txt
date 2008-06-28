@@ -1,4 +1,6 @@
 # FastCGI settings
+server.api="fastcgi"
+server.mod="thread"
 server.threads = 5
 server.buffer = 100
 server.socket = "/tmp/cppblog.socket"
