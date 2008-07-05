@@ -50,18 +50,18 @@ int main(int argv,char **argc)
 
 		int i,j;
 		char buffer[256];
-/*		sql<<"insert into users values(1,'artik','artik')",exec();
+		sql<<"insert into users values(1,'artik','artik')",exec();
 		sql<<"insert into options values(0,'כותרת הבלוג')",exec();
 		sql<<"insert into options values(1,'תיאור הבלוג')",exec();
 		for(i=0;i<5;i++) {
 			snprintf(buffer,sizeof(buffer),"page %d",i);
 			sql<<"insert into pages(author_id,title,content,is_open) "
 				"values(1,?,?,1)",buffer,(abstract+content),exec();
-		}*/
+		}
 
-		for(i=0;i<2;i++) {
+		for(i=0;i<10;i++) {
 			snprintf(buffer,sizeof(buffer),"category %d",i);
-		//	sql<<"insert into cats(name) values(?)",buffer,exec();
+			sql<<"insert into cats(name) values(?)",buffer,exec();
 			int id=sql.rowid();
 			cerr<<id<<endl;
 			snprintf(buffer,sizeof(buffer),"group %d",i);
@@ -73,7 +73,7 @@ int main(int argv,char **argc)
 					"values(?,?,'http://','')",id,buffer,exec();
 			}
 		}
-		/*
+		
 		int P=atol(argc[1]);
 		int C=atol(argc[2]);
 		time_t tb;
@@ -103,7 +103,7 @@ int main(int argv,char **argc)
 					comm_content,t,
 					exec();
 			}
-		}*/
+		}
 		sql<<"commit",exec();
 	}
 	catch(dbixx_error const &e){
