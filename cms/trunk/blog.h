@@ -133,8 +133,8 @@ public:
 	links_t fmt;
 	virtual void main();
 	void date(std::tm t,string &s);
-	Blog(cache_factory const &c) :
-		worker_thread(c),
+	Blog(worker_settings const &s) :
+		worker_thread(s),
 		url(this),
 		render(global_template)
 	{
