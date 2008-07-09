@@ -9,13 +9,13 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <cppcms/manager.h>
 #include "views.h"
 #include <boost/format.hpp>
 #include "blog.h"
 #include "error.h"
 #include "cxxmarkdown/markdowncxx.h"
 #include <set>
-#include <cppcms/global_config.h>
 
 using boost::format;
 using boost::str;
@@ -198,7 +198,7 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 
 }
 
-struct blog_options : public serializable 
+struct blog_options : public serializable
 {
 	string name,description,contact;
 	virtual void load(archive &a) { a>>name>>description>>contact; };
@@ -233,11 +233,11 @@ void View_Main_Page::ini_share()
 	}
 	c["media"]=blog->fmt.media;
 	c["admin_url"]=blog->fmt.admin;
-	c["base_url"]=global_config.sval("blog.script_path");
-	c["host"]=global_config.sval("blog.host");
+	c["base_url"]=blog->app.config.sval("blog.script_path");
+	c["host"]=blog->app.config.sval("blog.host");
 	c["rss_posts"]=blog->fmt.feed;
 	c["rss_comments"]=blog->fmt.feed_comments;
-	c["cookie_prefix"]=global_config.sval("blog.id","");
+	c["cookie_prefix"]=blog->app.config.sval("blog.id","");
 
 	string sidebar;
 	if(blog->cache.fetch_frame("sidebar",sidebar)) {
@@ -542,7 +542,7 @@ void View_Admin::ini_share()
 		r>>blog_name;
 	c["blog_name"]=blog_name;
 	c["media"]=blog->fmt.media;
-	c["base_url"]=global_config.sval("blog.script_path");
+	c["base_url"]=blog->app.config.sval("blog.script_path");
 	c["admin_url"]=blog->fmt.admin;
 	c["logout_url"]=blog->fmt.logout;
 	c["new_post_url"]=blog->fmt.new_post;
@@ -551,7 +551,7 @@ void View_Admin::ini_share()
 	c["edit_links_url"]=blog->fmt.edit_links;
 	c["edit_cats_url"]=blog->fmt.edit_cats;
 	c["admin_cache_url"]=blog->fmt.admin_cache;
-	c["cookie_prefix"]=global_config.sval("blog.id","");
+	c["cookie_prefix"]=blog->app.config.sval("blog.id","");
 }
 
 void View_Admin::ini_options()

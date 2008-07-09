@@ -12,8 +12,7 @@
 #include "cxxmarkdown/markdowncxx.h"
 #include "md5.h"
 #include <iconv.h>
-#include <cppcms/global_config.h>
-
+#include <cppcms/manager.h>
 #include "trackback.h"
 
 using cgicc::FormEntry;
@@ -28,10 +27,10 @@ using namespace tmpl;
 using namespace cppcms;
 
 
-static void create_gif(string const &tex,string const &fname)
+void Blog::create_gif(string const &tex,string const &fname)
 {
 	int pid;
-	string p=global_config.sval("latex.script");
+	string p=app.config.sval("latex.script");
 	if((pid=fork())<0) {
 		char buffer[256];
 		strerror_r(errno,buffer,sizeof(buffer));
@@ -49,7 +48,7 @@ static void create_gif(string const &tex,string const &fname)
 	}
 }
 
-static void latex_filter(string const &in,string &out)
+void Blog::latex_filter(string const &in,string &out)
 {
 	string::size_type p_old=0,p1=0,p2=0;
 	while((p1=in.find("[tex]",p_old))!=string::npos && (p2=in.find("[/tex]",p_old))!=string::npos && p2>p1) {
@@ -59,8 +58,8 @@ static void latex_filter(string const &in,string &out)
 		tex.append(in,p1,p2-p1);
 		char md5[33];
 		md5_onepass(tex.c_str(),tex.size(),md5);
-		string file=global_config.sval("latex.cache_path")+ md5 +".gif";
-		string wwwfile=global_config.sval("blog.media_path")+"/latex/" + md5 +".gif";
+		string file=app.config.sval("latex.cache_path")+ md5 +".gif";
+		string wwwfile=app.config.sval("blog.media_path")+"/latex/" + md5 +".gif";
 		struct stat tmp;
 		if(stat(file.c_str(),&tmp)<0) {
 			create_gif(tex,file);
@@ -75,11 +74,11 @@ static void latex_filter(string const &in,string &out)
 
 void Blog::init()
 {
-	string root=global_config.sval("blog.script_path");
+	string root=app.config.sval("blog.script_path");
 
-	fmt.media=global_config.sval("blog.media_path");
+	fmt.media=app.config.sval("blog.media_path");
 
-	if(global_config.lval("blog.configure",0)==1) {
+	if(app.config.lval("blog.configure",0)==1) {
 		url.add("^/?$",
 			boost::bind(&Blog::setup_blog,this));
 		fmt.admin=root + "/";
@@ -204,30 +203,30 @@ void Blog::init()
 
 		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
 		fmt.feed_comments=root+"/rss/comments";
-		
+
 		url.add("^/admin/sendtrackback$",boost::bind(&Blog::send_trackback,this));
 		fmt.send_trackback=root+"/admin/sendtrackback";
-		
+
 		url.add("^/admin/cache$",boost::bind(&Blog::admin_cache,this));
 		fmt.admin_cache=root+"/admin/cache";
 
 	}
 
 	try {
-		string engine=global_config.sval("dbi.engine");
+		string engine=app.config.sval("dbi.engine");
 		sql.driver(engine);
 		if(engine=="sqlite3") {
-			sql.param("dbname",global_config.sval("sqlite3.db"));
-			sql.param("sqlite3_dbdir",global_config.sval("sqlite3.dir"));
+			sql.param("dbname",app.config.sval("sqlite3.db"));
+			sql.param("sqlite3_dbdir",app.config.sval("sqlite3.dir"));
 		}
 		else if(engine=="mysql") {
-			sql.param("dbname",global_config.sval("mysql.db"));
-			sql.param("username",global_config.sval("mysql.user"));
-			sql.param("password",global_config.sval("mysql.pass"));
+			sql.param("dbname",app.config.sval("mysql.db"));
+			sql.param("username",app.config.sval("mysql.user"));
+			sql.param("password",app.config.sval("mysql.pass"));
 		}
 		else if(engine=="pgsql") {
-			sql.param("dbname",global_config.sval("pgsql.db"));
-			sql.param("username",global_config.sval("pgsql.user"));
+			sql.param("dbname",app.config.sval("pgsql.db"));
+			sql.param("username",app.config.sval("pgsql.user"));
 		}
 		sql.connect();
 	}
@@ -239,7 +238,7 @@ void Blog::init()
 	render.add_string_filter("markdown2html",
 			boost::bind(markdown2html,_1,_2));
 	render.add_string_filter("latex",
-		boost::bind(latex_filter,_1,_2));
+		boost::bind(&Blog::latex_filter,this,_1,_2));
 
 
 }
@@ -292,9 +291,9 @@ void Blog::send_trackback()
 
 		r>>title>>abstract;
 
-		::trackback tb(url,global_config.sval("blog.charset","utf-8"));
+		::trackback tb(url,app.config.sval("blog.charset","utf-8"));
 
-		string myurl="http://"+global_config.sval("blog.host","")+str(boost::format(fmt.post) % id);
+		string myurl="http://"+app.config.sval("blog.host","")+str(boost::format(fmt.post) % id);
 		tb.url(myurl);
 		tb.title(title);
 		sql<<"SELECT value FROM options WHERE id=?",BLOG_TITLE;
@@ -593,7 +592,7 @@ static bool cxx_iconv(string &s,string const &charset_in,string const &charset_o
 		#else
 		n=iconv(d,&rolling_in,&size_in,&rolling_out,&size_out);
 		#endif
-		
+
 		if(n==(size_t)(-1)) {
 			res=false;
 		}
@@ -656,7 +655,7 @@ void Blog::trackback(string sid)
 
 	if(url!="" && cgi->getEnvironment().getRequestMethod()=="POST"){
 		string charset=get_charset(cgi->getEnvironment().getContentType());
-		string mycharset=global_config.sval("blog.charset","utf-8");
+		string mycharset=app.config.sval("blog.charset","utf-8");
 		if(	!cxx_iconv(title,charset,mycharset)
 			|| !cxx_iconv(excerpt,charset,mycharset)
 			|| !cxx_iconv(blog_name,charset,mycharset))
@@ -735,7 +734,7 @@ void Blog::post(string s_id,bool preview)
 	render.render(c,"master",out);
 	if(!preview) {
 		string s=str(boost::format("comments_%1%") % id);
-		cache.add_trigger(s);	
+		cache.add_trigger(s);
 		cache.add_trigger(key_visitor);
 		cache.store_page(key);
 	}
@@ -772,20 +771,20 @@ void Blog::date(tm t,string &d)
 
 void Blog::set_lang()
 {
-	if(global_config.lval("locale.gnugettext",0)==1) {
+	if(app.config.lval("locale.gnugettext",0)==1) {
 		render.set_translator(gnugt);
 		return;
 	}
-	string default_locale=global_config.sval("locale.default","en");
+	string default_locale=app.config.sval("locale.default","en");
 
-	if(global_config.lval("locale.multiple",0)==0) {
+	if(app.config.lval("locale.multiple",0)==0) {
 		render.set_translator(tr[default_locale]);
 	}
 	else {
 		const vector<HTTPCookie> &cookies = env->getCookieList();
 		unsigned i;
 		render.set_translator(tr[default_locale]);
-		string blog_id=global_config.sval("blog.id","");
+		string blog_id=app.config.sval("blog.id","");
 		for(i=0;i!=cookies.size();i++) {
 			if(cookies[i].getName()==blog_id + "lang") {
 				string lang=cookies[i].getValue();
@@ -826,7 +825,7 @@ void Blog::main()
 		sql.close();
 		connected=false;
 		string error_message=err.what();
-		if(global_config.lval("dbi.debug",0)==1) {
+		if(app.config.lval("dbi.debug",0)==1) {
 			error_message+=":";
 //			error_message+=err.query();
 		}
@@ -958,7 +957,7 @@ int Blog::check_login( string username,string password)
 		return -1;
 	}
 	row r;
-	
+
 	string key="user_";
 	char buf[16];
 	for(unsigned i=0;i<username.size();i++) {
@@ -998,7 +997,7 @@ bool Blog::auth()
 
 	const vector<HTTPCookie> &cookies = env->getCookieList();
 
-	string blog_id=global_config.sval("blog.id","");
+	string blog_id=app.config.sval("blog.id","");
 
 	for(i=0;i!=cookies.size();i++) {
 		if(cookies[i].getName()==blog_id + "username") {
@@ -1033,7 +1032,7 @@ void Blog::set_login_cookies(string u,string p,int d)
 	else {
 		d*=24*3600;
 	}
-	string blog_id=global_config.sval("blog.id","");
+	string blog_id=app.config.sval("blog.id","");
 	HTTPCookie u_c(blog_id + "username",u,"","",d,"/",false);
 	response_header->setCookie(u_c);
 	HTTPCookie p_c(blog_id + "password",p,"","",d,"/",false);
@@ -1068,7 +1067,7 @@ void Blog::login()
 
 void Blog::logout()
 {
-	set_header(new HTTPRedirectHeader(global_config.sval("blog.script_path")));
+	set_header(new HTTPRedirectHeader(app.config.sval("blog.script_path")));
 	set_login_cookies("","",-1);
 }
 
@@ -1509,11 +1508,11 @@ void Blog::feed(string cat)
 
 	View_Main_Page view(this,c);
 	int cid=cat == "all" ? -1 : atoi(cat.c_str());
-	
+
 	view.ini_main(-1,true,cid);
 
 	render.render(c,"feed_posts",out);
-	
+
 	cache.add_trigger(str(boost::format("cat_%1%") % cid));
 	cache.store_page(key);
 }

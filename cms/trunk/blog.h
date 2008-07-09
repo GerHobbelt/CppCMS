@@ -78,7 +78,7 @@ struct post_content_t {
 
 class Blog : public cppcms::worker_thread {
 	friend class View_Main_Page;
-	url_parser url;
+	friend class View_Admin;
 // Member functions:
 	void main_page(string s,string);
 	void post(string s,bool preview);
@@ -94,7 +94,8 @@ public:
 	bool connected;
 	dbixx::session sql;
 private:
-
+	void create_gif(string const &tex,string const &fname);
+	void latex_filter(string const &in,string &out);
 	void auth_or_throw();
 
 	void admin();
@@ -133,9 +134,8 @@ public:
 	links_t fmt;
 	virtual void main();
 	void date(std::tm t,string &s);
-	Blog(worker_settings const &s) :
+	Blog(manager const &s) :
 		worker_thread(s),
-		url(this),
 		render(global_template)
 	{
 		init();

@@ -2,7 +2,6 @@
 #include <memory>
 #include "blog.h"
 #include <cppcms/manager.h>
-#include <cppcms/global_config.h>
 #include <cppcms/url.h>
 #include <dbi/dbixx.h>
 #include <tmpl/transtext.h>
@@ -17,21 +16,23 @@ transtext::trans_factory tr;
 int main(int argc,char **argv)
 {
 	try{
-		global_config.load(argc,argv);
-		global_template.load(global_config.sval("templates.file"));
+		manager app(argc,argv);
 
-		if(global_config.lval("locale.gnugettext",0)==1) {
-			gnugt.load(global_config.sval("locale.default","").c_str(),
+		global_template.load(app.config.sval("templates.file"));
+
+		if(app.config.lval("locale.gnugettext",0)==1) {
+			gnugt.load(app.config.sval("locale.default","").c_str(),
 				   "cppblog",
-				   global_config.sval("locale.dir","./locale").c_str());
+				   app.config.sval("locale.dir","./locale").c_str());
 		}
 		else {
-			tr.load(global_config.sval("locale.supported","en").c_str(),
+			tr.load(app.config.sval("locale.supported","en").c_str(),
 				"cppblog",
-				global_config.sval("locale.dir","./locale").c_str());
+				app.config.sval("locale.dir","./locale").c_str());
 		}
 
-		run_application(argc,argv,simple_factory<Blog>());
+		app.set_worker(new simple_factory<Blog>());
+		app.execute();
 	}
 	catch(cppcms_error &s) {
 		cerr<<s.what()<<endl;
