@@ -13,7 +13,7 @@
 #define BLOG_H
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
-#include <dbi/dbixx.h>
+#include <dbixx/dbixx.h>
 #include <tmpl/renderer.h>
 #include <tmpl/content.h>
 #include <tmpl/transtext.h>

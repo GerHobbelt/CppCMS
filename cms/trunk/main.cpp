@@ -3,7 +3,7 @@
 #include "blog.h"
 #include <cppcms/manager.h>
 #include <cppcms/url.h>
-#include <dbi/dbixx.h>
+#include <dbixx/dbixx.h>
 #include <tmpl/transtext.h>
 
 using namespace std;

@@ -1,4 +1,4 @@
-#include <dbi/dbixx.h>
+#include <dbixx/dbixx.h>
 #include <iostream>
 
 using namespace dbixx;
