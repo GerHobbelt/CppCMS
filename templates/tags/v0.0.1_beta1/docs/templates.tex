@@ -1,0 +1,295 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{html}
+\hypersetup{colorlinks,%
+citecolor=red,%
+filecolor=red,%
+linkcolor=red,%
+urlcolor=green,%
+pdftex}
+\newcommand{\tw}[1]{\texttt{#1}}
+\usepackage{float}
+ 
+\floatstyle{ruled}
+\newfloat{program}{thp}{lop}
+\floatname{program}{Listing}
+
+\title{CppCMS --- Templates Library}
+\author{Artyom Beilis (Tonkikh)}
+\begin{document}
+\maketitle
+\tableofcontents
+
+%begin{latexonly}
+\listof{program}{List of Listings}
+%end{latexonly}
+
+\begin{htmlonly}
+	\newenvironment{\program}{
+		\begin{rawhtml}
+		<div style="float:right; clear:right; width:500px; padding-left:20px">
+		\end{rawhtml}
+		}{
+		\begin{rawhtml}
+		</div>
+		\end{rawhtml}
+		}
+	\renewcommand{\caption}[1]{\textbf{#1}}
+\end{htmlonly}
+
+\begin{abstract}
+This is full documentation of CppCMS templates library. This library was designed to work with CppCMS framework however
+it can be used for any other purposes that even not connected to HTML generation.
+\end{abstract}
+\section{Key Components}
+The templates system is build form several key components:
+\begin{description}
+\item[Content:] the object that holds all the information required for building the page.
+\item[Renderer:] the object that holds a template and creates the page form the content
+\item[Template Compiler:] compiler that converts human readable template files to internal opcode that is used by renderer for generating pages.
+\item[Internationalization Framework:] the gettext compatible library that allows internationalize the templates content in multi-thread environment.
+\end{description}
+
+We would explain this in a simple example.
+First of all we would create a text file \tw{test.tmpl} with the
+code displayed in listing~\ref{lst:firsttmpl} and create a C++ code file \tw{test.cpp}
+with the code in listing~\ref{lst:firstcpp}.
+
+\begin{program}
+\caption{First Template\label{lst:firsttmpl}}
+\begin{verbatim}
+<% template test() %>
+Hello <% name %>!
+<% end %>
+\end{verbatim}
+\end{program}
+
+
+\begin{program}
+\caption{Frist C++ Code\label{lst:firstcpp}}
+\begin{verbatim}
+#include <tmpl/content.h>
+#include <tmpl/renderer.h>
+#include <iostream>
+using namespace tmpl;
+using namespace std;
+
+int main()
+{
+    template_data data("test.opcode");
+    renderer rnd(data);
+    content  cnt;
+    string result;
+
+    cnt["name"]=string("John");
+    
+    rnd.render(cnt,"test",result);
+    cout<<result;
+    return 0;
+}
+\end{verbatim}
+\end{program}
+
+Now we should build templates opcode by running:
+
+\begin{verbatim}
+tmpl_bld -o test.opcode test.tmpl
+\end{verbatim}
+
+Then compile our test code
+
+\begin{verbatim}
+g++ test.cpp -ltmpl -o test
+\end{verbatim}
+
+And now we can run it \tw{./test}. If everything was OK we should see as output:
+
+\begin{quote}
+Hello John!
+\end{quote}
+
+Now lets see line after line what happens. First we declare a template called `test', it includes some
+text and special command \verb+<% name %>+ that displays the value of content variable `name'. When we run
+\verb+tmpl_bld+ we create from text file \verb+test.tmpl+ a binary file \verb+test.opcode+ that actually 
+includes a simple instructions for displaying the content. You can find an `assembly' code in file \verb+test.s+.
+
+In the C++ code, we first of all load the opcode file we created to an object `data' of
+type \verb+template_data+. It holds the content of the file and can be used by multiple 
+`renderer' objects. After that we can create an object `rnd' of type \verb+renderer+ that would use our opcode.
+
+The next step is setting up the content. We assign to a key \tw{name} value `John': 
+the value that would be displayed for this content variable.
+Now we are ready to render the output calling \verb+render+ method of renderer object.
+It receives 3 parameters: the content, the name of the template and the string that
+would be filled up with rendered content. And now we cat print it as usual.
+
+\section{Content}
+
+The \verb+tmpl::content+ class is actually derived from \verb+map<string,boost::any>+. It maps 
+string key to a container that is capable of holding any\footnote{For full documentation 
+of \tw{boost::any} refer to \url{http://www.boost.org/doc/html/any.html} } value.
+
+In order to add a pair key/value to the content, you just assign it as if it was an ordinary map. 
+Currently renderer supports \tw{int}, \tw{string}, \tw{bool} and \tw{std::tm} types that it is capable to display.
+However, it can be extended to any user defined type, see~\ref{ref:NewTypes}.
+
+The templates system is capable of representing sequence of data---iterate over them. For example see listing~\ref{lst:iter}.
+
+\begin{program}
+\caption{Simple Iterating Over Sequences\label{lst:iter}}
+\begin{verbatim}
+<% foreach person in people %>
+<ul>
+    <% item %>
+    <li><% person.name %> is 
+        <% person.age %> year(s) old.</li>
+    <% end %> 
+</ul>
+<% end %>
+\end{verbatim}
+\end{program}
+
+In order to make a sequence of data we assign to a key `people' one of the following types:
+\begin{enumerate}
+\item \verb+vector_t+ of type \verb+vector<content>+
+\item \verb+list_t+ of type \verb+list<content>+
+\end{enumerate}
+It can be done using following methods:
+\begin{enumerate}
+\item \verb+vector_t &vector(string const &key, int size=0)+ 
+ method creates a vector of contents of size \tw{size} at given \tw{key} and returns it;
+\item \verb+list_t &list(string const &key)+ 
+ method creates a list of contents at required key as well;
+\end{enumerate}
+
+You can see an example of preparing a content for template~\ref{lst:iter} at listing~\ref{lst:VectoAndList}
+\begin{program}
+\caption{Creating a Sequence of Contents\label{lst:VectoAndList}}
+\begin{verbatim}
+// Using Vector
+content::vector_t &vec = 
+    cnt.vector("people",people.size());
+for{i=0;i<people.size();i++) {
+    vec[i]["name"] = people[i].name;
+    vec[i]["age"]  = people[i].age;
+}
+
+// Using List
+content::list_t &lst = cnt.list("people");
+for{i=0;i<people.size();i++) {
+    lst.push_back(content());
+    lst.back()["name"] = people[i].name;
+    lst.back()["age"]  = people[i].age;
+}\end{verbatim}
+\end{program}
+
+This approach is good for most of cases. However in some cases, in order to prevent 
+a waste of memory resources, it is better to create
+a data `on-the-fly' using callback functions. This can be achieved using
+\tw{boost::signal} and \tw{boost::bind}\footnote{See: \url{http://www.boost.org/doc/html/signals.html}}.
+
+The method that attaches a callback is defined as following:
+
+\begin{verbatim}
+typedef boost::signal<bool (content &)> callback_t;
+void signal(string const &key,callback_t::slot_type slot);
+\end{verbatim}
+
+You actually should attach a function that receives as parameter and empty content and fills it up with data returning `true'. It should return `false' at the end of the sequence. See listing~\ref{lst:ContantCallback} for an example.
+
+Take a note, at the beginning the value of \tw{i} is 0. When we get to the end of the sequence, the callback function returns
+false and \emph{resets} the value of \tw{i} to 0 again. This is important in case, the template would try to iterate
+over the same sequence twice. If the value will not be reset, then other iterations over the same sequence will be
+treated as iteration over empty sequence.
+
+\begin{program}
+\caption{Creating a Sequence With Callback\label{lst:ContantCallback}}
+\begin{verbatim}
+bool sequence(content &c,int &i)
+{
+    if(i>=people.size()) {
+        i=0;
+        return false;
+    }
+    c["name"]=people[i].name;
+    c["age"]=people[i].age;
+    i++;
+    return true;
+}
+...
+void setup()
+{
+    int i=0;
+    cnt.signal("people",boost::bind(sequence,_1,i));
+}
+\end{verbatim}
+
+\end{program}
+
+\section{Templates}
+
+\subsection{Basics}
+The syntax of templates engine is quite simple. Everything is separated to content---the normal text and commands---the
+text between \verb+<%+ and \verb+%>+ marks. Each single command should be enclosed with these marks, even if two commands follow each other:
+
+\begin{verbatim}
+<% if x %><% x %><% end %> - correct
+<% if x ; x ; end %>       - wrong
+<% x
+   %>                      - wrong
+\end{verbatim}
+
+Each command consists of tokens separated by blanks, the number of blanks inside command is not limited: \verb+<%x%>+ 
+and \verb+<% x    %>+ are both correct.
+
+The template names and variables are represented by case sensitive
+English words that may start with a letter and may include numbers and underscore~`\tw{\_}' symbol. 
+For example: command \verb+<% template me_1234() %>+ is legal, when \verb+<% template 1ab() %>+ is illegal.
+All commands are represented using small letters like \tw{if}.
+
+In this manual, when the syntax is described, all variable and template names are displayed as tokens 
+with \tw{CAPITAL} letters. For example: \verb+<% if def VARIABLE %>+ describes command \tw{if~def} and \tw{VARIABLE} 
+is general name for a token. 
+
+We can divide commands into two categories: `block commands' and `content' commands. The first one usually end with \verb+<% end %>+ commands and used for change control flow, and the second one used to display the content. 
+
+\subsection{Template Declarations}
+
+The final template opcode can be build from many template files, where each of them and consists of several template declarations. However if one template, makes include to other, the second should be declared/build before the first one. Thus if template declared in \tw{b.tmpl} includes template from \tw{a.tmpl} they must be compiled with:
+
+\begin{verbatim}
+tmpl_bld -o look.opcode a.tmpl b.tmpl
+\end{verbatim}
+
+If the order of files is changed, the compilation will fail. 
+Another important restriction that comes from this is that recursion is not allowed.
+
+Each template, is declared with command:
+
+\begin{verbatim}
+<% template TEMPLATE_NAME(PARAMETER1,PARAMETER2) %>
+\end{verbatim}
+
+The parameters list is not mandatory, however parenthesis~`\tw{()}' should always present. 
+For example: \verb+<% template my(name) %>+, \verb+<% template mynoparam() %>+.
+
+Template definition ends with \verb+<% end %>+ statement. The template definition is the topmost block. No template can be declared inside other templates, no commands and content should be included between declarations. For example:
+
+\begin{verbatim}
+<% template first() %>
+Legal content <% legal_command %>
+<% end %>
+Illegal content <% illegal_command %>
+<% template second() %>
+Legal content <% legal_command %>
+<% end %>
+\end{verbatim}
+
+\subsection{Content Commands} 
+These are non block commands, that used to display template content.
+
+\subsubsection{Variable and Filters}
+The variable content is displayed by enclosing its name with \verb+<% NAME %>+. 
+
+\end{document}
