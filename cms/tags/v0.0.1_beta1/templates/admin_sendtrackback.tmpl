@@ -1,0 +1,12 @@
+<% template admin_sendtrackback() %>
+<% if def error_no_url %>
+	<h2><% gt 'No url given' %></h2>
+<% else %> 
+	<% if success %>
+		<p><% gt 'The trackback was send sucessefully' %></p>
+	<% else %>
+		<p><% gt 'The send had failed with following message: %1%' using error_message %></p>
+	<% end %>
+<% end %>
+<p><a href="<% goback %>"><% gt 'Press here to return to post.' %></a></p>
+<% end %>
