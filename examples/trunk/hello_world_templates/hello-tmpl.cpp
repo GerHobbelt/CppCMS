@@ -10,7 +10,7 @@ using namespace tmpl;
 class my_hello_world : public worker_thread {
     renderer rnd;
 public:
-    my_hello_world(worker_settings const &s,template_data const &t) :
+    my_hello_world(manager const &s,template_data const &t) :
         worker_thread(s),
 	rnd(t)
     {
@@ -29,12 +29,11 @@ int main(int argc,char ** argv)
 {
     template_data templ;
     try {
-
-        global_config.load(argc,argv);
-        templ.load(global_config.sval("templates.file"));
-
-        run_application(argc,argv,
-            one_param_factory<my_hello_world,template_data>(templ));
+        manager app(argc,argv);
+        templ.load(app.config.sval("templates.file"));
+	app.set_worker(
+	    new one_param_factory<my_hello_world,template_data>(templ));
+	app.execute();
     }
     catch(std::exception const &e) {
         cerr<<e.what()<<endl;
