@@ -1,0 +1,9 @@
+server.api = "fastcgi"
+server.mod = "prefork"
+
+templates.file = "bb.opcode"
+
+bb.base_url="/bb"
+sql.dir="./"
+sql.db="bb.db"
+

@@ -1,0 +1,23 @@
+<% template topic() %>
+<h1><% title %></h1>
+<a href="<%  base_url %>">to main page</a>
+<% foreach msg in messages %>
+   <dl>
+   <% item %>
+       <dt><% msg.title %></dt>
+       <dd><% msg.content | escape | ext totext %></dd>
+   <% end %>
+   </dl>
+<% empty %>
+<h2>No comments for this topic</h2>
+<% end %>
+<h2>New comment</h2>
+   <p>
+   <form action="<% submit_url %>" method="post" >
+   Title:<br />
+   <input type="text" name="title" size=40 /><br />
+   <textarea name="content" cols="40" rows="10"></textarea><br />
+   <input type="submit" name="submit" value="Submit" /><br />
+   </form>
+   </p>
+<% end %>
