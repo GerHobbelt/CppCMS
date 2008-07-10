@@ -2,7 +2,7 @@
 #include <cppcms/manager.h>
 #include <tmpl/content.h>
 #include <tmpl/renderer.h>
-#include <dbi/dbixx.h>
+#include <dbixx/dbixx.h>
 #include <iostream>
 #include <boost/format.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
