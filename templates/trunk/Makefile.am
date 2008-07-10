@@ -16,6 +16,7 @@ lib_LTLIBRARIES     = libtmpl.la
 libtmpl_la_SOURCES = renderer.cpp content.cpp
 libtmpl_la_LIBADD = transtext/libtranstext.la
 libtmpl_la_CXXFLAGS = -Itranstext -Wall
+libtmpl_la_LDFLAGS  = -version-info 0:0:0
 
 nobase_pkginclude_HEADERS = content.h renderer.h
-bin_SCRIPTS = tmpl_cc tmpl_bld
+dist_bin_SCRIPTS = tmpl_cc tmpl_bld
