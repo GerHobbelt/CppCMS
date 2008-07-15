@@ -1465,6 +1465,16 @@ void Blog::save_post(int &id,string &title,
 		id,(*p),exec();
 		cache.rise(str(boost::format("cat_%1%") % *p));
 	}
+
+	if(pub) {
+		sql<<"SELECT cat_id FROM post2cat WHERE post_id=?",id,res;
+		while(res.next(r)) {
+			int cat_id;
+			r>>cat_id;
+			cache.rise(str(boost::format("cat_%1%") % cat_id));
+		}
+		
+	}
 	cache.rise("cat_-1");
 
 	tr.commit();
