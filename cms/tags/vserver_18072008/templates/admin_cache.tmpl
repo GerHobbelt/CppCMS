@@ -1,0 +1,12 @@
+<% template admin_cache() %>
+<% if def cache_keys %>
+	<p><% ngt 'Cached one entry.','Cached %1% entries.',cache_keys using cache_keys %></p>
+	<p>
+		<form action="<% submit_url %>" method="post">
+		<input type="submit" name="clear" value="<% gt 'Clear Cache' %>" />
+		</form>
+	</p>
+<% else %>
+	<p><% gt 'The caching system is disabled.' %></p>
+<% end %>
+<% end %>
