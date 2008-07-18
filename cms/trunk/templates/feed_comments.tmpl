@@ -11,7 +11,7 @@
 		<% item %>
 		<item>
 			<title><% comment.author %></title>
-			<link>http://<% host | raw %><% comment.permlink | raw %></link>
+			<link>http://<% host | raw %><% comment.permlink | raw %>#comment_<% comment.id %></link>
 			<guid>http://<% host | raw %><% comment.permlink | raw %>/<% comment.id %></guid>
 			<description>
 			&lt;div style=&quot;direction:<% if rtl %>rtl<% else %>ltr<% end %>&quot;&gt;

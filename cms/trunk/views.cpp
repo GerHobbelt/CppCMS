@@ -30,6 +30,7 @@ void View_Comment::init(comment_t &com)
 	}
 	c["content"]=com.content;
 	c["date"]=com.publish_time;
+	c["id"]=com.id;
 	if(blog->userid!=-1){
 		c["delete_url"]=str(format(blog->fmt.del_comment) % com.id);
 		c["edit_url"]=str(format(blog->fmt.edit_comment) % com.id);
@@ -686,6 +687,7 @@ void View_Admin_Main::ini()
 		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
 		latest_comments[i]["username"]=author;
 		latest_comments[i]["edit_url"]=str(format(blog->fmt.edit_comment) % c_id );
+		latest_comments[i]["id"]=c_id;
 	}
 }
 

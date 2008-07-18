@@ -27,7 +27,7 @@
 	<h2><% gt 'Comments' %></h2>
 	<dl>
 	<% item %>
-		<dt>
+		<dt id="comment_<% comment.id %>" >
 			<%if def comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
  			<% gt 'at ' %><% comment.date | strftime('%H:%M %d/%m/%y') %>
 			<% if def comment.delete_url %>
