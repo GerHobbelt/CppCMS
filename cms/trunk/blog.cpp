@@ -909,13 +909,15 @@ void Blog::add_comment(string &postid)
 		post_id,incom.author,incom.url,
 		incom.email,t,incom.message;
 	sql.exec();
+	int comment_id=sql.rowid("comments_id_sql");
 	count_comments(post_id);
 
 	cache.rise(str(boost::format("comments_%1%") % post_id));
 	cache.rise("comments");
 	tr.commit();
 
-	string redirect=str(format(fmt.post) % post_id);
+	string redirect=str(format(fmt.post) % post_id) +
+		str(format("#comment_%d") % comment_id);
 	set_header(new HTTPRedirectHeader(redirect));
 }
 void Blog::count_comments(int id)

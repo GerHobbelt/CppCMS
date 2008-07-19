@@ -1,6 +1,6 @@
 <% template comment_preview() %>
 	<% if def preview_message_content %>
-	<dt><strong><% gt 'Preview of message content:' %></strong></dt>
+	<dt id="preview" ><strong><% gt 'Preview of message content:' %></strong></dt>
 	<dd><% preview_message_content | ext markdown2html %></dd>
 	<% end %>
 <% end %>
@@ -106,7 +106,7 @@
 		document.write('ion')
 		document.write('="')
 		document.write('<% post_comment_url_1 %>')
-		document.write('<% post_comment_url_2 %>" meth')
+		document.write('<% post_comment_url_2 %>#preview" meth')
 		document.write('od="pos')
 		document.write('t" onsubmit="return test_form();" >')
 	-->
