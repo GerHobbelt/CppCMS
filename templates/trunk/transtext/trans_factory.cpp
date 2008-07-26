@@ -1,4 +1,6 @@
 #include "transtext.h"
+#include <stdlib.h>
+
 using namespace std;
 namespace transtext {
 

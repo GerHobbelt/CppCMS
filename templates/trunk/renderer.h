@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <boost/shared_array.hpp>
 #include <vector>
+#include <ctime>
 #include "content.h"
 #include "transtext.h"
 
@@ -19,7 +20,7 @@ public:
 
 namespace details {
 
-typedef enum {
+enum {
 	FLT_DEFAULT = 0, // string  - text2html
 			 // std::tm - ISO time 2007-12-31 23:34:43
 			 // int	    - as is
@@ -44,7 +45,7 @@ typedef enum {
 			 // 		id-FLT_EXTERNAL=name
 };
 
-typedef enum {
+enum {
 	OP_INLINE,	// 		r0 text_id
 			//		r1 text_len
 
@@ -194,7 +195,7 @@ private:
 	};
 	typedef	std::list<type_holder> converters_list_t;
 	converters_list_t converters;
-	void	display(boost::any const &param,std::string &out,uint16_t filter,uint16_t param);
+	void	display(boost::any const &,std::string &out,uint16_t filter,uint16_t param);
 
 	class filter {
 	public:
