@@ -1,5 +1,6 @@
 #include "transtext.h"
 #include <stdlib.h>
+#include <cstring>
 
 using namespace std;
 namespace transtext {
