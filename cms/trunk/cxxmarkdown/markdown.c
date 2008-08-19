@@ -230,8 +230,10 @@ isfootnote(Line *t)
     if ( ( (i = t->dle) > 3) || (T(t->text)[i] != '[') )
 	return 0;
 
-    for ( ; i < S(t->text) ; ++i ) {
-	if ( T(t->text)[i] == ']' && T(t->text)[i+1] == ':' )
+    for ( ++i; i < S(t->text) ; ++i ) {
+	if ( T(t->text)[i] == '[' )
+	    return 0;
+	else if ( T(t->text)[i] == ']' && T(t->text)[i+1] == ':' )
 	    return 1;
     }
     return 0;
@@ -331,17 +333,20 @@ ishdr(Line *t, int *htyp)
 }
 
 
-#if DL_TAG_EXTENSION
 static int
 isdefinition(Line *t)
 {
-    return t && t->next && (S(t->text) > 2)
-			&& (t->dle == 0)
-			&& (t->next->dle >= 4)
-			&& (T(t->text)[0] == '=')
-			&& (T(t->text)[S(t->text)-1] == '=');
-}
+#if DL_TAG_EXTENSION
+    return t && t->next
+	     && (S(t->text) > 2)
+	     && (t->dle == 0)
+	     && (T(t->text)[0] == '=')
+	     && (T(t->text)[S(t->text)-1] == '=')
+	     && ( (t->next->dle >= 4) || isdefinition(t->next) );
+#else
+    return 0;
 #endif
+}
 
 
 static int
@@ -353,12 +358,10 @@ islist(Line *t, int *trim)
     if ( iscode(t) || blankline(t) || ishdr(t,&i) || ishr(t) )
 	return 0;
 
-#if DL_TAG_EXTENSION
     if ( isdefinition(t) ) {
 	*trim = 4;
 	return DL;
     }
-#endif
     
     if ( strchr("*-+", T(t->text)[t->dle]) && isspace(T(t->text)[t->dle+1]) ) {
 	i = nextnonblank(t, t->dle+1);
@@ -591,12 +594,15 @@ listblock(Paragraph *top, int trim, MMIOT *f)
 
     while (( text = q )) {
 	if ( top->typ == DL ) {
-	    label = text;
-	    text = text->next;
+	    Line *lp;
 
-	    CLIP(label->text, 0, 1);
-	    S(label->text)--;
-	    label->next = 0;
+	    for ( lp = label = text; lp ; lp = lp->next ) {
+		text = lp->next;
+		CLIP(lp->text, 0, 1);
+		S(lp->text)--;
+		if ( !isdefinition(lp->next) )
+		    lp->next = 0;
+	    }
 	}
 	else label = 0;
 

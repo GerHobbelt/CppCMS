@@ -701,7 +701,7 @@ maybe_tag_or_link(MMIOT *f)
 
     if ( maybetag  || (size >= 3 && strncmp(cursor(f), "!--", 3) == 0) ) {
 	Qstring(forbidden_tag(f) ? "&lt;" : "<", f);
-	while ( ((c = peek(f, size+1)) != EOF) && (c != '>') )
+	while ( ((c = peek(f, 1)) != EOF) && (c != '>') )
 	    cputc(pull(f), f);
 	return 1;
     }
@@ -716,7 +716,7 @@ maybe_tag_or_link(MMIOT *f)
 	    Qstring("<a href=\"", f);
 	    puturl(text,size,f);
 	    Qstring("\">", f);
-	    reparse(text, size, DENY_A, f);
+	    puturl(text,size,f);
 	    Qstring("</a>", f);
 	    return 1;
 	}
@@ -873,6 +873,22 @@ text(MMIOT *f)
 	case '[':   if ( tag_text(f) || !linkylinky(0, f) )
 			Qchar(c, f);
 		    break;
+#if SUPERSCRIPT
+	case '^':   if ( isthisspace(f,-1) || isthisspace(f,1) )
+			Qchar(c,f);
+		    else {
+			char *sup = cursor(f);
+			int len = 0;
+			Qstring("<sup>",f);
+			while ( !isthisspace(f,1+len) ) {
+			    ++len;
+			}
+			shift(f,len);
+			reparse(sup, len, 0, f);
+			Qstring("</sup>", f);
+		    }
+		    break;
+#endif
 	case '*':
 	case '_':   if ( tag_text(f) )
 			Qchar(c, f);
@@ -1109,10 +1125,11 @@ definitionlist(Paragraph *p, MMIOT *f)
 	Qstring("<dl>\n", f);
 
 	for ( ; p ; p = p->next) {
-	    Qstring("<dt>", f);
-	    if (( tag = p->text ))
+	    for ( tag = p->text; tag; tag = tag->next ) {
+		Qstring("<dt>", f);
 		reparse(T(tag->text), S(tag->text), 0, f);
-	    Qstring("</dt>\n", f);
+		Qstring("</dt>\n", f);
+	    }
 
 	    htmlify(p->down, "dd", f);
 	}
@@ -1244,7 +1261,10 @@ mkd_text(char *bfr, int size, FILE *output, int flags)
     
     reparse(bfr, size, 0, &f);
     emblock(&f);
-    fwrite(T(f.out), S(f.out), 1, output);
+    if ( flags & CDATA_OUTPUT )
+	___mkd_xml(T(f.out), S(f.out), output);
+    else
+	fwrite(T(f.out), S(f.out), 1, output);
 
     ___mkd_freemmiot(&f, 0);
     return 0;
