@@ -5,11 +5,23 @@
 using namespace std;
 namespace transtext {
 
+static const trans default_trans;
+
+trans const &trans_factory::get() const
+{
+	if(def.empty()) {
+		return default_trans;
+	}
+	else {
+		return get(def);
+	}
+}
+
+
 trans const &trans_factory::get(string const &lang) const
 {
 	map<string,trans *>::const_iterator p;
 	if((p=langs.find(lang))==langs.end()) {
-		static const trans default_trans;
 		return default_trans;
 	}
 	else {
@@ -17,8 +29,9 @@ trans const &trans_factory::get(string const &lang) const
 	}
 }
 
-void trans_factory::load(string const &locale_list,string const &domain,string const &dir)
+void trans_factory::load(string const &locale_list,string const &domain,string const &dir,string const &d)
 {
+	def=d;
 	char *buffer=NULL;
 	trans *tr_tmp=NULL;
 	try{

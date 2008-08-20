@@ -28,41 +28,45 @@ using cgicc::Cgicc;
 using cgicc::HTTPHeader;
 
 class worker_thread: private boost::noncopyable {
-friend class url_parser;
-friend class cache_iface;
+	friend class url_parser;
+	friend class cache_iface;
+	friend class base_view_impl;
+
+	auto_ptr<HTTPHeader> response_header;
+	list<string> other_headers;
+	base_cache *caching_module;
+	bool gzip;
+	bool gzip_done;
+	stringbuf out_buf;
+
+	transtext::trans *gt;
+
 protected:
+
 	url_parser url;
 	manager const &app;
 	Cgicc *cgi;
 	CgiEnvironment const *env;
 
-	auto_ptr<HTTPHeader> response_header;
-	list<string> other_headers;
-	void set_header(HTTPHeader*h){response_header=auto_ptr<HTTPHeader>(h);};
-	void add_header(string s) { other_headers.push_back(s); };
-	virtual void main();
-
-	// Output and Cahce
-
 	cache_iface cache;
-	base_cache *caching_module;
-	bool gzip;
-	bool gzip_done;
-	string out;
-	void init_internal();
+	ostream cout;
+
+	void set_header(HTTPHeader *h);
+	void add_header(string s);
+	void set_lang();
+	void set_lang(string const &s);
+
+	inline char const *gettext(char const *s) { gt->gettext(s); };
+	inline char const *ngettext(char const *s,char const *p,int n) { gt->ngettext(s,p,n); };
+
+	virtual void main();
 public:
 	int id;
 	pthread_t pid;
 
 	void run(cgicc_connection &);
 
-	worker_thread(manager const &s) :
-			url(this),
-			app(s),
-			cache(this)
-	{
-		init_internal();
-	} ;
+	worker_thread(manager const &s);
 	virtual ~worker_thread();
 };
 

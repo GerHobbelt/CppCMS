@@ -216,10 +216,13 @@ public:
 	auto_ptr<base_factory> workers;
 	auto_ptr<web_application> web_app;
 
+	auto_ptr<transtext::trans_factory> gettext;
+
 	void set_worker(base_factory *w);
 	void set_cache(cache_factory *c);
 	void set_api(cgi_api *a);
 	void set_mod(web_application *m);
+	void set_gettext(transtext::trans *);
 
 	manager();
 	manager(char const *file);
