@@ -10,7 +10,7 @@
 using namespace cgicc;
 namespace cppcms {
 
-worker_thread(manager const &s) :
+worker_thread::worker_thread(manager const &s) :
 		url(this),
 		app(s),
 		cache(this),
@@ -25,14 +25,14 @@ worker_thread::~worker_thread()
 }
 void worker_thread::main()
 {
-	out="<h1>Hello World</h2>\n";
+	cout<<"<h1>Hello World</h2>\n";
 }
 void worker_thread::set_header(HTTPHeader *h)
 {
 	response_header=auto_ptr<HTTPHeader>(h);
 };
-void worker_thread::add_header(string s) { 
-	other_headers.push_back(s); 
+void worker_thread::add_header(string s) {
+	other_headers.push_back(s);
 };
 
 void worker_thread::set_lang()
@@ -93,7 +93,7 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 
 	string out=out_buf.str();
 	out_buf.str("");
-	
+
 	if(gzip) {
 		if(out.size()>0) {
 			if(gzip_done){

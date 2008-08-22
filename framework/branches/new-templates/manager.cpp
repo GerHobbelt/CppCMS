@@ -501,7 +501,7 @@ void manager::execute()
 		set_mod(get_mod());
 	}
 	if(!gettext.get()){
-		set_gettext();
+		set_gettext(get_gettext());
 	}
 	if(!workers.get()) {
 		throw cppcms_error("No workers factory set up");
@@ -530,13 +530,26 @@ void manager::set_mod(web_application *m)
 	web_app=auto_ptr<web_application>(m);
 }
 
+transtext::trans_factory *manager::get_gettext()
+{
+	transtext::trans_factory *tmp=NULL;
+	try{
+		tmp=new transtext::trans_factory();
+		tmp->load(	config.sval("locale.langlist",""),
+				config.sval("locale.domain",""),
+				config.sval("locale.dir",""),
+				config.sval("locale.default",""));
+		return tmp;
+	}
+	catch(...){
+		delete tmp;
+		throw;
+	}
+}
+
 void manager::set_gettext(transtext::trans_factory *s)
 {
 	gettext=auto_ptr<transtext::trans_factory>(s);
-	gettext->load(	config.sval("locale.langlist",""),
-			config.sval("locale.domain",""),
-			config.sval("locale.dir",""),
-			config.sval("locale.default",""));
 }
 
 manager::manager()

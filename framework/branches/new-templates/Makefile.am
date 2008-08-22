@@ -1,16 +1,19 @@
+SUBDIRS = ./transtext
+
 noinst_PROGRAMS = hello_world.fcgi
 
 hello_world_fcgi_SOURCES = hello_world.cpp
-hello_world_fcgi_LDADD = libcppcms.la
-hello_world_fcgi_CXXFLAGS=-Wall
+hello_world_fcgi_LDADD = libcppcms.la transtext/libtranstext.la
+hello_world_fcgi_CXXFLAGS= -Wall -I./transtext
 
 lib_LTLIBRARIES     = libcppcms.la
 libcppcms_la_SOURCES = global_config.cpp manager.cpp \
  	url.cpp  worker_thread.cpp text_tool.cpp\
- 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp 
+ 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp
 
 libcppcms_la_LDFLAGS  = -version-info 0:0:0
-libcppcms_la_CXXFLAGS = -Wall
+libcppcms_la_LIBADD = transtext/libtranstext.la
+libcppcms_la_CXXFLAGS = -Wall -I./transtext
 
 if  EN_FORK_CACHE
 libcppcms_la_SOURCES += process_cache.cpp
@@ -18,7 +21,7 @@ endif
 
 if EN_FCGI_BACKEND
 libcppcms_la_SOURCES += fcgi.cpp
-endif	
+endif
 
 
 nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \

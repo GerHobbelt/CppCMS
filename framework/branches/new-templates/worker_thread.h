@@ -17,6 +17,7 @@
 #include "cache_interface.h"
 #include "base_cache.h"
 #include "cgicc_connection.h"
+#include "transtext.h"
 
 namespace cppcms {
 
@@ -39,7 +40,7 @@ class worker_thread: private boost::noncopyable {
 	bool gzip_done;
 	stringbuf out_buf;
 
-	transtext::trans *gt;
+	transtext::trans const *gt;
 
 protected:
 
@@ -56,8 +57,8 @@ protected:
 	void set_lang();
 	void set_lang(string const &s);
 
-	inline char const *gettext(char const *s) { gt->gettext(s); };
-	inline char const *ngettext(char const *s,char const *p,int n) { gt->ngettext(s,p,n); };
+	inline char const *gettext(char const *s) { return gt->gettext(s); };
+	inline char const *ngettext(char const *s,char const *p,int n) { return gt->ngettext(s,p,n); };
 
 	virtual void main();
 public:

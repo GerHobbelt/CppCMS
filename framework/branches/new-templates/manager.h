@@ -1,5 +1,5 @@
-#ifndef _THREAD_POOL_H
-#define _THREAD_POOL_H
+#ifndef CPPCMS_MANAGER_H
+#define CPPCMS_MANAGER_H
 
 #include <pthread.h>
 #include <string>
@@ -11,6 +11,7 @@
 #include "cache_interface.h"
 #include "cgi_api.h"
 #include "posix_mutex.h"
+#include "transtext.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -209,6 +210,7 @@ class manager : private boost::noncopyable {
 	cache_factory *get_cache_factory();
 	cgi_api *get_api();
 	web_application *get_mod();
+	transtext::trans_factory *get_gettext();
 public:
 	cppcms_config config;
 	auto_ptr<cache_factory> cache;
@@ -222,7 +224,7 @@ public:
 	void set_cache(cache_factory *c);
 	void set_api(cgi_api *a);
 	void set_mod(web_application *m);
-	void set_gettext(transtext::trans *);
+	void set_gettext(transtext::trans_factory *);
 
 	manager();
 	manager(char const *file);
@@ -231,4 +233,4 @@ public:
 };
 
 }
-#endif /* _THREAD_POOL_H */
+#endif /* CPPCMS_MANAGER_H */

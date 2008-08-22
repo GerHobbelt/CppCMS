@@ -10,7 +10,7 @@ public:
 
 void my_hello_world::main()
 {
-	out+="<h1>Simple Hello World test application.</h1>\n";
+	cout<<"<h1>Simple Hello World test application.</h1>\n";
 }
 
 int main(int argc,char ** argv)

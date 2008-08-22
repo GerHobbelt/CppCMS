@@ -35,6 +35,7 @@ protected:
 	{
 		return base_worker->ngettext(s,p,n);
 	};
+	virtual ~base_view_impl() {};
 };
 
 template<typename W>
