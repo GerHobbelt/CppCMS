@@ -41,8 +41,9 @@ cache.limit=1000
 # Engine #
 ##########
 
-# dbi.engine="mysql"
+# libdbi.drivers="/path/to/user/placed/drivers"
 # dbi.debug=1
+# dbi.engine="mysql"
 dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 

@@ -31,6 +31,10 @@ int main(int argc,char **argv)
 				app.config.sval("locale.dir","./locale").c_str());
 		}
 
+		if(app.config.sval("libdbi.drivers","")!="") {
+			dbi_initialize(app.config.sval("libdbi.drivers").c_str());
+		}
+
 		app.set_worker(new simple_factory<Blog>());
 		app.execute();
 	}
