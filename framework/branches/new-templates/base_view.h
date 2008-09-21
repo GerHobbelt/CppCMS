@@ -2,6 +2,7 @@
 #define CPPCMS_BASEVIEW_H
 
 #include "worker_thread.h"
+#include <boost/format.hpp>
 
 namespace cppcms {
 
@@ -10,7 +11,7 @@ protected:
 	ostream *cout_ptr;
 	worker_thread *base_worker;
 
-	void set_worker(worker_thread *w) 
+	void set_worker(worker_thread *w)
 	{
 		base_worker=worker;
 		cout_ptr=&worker->cout;
@@ -26,7 +27,7 @@ protected:
 		s<<v;
 		return s.str();
 	};
-	string urlencode(string s);
+	string urlencode(string const &s);
 	inline char const *gettext(char const *s)
 	{
 		return base_worker->gettext(s);
@@ -35,7 +36,14 @@ protected:
 	{
 		return base_worker->ngettext(s,p,n);
 	};
-	virtual ~base_view_impl() {};
+	inline boost::format format(string const &f){
+		boost::format frm(f);
+		frm.exceptions(0);
+		return frm;
+	};
+public:
+
+	virtual ~base_view_impl();
 };
 
 template<typename W>
@@ -48,7 +56,7 @@ public:
 		worker=w;
 		base_view_impl::set_worker(w);
 	};
-	
+
 
 };
 
