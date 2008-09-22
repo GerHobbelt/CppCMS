@@ -11,6 +11,7 @@ test_f_CXXFLAGS = -Itranstext -Wall
 bin_PROGRAMS	= tmpl_as
 tmpl_as_SOURCES	= assemly.cpp
 tmpl_as_CXXFLAGS = -Itranstext -Wall
+tmpl_as_LDADD = @BOOST_REGEX_LIBS@
 
 lib_LTLIBRARIES     = libtmpl.la
 libtmpl_la_SOURCES = renderer.cpp content.cpp

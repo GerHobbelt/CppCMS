@@ -52,7 +52,7 @@ boost::any const &renderer::any_value(details::instruction const &op,content con
 	return p->second;
 }
 
-void renderer::add_converter(std::type_info const &type,converter_t::slot_type slot)
+void renderer::add_converter(std::type_info const &type,converter_t slot)
 {
 	converters.push_back(type_holder(type,slot));
 }
@@ -164,7 +164,7 @@ void renderer::create_formated_string(string const &str,string &out,int const &n
 			int pos=strtol(ptr,&ptr2,10)-1; // Index starts from 1
 			if(*ptr2!='%') continue;
 			i+=ptr2-ptr+1;
-			if(pos>=0 && pos<format_strings.size()) {
+			if(pos>=0 && pos<(int)format_strings.size()) {
 				out.append(format_strings[pos]);
 			}
 		}
@@ -388,20 +388,18 @@ void renderer::internal_string_filter(string const &s,string &out,uint16_t filte
 	}
 }
 
-void renderer::add_string_filter(std::string const &name,str_filter_t::slot_type slot)
+void renderer::add_string_filter(std::string const &name,str_filter_t slot)
 {
-	filter_ptr ptr(new filter);
-	ptr->string_input=true;
-	ptr->str_filter.connect(slot);
-	external_filters[name]=ptr;
+	filter &f=external_filters[name];
+	f.string_input=true;
+	f.str_filter=slot;
 }
 
-void renderer::add_any_filter(std::string const &name,any_filter_t::slot_type slot)
+void renderer::add_any_filter(std::string const &name,any_filter_t slot)
 {
-	filter_ptr ptr(new filter);
-	ptr->string_input=false;
-	ptr->any_filter.connect(slot);
-	external_filters[name]=ptr;
+	filter &f=external_filters[name];
+	f.string_input=false;
+	f.any_filter=slot;
 }
 
 void renderer::internal_int_filter(int val,string &out,uint16_t filter,uint16_t param)
@@ -474,15 +472,15 @@ void renderer::str_filter(string const &str,string &out,uint16_t filter,uint16_t
 	}
 }
 
-bool renderer::get_external_filter(filter_ptr &p,uint16_t filter)
+bool renderer::get_external_filter(renderer::filter *&p,uint16_t filter)
 {
 	using namespace details;
-	if(filter < FLT_EXTERNAL || filter-FLT_EXTERNAL >= id_to_name.size() )
+	if(filter < FLT_EXTERNAL || filter-FLT_EXTERNAL >= (int)id_to_name.size() )
 		return false;
 	string name=id_to_name[filter-FLT_EXTERNAL];
-	map<string,filter_ptr>::iterator fp;
+	map<string,renderer::filter>::iterator fp;
 	if((fp=external_filters.find(name))!=external_filters.end()) {
-		p=fp->second;
+		p=&fp->second;
 		return true;
 	}
 	return false;
@@ -498,7 +496,7 @@ char const *renderer::get_parameter(uint16_t param)
 
 void renderer::external_any_filter(boost::any const &a,string &out,uint16_t filter,uint16_t param)
 {
-	filter_ptr fp;
+	renderer::filter *fp;
 	if(get_external_filter(fp,filter)) {
 		if(fp->string_input) {
 			if(a.type()==typeid(string)) {
@@ -519,7 +517,7 @@ void renderer::external_any_filter(boost::any const &a,string &out,uint16_t filt
 
 void renderer::external_str_filter(string const &s,string &out,uint16_t filter,uint16_t param)
 {
-	filter_ptr fp;
+	renderer::filter *fp;
 	if(get_external_filter(fp,filter)) {
 		if(fp->string_input) {
 			fp->str_filter(s,out,get_parameter(param));
@@ -550,7 +548,7 @@ void renderer::display(boost::any const &a,string &out,uint16_t filter,uint16_t 
 		}
 		else {
 			any_filter(a,tmp,chain[0].filter,chain[0].parameter);
-			for(i=1;i<chain.size()-1;i++){
+			for(i=1;i<(int)chain.size()-1;i++){
 				str_filter(tmp,tmp_out,chain[i].filter,chain[i].parameter);
 				tmp=tmp_out;
 			}
@@ -576,8 +574,8 @@ void sequence::set(boost::any const &a)
 		vec=&boost::any_cast<content::vector_t const&>(a);
 		type=s_vector;
 	}
-	else if(a.type()==typeid(content::callback_ptr)) {
-		callback=&boost::any_cast<content::callback_ptr const &>(a);
+	else if(a.type()==typeid(content::callback_t)) {
+		callback=&boost::any_cast<content::callback_t const &>(a);
 		type=s_callback;
 		tmp_content.clear();
 	}
@@ -603,9 +601,9 @@ bool sequence::next()
 		break;
 	case s_callback:
 		{
-			content::callback_ptr const &cb=*callback;
+			content::callback_t const &cb=*callback;
 			tmp_content.clear();
-			if((*cb)(tmp_content)) {
+			if(cb(tmp_content)) {
 				return true;
 			}
 		}
@@ -634,9 +632,9 @@ bool sequence::first()
 		break;
 	case s_callback:
 		{
-			content::callback_ptr const &cb=*callback;
+			content::callback_t const &cb=*callback;
 			tmp_content.clear();
-			if((*cb)(tmp_content)){
+			if(cb(tmp_content)){
 				return true;
 			}
 		}

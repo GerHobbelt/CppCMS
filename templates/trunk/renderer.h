@@ -117,7 +117,7 @@ class sequence {
 	content::list_t::const_iterator lst_iterator;
 	content::vector_t const *vec;
 	content::vector_t::const_iterator vec_iterator;
-	content::callback_ptr const *callback;
+	content::callback_t const *callback;
 	enum { s_none, s_list, s_vector, s_callback } type;
 	content tmp_content;
 public:
@@ -172,10 +172,9 @@ class renderer
 	
 
 public:
-	typedef boost::signal<void (boost::any const &val,std::string &out)> converter_t;
-	typedef boost::shared_ptr<converter_t>	converter_ptr;
-	typedef boost::signal<void (boost::any const &a,std::string &out,char const *)> any_filter_t;
-	typedef boost::signal<void (std::string const &a,std::string &out,char const *)> str_filter_t;
+	typedef boost::function<void (boost::any const &val,std::string &out)> converter_t;
+	typedef boost::function<void (boost::any const &a,std::string &out,char const *)> any_filter_t;
+	typedef boost::function<void (std::string const &a,std::string &out,char const *)> str_filter_t;
 private:
 	
 	struct filter_data {
@@ -185,13 +184,13 @@ private:
 	};
 	class type_holder {
 		std::type_info const *typeinfo;
-		converter_ptr	converter;
+		converter_t	converter;
 	public:
 		type_holder() : typeinfo(&typeid(void)) {};
-		type_holder(std::type_info const &t,converter_t::slot_type slot)
-			: typeinfo(&t), converter(new converter_t) { converter->connect(slot); };
+		type_holder(std::type_info const &t,converter_t slot)
+			: typeinfo(&t), converter(slot) { };
 		std::type_info const &type() const { return *typeinfo; };
-		void exec(boost::any const &val,std::string &out) const { (*converter)(val,out); };
+		void exec(boost::any const &val,std::string &out) const { converter(val,out); };
 	};
 	typedef	std::list<type_holder> converters_list_t;
 	converters_list_t converters;
@@ -204,15 +203,14 @@ private:
 		str_filter_t str_filter;
 	};
 
-	typedef boost::shared_ptr<filter> filter_ptr;
-	std::map<std::string,filter_ptr> external_filters;
+	std::map<std::string,filter> external_filters;
 	std::vector<filter_data> chain;
 	std::vector<std::string> format_strings;
 	
 	void external_str_filter(std::string const &s,std::string &out,uint16_t filter,uint16_t param);
 	void external_any_filter(boost::any const &a,std::string &out,uint16_t filter,uint16_t param);
 	char const *get_parameter(uint16_t param);
-	bool get_external_filter(filter_ptr &p,uint16_t filter);
+	bool get_external_filter(filter *&p,uint16_t filter);
 	void str_filter(std::string const &str,std::string &out,uint16_t filter,uint16_t param);
 	void any_filter(boost::any const &a,std::string &out,uint16_t filter,uint16_t param);
 	void internal_time_filter(std::tm const &t,std::string &out,uint16_t filter,uint16_t param);
@@ -227,9 +225,9 @@ public:
 	void set_translator(transtext::trans const &t) { current_tr=&t; };
 	void reset_translator() { current_tr=NULL; };
 	void render(content const &c,std::string const &func,std::string &out);
-	void add_converter(std::type_info const &type,converter_t::slot_type slot);
-	void add_string_filter(std::string const &name,str_filter_t::slot_type slot);
-	void add_any_filter(std::string const &name,any_filter_t::slot_type slot);
+	void add_converter(std::type_info const &type,converter_t slot);
+	void add_string_filter(std::string const &name,str_filter_t slot);
+	void add_any_filter(std::string const &name,any_filter_t slot);
 };
 
 }

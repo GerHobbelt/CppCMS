@@ -14,11 +14,9 @@ content::list_t &content::list(std::string const key)
 	return boost::any_cast<list_t & >((*this)[key] = list_t());
 }
 
-void	content::signal(std::string const &key,callback_t::slot_type slot)
+void content::signal(std::string const &key,callback_t slot)
 {
-	callback_ptr cb(new callback_t);
-	cb->connect(slot);
-	(*this)[key]=cb;
+	(*this)[key]=callback_t(slot);
 }
 
 } // namespace tmpl
