@@ -16,6 +16,7 @@
 #include "url.h"
 #include "cache_interface.h"
 #include "base_cache.h"
+#include "base_view.h"
 #include "cgicc_connection.h"
 #include "transtext.h"
 
@@ -59,6 +60,23 @@ protected:
 
 	inline char const *gettext(char const *s) { return gt->gettext(s); };
 	inline char const *ngettext(char const *s,char const *p,int n) { return gt->ngettext(s,p,n); };
+
+	string current_template;
+
+	inline void use_template(string s="") { current_template=s; };
+
+	template<typename T>
+	auto_ptr<T> view()
+	{
+		using cppcms::details::views_storage;
+		auto_ptr<T> ptr;
+		if(current_template!="") 
+			ptr.reset(views_storage::instance().fetch_view<T>(current_template,typeid(T).name()));
+		else 
+			ptr.reset(new T);
+		ptr->set_worker(this);
+		return ptr;
+	};
 
 	virtual void main();
 public:

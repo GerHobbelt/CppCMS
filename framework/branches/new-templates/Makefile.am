@@ -2,7 +2,7 @@ SUBDIRS = ./transtext
 
 noinst_PROGRAMS = hello_world.fcgi
 
-hello_world_fcgi_SOURCES = hello_world.cpp
+hello_world_fcgi_SOURCES = hello_world.cpp hello_world_view1.cpp
 hello_world_fcgi_LDADD = libcppcms.la transtext/libtranstext.la
 hello_world_fcgi_CXXFLAGS= -Wall -I./transtext
 

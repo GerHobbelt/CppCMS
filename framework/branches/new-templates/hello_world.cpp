@@ -1,16 +1,23 @@
 #include "worker_thread.h"
 #include "manager.h"
+#include "hello_world_view.h"
+
 using namespace cppcms;
 
 class my_hello_world : public worker_thread {
 public:
-	my_hello_world(manager const &s) :  worker_thread(s) {};
+	my_hello_world(manager const &s) :  worker_thread(s)
+	{
+		use_template("view2");
+	};
 	virtual void main();
 };
 
 void my_hello_world::main()
 {
-	cout<<"<h1>Simple Hello World test application.</h1>\n";
+	auto_ptr<view::hello> v=view<view::hello>();
+	v->msg="Hello World\n";
+	v->render();
 }
 
 int main(int argc,char ** argv)
