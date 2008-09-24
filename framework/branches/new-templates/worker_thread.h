@@ -70,8 +70,17 @@ protected:
 	{
 		using cppcms::details::views_storage;
 		auto_ptr<T> ptr;
-		if(current_template!="") 
-			ptr.reset(views_storage::instance().fetch_view<T>(current_template,typeid(T).name()));
+		if(current_template!="") {
+			base_view_impl *p=views_storage::instance().fetch_view(current_template,typeid(T).name());
+			T *T_ptr=NULL;
+			if(p) {
+				T_ptr=dynamic_cast<T*>(p);
+				if(!T_ptr) delete p;
+			}
+			if(!T_ptr) 
+				throw cppcms_error("Can't find view "+string(typeid(T).name())+" in "+current_template);
+			ptr.reset(T_ptr);
+		}
 		else 
 			ptr.reset(new T);
 		ptr->set_worker(this);

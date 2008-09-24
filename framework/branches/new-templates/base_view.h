@@ -85,27 +85,14 @@ public:
 	void remove_views(string template_name);
 	base_view_impl *fetch_view(string template_name,string view_name);
 	static views_storage &instance();
-	template<typename T>
-	T *fetch_view(string t_name,string c_name,bool no_throw=false)
-	{
-		T *ptr=NULL;
-		base_view_impl *p=
-			details::views_storage::instance().fetch_view(t_name,c_name);
-		if(p) {
-			ptr=dynamic_cast<T*>(p);
-			if(ptr==NULL) { 
-				delete p;
-			}
-		}
-		if(ptr) {return ptr; }
-		if(no_throw) return NULL;
-		throw cppcms_error("Failed to fetch view "+t_name+"::"+c_name);
-	};
 };
 
 }; // DETAILS
 
 
 }; // CPPCMS
+
+#define cppcms_master_view(X,Y) X: virtual public cppcms::base_view< Y >
+#define cppcms_extend_view(X,Y) X: virtual public Y
 
 #endif

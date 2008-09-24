@@ -2,7 +2,8 @@
 
 class my_hello_world;
 namespace view {
-struct master: virtual public cppcms::base_view<my_hello_world> {
+
+struct cppcms_master_view(master,my_hello_world) {
 	virtual void render() { 
 		cout() <<"<html><body dir=\"rtl\">"<<std::endl;
 		content();
@@ -11,7 +12,7 @@ struct master: virtual public cppcms::base_view<my_hello_world> {
 	virtual void content() {};
 };
 
-struct hello: virtual public master {
+struct cppcms_extend_view(hello,master) {
 	std::string msg;
 	virtual void content() { cout() << msg ; }
 };

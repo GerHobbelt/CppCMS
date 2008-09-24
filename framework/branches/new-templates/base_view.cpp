@@ -2,11 +2,83 @@
 #include "worker_thread.h"
 
 namespace cppcms {
+
+string base_view_impl::escape(string const &s)
+{
+	string content;
+	unsigned i,len=s.size();
+	content.reserve(len*3/2);
+	for(i=0;i<len;i++) {
+		char c=s[i];
+		switch(c){
+			case '<': content+="&lt;"; break;
+			case '>': content+="&gt;"; break;
+			case '&': content+="&amp;"; break;
+			case '\"': content+="&quot;"; break;
+			default: content+=c;
+		}
+	}
+	return content;
+}
+
+string base_view_impl::urlencode(string const &s)
+{
+	string content;
+	unsigned i,len=s.size();
+	content.reserve(3*len);
+	for(i=0;i<len;i++){
+		char c=s[i];
+		if(	('a'<=c && c<='z')
+			|| ('A'<=c && c<='Z')
+			|| ('0'<=c && c<='9'))
+		{
+			content+=c;
+		}
+		else {
+			switch(c) {
+				case '-':
+				case '_':
+				case '.':
+				case '~':
+				case '!':
+				case '*':
+				case '\'':
+				case '(':
+				case ')':
+				case ';':
+				case ':':
+				case '@':
+				case '&':
+				case '=':
+				case '+':
+				case '$':
+				case ',':
+				case '/':
+				case '?':
+				case '%':
+				case '#':
+				case '[':
+				case ']':
+					content+=c;
+					break;
+				default:
+				{
+					char buf[4];
+					snprintf(buf,sizeof(buf),"%%%02x",(unsigned)(c));
+					content.append(buf,3);
+				}
+			};
+		}
+	};
+	return content;
+}
+
 void base_view_impl::set_worker(worker_thread *w)
 {
 	base_worker=w;
 	cout_ptr=&w->cout;
 };
+
 char const *base_view_impl::gettext(char const *s)
 {
 	return base_worker->gettext(s);
