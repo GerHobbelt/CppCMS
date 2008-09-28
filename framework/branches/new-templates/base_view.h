@@ -7,18 +7,28 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include "worker_thread.h"
 #include "cppcms_error.h"
 
 namespace cppcms {
 using namespace std;
-class worker_thread;
-class base_view_impl {
-protected:
-	ostream *cout_ptr;
-	worker_thread *base_worker;
 
-	void set_worker(worker_thread *w);
-	inline ostream &cout() { return *cout_ptr; };
+// Just simple polimorphic class
+class base_content {
+public:
+	virtual ~base_content() {};
+};
+
+class base_view {
+protected:
+	worker_thread &worker;
+	ostream &cout;
+
+	base_view(worker_thread *w) :
+		worker(*w),
+		cout(w->cout)
+	{
+	}
 
 	template<typename T>
 	string escape(T const &v)
@@ -41,37 +51,24 @@ protected:
 		return frm;
 	};
 public:
-	virtual void render() = 0;
-
-	virtual ~base_view_impl() {};
-};
-
-template<typename W>
-class base_view : public base_view_impl {
-protected:
-	W *worker;
-	inline std::ostream &get_cout() { return *cout_ptr; };
-public:
-	void set_worker(worker_thread *w) {
-		worker=dynamic_cast<W*>(w);
-		if(!worker) throw cppcms_error("Can't set_worker on class not derived from cppcms::worker_thread");
-		base_view_impl::set_worker(w);
-	};
-
-	base_view() {};
-	base_view(W *p) {worker=p; base_view_impl::set_worker(p); };
+	virtual void render() {};
+	virtual ~base_view() {};
 };
 
 namespace details {
 
-template<typename T>
+template<typename T,typename VT>
 struct view_builder {
-        base_view_impl *operator()() { return new T; };
+        base_view *operator()(worker_thread *w,base_content *c) {
+		VT *p=dynamic_cast<VT *>(c);
+		if(!p) throw cppcms_error("Incorrect content type");
+		return new T(w,*p);
+	};
 };
 
 class views_storage {
 public:
-	typedef boost::function<base_view_impl *()> view_factory_t;
+	typedef boost::function<base_view *(worker_thread *w,base_content *c)> view_factory_t;
 private:
 	typedef map<string,view_factory_t> template_views_t;
 	typedef map<string,template_views_t> templates_t;
@@ -83,7 +80,7 @@ public:
 			string view_name,
 			view_factory_t);
 	void remove_views(string template_name);
-	base_view_impl *fetch_view(string template_name,string view_name);
+	base_view *fetch_view(string template_name,string view_name,worker_thread *w,base_content *c);
 	static views_storage &instance();
 };
 
@@ -91,8 +88,5 @@ public:
 
 
 }; // CPPCMS
-
-#define cppcms_master_view(X,Y) X: virtual public cppcms::base_view< Y >
-#define cppcms_extend_view(X,Y) X: virtual public Y
 
 #endif

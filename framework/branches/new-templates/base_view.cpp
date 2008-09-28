@@ -3,7 +3,7 @@
 
 namespace cppcms {
 
-string base_view_impl::escape(string const &s)
+string base_view::escape(string const &s)
 {
 	string content;
 	unsigned i,len=s.size();
@@ -21,7 +21,7 @@ string base_view_impl::escape(string const &s)
 	return content;
 }
 
-string base_view_impl::urlencode(string const &s)
+string base_view::urlencode(string const &s)
 {
 	string content;
 	unsigned i,len=s.size();
@@ -73,20 +73,14 @@ string base_view_impl::urlencode(string const &s)
 	return content;
 }
 
-void base_view_impl::set_worker(worker_thread *w)
+char const *base_view::gettext(char const *s)
 {
-	base_worker=w;
-	cout_ptr=&w->cout;
+	return worker.gettext(s);
 };
 
-char const *base_view_impl::gettext(char const *s)
+char const *base_view::ngettext(char const *s,char const *p,int n)
 {
-	return base_worker->gettext(s);
-};
-
-char const *base_view_impl::ngettext(char const *s,char const *p,int n)
-{
-	return base_worker->ngettext(s,p,n);
+	return worker.ngettext(s,p,n);
 };
 
 namespace details {
@@ -106,14 +100,14 @@ void views_storage::remove_views(string t)
 	storage.erase(t);
 }
 
-base_view_impl *views_storage::fetch_view(string t,string v)
+base_view *views_storage::fetch_view(string t,string v,worker_thread *w,base_content *c)
 {
 	templates_t::iterator p=storage.find(t);
 	if(p==storage.end()) return NULL;
 	template_views_t::iterator p2=p->second.find(v);
 	if(p2==p->second.end()) return NULL;
 	view_factory_t &f=p2->second;
-	return f();
+	return f(w,c);
 }
 
 };

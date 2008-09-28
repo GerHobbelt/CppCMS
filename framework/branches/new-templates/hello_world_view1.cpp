@@ -1,27 +1,28 @@
 #include "hello_world_view.h"
 
 namespace view1 {
-	struct master : virtual public view::master {
-		virtual void render() {
-			cout()<<"<html><body>\n";
-			content();
-			cout()<<"</body></html>\n";
+	struct master: public cppcms::base_view {
+		view::master &content;
+		master(cppcms::worker_thread *w,view::master &c) : cppcms::base_view(w) , content(c)
+		{
 		}
-	};
-	struct hello: virtual public view::hello, virtual public master {};
-};
-
-namespace view2 {
-	struct master : virtual public view::master {
 		virtual void render() {
-			cout()<<"<html><body><h1>\n";
-			content();
-			cout()<<"</h1></body></html>\n";
-		}
+			cout<<"<html>";
+			cout<<"<title>"<<content.title<<"</title>\n";
+			cout<<"<body>\n";
+			body();
+			cout<<"</body>\n";
+			cout<<"</html>\n";
+		};
+		virtual void body(){};
 	};
-	struct hello: virtual public view::hello, virtual public master {
-		virtual void content() {
-			cout() << "Good Bye World\n";
+	struct hello: public master {
+		view::hello &content;
+		hello(cppcms::worker_thread *w,view::hello &c) : master(w,c) , content(c) {};
+		virtual void body() 
+		{
+			cout<<"<h1>"<<content.title<<"</h1>";
+			cout<<"<p>"<<escape(content.msg)<<"</p>";
 		};
 	};
 };
@@ -31,16 +32,13 @@ namespace {
 		loader() {
 			using namespace cppcms::details;
 			views_storage &vs=views_storage::instance();
-			vs.add_view("view1",typeid(view::hello).name(),view_builder<view1::hello>());
-			vs.add_view("view1",typeid(view::master).name(),view_builder<view1::hello>());
-			vs.add_view("view2",typeid(view::hello).name(),view_builder<view2::hello>());
-			vs.add_view("view2",typeid(view::master).name(),view_builder<view2::hello>());
+			vs.add_view("view1","hello",view_builder<view1::hello,view::hello>());
+			vs.add_view("view1","master",view_builder<view1::master,view::master>());
 		};
 		~loader() {
 			using namespace cppcms::details;
 			views_storage &vs=views_storage::instance();
 			vs.remove_views("view1");
-			vs.remove_views("view2");
 		};
 
 	} entry;

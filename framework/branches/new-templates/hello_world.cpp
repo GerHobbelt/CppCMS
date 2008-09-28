@@ -15,9 +15,10 @@ public:
 
 void my_hello_world::main()
 {
-	auto_ptr<view::hello> v=view<view::hello>();
-	v->msg="Hello World\n";
-	v->render();
+	view::hello v;
+	v.title="Cool";
+	v.msg="Hello World\n";
+	render("hello",v);
 }
 
 int main(int argc,char ** argv)

@@ -16,13 +16,13 @@
 #include "url.h"
 #include "cache_interface.h"
 #include "base_cache.h"
-#include "base_view.h"
 #include "cgicc_connection.h"
 #include "transtext.h"
 
 namespace cppcms {
 
 class manager;
+class base_content;
 
 using namespace std;
 using cgicc::CgiEnvironment;
@@ -32,7 +32,7 @@ using cgicc::HTTPHeader;
 class worker_thread: private boost::noncopyable {
 	friend class url_parser;
 	friend class cache_iface;
-	friend class base_view_impl;
+	friend class base_view;
 
 	auto_ptr<HTTPHeader> response_header;
 	list<string> other_headers;
@@ -65,28 +65,7 @@ protected:
 
 	inline void use_template(string s="") { current_template=s; };
 
-	template<typename T>
-	auto_ptr<T> view()
-	{
-		using cppcms::details::views_storage;
-		auto_ptr<T> ptr;
-		if(current_template!="") {
-			base_view_impl *p=views_storage::instance().fetch_view(current_template,typeid(T).name());
-			T *T_ptr=NULL;
-			if(p) {
-				T_ptr=dynamic_cast<T*>(p);
-				if(!T_ptr) delete p;
-			}
-			if(!T_ptr) 
-				throw cppcms_error("Can't find view "+string(typeid(T).name())+" in "+current_template);
-			ptr.reset(T_ptr);
-		}
-		else 
-			ptr.reset(new T);
-		ptr->set_worker(this);
-		return ptr;
-	};
-
+	void render(string name,base_content &content);
 	virtual void main();
 public:
 	int id;

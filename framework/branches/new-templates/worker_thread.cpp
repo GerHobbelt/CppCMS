@@ -1,6 +1,7 @@
 #include "worker_thread.h"
 #include "global_config.h"
 #include "thread_cache.h"
+#include "base_view.h"
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -121,7 +122,13 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 	}
 }
 
-
+void worker_thread::render(string name,base_content &content)
+{
+	using cppcms::details::views_storage;
+	auto_ptr<base_view> p(views_storage::instance().fetch_view(current_template,name,this,&content));
+	if(!p.get()) throw cppcms_error("Template "+name+" not found");
+	p->render();	
+};
 
 }
 
