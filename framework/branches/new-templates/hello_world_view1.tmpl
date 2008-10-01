@@ -1,0 +1,51 @@
+<% c++ #include "hello_world_view.h" %>
+<% namespace view1 %>
+	<% class master uses view::master %>
+	<% template render() %>
+		<html>
+		<title><% title %></title>
+		<body>
+		<% include body() %>
+		</body>
+		</html>
+	<% end template %>
+	<% template body() %>
+	<% end template %>
+	<% end class %>
+
+	<% class hello uses view::hello extends master %>
+	<% template body() %>
+		<h1><% title %></h1>
+		<p><% msg %></p>
+		<% foreach x in numbers %>
+			<ul>
+			<% item %>
+				<li><% x %>:
+					<% foreach n in numbers %>
+					<% separator %>,<% item %><% n %><% end %>
+					<% end %>
+				</li>
+			<% end %>
+			</ul>
+		<% end %>
+		<% foreach x in lst %>
+			<% item %><% x.name %>:<% x.val %><% end %>
+		<% empty %>
+			nothing
+		<% end %>
+		<% if (content.lst.size()==1) %>
+		OK
+		<% end %>
+		<% if ok %>
+		OK
+		<% end %>
+		<% if not ok %>
+		Not Ok
+		<% elif ok %>
+		OOOOKKKKK
+		<% else %>
+		not ok and not not ok???? 2 type bool?
+		<% end %>
+	<% end template %>
+	<% end class %>
+<% end namespace %>

@@ -18,6 +18,9 @@ void my_hello_world::main()
 	view::hello v;
 	v.title="Cool";
 	v.msg="Hello World\n";
+	v.numbers.push_back(10);
+	v.lst.push_back(view::data("Hello",10));
+	v.ok=true;
 	render("hello",v);
 }
 

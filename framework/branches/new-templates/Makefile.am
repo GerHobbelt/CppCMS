@@ -6,6 +6,9 @@ hello_world_fcgi_SOURCES = hello_world.cpp hello_world_view1.cpp
 hello_world_fcgi_LDADD = libcppcms.la transtext/libtranstext.la
 hello_world_fcgi_CXXFLAGS= -Wall -I./transtext
 
+hello_world_view1.cpp: hello_world_view1.tmpl
+	./tmpl_cc hello_world_view1.tmpl >hello_world_view1.cpp
+
 lib_LTLIBRARIES     = libcppcms.la
 libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp \
 	text_tool.cpp 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp \

@@ -1,0 +1,469 @@
+#!/usr/bin/env python
+
+import os
+import re
+import sys
+
+variable_match=r'([a-zA-Z]\w*)(((\.|->)([a-zA-Z]\w*))*)'
+
+def interleave(*args):
+	for idx in range(0, max(len(arg) for arg in args)):
+		for arg in args:
+			try:
+				yield arg[idx]
+			except IndexError:
+				continue
+
+def output(s):
+	global stack
+	print '\t'*len(stack) + s
+
+class tmpl_descr:
+	def __init__(self,start,size):
+		self.start_id=start
+		self.param_num=size
+
+class namespace_block:
+	pattern=r'^<%\s*namespace\s+(\w+)\s*%>$'
+	type='namespace'
+	def use(self,m):
+		global namespace_name
+		namespace_name=m.group(1)
+		output( "namespace %s {" % namespace_name)
+		global stack
+		stack.append(self)
+	def on_end(self):
+		global namespace_name
+		global class_list
+		output( "namespace {")
+		output( "	struct loader {")
+		output( "		loader(){")
+		output( "			using namespace cppcms::details;")
+		output( "			views_storage &_VS_ref=views_storage::instance();")
+		for class_def in class_list:
+			if class_def.content_name!='':
+				output( '			_VS_ref.add_view("%s","%s",view_builder<%s,%s>());' \
+					% (namespace_name,class_def.name,class_def.name,class_def.content_name))
+			else:
+				output( '			_VS_ref.add_view("%s","%s",simple_view_builder<%s>());' \
+					% (namespace_name,class_def.name,class_def.name))
+		output( "		};")
+		output( '		~loader() { cppcms::details::views_storage::instance().remove_views("%s"); };' % namespace_name)
+		output( "	} loader_entry;")
+		output( "} // empty namespace ")
+		output( "} // end of namespace %s" % namespace_name)
+		class_list=[];
+
+class class_block:
+	pattern=r'^<%\s*class\s+(\w+)\s+(uses\s+(\w+(::\w+)?))?\s+(extends\s+(\w+(::\w+)?))?\s*%>$'
+	type='class'
+	def declare(self):
+		if self.extends=='' :
+			constructor='cppcms::base_view(_w)'
+			self.extends='cppcms::base_view'
+		else:
+			constructor='%s(_w,_content)' % self.extends;
+		output( "struct %s :public %s" % (self.class_name , self.extends ))
+		output( "{")
+		if self.uses!='' : 
+			output( "\t%s &content;" % self.uses)
+			output( "\t%s(cppcms::worker_thread *_w,%s &_content): %s,content(_content) {};" % ( self.class_name,self.uses,constructor ))
+		else:
+			output( "\t%s(cppcms::worker_thread *_w): %s {};" % ( self.class_name,constructor ))
+
+	def use(self,m):
+		self.class_name=m.group(1)
+		if m.group(2):
+			self.uses=m.group(3)
+		else:
+			self.uses=''
+		if m.group(5):
+			self.extends=m.group(6)
+		else:
+			self.extends=''
+		self.declare();
+		global stack
+		if len(stack)!=1 or stack[-1].type!='namespace':
+			output( "%d %s" % (len(stack), stack[-1].type))
+			error_exit("You must define class inside namespace block only")
+		stack.append(self)
+		global class_list
+		class information:
+			content_name=self.uses;
+			name=self.class_name;
+		class_list.append(information())
+	def on_end(self):
+		output( "}; // end of class %s" % self.class_name)
+
+
+
+class template_block:
+	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*\(\s*\)\s*%>$'
+	type='template'
+	def use(self,m):
+		self.name=m.group(1)
+		output( "virtual void %s() {" % self.name)
+		global stack
+		if len(stack)!=2 or stack[-1].type!='class':
+			error_exit("You must define template inside class block only")
+		stack.append(self)
+		global current_template
+		current_template=self.name
+		global ignore_inline
+		ignore_inline=0
+
+	def on_end(self):
+		output( "} // end of template %s" % self.name)
+		global ignore_inline
+		ignore_inline=1
+
+		
+
+def inline_content(s):
+	global ignore_inline
+	if not ignore_inline:
+		output( 'cout<<"%s";' % to_string(s))
+
+def error_exit(x):
+	global exit_flag
+	global file_name
+	sys.stderr.write("Error: %s in file %s\n" % (x,file_name))
+	exit_flag=1
+
+def to_string(s):
+	res=''
+	for c in s:
+		global stack
+		if c=='\n':
+			res+="\\n\""+"\n"+"\t"*len(stack)+"\t\""
+		elif c=="\t":
+			res+="\\t"
+		elif c=="\v":
+			res+="\\v"
+		elif c=="\b":
+			res+="\\b"
+		elif c=="\r":
+			res+="\\r"
+		elif c=="\f":
+			res+="\\f"
+		elif c=="\a":
+			res+="\\a"
+		elif c=="\\":
+			res+="\\\\"
+		elif c=="\"":
+			res+="\\\""
+		elif ord(c)>0 and ord(c)<32:
+			res+="%03o" % ord(c)
+		else:
+			res+=c
+
+	return res
+
+
+def sequence(seq_name):
+	global tmpl_seq
+	if tmpl_seq.has_key(seq_name):
+		return tmpl_seq[seq_name]
+	error_exit("Undefined sequence %s" % seq_name)
+	return 0
+
+def make_ident(val):
+	m=re.match('^'+variable_match+'$',val)
+	global tmpl_seq
+	if tmpl_seq.has_key(m.group(1)):
+		return val
+	return "content." + val
+
+class foreach_block:
+	pattern=r'^<%\s*foreach\s+([a-zA-Z]\w*)\s+in\s+(' + variable_match +')\s*%>$'
+	type='foreach'
+	has_item=0
+	has_separator=0
+	separator_label=''
+	on_first_label=''
+	def use(self,m):
+		self.ident=m.group(1)
+		self.seq_name=make_ident(m.group(2))
+		global tmpl_seq
+		if tmpl_seq.has_key(self.ident):
+			error_exit("Nested sequences with same name")
+		tmpl_seq[self.ident]='';
+		output( "if(%s.begin()!=%s.end()) {" % (self.seq_name,self.seq_name) )
+		global stack
+		stack.append(self)
+
+	def on_end(self):
+		if not self.has_item:
+			error_exit("foreach without item")
+
+		global tmpl_seq
+		del tmpl_seq[self.ident]
+		output( "}" )
+
+def prepare_foreach(seq,ident,has_separator):
+	output( "for(typeof(%(s)s.begin()) %(i)s_ptr=%(s)s.begin(),%(i)s_ptr_end=%(s)s.end();%(i)s_ptr!=%(i)s_ptr_end;++%(i)s_ptr) {" % { 's' :seq, 'i' : ident })
+	output( "typeof(*%s_ptr) &%s=*%s_ptr;" % (ident,ident,ident))
+	if has_separator:
+		output( "if(%s_ptr!=%s.begin()) {" % (ident,seq))
+		
+		
+
+class separator_block:
+	pattern=r'^<%\s*separator\s*%>'
+	type='separator'
+	def use(self,m):
+		global stack
+		if len(stack)==0 or stack[len(stack)-1].type!='foreach':
+			error_exit("separator without foreach")
+			return
+		foreachb=stack[len(stack)-1]
+		if foreachb.has_separator:
+			error_exit("two separators for one foreach")
+		foreachb.has_separator=1
+		prepare_foreach(foreachb.seq_name,foreachb.ident,1)
+		
+
+class item_block:
+	pattern=r'^<%\s*item\s*%>'
+	type='item'
+	def use(self,m):
+		global stack
+		if not stack or stack[-1].type!='foreach':
+			error_exit("item without foreach")
+			return
+		foreachb=stack[-1]
+		if foreachb.has_item:
+			error_exit("Two items for one foreach");
+		if foreachb.has_separator:
+			output( "} // end of separator")
+		else:
+			prepare_foreach(foreachb.seq_name,foreachb.ident,0)
+		foreachb.has_item=1
+		stack.append(self)
+	def on_end(self):
+		output( "} // end of item" )
+
+class empty_block:
+	pattern=r'^<%\s*empty\s*%>'
+	type='empty'
+	def use(self,m):
+		global stack
+		if not stack or stack[-1].type!='foreach':
+			error_exit("empty without foreach")
+			return
+		forb=stack.pop()
+		if not forb.has_item:
+			error_exit("Unexpected empty - item missed?")
+		output( " } else {")
+		self.ident=forb.ident
+		stack.append(self)
+	def on_end(self):
+		output( "} // end of empty")
+		global tmpl_seq
+		del tmpl_seq[self.ident]
+
+
+class else_block:
+	pattern=r'^<%\s*else\s*%>$'
+	type='else'
+	def on_end(self):
+		output("}")
+	def use(self,m):
+		prev=stack.pop()
+		if prev.type!='if' and prev.type!='elif':
+			error_exit("elif without if");
+		output( "}else{")
+		stack.append(self)
+
+class if_block:
+	pattern=r'^<%\s*(if|elif)\s+((not\s+)?'+variable_match+'|\((.+)\)|)\s*%>$'
+	type='if'
+	def prepare(self):
+		if self.ident=='rtl':
+			self.ident='(std::strcmp(gettext("LTR"),"RTL")==0)'
+		output( "if(%s) {" % self.ident)
+
+	def on_end(self):
+		output( "} // endif")
+
+	def use(self,m):
+		global stack
+		self.type=m.group(1)
+		if m.group(4):
+			self.ident=make_ident(m.group(4))
+			if m.group(3):
+				self.ident="!("+self.ident+")"
+		else:
+			self.ident=m.group(9)
+		if self.type == 'if' :
+			self.prepare()
+			stack.append(self)
+		else: # type == elif
+			if stack :
+				prev=stack.pop()
+				if prev.type!='if' and prev.type!='elif':
+					error_exit("elif without if");
+				output( "}")
+				output( "else")
+				self.prepare()
+				stack.append(self)
+			else:
+				error_exit("Unexpeced elif");
+# END ifop				
+			
+
+class end_block:
+	pattern=r'^<%\s*end(\s+(\w+))?\s*%>';
+	def use(self,m):
+		global stack
+		if not stack:
+			error_exit("Unexpeced 'end'");
+		else:
+			obj=stack.pop();
+			if m.group(1):
+				if obj.type!=m.group(2):
+					error_exit("End of %s does not match block %s" % (m.group(2) , obj.type));
+			obj.on_end()
+
+class error_com:
+	pattern=r'^<%(.*)%>$'
+	def use(self,m):
+		error_exit("unknown command %s" % m.group(1))
+
+
+def make_filter_param(param):
+	res=''
+	for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
+		s=m.group(1)
+		if s==r"\'":
+			res+="'"
+		elif s==r"\l":
+			res+="<"
+		elif s==r"\r":
+			res+=">"
+		elif s=='<' or s=='>':
+			error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
+		else:
+			res+=s
+	res="'"+to_string(res)+"'"
+	return res
+
+
+class cpp_include_block:
+	pattern=r'^<%\s*c\+\+\s+(.*)%>$'
+	def use(self,m):
+		output( m.group(1));
+
+class show_block:
+	pattern=r'^<%\s*(' + variable_match + ')\s*%>$'
+	def use(self,m):
+		name=make_ident(m.group(1));
+		output( "cout<<escape(%s);" % name)
+
+class ngettext_block:
+	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(using(.*))?\s*%>$"
+	def use(self,m):
+		s1=make_filter_param(m.group(1))
+		s2=make_filter_param(m.group(3))
+		idt=make_ident(m.group(5))
+		if m.group(6):
+			split_gt_params(m.group(7))
+		output( "cout<<ngettext(%s,%s,%s);" % (s1,s2,idt))
+
+def split_gt_params(s):
+	m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	while m.group(1):
+		bs=base_show()
+		mtmp=re.match(bs.mark,m.group(1));
+		if not mtmp:
+			error_exit("Expected variable/filter");
+			return;
+		bs.prepare(mtmp,'showf');
+		if not m.group(5):
+			return
+		s=m.group(5)
+		m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
+	error_exit("Sytax error");
+
+class gettext_block:
+	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(using(.*))?\s*%>$"
+	def use(self,m):
+		s=m.group(1)
+		if m.group(3):
+			split_gt_params(m.group(4))
+		output( "cout<<gettext(%s);" % make_filter_param(s))
+
+
+
+class include_block:
+	pattern=r'^<%\s*include\s+([a-zA_Z]\w*(::\w+)?)\s*\(\s*\)\s*%>$';
+	def use(self,m):
+		output( "%s();" % m.group(1))
+
+def fetch_content(content):
+	tmp=''
+	for row in re.split('\n',content):
+		l1=re.split(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row)
+		n=0
+		for l2 in re.finditer(r"<\%([^\%]|'(\\'|[^'])*')*\%>",row):
+			yield tmp+l1[n]
+			tmp=''
+			yield l2.group(0)
+			n+=3
+		tmp+=l1[n]+'\n'
+	yield tmp
+
+def main():
+	global stack
+	for file in os.sys.argv[1:]:
+		global file_name
+		file_name=file
+		f=open(file,'r')
+		content=f.read()
+		f.close()
+		for x in fetch_content(content):
+			if x=='' : continue
+			if len(stack)==0:
+				if re.match(r"^\s*$",x):
+					continue
+				elif not re.match(r"<\%.*\%>",x):
+					error_exit("Content is not allowed outside template blocks")
+					continue
+			matched=0
+			for c in [	namespace_block(), class_block(), if_block(), template_block(), end_block(), else_block(), \
+					cpp_include_block(),\
+					gettext_block(),ngettext_block(),\
+					foreach_block(), item_block(), empty_block(),separator_block(),\
+					include_block(),\
+					show_block(), error_com()]:
+				m = re.match(c.pattern,x)
+				if m :
+					c.use(m)
+					matched=1
+					break
+			if not matched:
+				inline_content(x)
+
+
+		if stack:
+			error_exit("Unexpected end of file %s" % file)
+
+#######################
+# MAIN
+#######################
+
+
+namespace_name=''
+file_name=''
+labels_counter=0
+tmpl_seq={}
+template_parameters={}
+templates_map={}
+parameters_counter=2
+stack=[]
+class_list=[]
+exit_flag=0
+current_template=''
+ignore_inline=1
+main()
+sys.exit(exit_flag)
