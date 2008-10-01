@@ -22,7 +22,9 @@
 			<% item %>
 				<li><% x %>:
 					<% foreach n in numbers %>
-					<% separator %>,<% item %><% n %><% end %>
+					<% separator %>,<% item %>
+					<% c++ cout<< format("<%% %d\n %%>") % n; %>
+					<% end %>
 					<% end %>
 				</li>
 			<% end %>
