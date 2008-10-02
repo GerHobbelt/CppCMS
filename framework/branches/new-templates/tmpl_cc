@@ -18,8 +18,9 @@ def output(s):
 	global stack
 	global file_name
 	global line_number
-	print '\t' * len(stack) + '#line %d "%s"' % (line_number,file_name)
-	print '\t'*len(stack) + s
+	global output_fd
+	output_fd.write('\t' * len(stack) + '#line %d "%s"' % (line_number,file_name)+'\n' + \
+		'\t'*len(stack) + s + '\n')
 
 class tmpl_descr:
 	def __init__(self,start,size):
@@ -30,32 +31,47 @@ class namespace_block:
 	pattern=r'^<%\s*namespace\s+(\w+)\s*%>$'
 	type='namespace'
 	def use(self,m):
+		self.internal_namespace=0
 		global namespace_name
-		namespace_name=m.group(1)
+		if m.group(1)=='vary':
+			if namespace_name!='':
+				self.internal_namespace=0
+			else:
+				error_exit("Can't use `vary' namespace without external one")
+		else: # m.group(1)!='vary'
+			if namespace_name=='':
+				namespace_name=m.group(1)
+				self.internal_namespace=1
+			else:
+				error_exit("Can't define both external and non-vary namespace")
+
 		output( "namespace %s {" % namespace_name)
 		global stack
 		stack.append(self)
 	def on_end(self):
 		global namespace_name
-		global class_list
-		output( "namespace {")
-		output( "	struct loader {")
-		output( "		loader(){")
-		output( "			using namespace cppcms::details;")
-		output( "			views_storage &_VS_ref=views_storage::instance();")
-		for class_def in class_list:
-			if class_def.content_name!='':
-				output( '			_VS_ref.add_view("%s","%s",view_builder<%s,%s>());' \
-					% (namespace_name,class_def.name,class_def.name,class_def.content_name))
-			else:
-				output( '			_VS_ref.add_view("%s","%s",simple_view_builder<%s>());' \
-					% (namespace_name,class_def.name,class_def.name))
-		output( "		};")
-		output( '		~loader() { cppcms::details::views_storage::instance().remove_views("%s"); };' % namespace_name)
-		output( "	} loader_entry;")
-		output( "} // empty namespace ")
 		output( "} // end of namespace %s" % namespace_name)
-		class_list=[];
+		if self.internal_namespace:
+			namespace_name=''
+
+def write_class_loader():
+	global class_list
+	output( "namespace {")
+	output( "	struct loader {")
+	output( "		loader(){")
+	output( "			using namespace cppcms::details;")
+	output( "			views_storage &_VS_ref=views_storage::instance();")
+	for class_def in class_list:
+		if class_def.content_name!='':
+			output( '			_VS_ref.add_view("%s","%s",view_builder<%s::%s,%s>());' \
+				% (class_def.namespace,class_def.name,class_def.namespace,class_def.name,class_def.content_name))
+		else:
+			output( '			_VS_ref.add_view("%s","%s",simple_view_builder<%s::%s>());' \
+				% (class_def.namespace,class_def.name,class_def.namespace,class_def.name))
+	output( "		};")
+	output( '		~loader() { cppcms::details::views_storage::instance().remove_views("%s"); };' % namespace_name)
+	output( "	} loader_entry;")
+	output( "} // empty namespace ")
 
 class class_block:
 	pattern=r'^<%\s*class\s+(\w+)\s+(uses\s+(\w+(::\w+)?))?\s+(extends\s+(\w+(::\w+)?))?\s*%>$'
@@ -91,9 +107,11 @@ class class_block:
 			error_exit("You must define class inside namespace block only")
 		stack.append(self)
 		global class_list
+		global namespace_name
 		class information:
-			content_name=self.uses;
-			name=self.class_name;
+			content_name=self.uses
+			name=self.class_name
+			namespace=namespace_name
 		class_list.append(information())
 	def on_end(self):
 		output( "}; // end of class %s" % self.class_name)
@@ -107,7 +125,7 @@ class template_block:
 		self.name=m.group(1)
 		output( "virtual void %s() {" % self.name)
 		global stack
-		if len(stack)!=2 or stack[-1].type!='class':
+		if len(stack)==0 or stack[-1].type!='class':
 			error_exit("You must define template inside class block only")
 		stack.append(self)
 		global current_template
@@ -416,7 +434,39 @@ def fetch_content(content):
 
 def main():
 	global stack
-	for file in os.sys.argv[1:]:
+	all=[]
+	indx=1
+	global namespace_name
+	global output_file
+	global exit_flag
+	while indx < len(os.sys.argv):
+		if os.sys.argv[indx]=='-n':
+			if indx+1>=len(os.sys.argv):
+				sys.stderr.write("-n should be followed by namespace name\n")
+				exit_flag=1
+				return
+			else:
+				namespace_name=os.sys.argv[indx+1];
+				indx+=1
+		elif os.sys.argv[indx]=='-o':
+			if indx+1>=len(os.sys.argv):
+				sys.stderr.write("-o should be followed by output file name\n")
+				exit_flag=1
+				return
+			else:
+				output_file=os.sys.argv[indx+1]
+				indx+=1
+		else:
+			all.append(os.sys.argv[indx])
+		indx+=1
+	if not all:
+		sys.stderr.write("No input file names given\n")
+		exit_flag=1
+		return
+	global output_fd
+	if output_file!='':
+		output_fd=open(output_file,"w")
+	for file in all:
 		global file_name
 		global line_number
 		line_number=0
@@ -450,12 +500,17 @@ def main():
 
 		if stack:
 			error_exit("Unexpected end of file %s" % file)
+	global class_list
+	if class_list and exit_flag==0:
+		write_class_loader()
 
 #######################
 # MAIN
 #######################
 
 
+output_file=''
+output_fd=sys.stdout
 namespace_name=''
 file_name=''
 labels_counter=0
@@ -468,5 +523,18 @@ class_list=[]
 exit_flag=0
 current_template=''
 ignore_inline=1
+
+################
 main()
+################
+
+if output_fd!=sys.stderr:
+	output_fd.close()
+
+if exit_flag!=0 and output_file!='':
+	try:
+		os.unlink(output_file)
+	except:
+		pass
+
 sys.exit(exit_flag)

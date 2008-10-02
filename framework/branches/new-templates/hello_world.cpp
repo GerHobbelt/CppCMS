@@ -8,7 +8,7 @@ class my_hello_world : public worker_thread {
 public:
 	my_hello_world(manager const &s) :  worker_thread(s)
 	{
-		use_template("view1");
+		use_template("view2");
 	};
 	virtual void main();
 };
