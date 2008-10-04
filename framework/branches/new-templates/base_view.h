@@ -40,6 +40,22 @@ protected:
 
 	string escape(string const &s);
 
+	inline string raw(string s) { return s; };
+	inline string intf(int val,string f){
+		return (format(f) % val).str();
+	};
+	string strftime(std::tm const &t,string f)
+	{
+		char buf[128];
+		buf[0]=0;
+		std::strftime(buf,sizeof(buf),f.c_str(),&t);
+		return buf;
+	};
+	string date(std::tm const &t) { return strftime(t,"%Y-%m-%d"); };
+	string time(std::tm const &t) { return strftime(t,"%H:%M"); };
+	string timesec(std::tm const &t) { return strftime(t,"%T"); };
+	string escape(std::tm const &t) { return strftime(t,"%Y-%m-%d %T"); }
+
 	string urlencode(string const &s);
 
 	char const *gettext(char const *s);

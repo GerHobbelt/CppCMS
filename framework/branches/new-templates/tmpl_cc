@@ -409,7 +409,7 @@ class filters_show_block(base_show):
 	def use(self,m):
 		expr=self.prepare(m.group(1));
 		if expr!="":
-			output('cout<<%s' % expr)
+			output('cout<<%s;' % expr)
 
 def make_format_params(s):
 	pattern=r'^(([^,\("]|'+str_match+'|\(([^"\)]|'+str_match+')*\))+)(,(.*))?$'
