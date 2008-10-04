@@ -5,6 +5,7 @@ import re
 import sys
 
 variable_match=r'([a-zA-Z]\w*)(((\.|->)([a-zA-Z]\w*))*)'
+str_match=r'"([^"\\]|\\[^"]|\\")*"'
 
 def interleave(*args):
 	for idx in range(0, max(len(arg) for arg in args)):
@@ -347,68 +348,111 @@ class error_com:
 		error_exit("unknown command `%s'" % m.group(1))
 
 
-def make_filter_param(param):
-	res=''
-	for m in re.finditer(r"(\\'|\\l|\\r|[^'])",param):
-		s=m.group(1)
-		if s==r"\'":
-			res+="'"
-		elif s==r"\l":
-			res+="<"
-		elif s==r"\r":
-			res+=">"
-		elif s=='<' or s=='>':
-			error_exit(r"It is forbitten to use `<' and `>' in strings, use `\l' or `\r' istead")
-		else:
-			res+=s
-	res="'"+to_string(res)+"'"
-	return res
-
-
 class cpp_include_block:
 	pattern=r'^<%\s*c\+\+\s+(.*)%>$'
 	def use(self,m):
 		output( m.group(1));
 
-class show_block:
-	pattern=r'^<%\s*(' + variable_match + ')\s*%>$'
+
+class base_show:
+	mark='('+variable_match+r')\s*(\|(.*))?'
+	base_pattern='^\s*'+mark + '$'
+	def get_params(self,s):
+		pattern='^\s*(('+variable_match+')|('+str_match+')|(\d+))\s*(,(.*))?$'
+		res=[]
+		m=re.match(pattern,s)
+		while m:
+			if m.group(2):
+				res.append(make_ident(m.group(2)))
+			elif m.group(8):
+				res.append(m.group(8))
+			elif m.group(10):
+				res.append(m.group(10))
+			if m.group(12):
+				s=m.group(12)
+				m=re.match(pattern,s)
+			else:
+				return res
+		error_exit("Invalid parameters: `%s'" % s )
+		return []
+	def prepare(self,s):
+		m=re.match(self.base_pattern,s)
+		if not m:
+			error_exit("No variable")
+			return [];
+		var=make_ident(m.group(1))
+		if not m.group(8):
+			return "escape(%s)" % var
+		filters=m.group(8)
+		expr='^\s*(ext\s+)?(\w+)\s*(\((([^"\)]|'+str_match + ')*)\))?\s*(\|(.*))?$'
+		m=re.match(expr,filters)
+		while m:
+			if m.group(1):
+				func="content."+m.group(2)
+			else:
+				func=m.group(2)
+			if m.group(3):
+				params=','.join([var]+self.get_params(m.group(4)))
+			else:
+				params=var
+			var=func+"("+params+")"
+			if m.group(8):
+				filters=m.group(8)
+				m=re.match(expr,filters)
+			else:
+				return var
+		error_exit("Seems to be a problem in expression %s" % filters)
+		return "";
+
+class filters_show_block(base_show):
+	pattern=r'^<%\s*('+ variable_match + r'\s*(\|.*)?)%>$'
 	def use(self,m):
-		name=make_ident(m.group(1));
-		output( "cout<<escape(%s);" % name)
+		expr=self.prepare(m.group(1));
+		if expr!="":
+			output('cout<<%s' % expr)
+
+def make_format_params(s):
+	pattern=r'^(([^,\("]|'+str_match+'|\(([^"\)]|'+str_match+')*\))+)(,(.*))?$'
+	params=[]
+	m=re.match(pattern,s)
+	s_orig=s
+	while m.group(1):
+		res=base_show().prepare(m.group(1))
+		if res:
+			params.append(res)
+		if not m.group(6):
+			return params
+		s=m.group(7)
+		m=re.match(pattern,s)
+	error_exit("Seems to be wrong parameters list [%s]" % s_orig)
+	return []
 
 class ngettext_block:
-	pattern=r"^<%\s*ngt\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*'((\\'|\\l|\\r|[^'])*)'\s*,\s*([\w\.]+)\s*(using(.*))?\s*%>$"
+	pattern=r'^<%\s*ngt\s*('+str_match+')\s*,\s*('+str_match+')\s*,\s*('+variable_match+')\s*(using(.*))?\s*%>$'
 	def use(self,m):
-		s1=make_filter_param(m.group(1))
-		s2=make_filter_param(m.group(3))
+		s1=m.group(1)
+		s2=m.group(3)
 		idt=make_ident(m.group(5))
-		if m.group(6):
-			split_gt_params(m.group(7))
-		output( "cout<<ngettext(%s,%s,%s);" % (s1,s2,idt))
-
-def split_gt_params(s):
-	m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
-	while m.group(1):
-		bs=base_show()
-		mtmp=re.match(bs.mark,m.group(1));
-		if not mtmp:
-			error_exit("Expected variable/filter");
-			return;
-		bs.prepare(mtmp,'showf');
-		if not m.group(5):
-			return
-		s=m.group(5)
-		m=re.match(r"^(([^',]|'([^']|\\')*')*)(,(.*))?$",s)
-	error_exit("Sytax error");
+		params=[]
+		if m.group(11):
+			params=make_format_params(m.group(12))
+		if not params:
+			output( "cout<<ngettext(%s,%s,%s);" % (s1,s2,idt))
+		else:
+			output( "cout<<(format(ngettext(%s,%s,%s)) %% %s );" % (s1,s2,idt, ' % '.join(params)))
+			
 
 class gettext_block:
-	pattern=r"^<%\s*gt\s*'((\\'|\\l|\\r|[^'])*)'\s*(using(.*))?\s*%>$"
+	pattern=r'^<%\s*gt\s*('+str_match+')\s*(using(.*))?\s*%>$'
 	def use(self,m):
 		s=m.group(1)
+		params=[]
 		if m.group(3):
-			split_gt_params(m.group(4))
-		output( "cout<<gettext(%s);" % make_filter_param(s))
-
+			params=make_format_params(m.group(4))
+		if not params:
+			output( "cout<<gettext(%s);" % s)
+		else:
+			output( "cout<<(format(gettext(%s)) %% %s );" % (s , ' % '.join(params)))
 
 
 class include_block:
@@ -488,7 +532,7 @@ def main():
 					gettext_block(),ngettext_block(),\
 					foreach_block(), item_block(), empty_block(),separator_block(),\
 					include_block(),\
-					show_block(), error_com()]:
+					filters_show_block(), error_com()]:
 				m = re.match(c.pattern,x)
 				if m :
 					c.use(m)
