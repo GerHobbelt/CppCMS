@@ -1,0 +1,78 @@
+#page {
+        border:1px solid #333;
+	color: #222222;
+	background-color:#FFFFFF;
+	font-family: Arial, sans-serif;
+	font-size:83%;
+	margin:20px auto;
+	width:760px;
+}
+
+a {
+	color: #CC0000;
+	background-color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #CC0000;
+	background-color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+
+#header {
+	padding-left:10px;
+	padding-right:10px;
+	border-bottom:5px solid #333;
+}
+
+#news {
+        width:300px;
+}
+#menu {
+        width:300px;
+}
+
+#footer {
+	padding-right:10px;
+	padding-left:10px;
+	padding-top:5px;
+	padding-bottom:5px;
+	border-top:2px solid #333;
+	clear:both;
+}
+#footer p { margin:3px; }
+
+#form textarea {
+	width:98%
+}
+
+#form dd, dt {
+        margin-left:25px;
+        padding-left:5px;
+        margin-right:25px;
+        padding-right:5px;
+}
+#form dt {
+        font-size:120%;
+        font-weight:bold;
+}
+
+/* IE Hack*/
+#form fieldset {border:none;margin:0px;padding:0px;}
+
+
+h1 {font-size:167%; }
+
+h2 {font-size:139%;}
+
+h3 {font-size:120%;}
+
+h4 {font-size:100%;}
+
+#path { margin-right:5px; margin-left:5px; font-size:80%; }
+
+.catlist { list-style:none; }
