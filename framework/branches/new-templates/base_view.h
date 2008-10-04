@@ -9,6 +9,7 @@
 #include <map>
 #include "worker_thread.h"
 #include "cppcms_error.h"
+#include "config.h"
 
 namespace cppcms {
 using namespace std;
@@ -104,5 +105,20 @@ public:
 
 
 }; // CPPCMS
+
+
+#if defined(HAVE_CPP_0X_AUTO)
+#	define CPPCMS_TYPEOF(x) auto
+#elif defined(HAVE_CPP_0X_DECLTYPE)
+#	define CPPCMS_TYPEOF(x) decltype(x)
+#elif defined(HAVE_GCC_TYPEOF)
+#	define CPPCMS_TYPEOF(x) typeof(x)
+#elif defined(HAVE_WORKING_BOOST_TYPEOF)
+#	include <boost/typeof/typeof.hpp>
+#	define CPPCMS_TYPEOF(x) BOOST_TYPEOF(x)
+#else
+#	error "No useful C++0x auto/decltype/typeof method for this compiler"
+#endif
+
 
 #endif
