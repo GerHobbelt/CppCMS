@@ -120,11 +120,41 @@ class class_block:
 
 
 class template_block:
-	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*\(\s*\)\s*%>$'
+	pattern=r'^<%\s*template\s+([a-zA-Z]\w*)\s*\(([\w\s,:\&]*)\)\s*%>$'
 	type='template'
+	plist=[]
+	def create_parameters(self,lst):
+		pattern=r'^\s*((\w+(::\w+)*)\s*(const)?\s*(\&)?\s*(\w+))\s*(,(.*))?$'
+		m=re.match(pattern,lst)
+		res=[]
+		while m:
+			global tmpl_seq
+			id=m.group(2)
+			if tmpl_seq.has_key(id):
+				error_exit("Duplicate definition of patameter %s" % id)
+				for v in self.plist:
+					del tmpl_seq[v] 
+				return ""
+			tmpl_seq[id]=''
+			res.append(m.group(1))
+			self.plist.append(id)
+			if m.group(8):
+				lst=m.group(8)
+				m=re.match(pattern,lst)
+			else:
+				return ','.join(res)
+		for v in self.plist:
+			del tmpl_seq[v]
+		error_exit("Wrong expression %s" % lst)
+
+
+			
 	def use(self,m):
 		self.name=m.group(1)
-		output( "virtual void %s() {" % self.name)
+		params=""
+		if m.group(2) and not re.match('^\s*$',m.group(2)):
+			params=self.create_parameters(m.group(2))
+		output( "virtual void %s(%s) {" % (self.name,params) )
 		global stack
 		if len(stack)==0 or stack[-1].type!='class':
 			error_exit("You must define template inside class block only")
@@ -456,9 +486,13 @@ class gettext_block:
 
 
 class include_block:
-	pattern=r'^<%\s*include\s+([a-zA_Z]\w*(::\w+)?)\s*\(\s*\)\s*%>$';
+	pattern=r'^<%\s*include\s+([a-zA_Z]\w*(::\w+)?)\s*\(\s*(.*)\)\s*%>$';
 	def use(self,m):
-		output( "%s();" % m.group(1))
+		if m.group(3):
+			params=base_show().get_params(m.group(3))
+		else:
+			params=[]
+		output( "%s(%s);" % (m.group(1) , ','.join(params)))
 
 def fetch_content(content):
 	tmp=''

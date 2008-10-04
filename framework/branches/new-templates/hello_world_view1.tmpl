@@ -1,6 +1,9 @@
 <% namespace vary %>
 	<% class hello uses view::hello extends master %>
+	<% template test(int x,std::string const &t) %>
+	<% end %>
 	<% template body() %>
+		<% include test(10,"hello") %>
 		<h1><% title %></h1>
 		<p><% msg %></p>
 		<% foreach x in numbers %>
