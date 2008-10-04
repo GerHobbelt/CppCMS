@@ -22,8 +22,9 @@ libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp 
 libcppcms_la_LDFLAGS  = -version-info 0:0:0
 libcppcms_la_LIBADD = transtext/libtranstext.la
 libcppcms_la_CXXFLAGS = -Wall -I./transtext
+libcppcms_la_LIBADD = @CPPCMS_LIBS@
 
-if  EN_FORK_CACHE
+if EN_FORK_CACHE
 libcppcms_la_SOURCES += process_cache.cpp
 endif
 
@@ -31,9 +32,16 @@ if EN_FCGI_BACKEND
 libcppcms_la_SOURCES += fcgi.cpp
 endif
 
-
 nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	manager.h worker_thread.h fcgi.h cache_interface.h archive.h \
 	base_cache.h thread_cache.h cgicc_connection.h scgi.h cgi_api.h \
 	process_cache.h shmem_allocator.h posix_mutex.h config.h cgi.h
+
+if EN_TCP_CACHE
+libcppcms_la_SOURCES += tcp_cache.cpp
+bin_PROGRAMS = tcp_cache_server
+tcp_cache_server_SOURCES = base_cache.cpp thread_cache.cpp tcp_cache_server.cpp
+nobase_pkginclude_HEADERS += tcp_cache_protocol.h tcp_cache.h
+endif
+
 

@@ -25,6 +25,10 @@
 # include "fcgi.h"
 #endif
 
+#ifdef EN_TCP_CACHE
+# include "tcp_cache.h"
+#endif
+
 namespace cppcms {
 namespace details {
 
@@ -438,6 +442,13 @@ cache_factory *manager::get_cache_factory()
 		size_t s=config.lval("cache.memsize",64);
 		string f=config.sval("cache.file","");
 		return new process_cache_factory(s*1024U,f=="" ? NULL: f.c_str());
+	}
+#endif
+#ifdef EN_TCP_CACHE
+	else if(backend=="tcp") {
+		vector<long> const &ports=config.llist("cache.ports");
+		vector<string> const &ips=config.slist("cache.ips");
+		return new tcp_cache_factory(ips,ports);
 	}
 #endif
 	else {
