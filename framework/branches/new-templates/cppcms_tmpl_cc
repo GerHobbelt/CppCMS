@@ -62,7 +62,9 @@ def write_class_loader():
 	output( "		loader(){")
 	output( "			using namespace cppcms::details;")
 	output( "			views_storage &_VS_ref=views_storage::instance();")
+	list_of_views={}
 	for class_def in class_list:
+		list_of_views[class_def.namespace]=""
 		if class_def.content_name!='':
 			output( '			_VS_ref.add_view("%s","%s",view_builder<%s::%s,%s>());' \
 				% (class_def.namespace,class_def.name,class_def.namespace,class_def.name,class_def.content_name))
@@ -70,7 +72,12 @@ def write_class_loader():
 			output( '			_VS_ref.add_view("%s","%s",simple_view_builder<%s::%s>());' \
 				% (class_def.namespace,class_def.name,class_def.namespace,class_def.name))
 	output( "		};")
-	output( '		~loader() { cppcms::details::views_storage::instance().remove_views("%s"); };' % namespace_name)
+	output( '		~loader() { ')
+	output( "			using namespace cppcms::details;")
+	output( "			views_storage &_VS_ref=views_storage::instance();")
+	for ns in list_of_views:
+		output( '			_VS_ref.remove_views("%s");' % ns)
+	output( '		}')
 	output( "	} loader_entry;")
 	output( "} // empty namespace ")
 
@@ -104,7 +111,6 @@ class class_block:
 		self.declare();
 		global stack
 		if len(stack)!=1 or stack[-1].type!='namespace':
-			output( "%d %s" % (len(stack), stack[-1].type))
 			error_exit("You must define class inside namespace block only")
 		stack.append(self)
 		global class_list
@@ -388,7 +394,7 @@ class base_show:
 	mark='('+variable_match+r')\s*(\|(.*))?'
 	base_pattern='^\s*'+mark + '$'
 	def get_params(self,s):
-		pattern='^\s*(('+variable_match+')|('+str_match+')|(\d+))\s*(,(.*))?$'
+		pattern='^\s*(('+variable_match+')|('+str_match+')|(\-?\d+(\.\d*)?))\s*(,(.*))?$'
 		res=[]
 		m=re.match(pattern,s)
 		while m:
@@ -398,8 +404,8 @@ class base_show:
 				res.append(m.group(8))
 			elif m.group(10):
 				res.append(m.group(10))
-			if m.group(12):
-				s=m.group(12)
+			if m.group(13):
+				s=m.group(13)
 				m=re.match(pattern,s)
 			else:
 				return res
