@@ -13,6 +13,7 @@
 #ifndef DATA_H
 #define DATA_H
 #include <cppcms/archive.h>
+#include <cppcms/base_view.h>
 #include <string>
 #include <ctime>
 
@@ -56,5 +57,34 @@ struct option_t {
 	int		id;
 	std::string	value;
 };
+
+
+namespace data {
+struct common_base : public base_content {
+	string media;
+	string base_url;
+	string blog_name;
+};
+struct admin_base : public common_base  {
+	string admin_url;
+	string logout_url;
+	string new_post_url;
+	string new_page_url,edit_links_url,edit_cats_url,edit_options_url,admin_cache_url;
+};
+
+struct admin_cache : public admin_base {
+	bool cache_enabled;
+	int cache_keys;
+	string submit_url;
+};
+
+struct admin_editcomment : public admin_base  {
+	int id;
+	string edit_comment_url,author,email,url,content;
+};
+
+
+};
+
 
 #endif

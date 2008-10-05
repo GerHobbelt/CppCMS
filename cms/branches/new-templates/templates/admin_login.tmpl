@@ -1,18 +1,20 @@
-<% template admin_login() %>
+<% namespace admin_view %>
+<% class admin_login uses data::admin_login extends admin_base %>
+<% template master_content() %>
 <form action="<% login_url | raw %>" method="post">
 	<center>
 		<div style="padding:50px; font-size:200%;">
 			<table style="text-align:left" >
 				<tr>
-					<td><% gt 'Username:' %></td>
+					<td><% gt "Username:" %></td>
 					<td><input type="text" name="username" /></td>
 				</tr>
 				<tr>
-					<td><% gt 'Password:' %></td>
+					<td><% gt "Password:" %></td>
 					<td><input type="password" name="password" /></td>
 				</tr>
 				<tr>
-					<td><input type="submit" value="<% gt 'Login' %>" /></td>
+					<td><input type="submit" value="<% gt "Login" %>" /></td>
 					<td>&nbsp;</td>
 				</tr>
 			</table>
@@ -20,3 +22,5 @@
 	</center>
 </form>
 <% end %>
+<% end class %>
+<% end namespace %>
