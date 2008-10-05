@@ -1,4 +1,6 @@
-<% template admin_editcats() %>
+<% namespace admin_view %>
+<% class admin_editcats uses data::admin_categories extends admin_base %>
+<% template master_content() %>
 <script language="javascript">
 <!--
 function switchvis(id)
@@ -13,36 +15,39 @@ function switchvis(id)
 -->
 </script>
 <% if constraint_error %>
-	<h2><% gt 'Cannot remove category!' %></h2>
-	<p><% gt 'There are posts belongs to it. Maybe you need to mark "delete from posts"?' %></p>
+	<h2><% gt "Cannot remove category!" %></h2>
+	<p><% gt "There are posts belongs to it. Maybe you need to mark \"delete from posts\"?" %></p>
 <% end %>
 <% foreach cat in cats %>
-<h2><% gt 'Categories' %></h2>
+<h2><% gt "Categories" %></h2>
 <ul>
 	<% item %>
-	<li><p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');" ><% gt 'edit' %></a></p>
+	<li><p><% cat.name %> | <a href="javascript:switchvis('cat<% cat.id %>');" ><% gt "edit" %></a></p>
 	<div id="cat<% cat.id %>" style="display:none" >
 		<form action="<% submit_url %>" method="post" >
 		<input type="hidden" name="id" value="<% cat.id %>" />
 		<input type="text" name="name" value="<% cat.name %>" size="20" />
-		<input type="submit" name="save" value="<% gt 'Sumbit' %>" />
-		<input type="submit" name="delete" value="<% gt 'Delete' %>" />
-		<% gt 'Delete from posts:' %><input type="checkbox" name="recur" value="recur" />
+		<input type="submit" name="save" value="<% gt "Sumbit" %>" />
+		<input type="submit" name="delete" value="<% gt "Delete" %>" />
+		<% gt "Delete from posts:" %><input type="checkbox" name="recur" value="recur" />
 		</form>
 	</div>
 	</li>
 	<% end %>
 </ul>
 <% empty %>
-<h2><% gt 'There are no categories' %></h2>
+<h2><% gt "There are no categories" %></h2>
 <% end %>
 
 	<form action="<% submit_url %>" method="post" >
 	<p>
-	<% gt 'New category:' %>
+	<% gt "New category:" %>
 	<input type="hidden" name="new" />
 	<input type="text" name="name" size="20" />
-	<input type="submit" name="save" value="<% gt 'Sumbit' %>" />
+	<input type="submit" name="save" value="<% gt "Sumbit" %>" />
 	</p>
 	</form>
+<% end template %>
+<% end class %>
 <% end %>
+
