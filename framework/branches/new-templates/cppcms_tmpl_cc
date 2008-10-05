@@ -332,8 +332,6 @@ class if_block:
 	pattern=r'^<%\s*(if|elif)\s+((not\s+)?'+variable_match+'|\((.+)\)|)\s*%>$'
 	type='if'
 	def prepare(self):
-		if self.ident=='rtl':
-			self.ident='(std::strcmp(gettext("LTR"),"RTL")==0)'
 		output( "if(%s) {" % self.ident)
 
 	def on_end(self):
@@ -343,7 +341,10 @@ class if_block:
 		global stack
 		self.type=m.group(1)
 		if m.group(4):
-			self.ident=make_ident(m.group(4))
+			if m.group(4)=='rtl':
+				self.ident='(std::strcmp(gettext("LTR"),"RTL")==0)'
+			else:
+				self.ident=make_ident(m.group(4))
 			if m.group(3):
 				self.ident="!("+self.ident+")"
 		else:
