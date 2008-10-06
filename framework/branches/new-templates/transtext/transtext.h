@@ -3,6 +3,8 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace transtext {
 using namespace std;
@@ -40,26 +42,17 @@ public:
 	int num2idx(int n) const { return (*converter)(n); };
 };
 
-class trans_gnu: public trans {
-public:
-	trans_gnu() {};
-	virtual ~trans_gnu() {};
-	virtual void load(char const * locale,char const *domain_name, char const * dirname);
-	virtual char const *gettext(char const *s) const;
-	virtual char const *ngettext(char const *s,char const *p,int n) const;
-	
-};
-
 class trans_factory {
-	map<string,trans *> langs;
-	map<string,string>  names;
-	string def;
+	map<string,map<string,boost::shared_ptr<trans> > > langs;
+	string default_lang;
+	string default_domain;
 public:
-	trans const &get() const;
-	trans const &get(string const &lang) const;
-	trans const &operator[](string const &lang) const { return get(lang); };
-	void load(string const &locale_list,string const &domain,string const &dir,string const &d="");
-	map<string,string> const &get_names() const { return names; };
+	trans const &get(string lang,string domain) const;
+	void load(	string const &locale_dir,
+			vector<string> const &lang_list,
+			string const &lang_def,
+			vector<string> const &domain_list,
+			string const &domain_def);
 	~trans_factory();
 };
 

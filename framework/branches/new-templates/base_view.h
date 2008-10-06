@@ -59,9 +59,6 @@ protected:
 
 	string urlencode(string const &s);
 
-	char const *gettext(char const *s);
-	char const *ngettext(char const *s,char const *p,int n);
-
 	inline boost::format format(string const &f){
 		boost::format frm(f);
 		frm.exceptions(0);

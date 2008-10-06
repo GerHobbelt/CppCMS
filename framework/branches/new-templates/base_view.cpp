@@ -73,16 +73,6 @@ string base_view::urlencode(string const &s)
 	return content;
 }
 
-char const *base_view::gettext(char const *s)
-{
-	return worker.gettext(s);
-};
-
-char const *base_view::ngettext(char const *s,char const *p,int n)
-{
-	return worker.ngettext(s,p,n);
-};
-
 namespace details {
 
 views_storage &views_storage::instance() {

@@ -29,7 +29,7 @@ class tmpl_descr:
 		self.param_num=size
 
 class namespace_block:
-	pattern=r'^<%\s*namespace\s+(\w+)\s*%>$'
+	pattern=r'^<%\s*namespace\s+(\w+)\s*(at\s*(\w+)\s*)?%>$'
 	type='namespace'
 	def use(self,m):
 		self.internal_namespace=0
@@ -47,6 +47,12 @@ class namespace_block:
 				error_exit("Can't define both external and non-vary namespace")
 
 		output( "namespace %s {" % namespace_name)
+		self.reset_gettext=0
+		if m.group(2):
+			global spec_gettext
+			if not spec_gettext:
+				spec_gettext=m.group(3)
+				self.reset_gettext=1
 		global stack
 		stack.append(self)
 	def on_end(self):
@@ -54,6 +60,10 @@ class namespace_block:
 		output( "} // end of namespace %s" % namespace_name)
 		if self.internal_namespace:
 			namespace_name=''
+		if self.reset_gettext:
+			global spec_gettext
+			spec_gettext=''
+
 
 def write_class_loader():
 	global class_list
@@ -81,6 +91,13 @@ def write_class_loader():
 	output( "	} loader_entry;")
 	output( "} // empty namespace ")
 
+def gettext_domain():
+	global spec_gettext
+	if spec_gettext:
+		return spec_gettext
+	global namespace_name
+	return namespace_name
+
 class class_block:
 	pattern=r'^<%\s*class\s+(\w+)\s+(uses\s+(\w+(::\w+)?))?\s+(extends\s+(\w+(::\w+)?))?\s*%>$'
 	type='class'
@@ -94,9 +111,13 @@ class class_block:
 		output( "{")
 		if self.uses!='' : 
 			output( "\t%s &content;" % self.uses)
-			output( "\t%s(cppcms::worker_thread *_w,%s &_content): %s,content(_content) {};" % ( self.class_name,self.uses,constructor ))
+			output( "\ttranstext::trans const *tr;" )
+			output( "\t%s(cppcms::worker_thread *_w,%s &_content): %s,content(_content)" % ( self.class_name,self.uses,constructor ))
 		else:
-			output( "\t%s(cppcms::worker_thread *_w): %s {};" % ( self.class_name,constructor ))
+			output( "\t%s(cppcms::worker_thread *_w): %s" % ( self.class_name,constructor ))
+		output("\t{")
+		output('\t\ttr=_w->domain_gettext("%s");' % gettext_domain() )
+		output("\t};")
 
 	def use(self,m):
 		self.class_name=m.group(1)
@@ -342,7 +363,7 @@ class if_block:
 		self.type=m.group(1)
 		if m.group(4):
 			if m.group(4)=='rtl':
-				self.ident='(std::strcmp(gettext("LTR"),"RTL")==0)'
+				self.ident='(std::strcmp(tr->gettext("LTR"),"RTL")==0)'
 			else:
 				self.ident=make_ident(m.group(4))
 			if m.group(3):
@@ -474,9 +495,9 @@ class ngettext_block:
 		if m.group(11):
 			params=make_format_params(m.group(12))
 		if not params:
-			output( "cout<<ngettext(%s,%s,%s);" % (s1,s2,idt))
+			output( "cout<<tr->ngettext(%s,%s,%s);" % (s1,s2,idt))
 		else:
-			output( "cout<<(format(ngettext(%s,%s,%s)) %% %s );" % (s1,s2,idt, ' % '.join(params)))
+			output( "cout<<(format(tr->ngettext(%s,%s,%s)) %% %s );" % (s1,s2,idt, ' % '.join(params)))
 			
 
 class gettext_block:
@@ -487,9 +508,9 @@ class gettext_block:
 		if m.group(3):
 			params=make_format_params(m.group(4))
 		if not params:
-			output( "cout<<gettext(%s);" % s)
+			output( "cout<<tr->gettext(%s);" % s)
 		else:
-			output( "cout<<(format(gettext(%s)) %% %s );" % (s , ' % '.join(params)))
+			output( "cout<<(format(tr->gettext(%s)) %% %s );" % (s , ' % '.join(params)))
 
 
 class include_block:
@@ -540,6 +561,15 @@ def main():
 				return
 			else:
 				output_file=os.sys.argv[indx+1]
+				indx+=1
+		elif os.sys.argv[indx]=='-d':
+			if indx+1>=len(os.sys.argv):
+				sys.stderr.write("-d should followed by gettext domain name\n")
+				exit_flag=1
+				return
+			else:
+				global spec_gettext
+				spec_gettext=os.sys.argv[indx+1]
 				indx+=1
 		else:
 			all.append(os.sys.argv[indx])
@@ -607,6 +637,7 @@ stack=[]
 class_list=[]
 exit_flag=0
 current_template=''
+spec_gettext=''
 ignore_inline=1
 
 ################

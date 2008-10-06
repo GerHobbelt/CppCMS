@@ -18,6 +18,8 @@ worker_thread::worker_thread(manager const &s) :
 		cout(&(this->out_buf))
 {
 	caching_module=app.cache->get();
+	static const transtext::trans tr;
+	gt=&tr;
 } ;
 
 worker_thread::~worker_thread()
@@ -36,13 +38,15 @@ void worker_thread::add_header(string s) {
 	other_headers.push_back(s);
 };
 
-void worker_thread::set_lang()
-{
-	gt=&app.gettext->get();
-}
 void worker_thread::set_lang(string const &s)
 {
-	gt=&app.gettext->get(s);
+	lang=s;
+	gt=&app.gettext->get(s,"");
+}
+
+transtext::trans const *worker_thread::domain_gettext(string const &domain)
+{
+	return &app.gettext->get(lang,domain);
 }
 
 void worker_thread::run(cgicc_connection &cgi_conn)
@@ -50,9 +54,9 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 	cgi=&cgi_conn.cgi();
 	env=&(cgi->getEnvironment());
 	ostream &cgi_out=cgi_conn.cout();
-	set_lang();
 	other_headers.clear();
 	cache.reset();
+	set_lang("");
 	out_buf.str("");
 
 	set_header(new HTTPHTMLHeader);

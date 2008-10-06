@@ -546,10 +546,12 @@ transtext::trans_factory *manager::get_gettext()
 	transtext::trans_factory *tmp=NULL;
 	try{
 		tmp=new transtext::trans_factory();
-		tmp->load(	config.sval("locale.langlist",""),
-				config.sval("locale.domain",""),
-				config.sval("locale.dir",""),
-				config.sval("locale.default",""));
+		
+		tmp->load(	config.sval ("locale.dir",""),
+				config.slist("locale.lang_list"),
+				config.sval ("locale.lang_default",""),
+				config.slist ("locale.domain_list"),
+				config.sval ("locale.domain_default",""));
 		return tmp;
 	}
 	catch(...){
