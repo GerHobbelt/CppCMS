@@ -1,5 +1,5 @@
 <% namespace admin_view %>
-<% class admin_edit_links uses data::admin_links extends admin_base %>
+<% class admin_editlinks uses data::admin_editlinks extends admin_base %>
 <% template select_cat(int opt) %>
 <select name="cat" >
 	<% foreach cat in link_cats %>
@@ -73,7 +73,7 @@
 <% end %>
 
 <% template master_content() %>
-<% if not_empty %><h2><% gt "The category you try to delete is not empty!" %></h2><% end %>
+<% if error_not_empty %><h2><% gt "The category you try to delete is not empty!" %></h2><% end %>
 <script language="javascript">
 <!--
 function switchvis(id)

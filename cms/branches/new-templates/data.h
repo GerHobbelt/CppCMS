@@ -82,7 +82,76 @@ struct admin_editcomment : public admin_base  {
 	int id;
 	string edit_comment_url,author,email,url,content;
 };
+struct category {
+	int id;
+	string name;
+	bool del;
+};
 
+struct admin_editcats : public admin_base {
+	bool constraint_error;
+	string submit_url;
+	list<category> cats;
+
+};
+
+struct link {
+	string name,descr,url;
+	int id;
+	int cat_id;
+};
+
+struct admin_editlinks : public admin_base {
+	bool error_not_empty;
+	string submit_url;
+	list<category> link_cats;
+	list<link> links;
+};
+
+struct admin_editoptions : public admin_base {
+	string post_options_url,blog_description,blog_contact,copyright_string;
+};
+
+struct admin_editcontent : public admin_base {
+	bool is_open;
+	int post_id;
+	string submit_post_url,post_title,content,preview_url;
+};
+
+struct admin_editpost : public admin_editcontent {
+	list<category> cats_in,cats_out;
+	string abstract,send_trackback_url;
+
+};
+
+struct admin_editpage : public admin_editcontent {};
+struct admin_login : public admin_base {
+	string login_url;
+};
+
+struct short_post {
+	string title;
+	string edit_url;
+	bool published;
+};
+
+struct short_comment {
+	string post_permlink,username,edit_url;
+	int id;
+};
+
+struct admin_main : public admin_base {
+	list<short_comment> comments;
+	list<short_post> posts;
+	list<short_post> pages;
+};
+
+struct admin_sendtrackback : public admin_base {
+	bool error_no_url;
+	string error_message;
+	bool success;
+	string goback;
+};
 
 };
 
