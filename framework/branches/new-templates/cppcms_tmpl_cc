@@ -350,7 +350,7 @@ class else_block:
 		stack.append(self)
 
 class if_block:
-	pattern=r'^<%\s*(if|elif)\s+((not\s+)?'+variable_match+'|\((.+)\)|)\s*%>$'
+	pattern=r'^<%\s*(if|elif)\s+((not\s+)?('+variable_match+')|\((.+)\)|)\s*%>$'
 	type='if'
 	def prepare(self):
 		output( "if(%s) {" % self.ident)
@@ -369,7 +369,7 @@ class if_block:
 			if m.group(3):
 				self.ident="!("+self.ident+")"
 		else:
-			self.ident=m.group(9)
+			self.ident=m.group(10)
 		if self.type == 'if' :
 			self.prepare()
 			stack.append(self)
