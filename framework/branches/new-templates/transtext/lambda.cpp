@@ -14,6 +14,7 @@ using namespace std;
 #define LOG(x)
 #endif
 
+namespace cppcms {
 namespace transtext {
 
 namespace lambda {
@@ -392,5 +393,7 @@ plural *compile(char const *str)
 } // namespace lambda
 
 } //ֳ Namespace gettext
+
+} // namespace cppcms
 
 

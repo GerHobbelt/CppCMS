@@ -111,7 +111,7 @@ class class_block:
 		output( "{")
 		if self.uses!='' : 
 			output( "\t%s &content;" % self.uses)
-			output( "\ttranstext::trans const *tr;" )
+			output( "\tcppcms::transtext::trans const *tr;" )
 			output( "\t%s(cppcms::worker_thread *_w,%s &_content): %s,content(_content)" % ( self.class_name,self.uses,constructor ))
 		else:
 			output( "\t%s(cppcms::worker_thread *_w): %s" % ( self.class_name,constructor ))

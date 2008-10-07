@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 
+namespace cppcms {
+
 namespace transtext {
 using namespace lambda;
 using namespace std;
@@ -86,4 +88,6 @@ char const *trans_thread_safe::ngettext(char const *s,char const *p,int n) const
 }
 
 
-};
+} // namespace transtex
+
+} // namespace cppcms

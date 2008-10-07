@@ -1,6 +1,9 @@
 #include "transtext.h"
 
 using namespace std;
+
+namespace cppcms {
+
 namespace transtext {
 
 static const trans default_trans;
@@ -59,4 +62,6 @@ trans_factory::~trans_factory()
 }
 
 
-};
+} // namespace transtext
+
+} // namespace cppcms

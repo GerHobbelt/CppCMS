@@ -1,10 +1,12 @@
-#ifndef TMPL_LAMBDA_H
-#define TMPL_LAMBDA_H
+#ifndef CPPCMS_TRANSTEXT_H
+#define CPPCMS_TRANSTEXT_H
 
 #include <map>
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+
+namespace cppcms {
 
 namespace transtext {
 using namespace std;
@@ -56,7 +58,9 @@ public:
 	~trans_factory();
 };
 
-}
+} // namespace transtext
+ 
+} // namespace cppcms
 
 
 #endif
