@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <cstdlib>
 
-using namespace transtext;
+using namespace tmpl::transtext;
 
 
 int main(int argc,char **argv)

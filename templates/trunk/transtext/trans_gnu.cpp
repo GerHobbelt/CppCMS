@@ -2,6 +2,7 @@
 #include <locale.h>
 #include <libintl.h>
 
+namespace tmpl {
 namespace transtext {
 
 void trans_gnu::load(char const * locale,char const *domain_name, char const * dirname)
@@ -21,4 +22,6 @@ char const *trans_gnu::ngettext(char const *s,char const *p,int n) const
 	return ::ngettext(s,p,n);
 }
 
-};
+}
+
+}

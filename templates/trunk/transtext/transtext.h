@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 
+namespace tmpl {
 namespace transtext {
 using namespace std;
 
@@ -62,6 +63,6 @@ public:
 };
 
 }
-
+}
 
 #endif

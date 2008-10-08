@@ -3,6 +3,9 @@
 #include <cstring>
 
 using namespace std;
+
+namespace tmpl {
+
 namespace transtext {
 
 trans const &trans_factory::get(string const &lang) const
@@ -60,4 +63,6 @@ trans_factory::~trans_factory()
 }
 
 
-};
+} // transtext
+
+} //tmpl
