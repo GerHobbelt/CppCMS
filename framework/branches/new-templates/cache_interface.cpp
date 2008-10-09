@@ -42,8 +42,9 @@ string deflate(string const &text,long level,long length)
 bool cache_iface::fetch_page(string const &key)
 {
 	if(!cms->caching_module) return false;
-	string tmp=cms->out_buf.str();
+	string tmp;
 	if(cms->caching_module->fetch_page(key,tmp,cms->gzip)) {
+		cms->cout<<tmp;
 		cms->gzip_done=true;
 		return true;
 	}

@@ -38,6 +38,11 @@ void worker_thread::add_header(string s) {
 	other_headers.push_back(s);
 };
 
+void worker_thread::set_cookie(cgicc::HTTPCookie const &c)
+{
+	response_header->setCookie(c);
+}
+
 void worker_thread::set_lang(string const &s)
 {
 	lang=s;
@@ -47,6 +52,11 @@ void worker_thread::set_lang(string const &s)
 transtext::trans const *worker_thread::domain_gettext(string const &domain)
 {
 	return &app.gettext->get(lang,domain);
+}
+
+HTTPHeader &worker_thread::header()
+{
+	return *response_header;
 }
 
 void worker_thread::run(cgicc_connection &cgi_conn)

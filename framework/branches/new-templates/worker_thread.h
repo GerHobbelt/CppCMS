@@ -42,10 +42,11 @@ class worker_thread: private boost::noncopyable {
 
 	transtext::trans const *gt;
 	string lang;
+	
+	auto_ptr<HTTPHeader> response_header;
 
 protected:
 	
-	auto_ptr<HTTPHeader> response_header;
 
 	url_parser url;
 	manager const &app;
@@ -57,6 +58,10 @@ protected:
 
 	void set_header(HTTPHeader *h);
 	void add_header(string s);
+	void set_cookie(cgicc::HTTPCookie const &c);
+
+	HTTPHeader &header();
+
 	void set_lang();
 	void set_lang(string const &s);
 
