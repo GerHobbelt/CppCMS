@@ -34,7 +34,6 @@ class worker_thread: private boost::noncopyable {
 	friend class cache_iface;
 	friend class base_view;
 
-	auto_ptr<HTTPHeader> response_header;
 	list<string> other_headers;
 	base_cache *caching_module;
 	bool gzip;
@@ -45,6 +44,8 @@ class worker_thread: private boost::noncopyable {
 	string lang;
 
 protected:
+	
+	auto_ptr<HTTPHeader> response_header;
 
 	url_parser url;
 	manager const &app;
@@ -68,6 +69,7 @@ protected:
 	inline void use_template(string s="") { current_template=s; };
 
 	void render(string name,base_content &content);
+	void render(string templ,string name,base_content &content);
 	virtual void main();
 public:
 	int id;

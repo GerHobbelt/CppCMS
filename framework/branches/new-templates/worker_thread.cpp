@@ -80,7 +80,7 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 	}
 	catch(std::exception const &e) {
 		string msg=e.what();
-		set_header(new HTTPStatusHeader(500,msg));
+		cgi_out<<HTTPStatusHeader(500,msg);
 		cgi_out<<"<html><body><p>"+msg+"</p><body></html>";
 		gzip=gzip_done=false;
 		other_headers.clear();
@@ -126,12 +126,17 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 	}
 }
 
-void worker_thread::render(string name,base_content &content)
+void worker_thread::render(string tmpl,string name,base_content &content)
 {
 	using cppcms::details::views_storage;
-	auto_ptr<base_view> p(views_storage::instance().fetch_view(current_template,name,this,&content));
+	auto_ptr<base_view> p(views_storage::instance().fetch_view(tmpl,name,this,&content));
 	if(!p.get()) throw cppcms_error("Template "+name+" not found");
 	p->render();	
+};
+
+void worker_thread::render(string name,base_content &content)
+{
+	render(current_template,name,content);
 };
 
 }

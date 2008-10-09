@@ -4,7 +4,7 @@ noinst_PROGRAMS = hello_world.fcgi
 dist_bin_SCRIPTS = cppcms_tmpl_cc
 
 hello_world_fcgi_SOURCES = hello_world.cpp hello_world_view1.cpp hello_world_view2.cpp
-hello_world_fcgi_LDADD = libcppcms.la transtext/libtranstext.la
+hello_world_fcgi_LDADD = libcppcms.la transtext/libcppcmstranstext.la
 hello_world_fcgi_CXXFLAGS= -Wall -I./transtext
 
 
@@ -21,9 +21,8 @@ libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp 
 	base_view.cpp
 
 libcppcms_la_LDFLAGS  = -version-info 0:0:0
-libcppcms_la_LIBADD = transtext/libtranstext.la
+libcppcms_la_LIBADD = @CPPCMS_LIBS@ transtext/libcppcmstranstext.la
 libcppcms_la_CXXFLAGS = -Wall -I./transtext
-libcppcms_la_LIBADD = @CPPCMS_LIBS@
 
 if EN_FORK_CACHE
 libcppcms_la_SOURCES += process_cache.cpp
