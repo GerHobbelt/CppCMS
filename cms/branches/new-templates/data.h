@@ -64,6 +64,7 @@ struct common_base : public base_content {
 	string media;
 	string base_url;
 	string blog_name;
+	string cookie_prefix;
 };
 struct admin_base : public common_base  {
 	string admin_url;
@@ -91,7 +92,7 @@ struct category {
 struct admin_editcats : public admin_base {
 	bool constraint_error;
 	string submit_url;
-	list<category> cats;
+	vector<category> cats;
 
 };
 
@@ -104,8 +105,8 @@ struct link {
 struct admin_editlinks : public admin_base {
 	bool error_not_empty;
 	string submit_url;
-	list<category> link_cats;
-	list<link> links;
+	vector<category> link_cats;
+	vector<link> links;
 };
 
 struct admin_editoptions : public admin_base {
@@ -113,13 +114,14 @@ struct admin_editoptions : public admin_base {
 };
 
 struct admin_editcontent : public admin_base {
-	bool is_open;
+	int is_open;
 	int post_id;
 	string submit_post_url,post_title,content,preview_url;
 };
 
 struct admin_editpost : public admin_editcontent {
-	list<category> cats_in,cats_out;
+	vector<category> cats_in;
+	list<category> cats_out;
 	string abstract,send_trackback_url;
 
 };
@@ -132,7 +134,7 @@ struct admin_login : public admin_base {
 struct short_post {
 	string title;
 	string edit_url;
-	bool published;
+	int published;
 };
 
 struct short_comment {
@@ -141,9 +143,9 @@ struct short_comment {
 };
 
 struct admin_main : public admin_base {
-	list<short_comment> comments;
-	list<short_post> posts;
-	list<short_post> pages;
+	vector<short_comment> comments;
+	vector<short_post> posts;
+	vector<short_post> pages;
 };
 
 struct admin_sendtrackback : public admin_base {
@@ -151,6 +153,11 @@ struct admin_sendtrackback : public admin_base {
 	string error_message;
 	bool success;
 	string goback;
+};
+
+struct admin_setupblog : public admin_base {
+	bool password_error,configured,field_error;
+	string submit;
 };
 
 };

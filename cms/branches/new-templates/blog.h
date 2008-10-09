@@ -11,12 +11,12 @@
 //
 #ifndef BLOG_H
 #define BLOG_H
+#include <tmpl/transtext.h>
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
 #include <dbixx/dbixx.h>
 #include <tmpl/renderer.h>
 #include <tmpl/content.h>
-#include <tmpl/transtext.h>
 #include <set>
 #include "views.h"
 #include "data.h"
@@ -25,8 +25,8 @@ using namespace std;
 using namespace cppcms;
 
 extern tmpl::template_data global_template;
-extern transtext::trans_factory tr;
-extern transtext::trans_gnu gnugt;
+extern tmpl::transtext::trans_factory tr;
+extern tmpl::transtext::trans_gnu gnugt;
 
 struct links_t {
 	string media;

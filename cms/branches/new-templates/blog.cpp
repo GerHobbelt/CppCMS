@@ -255,7 +255,9 @@ void Blog::page(string s_id,bool preview)
 	View_Main_Page view(this,c);
  	view.ini_page(id,preview);
 
+	string out;
 	render.render(c,"master",out);
+	cout<<out;
 
 	cache.store_page(s);
 }
@@ -270,6 +272,8 @@ void Blog::send_trackback()
 	int id=-1;
 	string url;
 
+	data::admin_sendtrackback c;
+
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
 		if(field=="url") {
@@ -280,7 +284,7 @@ void Blog::send_trackback()
 		}
 	}
 	if(url=="" || id==-1) {
-		c["error_no_url"]=true;
+		c.error_no_url=true;
 	}
 	else{
 		sql<<"SELECT title,abstract FROM posts WHERE id=?",id;
@@ -317,16 +321,15 @@ void Blog::send_trackback()
 		tb.excerpt(content);
 		string error;
 		bool result=tb.post(error);
-		c["success"]=result;
+		c.success=result;
 		if(!result)
-			c["error_message"]=error;
-		c["goback"]=str(boost::format(fmt.edit_post) % id);
+			c.error_message=error;
+		c.goback=str(boost::format(fmt.edit_post) % id);
 	}
 
-	View_Admin view(this,c);
-	view.ini_share();
-	c["master_content"]=string("admin_sendtrackback");
-	render.render(c,"admin",out);
+	View_Admin view(this);
+	view.ini_share(c);
+	worker_thread::render("admin_view","admin_sendtrackback",c);
 }
 
 
@@ -335,6 +338,7 @@ void Blog::admin_cache()
 	auth_or_throw();
 
 	const vector<FormEntry> &form=cgi->getElements();
+	data::admin_cache c;
 	unsigned i;
 	for(i=0;i<form.size();i++) {
 		string const &field=form[i].getName();
@@ -344,14 +348,17 @@ void Blog::admin_cache()
 	}
 	unsigned keys,triggers;
 	if(cache.stats(keys,triggers)) {
-		c["cache_keys"]=(int)keys;
-		c["submit_url"]=fmt.admin_cache;
+		c.cache_enabled=true;
+		c.cache_keys=(int)keys;
+		c.submit_url=fmt.admin_cache;
+	}
+	else {
+		c.cache_enabled=false;
 	}
 
-	View_Admin view(this,c);
-	view.ini_share();
-	c["master_content"]=string("admin_cache");
-	render.render(c,"admin",out);
+	View_Admin view(this);
+	view.ini_share(c);
+	worker_thread::render("admin_view","admin_cache",c);
 }
 
 void Blog::edit_options()
@@ -400,9 +407,10 @@ void Blog::edit_options()
 		tr.commit();
 	}
 
-	View_Admin view(this,c);
-	view.ini_options();
-	render.render(c,"admin",out);
+	data::admin_editoptions c;
+	View_Admin view(this);
+	view.ini_options(c);
+	worker_thread::render("admin_view","admin_editoptions",c);
 
 }
 
@@ -411,6 +419,8 @@ void Blog::edit_links()
 	auth_or_throw();
 
 	const vector<FormEntry> &form=cgi->getElements();
+
+	data::admin_editlinks c;
 
 	if(form.size()>0) {
 		unsigned i;
@@ -436,7 +446,7 @@ void Blog::edit_links()
 					tr.commit();
 				}
 				else {
-					c["not_empty"]=true;
+					c.error_not_empty=true;
 				}
 				break;
 			}
@@ -488,9 +498,9 @@ void Blog::edit_links()
 		cache.rise("links");
 	}
 
-	View_Admin view(this,c);
-	view.ini_links();
-	render.render(c,"admin",out);
+	View_Admin view(this);
+	view.ini_links(c);
+	worker_thread::render("admin_view","admin_editlinks",c);
 
 }
 
@@ -500,7 +510,9 @@ void Blog::edit_cats()
 {
 	auth_or_throw();
 
-	c["constraint_error"]=false;
+	data::admin_editcats c;
+
+	c.constraint_error=false;
 
 	const vector<FormEntry> &form=cgi->getElements();
 
@@ -543,7 +555,7 @@ void Blog::edit_cats()
 				row r;
 				sql<<"SELECT post_id FROM post2cat WHERE cat_id=? LIMIT 1",id;
 				if(sql.single(r)) {
-					c["constraint_error"]=true;
+					c.constraint_error=true;
 					tr.rollback();
 				}
 				else {
@@ -558,9 +570,10 @@ void Blog::edit_cats()
 		cache.rise("categories");
 	}
 
-	View_Admin view(this,c);
-	view.ini_cats();
-	render.render(c,"admin",out);
+	View_Admin view(this);
+	view.ini_cats(c);
+	string out;
+	worker_thread::render("admin_view","admin_editcats",c);
 
 }
 
@@ -708,7 +721,9 @@ void Blog::trackback(string sid)
 	}
 
 	set_header(new HTTPContentHeader("text/xml"));
+	string out;
 	render.render(c,"trackback",out);
+	cout<<out;
 }
 
 
@@ -731,7 +746,9 @@ void Blog::post(string s_id,bool preview)
 	View_Main_Page view(this,c);
 	view.ini_post(id,preview);
 
+	string out;
 	render.render(c,"master",out);
+	cout<<out;
 	if(!preview) {
 		string s=str(boost::format("comments_%1%") % id);
 		cache.add_trigger(s);
@@ -754,7 +771,9 @@ void Blog::main_page(string from,string cat)
 	}
 
 	view.ini_main(pid,false,cid);
+	string out;
 	render.render(c,"master",out);
+	cout<<out;
 
 	cache.add_trigger(str(boost::format("cat_%1%") % cid));
 	cache.store_page(key);
@@ -895,7 +914,9 @@ void Blog::add_comment(string &postid)
 		c["preview_message_content"]=incom.message;
 		View_Main_Page view(this,c);
 		view.ini_post(post_id,true);
+		string out;
 		render.render(c,"master",out);
+		cout<<out;
 		return;
 	}
 
@@ -932,9 +953,10 @@ void Blog::error_page(int what)
 	if(what==Error::AUTH) {
 		if(cache.fetch_page("login"))
 			return;
-		View_Admin view(this,c);
- 		view.ini_login();
-		render.render(c,"admin",out);
+		data::admin_login c;
+		View_Admin view(this);
+ 		view.ini_login(c);
+		worker_thread::render("admin_view","admin_login",c);
 		cache.store_page("login");
 	}
 	else {
@@ -944,7 +966,9 @@ void Blog::error_page(int what)
 		}
 		View_Main_Page view(this,c);
 		view.ini_error(what);
+		string out;
 		render.render(c,"master",out);
+		cout<<out;
 		if(what==Error::E404) {
 			cache.store_page("404");
 		}
@@ -1036,9 +1060,9 @@ void Blog::set_login_cookies(string u,string p,int d)
 	}
 	string blog_id=app.config.sval("blog.id","");
 	HTTPCookie u_c(blog_id + "username",u,"","",d,"/",false);
-	response_header->setCookie(u_c);
+	set_cookie(u_c);
 	HTTPCookie p_c(blog_id + "password",p,"","",d,"/",false);
-	response_header->setCookie(p_c);
+	set_cookie(p_c);
 }
 
 void Blog::login()
@@ -1077,10 +1101,11 @@ void Blog::admin()
 {
 	auth_or_throw();
 
-	View_Admin view(this,c);
-	view.ini_main();
-	render.render(c,"admin",out);
-
+	data::admin_main c;
+	View_Admin view(this);
+	view.ini_main(c);
+	use_template("admin_view");
+	worker_thread::render("admin_view","admin_main",c);
 }
 
 void Blog::setup_blog()
@@ -1088,8 +1113,9 @@ void Blog::setup_blog()
 	const vector<FormEntry> &form=cgi->getElements();
 
 
-	View_Admin view(this,c);
-	view.ini_share();
+	data::admin_setupblog c;
+	View_Admin view(this);
+	view.ini_share(c);
 
 	string name,description,author,pass1,pass2;
 
@@ -1122,21 +1148,21 @@ void Blog::setup_blog()
 	int n;
 	r>>n;
 
-	c["password_error"]=false;
-	c["configured"]=false;
-	c["field_error"]=false;
-	c["blog_name"]=string("CppBlog");
-	c["submit"]=fmt.admin;
+	c.password_error=false;
+	c.configured=false;
+	c.field_error=false;
+	c.blog_name=string("CppBlog");
+	c.submit=fmt.admin;
 
 	if(n!=0) {
-		c["configured"]=true;
+		c.configured=true;
 	}
 	else if(submit) {
 		if(pass1!=pass2) {
-			c["password_error"]=true;
+			c.password_error=true;
 		}
 		else if(name=="" || author=="" || description=="" || pass1=="") {
-			c["field_error"]=true;
+			c.field_error=true;
 		}
 		else {
 			transaction tr(sql);
@@ -1151,12 +1177,11 @@ void Blog::setup_blog()
 			sql<<	"INSERT INTO links(cat_id,title,url,description) "
 				"VALUES (?,'CppCMS','http://cppcms.sourceforge.net/','') ",rowid,exec();
 			tr.commit();
-			c["configured"]=true;
+			c.configured=true;
 		}
 	}
 
-	c["master_content"]=string("setup_blog");
-	render.render(c,"admin",out);
+	worker_thread::render("admin_view","admin_setupblog",c);
 }
 
 void Blog::update_comment(string sid)
@@ -1225,11 +1250,13 @@ void Blog::update_comment(string sid)
 void Blog::edit_comment(string sid)
 {
 	auth_or_throw();
+
 	int id=atoi(sid.c_str());
 
-	View_Admin view(this,c);
-	view.ini_cedit(id);
-	render.render(c,"admin",out);
+	data::admin_editcomment c;
+	View_Admin view(this);
+	view.ini_cedit(id,c);
+	worker_thread::render("admin_view","admin_editcomment",c);
 
 }
 void Blog::edit_post(string sid,string ptype)
@@ -1237,11 +1264,18 @@ void Blog::edit_post(string sid,string ptype)
 	auth_or_throw();
 
 	int id= (sid == "new") ? -1 : atoi(sid.c_str()) ;
-
-	View_Admin view(this,c);
-	view.ini_edit(id,ptype);
-	render.render(c,"admin",out);
-
+	if(ptype=="post"){
+		data::admin_editpost c;
+		View_Admin view(this);
+		view.ini_editpost(id,c);
+		worker_thread::render("admin_view","admin_editpost",c);
+	}
+	else {
+		data::admin_editpage c;
+		View_Admin view(this);
+		view.ini_editpage(id,c);
+		worker_thread::render("admin_view","admin_editpage",c);
+	}
 }
 
 void Blog::get_post(string sid,string ptype)
@@ -1523,7 +1557,9 @@ void Blog::feed(string cat)
 
 	view.ini_main(-1,true,cid);
 
+	string out;
 	render.render(c,"feed_posts",out);
+	cout<<out;
 
 	cache.add_trigger(str(boost::format("cat_%1%") % cid));
 	cache.store_page(key);
@@ -1539,7 +1575,9 @@ void Blog::feed_comments()
 
 	View_Main_Page view(this,c);
 	view.ini_rss_comments();
+	string out;
 	render.render(c,"feed_comments",out);
+	cout<<out;
 	cache.add_trigger("comments");
 	cache.store_page(key);
 }

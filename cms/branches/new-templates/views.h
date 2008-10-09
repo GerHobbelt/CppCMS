@@ -65,37 +65,19 @@ public:
 	void ini_rss_comments();
 };
 
-class View_Admin_Post {
-	Blog *blog;
-	content &c;
-public:
-	View_Admin_Post(Blog *b,content &con) : c(con) { blog=b;};
-	void ini(int id,string ptype);
-};
-
-class View_Admin_Main
-{
-	Blog *blog;
-	content &c;
-
-public:
-	View_Admin_Main(Blog *b,content &con): blog(b),c(con){};
-	void ini();
-};
-
 class View_Admin {
 	Blog *blog;
-	content &c;
 public:
-	View_Admin(Blog *b,content &con) : blog(b),c(con) {};
-	void ini_share();
-	void ini_main();
-	void ini_edit(int id,string ptype);
-	void ini_options();
-	void ini_links();
-	void ini_cats();
-	void ini_cedit(int id);
-	void ini_login();
+	View_Admin(Blog *b) : blog(b) {};
+	void ini_share(data::admin_base &c);
+	void ini_main(data::admin_main &c);
+	void ini_editpage(int id,data::admin_editpage &c);
+	void ini_editpost(int id,data::admin_editpost &c);
+	void ini_options(data::admin_editoptions &c);
+	void ini_links(data::admin_editlinks &c);
+	void ini_cats(data::admin_editcats &c);
+	void ini_cedit(int id,data::admin_editcomment &c);
+	void ini_login(data::admin_login &c);
 };
 
 #endif

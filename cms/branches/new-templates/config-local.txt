@@ -43,8 +43,8 @@ cache.limit=1000
 
 # libdbi.drivers="/path/to/user/placed/drivers"
 # dbi.debug=1
-# dbi.engine="mysql"
-dbi.engine="sqlite3"
+ dbi.engine="mysql"
+#dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
@@ -58,10 +58,8 @@ sqlite3.dir="./db/"
 pgsql.db="cppcms"
 pgsql.user="artik"
 
-#locale.gnugettext=1
-#locale.default = "he_IL.UTF-8" # For GNU GetText
-
-locale.default = "he"
 locale.dir = "./locale"
-locale.supported = "en,he"
-locale.multiple = 0
+locale.lang_list = { "he" "en" }
+locale.lang_default = "he"
+locale.domain_list = { "cppblog" }
+

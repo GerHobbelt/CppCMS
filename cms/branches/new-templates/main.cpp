@@ -10,8 +10,8 @@ using namespace std;
 using namespace cppcms;
 
 tmpl::template_data global_template;
-transtext::trans_gnu gnugt;
-transtext::trans_factory tr;
+tmpl::transtext::trans_gnu gnugt;
+tmpl::transtext::trans_factory tr;
 
 int main(int argc,char **argv)
 {

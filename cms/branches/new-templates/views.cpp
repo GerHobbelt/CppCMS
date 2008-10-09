@@ -532,32 +532,30 @@ void View_Main_Page::ini_error(int id)
 	}
 }
 
-void View_Admin::ini_share()
+void View_Admin::ini_share(data::admin_base &c)
 {
 	row r;
 	blog->sql<<
 		"SELECT value FROM options WHERE id=?",
 		(int)BLOG_TITLE;
-	string blog_name;
 	if(blog->sql.single(r))
-		r>>blog_name;
-	c["blog_name"]=blog_name;
-	c["media"]=blog->fmt.media;
-	c["base_url"]=blog->app.config.sval("blog.script_path");
-	c["admin_url"]=blog->fmt.admin;
-	c["logout_url"]=blog->fmt.logout;
-	c["new_post_url"]=blog->fmt.new_post;
-	c["new_page_url"]=blog->fmt.new_page;
-	c["edit_options_url"]=blog->fmt.edit_options;
-	c["edit_links_url"]=blog->fmt.edit_links;
-	c["edit_cats_url"]=blog->fmt.edit_cats;
-	c["admin_cache_url"]=blog->fmt.admin_cache;
-	c["cookie_prefix"]=blog->app.config.sval("blog.id","");
+		r>>c.blog_name;
+	c.media=blog->fmt.media;
+	c.base_url=blog->app.config.sval("blog.script_path");
+	c.admin_url=blog->fmt.admin;
+	c.logout_url=blog->fmt.logout;
+	c.new_post_url=blog->fmt.new_post;
+	c.new_page_url=blog->fmt.new_page;
+	c.edit_options_url=blog->fmt.edit_options;
+	c.edit_links_url=blog->fmt.edit_links;
+	c.edit_cats_url=blog->fmt.edit_cats;
+	c.admin_cache_url=blog->fmt.admin_cache;
+	c.cookie_prefix=blog->app.config.sval("blog.id","");
 }
 
-void View_Admin::ini_options()
+void View_Admin::ini_options(data::admin_editoptions &c)
 {
-	ini_share();
+	ini_share(c);
 	result res;
 	blog->sql<<"SELECT id,value FROM options",res;
 	row r;
@@ -566,36 +564,32 @@ void View_Admin::ini_options()
 		string val;
 		r>>id>>val;
 		if(id==BLOG_TITLE)
-			c["blog_name"]=val;
+			c.blog_name=val;
 		else if(id==BLOG_DESCRIPTION)
-			c["blog_description"]=val;
+			c.blog_description=val;
 		else if(id==BLOG_CONTACT)
-			c["blog_contact"]=val;
+			c.blog_contact=val;
 	}
 	blog->sql<<"SELECT value FROM text_options WHERE id='copyright'";
 	if(blog->sql.single(r)) {
 		string val;
-		r>>val;
-		c["copyright_string"]=val;
+		r>>c.copyright_string;
 	}
-	c["master_content"]=string("admin_editoptions");
-	c["post_options_url"]=blog->fmt.edit_options;
+	c.post_options_url=blog->fmt.edit_options;
 }
 
-void View_Admin::ini_login()
+void View_Admin::ini_login(data::admin_login &c)
 {
-	ini_share();
-	c["master_content"]=string("admin_login");
-	c["login_url"]=blog->fmt.login;
+	ini_share(c);
+	c.login_url=blog->fmt.login;
 }
 
-void View_Admin::ini_cedit(int id)
+void View_Admin::ini_cedit(int id,data::admin_editcomment &c)
 {
-	ini_share();
+	ini_share(c);
 
-	c["master_content"]=string("admin_editcomment");
-	c["edit_comment_url"]=str(format(blog->fmt.update_comment) % id);
-	c["id"]=id;
+	c.edit_comment_url=str(format(blog->fmt.update_comment) % id);
+	c.id=id;
 	string author,url,content,email;
 	blog->sql<<
 		"SELECT author,url,email,content "
@@ -605,31 +599,98 @@ void View_Admin::ini_cedit(int id)
 	if(!blog->sql.single(r)) {
 		throw Error(Error::E404);
 	}
-	r>>author>>url>>email>>content;
-	c["author"]=author;
-	c["url"]=url;
-	c["content"]=content;
-	c["email"]=email;
+	r>>c.author>>c.url>>c.email>>c.content;
 }
 
-void View_Admin::ini_edit(int id,string ptype)
+void View_Admin::ini_editpage(int id,data::admin_editpage &c)
 {
-	ini_share();
-	c["master_content"]=string("admin_editpost");
-	View_Admin_Post post(blog,c);
-	post.ini(id,ptype);
+	ini_share(c);
+
+	c.post_id=id;
+
+	if(id!=-1) {
+		c.post_id=id;
+		c.submit_post_url=str(format( blog->fmt.update_page) % id);
+		c.preview_url=str(format(blog->fmt.page_preview) % id);
+	}
+	else {
+		c.submit_post_url=blog->fmt.add_page;
+		c.is_open=0;
+		return;
+	}
+	row r;
+	blog->sql<<
+		"SELECT id,title,content,is_open "
+		"FROM pages "
+		"WHERE id=?",
+		id;
+	if(!blog->sql.single(r)){
+		throw Error(Error::E404);
+	}
+	r>>c.post_id>>c.post_title>>c.content>>c.is_open;
 }
 
-void View_Admin::ini_main()
+void View_Admin::ini_editpost(int id,data::admin_editpost &c)
 {
-	ini_share();
-	View_Admin_Main main(blog,c);
-	main.ini();
-	c["master_content"]=string("admin_main");
+	ini_share(c);
+	
+	c.post_id=id;
+	set<int> inset;
+	result res;
+	row r;
+	if(id!=-1) {
+		blog->sql<<
+			"SELECT cats.id,cats.name "
+			"FROM	post2cat "
+			"JOIN	cats ON post2cat.cat_id=cats.id "
+			"WHERE	post2cat.post_id=?",id;
+		blog->sql.fetch(res);
+		c.cats_in.resize(res.rows());
+		int i;
+		for(i=0;res.next(r);i++) {
+			int cid;
+			r>>cid>>c.cats_in[i].name;
+			inset.insert(cid);
+			c.cats_in[i].id=cid;
+		}
+	}
+
+	blog->sql<<"SELECT id,name FROM cats",res;
+	while(res.next(r)) {
+		data::category ctmp;
+		r>>ctmp.id>>ctmp.name;
+		if(inset.find(ctmp.id)==inset.end()) {
+			c.cats_out.push_back(ctmp);
+		}
+	}
+
+	if(id!=-1) {
+		c.submit_post_url=str(format( blog->fmt.update_post) % id);
+		c.preview_url=str(format(blog->fmt.preview) % id);
+		c.send_trackback_url=blog->fmt.send_trackback;
+	}
+	else {
+		c.submit_post_url=blog->fmt.add_post;
+		c.is_open=0;
+		return;
+	}
+
+	blog->sql<<
+		"SELECT title,abstract,content,is_open "
+		"FROM posts "
+		"WHERE id=?",
+		id;
+	if(!blog->sql.single(r)){
+		throw Error(Error::E404);
+	}
+	r>>	c.post_title>>
+		c.abstract>>c.content>>c.is_open;
+	
 }
 
-void View_Admin_Main::ini()
+void View_Admin::ini_main(data::admin_main &c)
 {
+	ini_share(c);
 	result rs;
 
 	blog->sql<<
@@ -639,18 +700,15 @@ void View_Admin_Main::ini()
 	blog->sql.fetch(rs);
 	row r;
 
-	content::vector_t &unpublished_posts=c.vector("posts",rs.rows());
+	c.posts.resize(rs.rows());
 
 	int i;
 	for(i=0;rs.next(r);i++) {
 		int id;
 		string intitle;
-		r>>id>>intitle;
+		r>>id>>c.posts[i].title;
 		string edit_url=str(format(blog->fmt.edit_post) % id);
-
-		unpublished_posts[i]["edit_url"]=edit_url;
-		if(intitle!="")
-			unpublished_posts[i]["title"]=intitle;
+		c.posts[i].edit_url=edit_url;
 	}
 
 	blog->sql<<
@@ -658,18 +716,13 @@ void View_Admin_Main::ini()
 		"FROM	pages ";
 	blog->sql.fetch(rs);
 
-	content::vector_t &pages=c.vector("pages",rs.rows());
+	c.pages.resize(rs.rows());
 
 	for(i=0;rs.next(r);i++) {
-		int id,is_open;
-		string title;
-		r>>id>>title>>is_open;
+		int id;
+		r>>id>>c.pages[i].title>>c.pages[i].published;
 		string edit_url=str(format(blog->fmt.edit_page) % id);
-
-		pages[i]["edit_url"]=edit_url;
-		if(title!="")
-			pages[i]["title"]=title;
-		pages[i]["published"]=bool(is_open);
+		c.pages[i].edit_url=edit_url;
 	}
 	blog->sql<<
 		"SELECT id,post_id,author "
@@ -677,174 +730,65 @@ void View_Admin_Main::ini()
 		"ORDER BY id DESC "
 		"LIMIT 10",rs;
 
-	content::vector_t &latest_comments=c.vector("comments",rs.rows());
+	c.comments.resize(rs.rows());
 
 	for(i=0;rs.next(r);i++) {
 		int id,c_id;
 		string author;
-		r>>c_id>>id>>author;
+		r>>c_id>>id>>c.comments[i].username;
 
-		latest_comments[i]["post_permlink"]=str(format(blog->fmt.post) % id);
-		latest_comments[i]["username"]=author;
-		latest_comments[i]["edit_url"]=str(format(blog->fmt.edit_comment) % c_id );
-		latest_comments[i]["id"]=c_id;
+		c.comments[i].post_permlink=str(format(blog->fmt.post) % id);
+		c.comments[i].edit_url=str(format(blog->fmt.edit_comment) % c_id );
+		c.comments[i].id=c_id;
 	}
 }
 
-void View_Admin_Post::ini(int id,string ptype)
+void View_Admin::ini_links(data::admin_editlinks &c)
 {
-	bool is_post=ptype=="post";
-	post_t post_data;
-	c["is_page"]=(bool)(!is_post);
-
-	if(is_post){
-		set<int> inset;
-		result res;
-		row r;
-		if(id!=-1) {
-			blog->sql<<
-				"SELECT cats.id,cats.name "
-				"FROM	post2cat "
-				"JOIN	cats ON post2cat.cat_id=cats.id "
-				"WHERE	post2cat.post_id=?",id;
-			blog->sql.fetch(res);
-
-			content::vector_t &cats_in=c.vector("cats_in",res.rows());
-			int i;
-			for(i=0;res.next(r);i++) {
-				int cid;
-				string name;
-				r>>cid>>name;
-				inset.insert(cid);
-				cats_in[i]["id"]=cid;
-				cats_in[i]["name"]=name;
-			}
-		}
-
-		content::list_t &cats_out=c.list("cats_out");
-		blog->sql<<"SELECT id,name FROM cats",res;
-		while(res.next(r)) {
-			int cid;
-			string name;
-			r>>cid>>name;
-			if(inset.find(cid)==inset.end()) {
-				cats_out.push_back(content());
-				cats_out.back()["id"]=cid;
-				cats_out.back()["name"]=name;
-			}
-		}
-
-	}
-
-	if(id!=-1) {
-		c["post_id"]=id;
-		c["submit_post_url"]=str(format( is_post ? blog->fmt.update_post : blog->fmt.update_page) % id);
-		if(is_post) {
-			c["preview_url"]=str(format(blog->fmt.preview) % id);
-			c["send_trackback_url"]=blog->fmt.send_trackback;
-		}
-		else
-			c["preview_url"]=str(format(blog->fmt.page_preview) % id);
-	}
-	else {
-		if(is_post)
-			c["submit_post_url"]=blog->fmt.add_post;
-		else
-			c["submit_post_url"]=blog->fmt.add_page;
-		return;
-	}
-	post_data.id=-1;
-	row r;
-	int is_open;
-	if(is_post){
-		blog->sql<<
-			"SELECT id,title,abstract,content,is_open "
-			"FROM posts "
-			"WHERE id=?",
-			id;
-		if(!blog->sql.single(r)){
-			throw Error(Error::E404);
-		}
-		r>>	post_data.id>>post_data.title>>
-			post_data.abstract>>post_data.content>>is_open;
-	}
-	else {
-		blog->sql<<
-			"SELECT id,title,content,is_open "
-			"FROM pages "
-			"WHERE id=?",
-			id;
-		if(!blog->sql.single(r)){
-			throw Error(Error::E404);
-		}
-		r>>	post_data.id>>post_data.title>>post_data.content>>is_open;
-	}
-
-	c["post_title"]=post_data.title;
-	if(is_post)
-		c["abstract"]=post_data.abstract;
-	c["content"]=post_data.content;
-	c["is_open"]=bool(is_open);
-}
-
-
-void View_Admin::ini_links()
-{
-	ini_share();
+	ini_share(c);
 	result res;
 	row r;
 	blog->sql<<
 		"SELECT id,name FROM link_cats",res;
-	content::vector_t &cats=c.vector("link_cats",res.rows());
+	c.link_cats.resize(res.rows());
 	int i;
 	for(i=0;res.next(r);i++) {
-		int id;
 		string name;
-		r>>id>>name;
-		cats[i]["id"]=id;
-		cats[i]["del"]=true;
-		cats[i]["name"]=name;
+		r>>c.link_cats[i].id>>c.link_cats[i].name;
+		c.link_cats[i].del=false;
 	}
 
-	c["master_content"]=string("admin_editlinks");
-	c["submit_url"]=blog->fmt.edit_links;
+	c.submit_url=blog->fmt.edit_links;
 
 	blog->sql<<
 		"SELECT id,cat_id,title,url,description "
 		"FROM links "
 		"ORDER BY cat_id",res;
-	content::vector_t &links=c.vector("links",res.rows());
+	c.links.resize(res.rows());
 
 	for(i=0;res.next(r);i++) {
-		int id,cat_id;
 		string title,url,description;
-		r>>id>>cat_id>>title>>url>>description;
-		links[i]["id"]=id;
-		links[i]["cat_id"]=cat_id;
-		links[i]["name"]=title;
-		links[i]["url"]=url;
-		if(description!="")
-			links[i]["descr"]=description;
+		r>>	c.links[i].id>>
+			c.links[i].cat_id>>
+			c.links[i].name>>
+			c.links[i].url>>
+			c.links[i].descr;
 	}
 }
 
 
-void View_Admin::ini_cats()
+void View_Admin::ini_cats(data::admin_editcats &c)
 {
-	ini_share();
+	ini_share(c);
 	result res;
 	row r;
 	blog->sql<<"SELECT id,name FROM cats",res;
-	content::vector_t &cats=c.vector("cats",res.rows());
+	c.cats.resize(res.rows());
 	int i;
 	for(i=0;res.next(r);i++) {
-		int id;
 		string name;
-		r>>id>>name;
-		cats[i]["id"]=id;
-		cats[i]["name"]=name;
+		r>>c.cats[i].id>>c.cats[i].name;
 	}
 
-	c["master_content"]=string("admin_editcats");
-	c["submit_url"]=blog->fmt.edit_cats;
+	c.submit_url=blog->fmt.edit_cats;
 }
