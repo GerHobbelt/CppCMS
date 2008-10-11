@@ -2,7 +2,7 @@
 	<% class hello uses view::hello extends master %>
 	<% template body() %>
 	<% if rtl %><% end %>
-		<h1><% title %></h1>
+		<% if not empty title %><h1><% title %></h1><% end %>
 		<p><% msg %></p>
 		<% foreach x in numbers %>
 			<ul>
