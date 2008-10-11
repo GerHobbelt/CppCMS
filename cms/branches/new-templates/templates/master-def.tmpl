@@ -1,9 +1,12 @@
-<% template master() %>
+<% namespace vary %>
+<% class master uses data::master extends master_base %>
+<% template master_content() %><% end %>
+<% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
+<title><% blog_name %><% if not empty subtitle %> :: <% subtitle %><% end %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" />
 <% if rtl %>
@@ -19,12 +22,11 @@
 <div id="page">
 <div id="header">
 <div id="navall" >
-	<% if def langlist %><% include lnglst %><% end %>
 	<div id="nav">
 		<ul>
-			<li><a href="http://cppcms.sourceforge.net/"><% gt 'Project' %></a></li>
-			<li><a href="http://cppcms.sourceforge.net/#downloads"><% gt 'Downloads' %></a></li>
-			<li><a class="selected" href="<% base_url | raw %>"><% gt 'Home' %></a></li>
+			<li><a href="http://cppcms.sourceforge.net/"><% gt "Project" %></a></li>
+			<li><a href="http://cppcms.sourceforge.net/#downloads"><% gt "Downloads" %></a></li>
+			<li><a class="selected" href="<% base_url | raw %>"><% gt "Home" %></a></li>
 		</ul>
 	</div>
 </div>
@@ -34,45 +36,47 @@
 
 <div id="path">
 
-<a href="<% base_url | raw %>"><% gt 'Home' %></a>
+<a href="<% base_url | raw %>"><% gt "Home" %></a>
 &nbsp;/&nbsp;
-<a href="<% rss_posts | raw %>"><% gt 'RSS' %></a>
+<a href="<% rss_posts | raw %>"><% gt "RSS" %></a>
 &nbsp;/&nbsp;
-<a href="<% rss_comments | raw %>"><% gt 'RSS Comments' %></a>
+<a href="<% rss_comments | raw %>"><% gt "RSS Comments" %></a>
 &nbsp;/&nbsp;
-<% if def category_name %>
-<a href="<% category_rss %>"><% gt 'RSS for %1%' using category_name %></a>
+<% if not empty category_name %>
+<a href="<% category_rss %>"><% gt "RSS for %1%" using category_name %></a>
 &nbsp;/&nbsp;
 <% end %>
-<a href="http://cppcms.sourceforge.net/"><% gt 'Project Site' %></a>
+<a href="http://cppcms.sourceforge.net/"><% gt "Project Site" %></a>
 &nbsp;/&nbsp;
-<a href="<% admin_url %>"><% gt 'Enter' %></a>
+<a href="<% admin_url %>"><% gt "Enter" %></a>
 </div>
 
 <% if not rtl %>
 	<div id="maincontent">
-	<% include ref master_content %>
+	<% include master_content() %>
 	</div>
 	<div id="sidecontent">
-	<% sidebar | raw %>
+	<% include sidebar() %>
 	</div>
 <% else %>
 	<div id="sidecontent">
-	<% sidebar | raw %>
+	<% include sidebar() %>
 	</div>
 	<div id="maincontent">
-	<% include ref master_content %>
+	<% include master_content() %>
 	</div>
 <% end %>
 
 <div id="footer">
-	<div id="copyrightdesign" ><% gt 'Based on Design by \la href="http://ContentedDesigns.com"\rContented Designs\l/a\r' %>
+	<div id="copyrightdesign" ><% gt "Based on Design by <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
 	</div>
 	<div id="footercontact">
-		<a href="<% if def blog_contact %><% blog_contact %><% else %>#<% end %>"><% gt 'Contact' %></a>
+		<a href="<% if not empty blog_contact %><% blog_contact %><% else %>#<% end %>"><% gt "Contact" %></a>
 	</div>
 </div>
 </div>
 </body>
 </html>
-<% end %>
+<% end template %>
+<% end class %>
+<% end namespace %>

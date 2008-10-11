@@ -60,12 +60,116 @@ struct option_t {
 
 
 namespace data {
+
+
 struct common_base : public base_content {
 	string media;
 	string base_url;
 	string blog_name;
 	string cookie_prefix;
 };
+
+/* PAGES */
+
+struct master : public common_base {
+
+	boost::function<void(string &)> on_sidebar_load();
+	boost::function<string(string)> markdown2html;
+	boost::function<string(string)> latex;
+
+	string sidebar;
+
+	string subtitle,blog_description, rss_posts,rss_comments,category_rss,category_name;
+	string admin_url,blog_contact;
+};
+
+struct error : public master {
+	bool error_404;
+	bool error_comment;
+	error() : error_404(false), error_comment(false) {}
+};
+
+struct category {
+	int id;
+	string name;
+	bool del;
+};
+
+
+struct post_data {
+	string permlink,title,author;
+	std::tm date;
+	list<category> post_cats;
+	int comment_count;
+	string edit_url;
+	int has_content;
+};
+
+struct main_page : public master {
+	vector<post_data> posts;
+	string next_page_link;
+};
+
+struct page: public master {
+	string title;
+	string content;
+};
+
+struct comment_data {
+	int id;
+	std::tm date;
+	string url,username,delete_url,content;
+};
+
+struct post : public master {
+	string preview_message_content;
+	string title;
+	std::tm date;
+	string author;
+	list<category> post_cats;
+	int comment_count;
+	string edit_url;
+	string abstract,content;
+	vector<comment_data> comments;
+	string trackback_part_1,trackback_part_2;
+	string post_comment_url_1,post_comment_url_2;
+};
+
+struct comment_feed {
+	int id;
+	string author,content,permlink;
+};
+
+struct feed_comments : public master {
+	vector<comment_feed> comments;
+};
+
+
+struct post_feed {
+	string title,permlink,abstract;	
+};
+
+struct feed_posts : public master {
+	vector<post_feed> posts;
+};
+
+struct trackback: public base_content {
+	int error;
+	string message;
+};
+
+struct sidebar : public base_contenr {
+	boost::function<string(string)> markdown2html;
+	string copyright_string;
+	struct page {string link,title;};
+	vector<page> pages;
+	struct cat { string link,name; };
+	vector<cat> cats;
+
+};
+
+/* ADMIN */
+
 struct admin_base : public common_base  {
 	string admin_url;
 	string logout_url;
@@ -83,12 +187,6 @@ struct admin_editcomment : public admin_base  {
 	int id;
 	string edit_comment_url,author,email,url,content;
 };
-struct category {
-	int id;
-	string name;
-	bool del;
-};
-
 struct admin_editcats : public admin_base {
 	bool constraint_error;
 	string submit_url;

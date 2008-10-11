@@ -1,63 +1,65 @@
+<% namespace vary %>
+<% class post uses data::post extends master %>
 <% template comment_preview() %>
-	<% if def preview_message_content %>
-	<dt id="preview" ><strong><% gt 'Preview of message content:' %></strong></dt>
+	<% if not empty preview_message_content %>
+	<dt id="preview" ><strong><% gt "Preview of message content:" %></strong></dt>
 	<dd><% preview_message_content | ext markdown2html %></dd>
 	<% end %>
-<% end %>
-<% template post() %>
+<% end template %>
+<% template master_content() %>
 <h1><a href="<% permlink %>"><% title %></a></h1>
 <div class="published">
-	<% gt '%1%, by %2% ' using date | strftime('%d/%m/%y'), author %>; 
+	<% gt "%1%, by %2% " using date | strftime("%d/%m/%y"), author %>; 
 	<% foreach cat in post_cats %>
-		<% gt 'Posted in:' %> 
+		<% gt "Posted in:" %> 
 		<% separator %>, <% item %><a href="<% cat.url %>"><% cat.name %></a><% end %>;
-	<% end %><a href="#comments_pos"><% ngt 'one comment','%1% comments', comment_count using comment_count %></a>
-	<% if def edit_url %>
-		| <a href="<% edit_url | raw %>"><% gt 'edit' %></a>
+	<% end %><a href="#comments_pos"><% ngt "one comment","%1% comments", comment_count using comment_count %></a>
+	<% if not empty edit_url %>
+		| <a href="<% edit_url | raw %>"><% gt "edit" %></a>
 	<%end%>
 </div>
 <% abstract | ext latex | ext markdown2html %>
-<% if def content %>
+<% if not empty content %>
 	<span id="more"></span>
 	<% content | ext latex | ext markdown2html %>
 <% end %>
 <div id="comments">
 <span id="comments_pos"></span>
 <% foreach comment in comments %>
-	<h2><% gt 'Comments' %></h2>
+	<h2><% gt "Comments" %></h2>
 	<dl>
 	<% item %>
 		<dt id="comment_<% comment.id %>" >
-			<%if def comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
- 			<% gt 'at ' %><% comment.date | strftime('%H:%M %d/%m/%y') %>
-			<% if def comment.delete_url %>
-				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('<% gt 'Are you shure?' %>'); " ><% gt 'delete' %></a>
-				| <a href="<% comment.edit_url | raw %>"><% gt 'edit' %></a>
+			<%if not empty comment.url %><a href="<% comment.url | raw %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
+ 			<% gt "at " %><% comment.date | strftime("%H:%M %d/%m/%y") %>
+			<% if not empty  comment.delete_url %>
+				| <a href="<% comment.delete_url | raw %>" onclick="return confirm('<% gt "Are you shure?" %>'); " ><% gt "delete" %></a>
+				| <a href="<% comment.edit_url | raw %>"><% gt "edit" %></a>
 			<% end %>
 		</dt>
 		<dd>
 		<% comment.content | ext markdown2html %>
 		</dd>
 	<% end %>
-		<% include comment_preview %>
+		<% include comment_preview() %>
 	</dl>
 <% empty %>
 	<dl>
-		<% include comment_preview %>
+		<% include comment_preview() %>
 	</dl>
 <% end %>
-	<p><% gt 'You can send a trackback to following url:' %>
+	<p><% gt "You can send a trackback to following url:" %>
 		<script type="text/javascript">
 		<!--
 		document.write('<a href')
 		document.write('="<% trackback_part_1 %>')
 		document.write('<% trackback_part_2 %>" >')
-		document.write('<% gt 'trackback' %>')
+		document.write('<% gt "trackback" %>')
 		document.write('</a>')
 		-->
 		</script>
 	</p>
-	<h2><% gt 'Add Comment:' %></h2>
+	<h2><% gt "Add Comment:" %></h2>
 	<script type="text/javascript">
 	<!--
                 /*  Form validation and simple-antispam */
@@ -90,7 +92,7 @@
                            || form.email.value.length == 0
                            || form.message.value.length  == 0)
                         {
-                                alert('<% gt 'Name, E-Mail, Message content are mandatory!' %>');
+                                alert('<% gt "Name, E-Mail, Message content are mandatory!" %>');
                                 return false; 
                         }
                         else {
@@ -113,25 +115,25 @@
 	</script>
 		<table>
 			<tr>
-				<td><% gt 'Name:' %></td>
+				<td><% gt "Name:" %></td>
 				<td><input type="text" name="username" /></td>
 			</tr>
 			<tr>
-				<td><% gt 'E-Mail:' %></td>
+				<td><% gt "E-Mail:" %></td>
 				<td><input type="text" name="email" /></td>
 			</tr>
 			<tr>
-				<td><% gt 'Site:' %></td>
+				<td><% gt "Site:" %></td>
 				<td><input type="text" name="url" /></td>
 			</tr>
 	 	</table>
 		<p>
-			<% gt 'You can write your messages using \la href="http://en.wikipedia.org/wiki/Markdown"\rMarkdown\l/a\r syntax.'%> 
+			<% gt "You can write your messages using <a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> syntax." %> 
 		</p>
 		<p><textarea name="message" cols="80" rows="10"><% preview_message_content %></textarea></p>
 		<p>
-			<input type="submit" name="submit" value="<% gt 'Submit' %>" /> 
-			<input type="submit" name="preview" value="<% gt 'Preview' %>" />
+			<input type="submit" name="submit" value="<% gt "Submit" %>" /> 
+			<input type="submit" name="preview" value="<% gt "Preview" %>" />
 		</p>
 	<script type="text/javascript">
 	<!--
@@ -141,7 +143,7 @@
 	</script>
 	<div id="removecomment">
 		<p>
-		<% gt 'You must enable JavaScript in order to post comments.' %>
+		<% gt "You must enable JavaScript in order to post comments." %>
 		</p>
 	</div>
 	<script type="text/javascript">
@@ -160,4 +162,6 @@
 	-->
 	</script>
 </div>
-<% end %>
+<% end template %>
+<% end class %>
+<% end namespace %>

@@ -1,7 +1,9 @@
-<% template feed_comments() %><?xml version="1.0" encoding="UTF-8"?>
+<% namespace vary %>
+<% class feed_comments uses data::feed_comments %>
+<% template render() %><?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-	<title><% blog_name %>::<% gt 'comments' %> </title>
+	<title><% blog_name %>::<% gt "comments" %> </title>
 	<link>http://<% host | raw %><% base_url | raw %></link>
 	<description><% blog_description %></description>
 	<atom:link 
@@ -23,4 +25,6 @@
 	<% end %>
 </channel>
 </rss>
-<% end %>
+<% end template %>
+<% end class %>
+<% end namespace %>
