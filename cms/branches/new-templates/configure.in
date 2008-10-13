@@ -12,7 +12,6 @@ AC_SUBST(LIBTOOL_DEPS)
 
 AC_LANG_CPLUSPLUS
 AC_CONFIG_FILES([Makefile cxxmarkdown/Makefile templates/Makefile])
-AC_CHECK_LIB(tmpl,main,[],[echo "tmpl library not installed" ; exit -1])
 AC_CHECK_LIB(curl,main,[],[echo "curl library not installed" ; exit -1])
 AC_CHECK_LIB(cppcms,main,[],[echo "cppcms library not installed" ; exit -1])
 AC_CHECK_LIB(dbixx,main,[],[echo "DBIXX library not installed" ; exit -1])

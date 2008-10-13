@@ -2,7 +2,7 @@ pkgdata_DATA = style.css adminstyle.css
 nobase_lib_LTLIBRARIES = libadmin_view.la libcontendend.la liborangesky.la
 libadmin_view_la_SOURCES = admin_view.cpp
 libcontendend_la_SOURCES = def.cpp
-liboramgesky_la_SOURCES = os.cpp
+liborangesky_la_SOURCES = os.cpp
 
 
 ADMIN_TEMPLATES=admin.tmpl admin_cache.tmpl admin_editcomment.tmpl admin_main.tmpl \

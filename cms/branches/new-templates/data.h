@@ -12,6 +12,7 @@
 
 #ifndef DATA_H
 #define DATA_H
+#include <boost/function.hpp>
 #include <cppcms/archive.h>
 #include <cppcms/base_view.h>
 #include <string>
@@ -73,7 +74,7 @@ struct common_base : public base_content {
 
 struct master : public common_base {
 
-	boost::function<void(string &)> on_sidebar_load();
+	boost::function<void(string &)> on_sidebar_load;
 	boost::function<string(string)> markdown2html;
 	boost::function<string(string)> latex;
 
@@ -81,6 +82,7 @@ struct master : public common_base {
 
 	string subtitle,blog_description, rss_posts,rss_comments,category_rss,category_name;
 	string admin_url,blog_contact;
+	string host;
 };
 
 struct error : public master {
@@ -92,12 +94,13 @@ struct error : public master {
 struct category {
 	int id;
 	string name;
+	string url;
 	bool del;
 };
 
 
 struct post_data {
-	string permlink,title,author;
+	string permlink,title,author,abstract;
 	std::tm date;
 	list<category> post_cats;
 	int comment_count;
@@ -118,7 +121,7 @@ struct page: public master {
 struct comment_data {
 	int id;
 	std::tm date;
-	string url,username,delete_url,content;
+	string url,username,delete_url,content,edit_url;
 };
 
 struct post : public master {
@@ -133,6 +136,7 @@ struct post : public master {
 	vector<comment_data> comments;
 	string trackback_part_1,trackback_part_2;
 	string post_comment_url_1,post_comment_url_2;
+	string permlink;
 };
 
 struct comment_feed {
@@ -158,14 +162,21 @@ struct trackback: public base_content {
 	string message;
 };
 
-struct sidebar : public base_contenr {
+struct sidebar : public base_content {
 	boost::function<string(string)> markdown2html;
 	string copyright_string;
 	struct page {string link,title;};
 	vector<page> pages;
 	struct cat { string link,name; };
 	vector<cat> cats;
-
+	struct link_cat {
+		string title;
+		struct link {
+			string href,title,description;
+		};
+		list<link> links;
+	};
+	list<link_cat> link_cats;
 };
 
 /* ADMIN */

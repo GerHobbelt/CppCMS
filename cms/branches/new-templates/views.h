@@ -16,7 +16,6 @@
 #include "data.h"
 #include <list>
 #include <vector>
-#include <tmpl/content.h>
 #include <set>
 
 using boost::shared_ptr;
@@ -26,9 +25,8 @@ class Blog;
 
 class View_Comment {
 	Blog *blog;
-	content &c;
 public:
-	View_Comment(Blog *b,content &con): c(con) { blog=b; };
+	View_Comment(Blog *b) blog(b){}
 	void init(comment_t &c);
 };
 
@@ -37,10 +35,9 @@ class View_Post {
 	Blog *blog;
 
 	void ini_share(post_t &p);
-	content &c;
 
 public:
-	View_Post(Blog *b,content &con): c(con) { blog=b; };
+	View_Post(Blog *b): blog(b) {}
 	void ini_short(post_t &p);
 	void ini_full(post_t &p);
 };
@@ -49,17 +46,13 @@ public:
 class View_Main_Page {
 	Blog *blog;
 	int error_code;
-	void ini_share();
-	void ini_sidebar(set<string> &triggers,content &c);
+	void ini_share(data::master &c);
+	void ini_sidebar(set<string> &triggers,data::sidebar &c);
 	void prepare_query(int,int,int);
-	content &c;
 public:
-	View_Main_Page(Blog *blog,content &con) : c(con)
-	{
-		this->blog=blog;
-	};
+	View_Main_Page(Blog *b) : blog(b) {}
 	void ini_post(int id,bool preview);
-	void ini_page(int id,bool preview);
+	void ini_page(int id,bool preview,data::page &c);
 	void ini_main(int id=-1,bool feed=false,int cat_id=-1);
 	void ini_error(int what);
 	void ini_rss_comments();

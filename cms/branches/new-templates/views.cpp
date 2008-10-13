@@ -206,16 +206,16 @@ struct blog_options : public serializable
 	virtual void save(archive &a) const { a<<name<<description<<contact; };
 };
 
-void View_Main_Page::ini_share()
+void View_Main_Page::ini_share(data::mater &c)
 {
 	int id;
 	string val;
 	result rs;
 	blog_options options;
 	if(blog->cache.fetch_data("options",options)){
-		c["blog_name"]=options.name;
-		c["blog_description"]=options.description;
-		c["blog_contact"]=options.contact;
+		c.blog_name=options.name;
+		c.blog_description=options.description;
+		c.blog_contact=options.contact;
 	}
 	else {
 		blog->sql<<"SELECT id,value FROM options";
@@ -224,21 +224,23 @@ void View_Main_Page::ini_share()
 		for(;rs.next(i);){
 			i >>id>>val;
 			if(id==BLOG_TITLE)
-				c["blog_name"]=options.name=val;
+				c.blog_name=options.name=val;
 			else if(id==BLOG_DESCRIPTION)
-				c["blog_description"]=options.description=val;
+				c.blog_description=options.description=val;
 			else if(id==BLOG_CONTACT && val!="")
-				c["blog_contact"]=options.contact=val;
+				c.blog_contact=options.contact=val;
 		}
 		blog->cache.store_data("options",options);
 	}
-	c["media"]=blog->fmt.media;
-	c["admin_url"]=blog->fmt.admin;
-	c["base_url"]=blog->app.config.sval("blog.script_path");
-	c["host"]=blog->app.config.sval("blog.host");
-	c["rss_posts"]=blog->fmt.feed;
-	c["rss_comments"]=blog->fmt.feed_comments;
-	c["cookie_prefix"]=blog->app.config.sval("blog.id","");
+	c.media=blog->fmt.media;
+	c.admin_url=blog->fmt.admin;
+	c.base_url=blog->app.config.sval("blog.script_path");
+	c.host=blog->app.config.sval("blog.host");
+	c.rss_posts=blog->fmt.feed;
+	c.rss_comments=blog->fmt.feed_comments;
+	c.cookie_prefix=blog->app.config.sval("blog.id","");
+
+	c.on_sidebar_load=
 
 	string sidebar;
 	if(blog->cache.fetch_frame("sidebar",sidebar)) {
@@ -465,10 +467,9 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 }
 
 
-void View_Main_Page::ini_page(int id,bool preview)
+void View_Main_Page::ini_page(int id,bool preview,data::page &c)
 {
-	ini_share();
-	c["master_content"]=string("page");
+	ini_share(c);
 	row r;
 	blog->sql<<
 		"SELECT title,content,is_open "
@@ -476,13 +477,9 @@ void View_Main_Page::ini_page(int id,bool preview)
 		"WHERE	id=?",id;
 	if(!blog->sql.single(r))
 		throw Error(Error::E404);
-	string title;
-	string content;
 	int is_open;
-	r >> title>>content>>is_open;
+	r >>c.title>>c.content>>is_open;
 	if(!is_open && !preview) throw Error(Error::E404);
-	c["content"]=content;
-	c["title"]=title;
 }
 
 void View_Main_Page::ini_post(int id,bool preview)

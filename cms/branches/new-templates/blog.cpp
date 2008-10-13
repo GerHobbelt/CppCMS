@@ -252,12 +252,11 @@ void Blog::page(string s_id,bool preview)
 		return;
 	}
 
-	View_Main_Page view(this,c);
- 	view.ini_page(id,preview);
+	data::page c;
+	View_Main_Page view(this);
+ 	view.ini_page(id,preview,c);
 
-	string out;
-	render.render(c,"master",out);
-	cout<<out;
+	render("master",c);
 
 	cache.store_page(s);
 }
