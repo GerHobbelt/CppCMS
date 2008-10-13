@@ -136,17 +136,28 @@ void worker_thread::run(cgicc_connection &cgi_conn)
 	}
 }
 
-void worker_thread::render(string tmpl,string name,base_content &content)
+void worker_thread::render(string tmpl,string name,base_content &content,ostream &out )
 {
 	using cppcms::details::views_storage;
-	auto_ptr<base_view> p(views_storage::instance().fetch_view(tmpl,name,this,&content));
+	base_view::settings s(this,&out);
+	auto_ptr<base_view> p(views_storage::instance().fetch_view(tmpl,name,s,&content));
 	if(!p.get()) throw cppcms_error("Template "+name+" not found");
 	p->render();	
 };
 
+void worker_thread::render(string tmpl,string name,base_content &content)
+{
+	render(tmpl,name,content,cout);
+};
+
+void worker_thread::render(string name,base_content &content,ostream &o)
+{
+	render(current_template,name,content,o);
+};
+
 void worker_thread::render(string name,base_content &content)
 {
-	render(current_template,name,content);
+	render(current_template,name,content,cout);
 };
 
 }

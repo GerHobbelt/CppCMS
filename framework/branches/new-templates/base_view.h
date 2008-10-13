@@ -21,13 +21,20 @@ public:
 };
 
 class base_view {
+public:
+	struct settings {
+		worker_thread *worker;
+		ostream *output;
+		settings(worker_thread *w) : worker(w) , output(&w->cout) {};
+		settings(worker_thread *w,ostream *o) : worker(w), output(o) {};
+	};
 protected:
 	worker_thread &worker;
 	ostream &cout;
 
-	base_view(worker_thread *w) :
-		worker(*w),
-		cout(w->cout)
+	base_view(settings s) :
+		worker(*s.worker),
+		cout(*s.output)
 	{
 	}
 
@@ -73,16 +80,16 @@ namespace details {
 
 template<typename T,typename VT>
 struct view_builder {
-        base_view *operator()(worker_thread *w,base_content *c) {
+        base_view *operator()(base_view::settings s,base_content *c) {
 		VT *p=dynamic_cast<VT *>(c);
 		if(!p) throw cppcms_error("Incorrect content type");
-		return new T(w,*p);
+		return new T(s,*p);
 	};
 };
 
 class views_storage {
 public:
-	typedef boost::function<base_view *(worker_thread *w,base_content *c)> view_factory_t;
+	typedef boost::function<base_view *(base_view::settings s,base_content *c)> view_factory_t;
 private:
 	typedef map<string,view_factory_t> template_views_t;
 	typedef map<string,template_views_t> templates_t;
@@ -94,7 +101,7 @@ public:
 			string view_name,
 			view_factory_t);
 	void remove_views(string template_name);
-	base_view *fetch_view(string template_name,string view_name,worker_thread *w,base_content *c);
+	base_view *fetch_view(string template_name,string view_name,base_view::settings ,base_content *c);
 	static views_storage &instance();
 };
 

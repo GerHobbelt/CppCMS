@@ -103,20 +103,20 @@ class class_block:
 	type='class'
 	def declare(self):
 		if self.extends=='' :
-			constructor='cppcms::base_view(_w)'
+			constructor='cppcms::base_view(_s)'
 			self.extends='cppcms::base_view'
 		else:
-			constructor='%s(_w,_content)' % self.extends;
+			constructor='%s(_s,_content)' % self.extends;
 		output( "struct %s :public %s" % (self.class_name , self.extends ))
 		output( "{")
 		if self.uses!='' : 
 			output( "\t%s &content;" % self.uses)
 			output( "\tcppcms::transtext::trans const *tr;" )
-			output( "\t%s(cppcms::worker_thread *_w,%s &_content): %s,content(_content)" % ( self.class_name,self.uses,constructor ))
+			output( "\t%s(cppcms::base_view::settings _s,%s &_content): %s,content(_content)" % ( self.class_name,self.uses,constructor ))
 		else:
-			output( "\t%s(cppcms::worker_thread *_w): %s" % ( self.class_name,constructor ))
+			output( "\t%s(cppcms::base_view::settings _s): %s" % ( self.class_name,constructor ))
 		output("\t{")
-		output('\t\ttr=_w->domain_gettext("%s");' % gettext_domain() )
+		output('\t\ttr=_s.worker->domain_gettext("%s");' % gettext_domain() )
 		output("\t};")
 
 	def use(self,m):

@@ -75,6 +75,8 @@ protected:
 
 	void render(string name,base_content &content);
 	void render(string templ,string name,base_content &content);
+	void render(string name,base_content &content,ostream &);
+	void render(string templ,string name,base_content &content,ostream &);
 	virtual void main();
 public:
 	int id;
