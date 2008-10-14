@@ -1060,7 +1060,6 @@ void Blog::admin()
 	data::admin_main c;
 	View_Admin view(this);
 	view.ini_main(c);
-	use_template("admin_view");
 	render("admin_view","admin_main",c);
 }
 

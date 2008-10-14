@@ -460,14 +460,14 @@ void View_Main_Page::ini_page(int id,bool preview,data::page &c)
 		throw Error(Error::E404);
 	int is_open;
 	r >>c.title>>c.content>>is_open;
+	c.subtitle=c.title;
 	if(!is_open && !preview) throw Error(Error::E404);
 }
 
 void View_Main_Page::ini_post(int id,bool preview,data::post &c)
 {
 	View_Post post_v(blog);
-	data::post post;
-	post.id=-1;
+	c.id=-1;
 	row r;
 	blog->sql<<
 		"SELECT posts.id,users.username,posts.title, "
@@ -480,11 +480,11 @@ void View_Main_Page::ini_post(int id,bool preview,data::post &c)
 	if(!blog->sql.single(r)) {
 		throw Error(Error::E404);
 	}
-	r>>	post.id>>post.author>>post.title>>
-		post.abstract>>post.content>>
-		post.date>>post.is_open>>post.comment_count;
+	r>>	c.id>>c.author>>c.title>>
+		c.abstract>>c.content>>
+		c.date>>c.is_open>>c.comment_count;
 
-	if(post.id==-1 || (!post.is_open && !preview)){
+	if(c.id==-1 || (!c.is_open && !preview)){
 		throw Error(Error::E404);
 	}
 
