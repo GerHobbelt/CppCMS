@@ -141,7 +141,7 @@ void worker_thread::render(string tmpl,string name,base_content &content,ostream
 	using cppcms::details::views_storage;
 	base_view::settings s(this,&out);
 	auto_ptr<base_view> p(views_storage::instance().fetch_view(tmpl,name,s,&content));
-	if(!p.get()) throw cppcms_error("Template "+name+" not found");
+	if(!p.get()) throw cppcms_error("Template `"+name+"' not found in template set `" + tmpl +"'");
 	p->render();	
 };
 
