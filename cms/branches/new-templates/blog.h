@@ -89,6 +89,8 @@ public:
 private:
 	void create_gif(string const &tex,string const &fname);
 	void latex_filter(string const &in,string &out);
+	string latex(string);
+	string markdown(string);
 	void auth_or_throw();
 
 	void admin();
@@ -111,7 +113,6 @@ private:
 	bool auth();
 	void feed(string scatid);
 	void feed_comments();
-	void set_lang();
 	void edit_options();
 	void edit_cats();
 	void count_comments(int id);
@@ -124,7 +125,6 @@ private:
 public:
 	links_t fmt;
 	virtual void main();
-	void date(std::tm t,string &s);
 	Blog(manager const &s) :
 		worker_thread(s)
 	{

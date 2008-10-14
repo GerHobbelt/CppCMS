@@ -22,110 +22,89 @@ using boost::str;
 
 using namespace dbixx;
 
-void View_Comment::init(comment_t &com)
+
+void View_Post::ini_share(data::post_data &c)
 {
-	c["username"]=com.author;
-	if(com.url.size()!=0){
-		c["url"]=com.url;
-	}
-	c["content"]=com.content;
-	c["date"]=com.publish_time;
-	c["id"]=com.id;
 	if(blog->userid!=-1){
-		c["delete_url"]=str(format(blog->fmt.del_comment) % com.id);
-		c["edit_url"]=str(format(blog->fmt.edit_comment) % com.id);
+		c.edit_url=str(format(blog->fmt.edit_post) % c.id);
 	}
+	c.permlink=str(format(blog->fmt.post) % c.id);
 }
 
-void View_Post::ini_share(post_t &p)
+void View_Post::ini_full(data::post &c)
 {
-	c["title"]=p.title;
-	c["subtitle"]=p.title;
-	c["date"]=p.publish;
-	c["author"]=p.author_name;
-
-	if(blog->userid!=-1){
-		c["edit_url"]=str(format(blog->fmt.edit_post) % p.id);
-	}
-	c["permlink"]=str(format(blog->fmt.post) % p.id);
-	c["comment_count"]=p.comment_count;
-}
-
-void View_Post::ini_full(post_t &p)
-{
-	ini_share(p);
-	c["abstract"]=p.abstract;
-	if(p.content!="") {
-		c["content"]=p.content;
-		c["has_content"]=true;
+	ini_share(c);
+	
+	c.subtitle=c.title;
+	
+	if(c.content!="") {
+		c.has_content=true;
 	}
 	else {
-		c["has_content"]=false;
+		c.has_content=false;
 	}
 
 	// Simple ANTI SPAM protection
-	string post_comment=str(format(blog->fmt.add_comment) % p.id);
+	string post_comment=str(format(blog->fmt.add_comment) % c.id);
 	int n=post_comment.size()/2;
 	string post_comment_url_2=post_comment.substr(n);
 	string post_comment_url_1=post_comment.substr(0,n);
-	c["post_comment_url_1"]=post_comment_url_1;
-	c["post_comment_url_2"]=post_comment_url_2;
+	c.post_comment_url_1=post_comment_url_1;
+	c.post_comment_url_2=post_comment_url_2;
 
-	string trackback=str(format(blog->fmt.trackback) % p.id);
+	string trackback=str(format(blog->fmt.trackback) % c.id);
 	n=trackback.size()/2;
 	string tb_2=trackback.substr(n);
 	string tb_1=trackback.substr(0,n);
-	c["trackback_part_1"]=tb_1;
-	c["trackback_part_2"]=tb_2;
+	c.trackback_part_1=tb_1;
+	c.trackback_part_2=tb_2;
 
 	result rs;
 	blog->sql<<
-		"SELECT id,author,email,url,publish_time,content "
+		"SELECT id,author,url,publish_time,content "
 		"FROM comments "
 		"WHERE post_id=? "
-		"ORDER BY publish_time",p.id;
+		"ORDER BY publish_time",c.id;
 	blog->sql.fetch(rs);
 
 	row cur;
 
-	content::vector_t &comments_list=c.vector("comments",rs.rows());
+	c.comments.resize(rs.rows());
 
 	int i;
 	for(i=0;rs.next(cur);i++)
 	{
-		View_Comment com(blog,comments_list[i]);
-
-		comment_t comment;
-		cur	>> comment.id >>comment.author >> comment.email >> comment.url
-			>> comment.publish_time >> comment.content ;
-
-		com.init(comment);
+		data::comment_data &com=c.comments[i];
+		cur	>> com.id >>com.username >> com.url
+			>> com.date >> com.content ;
+		if(blog->userid!=-1){
+			com.delete_url=str(format(blog->fmt.del_comment) % c.id);
+			com.edit_url=str(format(blog->fmt.edit_comment) % c.id);
+		}
 	}
 
 	blog->sql<<
 		"SELECT post2cat.cat_id,cats.name "
 		"FROM	post2cat "
 		"JOIN	cats ON post2cat.cat_id=cats.id "
-		"WHERE	post2cat.post_id=?",p.id,rs;
-	content::vector_t &cats=c.vector("post_cats",rs.rows());
+		"WHERE	post2cat.post_id=?",c.id,rs;
+	c.post_cats.resize(rs.rows());
 	for(i=0;rs.next(cur);i++) {
+		data::category cat;
 		int id;
-		string name;
-		cur>>id>>name;
-		cats[i]["url"]=str(format(blog->fmt.cat) % id);
-		cats[i]["name"]=name;
+		cur>>id>>cat.name;
+		cat.url=str(format(blog->fmt.cat) % id);
+		c.post_cats.push_back(cat);
 	}
 }
 
 
-void View_Post::ini_short(post_t &p)
+void View_Post::ini_short(data::post_data &p)
 {
 	ini_share(p);
-	c["abstract"]=p.abstract;
-	c["has_content"]=(bool)p.has_content;
 }
 
-void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
+void View_Main_Page::ini_sidebar(set<string> &triggers,data::sidebar &c)
 {
 	result res;
 	row r;
@@ -135,8 +114,7 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 		"WHERE	id='copyright'";
 	if(blog->sql.single(r)){
 		string val;
-		r>>val;
-		c["copyright_string"]=val;
+		r>>c.copyright_string;
 	}
 
 	triggers.insert("options");
@@ -145,14 +123,12 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 		"SELECT id,title "
 		"FROM	pages "
 		"WHERE	is_open=1",res;
-	content::vector_t &pages=c.vector("pages",res.rows());
+	c.pages.resize(res.rows());
 	int i;
 	for(i=0;res.next(r);i++) {
 		int id;
-		string title;
-		r>>id>>title;
-		pages[i]["title"]=title;
-		pages[i]["link"]=str(boost::format(blog->fmt.page) % id);
+		r>>id>>c.pages[i].title;
+		c.pages[i].link=str(boost::format(blog->fmt.page) % id);
 		triggers.insert(str(boost::format("page_%1%") % id));
 	}
 	triggers.insert("pages");
@@ -163,40 +139,39 @@ void View_Main_Page::ini_sidebar(set<string> &triggers,content &c)
 		"WHERE links.cat_id=link_cats.id "
 		"ORDER BY link_cats.id",res;
 
-	content::list_t &link_cats=c.list("link_cats");
+	list<data::sidebar::link_cat> &link_cats=c.link_cats;
 	int previd=-1;
-	content::list_t *lptr=NULL;
+	list<data::sidebar::link_cat::link> *lptr=NULL;
 	while(res.next(r)){
 		int id;
 		string gname,title,url,descr;
 		r>>id>>gname>>title>>url>>descr;
 		if(previd==-1 || id!=previd) {
-			link_cats.push_back(content());
-			link_cats.back()["title"]=gname;
-			lptr=&(link_cats.back().list("links"));
+			data::sidebar::link_cat content;
+			content.title=gname;
+			link_cats.push_back(content);
+			lptr=&(link_cats.back().links);
 			previd=id;
 		}
-		lptr->push_back(content());
-		content &ctmp=lptr->back();
-		ctmp["href"]=url;
-		ctmp["title"]=title;
-		if(descr!="")
-			ctmp["description"]=descr;
+		data::sidebar::link_cat::link ctmp;
+		ctmp.href=url;
+		ctmp.title=title;
+		ctmp.description=descr;
+		lptr->push_back(ctmp);
 	}
 
 	triggers.insert("links");
 
 	blog->sql<<"SELECT id,name FROM	cats",res;
-	content::vector_t &cats=c.vector("cats",res.rows());
+	c.cats.resize(res.rows());
 	for(i=0;res.next(r);i++) {
 		int id;
 		string name;
-		r>>id>>name;
-		cats[i]["link"]=str(boost::format(blog->fmt.cat) % id);
-		cats[i]["name"]=name;
+		r>>id>>c.cats[i].name;
+		c.cats[i].link=str(boost::format(blog->fmt.cat) % id);
 	}
 	triggers.insert("categories");
-
+	c.markdown2html=boost::bind(&Blog::markdown,blog,_1);
 }
 
 struct blog_options : public serializable
@@ -206,7 +181,7 @@ struct blog_options : public serializable
 	virtual void save(archive &a) const { a<<name<<description<<contact; };
 };
 
-void View_Main_Page::ini_share(data::mater &c)
+void View_Main_Page::ini_share(data::master &c)
 {
 	int id;
 	string val;
@@ -240,43 +215,48 @@ void View_Main_Page::ini_share(data::mater &c)
 	c.rss_comments=blog->fmt.feed_comments;
 	c.cookie_prefix=blog->app.config.sval("blog.id","");
 
-	c.on_sidebar_load=
+	c.on_sidebar_load=boost::bind(
+			&View_Main_Page::on_sidebar_load,
+			this,
+			_1);
+	c.markdown2html=boost::bind(&Blog::markdown,blog,_1);
+	c.latex=boost::bind(&Blog::latex,blog,_1);
 
-	string sidebar;
-	if(blog->cache.fetch_frame("sidebar",sidebar)) {
-		c["sidebar"]=sidebar;
-	}
-	else {
-		sidebar.reserve(16000);
-		content sbar_content;
-		set<string> triggers;
-		ini_sidebar(triggers,sbar_content);
-		blog->render.render(sbar_content,"sidebar",sidebar);
-		c["sidebar"]=sidebar;
-		blog->cache.store_frame("sidebar",sidebar,triggers);
-	}
 }
 
-void View_Main_Page::ini_rss_comments()
+void View_Main_Page::on_sidebar_load(string &sidebar)
 {
-	ini_share();
+	if(blog->cache.fetch_frame("sidebar",sidebar)) {
+		return;
+	}
+	
+	ostringstream oss;
+	
+	data::sidebar c;
+	set<string> triggers;
+	ini_sidebar(triggers,c);
+	blog->render("sidebar",c,oss);
+	sidebar=oss.str();
+	
+	blog->cache.store_frame("sidebar",sidebar,triggers);
+}
+
+void View_Main_Page::ini_rss_comments(data::feed_comments &c)
+{
+	ini_share(c);
 	result res;
 	blog->sql<<
 		"SELECT id,post_id,author,content "
 		"FROM comments "
 		"ORDER BY id DESC "
 		"LIMIT 10",res;
-	content::vector_t &comments=c.vector("comments",res.rows());
+	c.comments.resize(res.rows());
 	row r;
 	int i;
 	for(i=0;res.next(r);i++){
-		int id,pid;
-		string author,content;
-		r>>id>>pid>>author>>content;
-		comments[i]["permlink"]=str(boost::format(blog->fmt.post) % pid);
-		comments[i]["author"]=author;
-		comments[i]["content"]=content;
-		comments[i]["id"]=id;
+		int pid;
+		r>>c.comments[i].id>>pid>>c.comments[i].author>>c.comments[i].content;
+		c.comments[i].permlink=str(boost::format(blog->fmt.post) % pid);
 	}
 }
 
@@ -346,13 +326,14 @@ void View_Main_Page::prepare_query(int cat_id,int id,int max_posts)
 	}
 }
 
-void View_Main_Page::ini_main(int id,bool feed,int cat_id)
+void View_Main_Page::ini_main(int id,bool feed,int cat_id,data::main_page &c)
 {
-	ini_share();
+	ini_share(c);
 
 	int max_posts=feed ? 10 : 5;
 
-	content::vector_t &latest_posts=c.vector("posts",max_posts);
+	c.posts.resize(max_posts);
+	vector<data::post_data> &latest_posts=c.posts;
 
 	result rs;
 
@@ -365,30 +346,31 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 
 	std::tm first,last;
 
-	std::map<int,content::list_t *> post2cat_list;
+	std::map<int,list<data::category> *> post2cat_list;
 
 	for(counter=1,n=0;rs.next(r);counter++) {
 		if(counter==max_posts+1) {
 			int id;
 			r>>id;
 			if(cat_id==-1)
-				c["next_page_link"]=str(format(blog->fmt.main_from) % id);
+				c.next_page_link=str(format(blog->fmt.main_from) % id);
 			else
-				c["next_page_link"]=str(format(blog->fmt.cat_from) % cat_id % id);
+				c.next_page_link=str(format(blog->fmt.cat_from) % cat_id % id);
 			break;
 		}
-		post_t post;
+		
+		data::post_data &post=latest_posts[n];
 
 		r>>post.id;
-		r>>post.author_name;
+		r>>post.author;
 		r>>post.title;
 		r>>post.abstract;
 		r>>post.has_content;
-		r>>post.publish;
+		r>>post.date;
 		r>>post.comment_count;
 
 		if(!feed){
-			post2cat_list[post.id]=&(latest_posts[n].list("post_cats"));
+			post2cat_list[post.id]=&post.post_cats;
 		}
 
 		blog->cache.add_trigger(str(boost::format("post_%1%") % post.id));
@@ -396,15 +378,12 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 			blog->cache.add_trigger(str(boost::format("comments_%1%") % post.id));
 
 		if(counter==1)
-			first=post.publish;
-		last=post.publish;
+			first=post.date;
+		last=post.date;
 
-		View_Post post_v(blog,latest_posts[n]);
+		View_Post post_v(blog);
 		post_v.ini_short(post);
 		n++;
-	}
-	if(n<max_posts){
-		latest_posts.resize(n);
 	}
 
 	string cat_name;
@@ -440,12 +419,12 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 			if(cid==cat_id && cat_name==""){
 				cat_name=name;
 			}
-			map<int,content::list_t *>::iterator ptr;
+			map<int,list<data::category> *>::iterator ptr;
 			if((ptr=post2cat_list.find(pid))!=post2cat_list.end()) {
-				content::list_t &temp=(*(ptr->second));
-				temp.push_back(content());
-				temp.back()["name"]=name;
-				temp.back()["url"]=str(format(blog->fmt.cat) % cid);
+				list<data::category> &temp=(*(ptr->second));
+				temp.push_back(data::category());
+				temp.back().name=name;
+				temp.back().url=str(format(blog->fmt.cat) % cid);
 			}
 		}
 	}
@@ -458,12 +437,14 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id)
 				throw Error(Error::E404);
 			r>>cat_name;
 		}
-		c["category_name"]=cat_name;
-		c["category_rss"]=str(format(blog->fmt.feed_cats) % cat_id);
-		c["subtitle"]=cat_name;
+		c.category_name=cat_name;
+		c.category_rss=str(format(blog->fmt.feed_cats) % cat_id);
+		c.subtitle=cat_name;
 	}
-
-	c["master_content"]=string("main_page");
+	
+	if(n<max_posts){
+		latest_posts.resize(n);
+	}
 }
 
 
@@ -482,10 +463,10 @@ void View_Main_Page::ini_page(int id,bool preview,data::page &c)
 	if(!is_open && !preview) throw Error(Error::E404);
 }
 
-void View_Main_Page::ini_post(int id,bool preview)
+void View_Main_Page::ini_post(int id,bool preview,data::post &c)
 {
-	View_Post post_v(blog,c);
-	post_t post;
+	View_Post post_v(blog);
+	data::post post;
 	post.id=-1;
 	row r;
 	blog->sql<<
@@ -499,32 +480,30 @@ void View_Main_Page::ini_post(int id,bool preview)
 	if(!blog->sql.single(r)) {
 		throw Error(Error::E404);
 	}
-	r>>	post.id>>post.author_name>>post.title>>
+	r>>	post.id>>post.author>>post.title>>
 		post.abstract>>post.content>>
-		post.publish>>post.is_open>>post.comment_count;
+		post.date>>post.is_open>>post.comment_count;
 
 	if(post.id==-1 || (!post.is_open && !preview)){
 		throw Error(Error::E404);
 	}
 
-	ini_share();
+	ini_share(c);
 
-	post_v.ini_full(post);
-	c["master_content"]=string("post");
+	post_v.ini_full(c);
 }
 
-void View_Main_Page::ini_error(int id)
+void View_Main_Page::ini_error(int id,data::error &c)
 {
-	ini_share();
-	c["master_content"]=string("error");
+	ini_share(c);
 	switch(id){
 	case Error::E404:
-		c["error_404"]=true;
-		c["error_comment"]=false;
+		c.error_404=true;
+		c.error_comment=false;
 		break;
 	case Error::COMMENT_FIELDS:
-		c["error_404"]=false;
-		c["error_comment"]=true;
+		c.error_404=false;
+		c.error_comment=true;
 		break;
 	}
 }

@@ -98,14 +98,30 @@ struct category {
 	bool del;
 };
 
+struct comment_data {
+	int id;
+	std::tm date;
+	string url,username,delete_url,content,edit_url;
+};
+
 
 struct post_data {
+	int id;
+	int is_open;
 	string permlink,title,author,abstract;
 	std::tm date;
 	list<category> post_cats;
 	int comment_count;
 	string edit_url;
 	int has_content;
+};
+
+struct post : public master,public post_data {
+	string preview_message_content;
+	string content;
+	vector<comment_data> comments;
+	string trackback_part_1,trackback_part_2;
+	string post_comment_url_1,post_comment_url_2;
 };
 
 struct main_page : public master {
@@ -118,26 +134,7 @@ struct page: public master {
 	string content;
 };
 
-struct comment_data {
-	int id;
-	std::tm date;
-	string url,username,delete_url,content,edit_url;
-};
 
-struct post : public master {
-	string preview_message_content;
-	string title;
-	std::tm date;
-	string author;
-	list<category> post_cats;
-	int comment_count;
-	string edit_url;
-	string abstract,content;
-	vector<comment_data> comments;
-	string trackback_part_1,trackback_part_2;
-	string post_comment_url_1,post_comment_url_2;
-	string permlink;
-};
 
 struct comment_feed {
 	int id;
@@ -148,14 +145,6 @@ struct feed_comments : public master {
 	vector<comment_feed> comments;
 };
 
-
-struct post_feed {
-	string title,permlink,abstract;	
-};
-
-struct feed_posts : public master {
-	vector<post_feed> posts;
-};
 
 struct trackback: public base_content {
 	int error;
