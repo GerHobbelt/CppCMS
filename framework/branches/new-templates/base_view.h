@@ -25,7 +25,7 @@ public:
 	struct settings {
 		worker_thread *worker;
 		ostream *output;
-		settings(worker_thread *w) : worker(w) , output(&w->cout) {};
+		settings(worker_thread *w) : worker(w) , output(&w->get_cout()) {};
 		settings(worker_thread *w,ostream *o) : worker(w), output(o) {};
 	};
 protected:
@@ -109,6 +109,12 @@ public:
 
 
 }; // CPPCMS
+
+#define cppcms_view(X)			\
+	do {				\
+		void X##_symbol();	\
+		X##_symbol();		\
+	} while(0)			
 
 
 #if defined(HAVE_CPP_0X_AUTO)

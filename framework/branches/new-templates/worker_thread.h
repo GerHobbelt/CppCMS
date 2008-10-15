@@ -81,6 +81,7 @@ protected:
 public:
 	int id;
 	pthread_t pid;
+	ostream &get_cout() { return cout; }
 	
 	transtext::trans const *domain_gettext(string const &domain);
 
