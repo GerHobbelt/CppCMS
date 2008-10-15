@@ -90,6 +90,10 @@ def write_class_loader():
 	output( '		}')
 	output( "	} loader_entry;")
 	output( "} // empty namespace ")
+	output( 'extern "C" { // Dummy extern symbols to insure full link' )
+	for ns in list_of_views:
+		output( '\tvoid load_view_%s(){}' % ns )
+	output( '} // extern C' )
 
 def gettext_domain():
 	global spec_gettext
