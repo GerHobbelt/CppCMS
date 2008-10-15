@@ -2,7 +2,8 @@ SUBDIRS = ./cxxmarkdown ./templates
 
 sbin_PROGRAMS = cppblog
 cppblog_SOURCES = main.cpp blog.cpp views.cpp md5.c trackback.cpp 
-cppblog_LDADD = cxxmarkdown/libmarkdowncxx.a # templates/libadmin_view.a templates/libcontendend.a templates/liborangesky.a
+cppblog_LDFLAGS = -export-dynamic
+cppblog_LDADD = cxxmarkdown/libmarkdowncxx.a
 cppblog_CXXFLAGS =-Wall
 
 noinst_HEADERS = blog.h data.h views.h error.h

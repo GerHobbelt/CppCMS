@@ -17,6 +17,7 @@ blog.template="contendend"
 
 # Templates
 
+templates.dirs = { "./templates/.libs/" }
  templates.file = "./templates/look.opcode" # Default
 templates.ext = ".exe"
 templates.dirs = { "./templates/modules"}
@@ -47,8 +48,8 @@ cache.limit=1000
 
 # libdbi.drivers="/path/to/user/placed/drivers"
 # dbi.debug=1
- dbi.engine="mysql"
-#dbi.engine="sqlite3"
+#dbi.engine="mysql"
+ dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
