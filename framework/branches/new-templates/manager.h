@@ -211,6 +211,8 @@ class manager : private boost::noncopyable {
 	cgi_api *get_api();
 	web_application *get_mod();
 	transtext::trans_factory *get_gettext();
+	list<void *> templates_list; 
+	void load_templates();
 public:
 	cppcms_config config;
 	auto_ptr<cache_factory> cache;
@@ -229,6 +231,7 @@ public:
 	manager();
 	manager(char const *file);
 	manager(int argc, char **argv);
+	~manager();
 	void execute();
 };
 
