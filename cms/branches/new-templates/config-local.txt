@@ -12,11 +12,14 @@ blog.id = "new_wp_"
 blog.host = "localhost:8080"
 blog.configure = 0
 blog.charset="utf-8"
-blog.template="orangesky"
+#blog.template="orangesky"
+blog.template="contendend"
 
 # Templates
 
  templates.file = "./templates/look.opcode" # Default
+templates.ext = ".exe"
+templates.dirs = { "./templates/modules"}
 # templates.file = "./templates/os.opcode"  # Orange Sky
 
 
@@ -44,8 +47,8 @@ cache.limit=1000
 
 # libdbi.drivers="/path/to/user/placed/drivers"
 # dbi.debug=1
-# dbi.engine="mysql"
-dbi.engine="sqlite3"
+ dbi.engine="mysql"
+#dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"
