@@ -15,7 +15,9 @@ public:
 
 void my_hello_world::main()
 {
-    out+="<html><body><h1>Hello World</h1></body></html>";
+    cout << "<html><body>\n"
+            "<h1>Hello World</h1>\n"
+	    "</body></html>\n";
 }
 
 int main(int argc,char ** argv)
