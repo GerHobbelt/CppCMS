@@ -1,10 +1,10 @@
-all: hello-tmpl.fcgi first.opcode
+all: hello-tmpl.fcgi
 
-hello-tmpl.fcgi: hello-tmpl.cpp
-	g++ hello-tmpl.cpp -o hello-tmpl.fcgi -lcppcms -ltmpl
+hello-tmpl.fcgi: hello-tmpl.cpp view.cpp data.h
+	g++ -Wall hello-tmpl.cpp view.cpp -o hello-tmpl.fcgi -lcppcms -ltmpl
 
-first.opcode: first.tmpl
-	tmpl_bld -o first.opcode first.tmpl
+view.cpp: first.tmpl data.h
+	cppcms_tmpl_cc first.tmpl -o view.cpp
 
 clean:
-	rm -f *.fcgi *.exe *.opcode *.s
+	rm -f *.fcgi *.exe *.so view.cpp
