@@ -1,7 +1,9 @@
-<% template feed_posts() %><?xml version="1.0" encoding="UTF-8"?>
+<% namespace vary %>
+<% class feed_posts uses data::main_page %>
+<% template render() %><?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-	<title><% blog_name %><% if def subtitle %> :: <% subtitle %><% end %></title>
+	<title><% blog_name %><% if not empty subtitle %> :: <% subtitle %><% end %></title>
 	<link>http://<% host | raw %><% base_url | raw %></link>
 	<description><% blog_description %></description>
 	<atom:link 
@@ -17,7 +19,7 @@
 			&lt;div style=&quot;direction:<% if rtl %>rtl<% else %>ltr<% end %>&quot;&gt;
 			<% post.abstract | ext latex | ext markdown2html | escape %>
 			&lt;p&gt;
-			&lt;a href="<% post.permlink | raw %>"&gt;<% gt 'more...' %>&lt;/a&gt;
+			&lt;a href="<% post.permlink | raw %>"&gt;<% gt "more..." %>&lt;/a&gt;
 			&lt;/p&gt;
 			&lt;/div&gt;
 			</description>
@@ -26,4 +28,6 @@
 	<% end %>
 </channel>
 </rss>
+<% end %>
+<% end %>
 <% end %>

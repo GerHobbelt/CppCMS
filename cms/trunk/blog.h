@@ -14,19 +14,12 @@
 #include <cppcms/worker_thread.h>
 #include <cppcms/url.h>
 #include <dbixx/dbixx.h>
-#include <tmpl/renderer.h>
-#include <tmpl/content.h>
-#include <tmpl/transtext.h>
 #include <set>
 #include "views.h"
 #include "data.h"
 
 using namespace std;
 using namespace cppcms;
-
-extern tmpl::template_data global_template;
-extern transtext::trans_factory tr;
-extern transtext::trans_gnu gnugt;
 
 struct links_t {
 	string media;
@@ -96,6 +89,8 @@ public:
 private:
 	void create_gif(string const &tex,string const &fname);
 	void latex_filter(string const &in,string &out);
+	string latex(string);
+	string markdown(string);
 	void auth_or_throw();
 
 	void admin();
@@ -118,8 +113,6 @@ private:
 	bool auth();
 	void feed(string scatid);
 	void feed_comments();
-	tmpl::renderer render;
-	void set_lang();
 	void edit_options();
 	void edit_cats();
 	void count_comments(int id);
@@ -127,16 +120,13 @@ private:
 	void send_trackback();
 	void admin_cache();
 
-	content c;
 	void init();
 
 public:
 	links_t fmt;
 	virtual void main();
-	void date(std::tm t,string &s);
 	Blog(manager const &s) :
-		worker_thread(s),
-		render(global_template)
+		worker_thread(s)
 	{
 		init();
 	};

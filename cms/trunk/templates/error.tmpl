@@ -1,14 +1,18 @@
-<% template error() %>
-<h1><% gt 'Error' %></h1>
+<% namespace vary %>
+<% class error uses data::error extends master %>
+<% template mater_content() %>
+<h1><% gt "Error" %></h1>
 <% if error_404 %>
-	<p><% gt 'The page you had looked for not found' %></p>
+	<p><% gt "The page you had looked for not found" %></p>
 <% elif error_comment %>
-	<p><% gt 'Not all mandatory fields were filled:' %></p>
+	<p><% gt "Not all mandatory fields were filled:" %></p>
 	<ul>
-		<li><% gt 'Name' %></li>
-		<li><% gt 'E-Mail, it will not be disclosed in the comment text' %></li>
-		<li><% gt 'Message Body' %></li>
+		<li><% gt "Name" %></li>
+		<li><% gt "E-Mail, it will not be disclosed in the comment text" %></li>
+		<li><% gt "Message Body" %></li>
 	</ul>
-	<p><% gt 'Press "back" browser button and fix the form' %></p>
+	<p><% gt "Press \"back\" browser button and fix the form" %></p>
 <% end %>
 <% end %>
+<% end class %>
+<% end namespace %>

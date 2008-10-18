@@ -1,0 +1,11 @@
+<% c++ #include "../data.h" %>
+<% namespace vary %>
+<% class master_base uses data::master %>
+<% template render() %><% end %>
+<% template sidebar() %>
+<% c++ content.on_sidebar_load(content.sidebar); %>
+<% sidebar | raw %>
+<% end template %>
+<% end class %>
+<% end namespace %>
+

@@ -1,6 +1,10 @@
-<% template trackback() %><?xml version="1.0" encoding="utf-8"?>
+<% namespace vary %>
+<% class trackback uses data::trackback %>
+<% template render() %><?xml version="1.0" encoding="utf-8"?>
 <response>
 <error><% error %></error>
-<% if def message %><message><% message %></message>
+<% if not empty message %><message><% message %></message>
 <% end %></response>
+<% end %>
+<% end %>
 <% end %>

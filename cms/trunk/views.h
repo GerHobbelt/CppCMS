@@ -16,86 +16,55 @@
 #include "data.h"
 #include <list>
 #include <vector>
-#include <tmpl/content.h>
 #include <set>
 
 using boost::shared_ptr;
-using namespace tmpl;
 using namespace std;
 class Blog;
 
-class View_Comment {
-	Blog *blog;
-	content &c;
-public:
-	View_Comment(Blog *b,content &con): c(con) { blog=b; };
-	void init(comment_t &c);
-};
 
 class View_Post {
 	friend class View_Main_Page;
 	Blog *blog;
 
-	void ini_share(post_t &p);
-	content &c;
+	void ini_share(data::post_data &);
 
 public:
-	View_Post(Blog *b,content &con): c(con) { blog=b; };
-	void ini_short(post_t &p);
-	void ini_full(post_t &p);
+	View_Post(Blog *b): blog(b) {}
+	void ini_short(data::post_data &);
+	void ini_full(data::post &);
 };
 
 
 class View_Main_Page {
 	Blog *blog;
 	int error_code;
-	void ini_share();
-	void ini_sidebar(set<string> &triggers,content &c);
+	void ini_share(data::master &c);
+	void ini_sidebar(set<string> &triggers,data::sidebar &c);
 	void prepare_query(int,int,int);
-	content &c;
+	void on_sidebar_load(string &sidebar);
 public:
-	View_Main_Page(Blog *blog,content &con) : c(con)
-	{
-		this->blog=blog;
-	};
-	void ini_post(int id,bool preview);
-	void ini_page(int id,bool preview);
-	void ini_main(int id=-1,bool feed=false,int cat_id=-1);
-	void ini_error(int what);
-	void ini_rss_comments();
-};
-
-class View_Admin_Post {
-	Blog *blog;
-	content &c;
-public:
-	View_Admin_Post(Blog *b,content &con) : c(con) { blog=b;};
-	void ini(int id,string ptype);
-};
-
-class View_Admin_Main
-{
-	Blog *blog;
-	content &c;
-
-public:
-	View_Admin_Main(Blog *b,content &con): blog(b),c(con){};
-	void ini();
+	View_Main_Page(Blog *b) : blog(b) {}
+	void ini_post(int id,bool preview,data::post &c);
+	void ini_page(int id,bool preview,data::page &c);
+	void ini_main(int id,bool feed,int cat_id,data::main_page &c);
+	void ini_error(int what,data::error &c);
+	void ini_rss_comments(data::feed_comments &c);
 };
 
 class View_Admin {
 	Blog *blog;
-	content &c;
 public:
-	View_Admin(Blog *b,content &con) : blog(b),c(con) {};
-	void ini_share();
-	void ini_main();
-	void ini_edit(int id,string ptype);
-	void ini_options();
-	void ini_links();
-	void ini_cats();
-	void ini_cedit(int id);
-	void ini_login();
+	View_Admin(Blog *b) : blog(b) {};
+	void ini_share(data::admin_base &c);
+	void ini_main(data::admin_main &c);
+	void ini_editpage(int id,data::admin_editpage &c);
+	void ini_editpost(int id,data::admin_editpost &c);
+	void ini_options(data::admin_editoptions &c);
+	void ini_links(data::admin_editlinks &c);
+	void ini_cats(data::admin_editcats &c);
+	void ini_cedit(int id,data::admin_editcomment &c);
+	void ini_login(data::admin_login &c);
 };
 
 #endif
