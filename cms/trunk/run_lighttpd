@@ -10,7 +10,7 @@ down()
 	exit
 }
 
-./cppblog -c config-local.txt &
+./cppblog -c config.txt &
 SERVER=$!
 
 /usr/sbin/lighttpd -D -f light.conf &
