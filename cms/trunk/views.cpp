@@ -78,8 +78,8 @@ void View_Post::ini_full(data::post &c)
 		cur	>> com.id >>com.username >> com.url
 			>> com.date >> com.content ;
 		if(blog->userid!=-1){
-			com.delete_url=str(format(blog->fmt.del_comment) % c.id);
-			com.edit_url=str(format(blog->fmt.edit_comment) % c.id);
+			com.delete_url=str(format(blog->fmt.del_comment) % com.id);
+			com.edit_url=str(format(blog->fmt.edit_comment) % com.id);
 		}
 	}
 
