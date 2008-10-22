@@ -88,7 +88,6 @@ void View_Post::ini_full(data::post &c)
 		"FROM	post2cat "
 		"JOIN	cats ON post2cat.cat_id=cats.id "
 		"WHERE	post2cat.post_id=?",c.id,rs;
-	c.post_cats.resize(rs.rows());
 	for(i=0;rs.next(cur);i++) {
 		data::category cat;
 		int id;
