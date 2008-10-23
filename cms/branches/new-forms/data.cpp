@@ -14,7 +14,7 @@ edit_comment_form::edit_comment_form(worker_thread *w) :
 		content.set_nonempty();
 		content.rows=24;
 		content.cols=80;
-		*this & author & email & url & save & del & content;
+		*this & author & email & url & content & save & del;
 		email.help=w->gettext("(not displayed)");
 	}
 
