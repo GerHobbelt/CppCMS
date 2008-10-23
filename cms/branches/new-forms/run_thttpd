@@ -1,0 +1,20 @@
+#!/bin/bash
+
+down()
+{
+	kill $1
+	wait $1
+	echo "done"
+	exit
+}
+
+thttpd -D -p 8080 -c '/blog' -h localhost &
+SERVER=$!
+
+trap "echo signal... ; down $SERVER " SIGHUP SIGINT SIGTERM
+
+echo "Press any key to exit"
+read
+down $SERVER
+
+

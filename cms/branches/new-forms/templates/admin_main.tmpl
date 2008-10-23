@@ -1,0 +1,51 @@
+<% namespace admin_view %>
+<% class admin_main uses data::admin_main extends admin_base %>
+<% template master_content() %>
+<div id="menu">
+        <h2><% gt "Tasks" %></h2>
+        <ul>
+                <li><a href="<% base_url | raw %>"><% gt "To The Blog" %></a></li>
+                <li><a href="<% new_post_url | raw  %>"><% gt "New Post" %></a></li>
+                <li><a href="<% new_page_url | raw  %>"><% gt "New Page" %></a></li>
+                <li><a href="<% edit_links_url | raw  %>"><% gt "Edit Links" %></a></li>
+                <li><a href="<% edit_cats_url | raw  %>"><% gt "Edit Categories" %></a></li>
+                <li><a href="<% edit_options_url | raw  %>"><% gt "Edit Options" %></a></li>
+                <li><a href="<% admin_cache_url | raw  %>"><% gt "Administrate Cache" %></a></li>
+        </ul>
+        <h2><% gt "Unpublished Posts" %></h2>
+        <% foreach post in posts %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% post.edit_url | raw %>"><% post.title %></a></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p><% gt "No unpublished posts" %></p>
+	<% end%>
+</div>
+<div id="news">
+        <h2><% gt "Pages" %></h2>
+        <% foreach page in pages %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% page.edit_url | raw %>"><% page.title %></a><% if not page.published %> <% gt "(not published)" %><%end%></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p><% gt "No pages" %></p>
+	<% end%>
+<h2><% gt "Latest Comments" %></h2>
+        <% foreach comment in comments %>
+	        <ul>
+        	<% item %>
+			<li><a href="<% comment.post_permlink | raw %>#comment_<% comment.id %>"><% comment.username %></a>, 
+			    <a href="<% comment.edit_url | raw %>"><% gt "edit" %></a></li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p><% gt "No comments" %></p>
+	<% end%>
+</div>
+<% end %>
+<% end class %>
+<% end namespace %>
