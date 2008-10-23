@@ -185,15 +185,17 @@ struct admin_cache : public admin_base {
 };
 
 struct edit_comment_form : public form {
-	form fields;
-	form buttons;
+	widgetset fields;
+	widgetset buttons;
 	widgets::text author;
 	widgets::email email;
 	widgets::text  url;
 	widgets::textarea content;
 	widgets::submit save;
 	widgets::submit del;
+	widgets::checkbox sure;
 	edit_comment_form(worker_thread *w);
+	virtual bool validate();
 };
 
 struct admin_editcomment : public admin_base  {

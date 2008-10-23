@@ -1184,15 +1184,30 @@ void Blog::edit_comment(string sid)
 	int id=atoi(sid.c_str());
 
 	data::admin_editcomment c(this);
-	View_Admin view(this);
+	c.id=id;
+	
 	if(env->getRequestMethod()=="POST"){
 		c.form.load(*cgi);
-		if(c.form.del.pressed || c.form.validate()) {
+		if(c.form.validate()) {
 			update_comment(sid,c.form);
 			return;
 		}
 	}
-	view.ini_cedit(id,c);
+	else {
+		string author,url,content,email;
+		sql<<	"SELECT author,url,email,content "
+			"FROM	comments "
+			"WHERE	id=?",id;
+		row r;
+		if(!sql.single(r)) {
+			throw Error(Error::E404);
+		}
+		r >> c.form.author.str() >> c.form.url.str()
+		  >> c.form.email.str()  >> c.form.content.str();
+	}
+
+	View_Admin view(this);
+	view.ini_share(c);
 	render("admin_view","admin_editcomment",c);
 
 }

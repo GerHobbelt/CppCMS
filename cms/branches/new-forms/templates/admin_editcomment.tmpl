@@ -7,8 +7,9 @@
 	<% xhtml %>
         <table>
 	<% form as_table form.fields %>
-	<tr><th>&nbsp;</th><td><% form input form.save %><% form input form.del %></dt></tr>
-        </table>
+	</table>
+	<% form as_p form.content %>
+	<p><% form as_space form.buttons %></p>
 </form>
 </div>
 <% end template %>

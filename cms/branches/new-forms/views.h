@@ -63,7 +63,6 @@ public:
 	void ini_options(data::admin_editoptions &c);
 	void ini_links(data::admin_editlinks &c);
 	void ini_cats(data::admin_editcats &c);
-	void ini_cedit(int id,data::admin_editcomment &c);
 	void ini_login(data::admin_login &c);
 };
 
