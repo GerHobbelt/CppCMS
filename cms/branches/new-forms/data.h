@@ -185,6 +185,8 @@ struct admin_cache : public admin_base {
 };
 
 struct edit_comment_form : public form {
+	form fields;
+	form buttons;
 	widgets::text author;
 	widgets::email email;
 	widgets::text  url;

@@ -12,9 +12,11 @@ edit_comment_form::edit_comment_form(worker_thread *w) :
 		author.set_nonempty();
 		email.set_nonempty();
 		content.set_nonempty();
-		content.rows=24;
+		content.rows=10;
 		content.cols=80;
 		*this & author & email & url & content & save & del;
+		fields & author & email & url & content;
+		buttons & save & del;
 		email.help=w->gettext("(not displayed)");
 	}
 

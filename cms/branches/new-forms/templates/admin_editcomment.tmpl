@@ -4,20 +4,11 @@
 <div id="form">
 <h2><% gt "Edit Comment No." %><% id %></h2>
 <form id="inp" action="" method="post" >
-        <table>
 	<% xhtml %>
-	<% form as_table form.author %>
-	<% form as_table form.email %>
-	<% form as_table form.url %>
-	</table>
-	<p>
-                <fieldset><div> <!-- IE Textarea ugly hack -->
-                        <textarea name="content" cols="80" rows="10"><% form.content.value %></textarea>
-                </div></fieldset>
-        </p>
-	<p>	<% form input form.save %>
-                <input type="submit" name="<% form.del.name %>" value="<% form.del.value %>" onclick="return confirm('<% gt "Are you shure?" %>');" />
-        </p>
+        <table>
+	<% form as_table form.fields %>
+	<tr><th>&nbsp;</th><td><% form input form.save %><% form input form.del %></dt></tr>
+        </table>
 </form>
 </div>
 <% end template %>
