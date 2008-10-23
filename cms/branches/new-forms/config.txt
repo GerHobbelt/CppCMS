@@ -23,7 +23,7 @@ cache.limit=1000
 
 # Templates location
 templates.dirs = { "./templates/.libs/" }
-# templates.ext = ".dll"
+templates.ext = ".dll"
 # Uncomment above for cygwin platform
 
 # Blog configuration
@@ -46,8 +46,8 @@ blog.configure = 0
 
 
 # One of templates
-#blog.template="orangesky"
-blog.template="contendend"
+blog.template="orangesky"
+#blog.template="contendend"
 
 
 # LaTeX equations support
@@ -60,8 +60,8 @@ latex.cache_path = "/home/artik/Projects/FastBlog/cppblog/cms/templates/latex/"
 ##############
 
 # dbi.debug=1
-dbi.engine="mysql"
-# dbi.engine="sqlite3"
+# dbi.engine="mysql"
+ dbi.engine="sqlite3"
 # dbi.engine="pgsql"
 
 mysql.db="cppcms"

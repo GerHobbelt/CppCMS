@@ -563,18 +563,23 @@ void View_Admin::ini_cedit(int id,data::admin_editcomment &c)
 {
 	ini_share(c);
 
-	c.edit_comment_url=str(format(blog->fmt.update_comment) % id);
 	c.id=id;
-	string author,url,content,email;
-	blog->sql<<
-		"SELECT author,url,email,content "
-		"FROM	comments "
-		"WHERE	id=?",id;
-	row r;
-	if(!blog->sql.single(r)) {
-		throw Error(Error::E404);
+	if(blog->env->getRequestMethod()!="POST") {
+		string author,url,content,email;
+		blog->sql<<
+			"SELECT author,url,email,content "
+			"FROM	comments "
+			"WHERE	id=?",id;
+		row r;
+		if(!blog->sql.single(r)) {
+			throw Error(Error::E404);
+		}
+		r>>author>>url>>email>>content;
+		c.form.author.set(author);
+		c.form.url.set(url);
+		c.form.email.set(email);
+		c.form.content.set(content);
 	}
-	r>>c.author>>c.url>>c.email>>c.content;
 }
 
 void View_Admin::ini_editpage(int id,data::admin_editpage &c)

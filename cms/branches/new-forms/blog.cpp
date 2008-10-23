@@ -166,10 +166,6 @@ void Blog::init()
 			boost::bind(&Blog::get_post,this,$1,"post"));
 		fmt.update_post=root+"/postback/post/%1%";
 
-		url.add("^/postback/update_comment/(\\d+)$",
-			boost::bind(&Blog::update_comment,this,$1));
-		fmt.update_comment=root+"/postback/update_comment/%1%";
-
 		url.add("^/admin/login$",
 			boost::bind(&Blog::login,this));
 		fmt.login=root+"/admin/login";
@@ -1139,43 +1135,19 @@ void Blog::setup_blog()
 	render("admin_view","admin_setupblog",c);
 }
 
-void Blog::update_comment(string sid)
+void Blog::update_comment(string sid,data::edit_comment_form &form)
 {
 	auth_or_throw();
 
 	int id=atoi(sid.c_str());
 
-	const vector<FormEntry> &form=cgi->getElements();
-	bool del=false;
-
-	string author,url,email,content;
-
-	unsigned i;
-	for(i=0;i<form.size();i++) {
-		string const &field=form[i].getName();
-		if(field=="url") {
-			url=form[i].getValue();
-		}
-		else if(field=="author") {
-			author=form[i].getValue();
-		}
-		else if(field=="content") {
-			content=form[i].getValue();
-		}
-		else if(field=="email") {
-			email=form[i].getValue();
-		}
-		else if(field=="delete") {
-			del=true;
-		}
-	}
 	row r;
 	sql<<"SELECT post_id FROM comments WHERE id=?",id;
 	if(sql.single(r)) {
 		int pid;
 		r>>pid;
 		cache.rise("comments");
-		if(del) {
+		if(form.del.pressed) {
 			cache.rise(str(boost::format("comments_%1%") % pid));
 		}
 		else {
@@ -1183,14 +1155,17 @@ void Blog::update_comment(string sid)
 		}
 
 	}
-	if(del) {
+	if(form.del.pressed) {
 		del_single_comment(id);
 	}
 	else {
 		sql<<	"UPDATE comments "
 			"SET	url=?,author=?,content=?,email=? "
 			"WHERE	id=?",
-				url,author,content,email,id,exec();
+				form.url.get(),
+				form.author.get(),
+				form.content.get(),
+				form.email.get(),id,exec();
 		row r;
 		sql<<"SELECT post_id FROM comments WHERE id=?",id;
 		if(sql.single(r)) {
@@ -1208,8 +1183,15 @@ void Blog::edit_comment(string sid)
 
 	int id=atoi(sid.c_str());
 
-	data::admin_editcomment c;
+	data::admin_editcomment c(this);
 	View_Admin view(this);
+	if(env->getRequestMethod()=="POST"){
+		c.form.load(*cgi);
+		if(c.form.del.pressed || c.form.validate()) {
+			update_comment(sid,c.form);
+			return;
+		}
+	}
 	view.ini_cedit(id,c);
 	render("admin_view","admin_editcomment",c);
 

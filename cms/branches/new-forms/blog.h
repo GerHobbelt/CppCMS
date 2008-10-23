@@ -96,7 +96,7 @@ private:
 	void admin();
 	void edit_post(string id,string ptype);
 	void edit_comment(string id);
-	void update_comment(string id);
+	void update_comment(string id,data::edit_comment_form &);
 	void get_post(string id,string type);
 	void login();
 	void logout();

@@ -15,6 +15,7 @@
 #include <boost/function.hpp>
 #include <cppcms/archive.h>
 #include <cppcms/base_view.h>
+#include <cppcms/form.h>
 #include <string>
 #include <ctime>
 
@@ -183,9 +184,20 @@ struct admin_cache : public admin_base {
 	string submit_url;
 };
 
+struct edit_comment_form : public form {
+	widgets::text author;
+	widgets::email email;
+	widgets::text  url;
+	widgets::textarea content;
+	widgets::submit save;
+	widgets::submit del;
+	edit_comment_form(worker_thread *w);
+};
+
 struct admin_editcomment : public admin_base  {
 	int id;
-	string edit_comment_url,author,email,url,content;
+	edit_comment_form form;
+	admin_editcomment(worker_thread *w) : form(w){};
 };
 struct admin_editcats : public admin_base {
 	bool constraint_error;
