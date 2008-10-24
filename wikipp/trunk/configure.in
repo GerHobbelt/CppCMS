@@ -14,7 +14,7 @@ AC_SUBST(LIBTOOL_DEPS)
 
 AC_LANG_CPLUSPLUS
 CMSLIBS=
-AC_CONFIG_FILES([Makefile templates/Makefile po/Makefile.in])
+AC_CONFIG_FILES([Makefile templates/Makefile po/Makefile.in cxxmarkdown/Makefile])
 AC_CHECK_LIB(cppcms,main,[],[echo "cppcms library not installed" ; exit -1])
 AC_CHECK_LIB(dbixx,main,[CMSLIBS="-ldbixx $CMSLIBS"],[echo "DBIXX library not installed" ; exit -1])
 AC_SUBST(CMSLIBS)

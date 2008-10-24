@@ -1,8 +1,9 @@
-SUBDIRS = po ./templates
+SUBDIRS = po ./templates cxxmarkdown
 
 sbin_PROGRAMS = wikipp
-wikipp_SOURCES = main.cpp data.cpp wiki.cpp
+wikipp_SOURCES = main.cpp data.cpp wiki.cpp 
 wikipp_LDFLAGS = -export-dynamic @CMSLIBS@
+wikipp_LDADD = templates/libmarkdown.a
 wikipp_CXXFLAGS =-Wall
 
 noinst_HEADERS = data.h wiki.h
