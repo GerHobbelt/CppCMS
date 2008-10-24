@@ -1,0 +1,6 @@
+# List of source files which contain translatable strings.
+
+main.cpp
+data.cpp
+data.h
+templates/view.cpp

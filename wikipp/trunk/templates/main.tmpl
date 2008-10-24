@@ -1,0 +1,14 @@
+<% c++ #include "../data.h" %>
+<% namespace view %>
+<% class master uses data::master %>
+<% template render() %>
+<html>
+	<head>
+		<title>Hello World</title>
+	</head>
+<body>
+	<h1><% gt "Hello World" %></h1>
+</body>
+<% end template %>
+<% end class %>
+<% end namespace %>

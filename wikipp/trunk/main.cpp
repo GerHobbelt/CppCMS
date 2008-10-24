@@ -1,0 +1,16 @@
+#include <cppcms/manager.h>
+#include "wiki.h"
+
+using namespace cppcms;
+
+int main(int argc,char ** argv)
+{
+	try {
+		manager app(argc,argv);
+		app.set_worker(new simple_factory<wiki>());
+		app.execute();
+	}
+	catch(std::exception const &e) {
+		cerr<<e.what()<<endl;
+	}
+}

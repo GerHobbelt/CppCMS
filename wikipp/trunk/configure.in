@@ -3,6 +3,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 
 AC_INIT([wikipp], [0.0.1], [artyomtnk@yahoo.com])
+AM_GNU_GETTEXT([external])
+AC_CONFIG_HEADER(config.h)
 
 AM_INIT_AUTOMAKE([1.9 foreign])
 
@@ -12,7 +14,7 @@ AC_SUBST(LIBTOOL_DEPS)
 
 AC_LANG_CPLUSPLUS
 CMSLIBS=
-AC_CONFIG_FILES([Makefile templates/Makefile])
+AC_CONFIG_FILES([Makefile templates/Makefile po/Makefile.in])
 AC_CHECK_LIB(cppcms,main,[],[echo "cppcms library not installed" ; exit -1])
 AC_CHECK_LIB(dbixx,main,[CMSLIBS="-ldbixx $CMSLIBS"],[echo "DBIXX library not installed" ; exit -1])
 AC_SUBST(CMSLIBS)

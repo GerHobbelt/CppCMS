@@ -1,0 +1,46 @@
+# CppCMS System Settings
+
+# Server
+server.api="fastcgi"
+server.mod="thread"
+server.threads = 5
+server.buffer = 100
+server.socket = "/tmp/wikipp.socket"
+
+# Localization
+locale.dir = "./locale"
+locale.lang_list = { "he" "en" }
+locale.lang_default = "en"
+locale.domain_list = { "wikipp" }
+
+# gzip - default disabled
+gzip.enable=1
+gzip.level=1
+
+# Cache
+cache.backend="threaded"
+cache.limit=1000
+
+# Templates location
+templates.dirs = { "./templates/.libs/" }
+#templates.ext = ".dll"
+# Uncomment above for cygwin platform
+
+
+# dbi.debug=1
+ dbi.engine="mysql"
+# dbi.engine="sqlite3"
+# dbi.engine="pgsql"
+
+mysql.db="cppcms"
+mysql.user="root"
+mysql.pass="root"
+
+sqlite3.db="cppcms.db"
+sqlite3.dir="./db/"
+
+
+pgsql.db="cppcms"
+pgsql.user="artik"
+
+

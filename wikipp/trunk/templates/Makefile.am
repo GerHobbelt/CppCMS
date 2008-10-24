@@ -1,14 +1,13 @@
 pkgdata_DATA = style.css 
-nobase_lib_LTLIBRARIES = libview.ls
+nobase_lib_LTLIBRARIES = libview.la
 
-libaview_la_SOURCES = view.cpp
-
+libview_la_SOURCES = view.cpp
 libview_la_LDFLAGS = -no-undefined
 
 TEMPLATES= main.tmpl
 
 view.cpp: ${TEMPLATES} 
-	cppcms_tmpl_cc -o view.cpp -d wikipp -n view ${TEMPLATES}
+	cppcms_tmpl_cc -o view.cpp -d wikipp ${TEMPLATES}
 
 clean-local:
 	rm -f *.cpp
