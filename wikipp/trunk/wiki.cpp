@@ -1,6 +1,17 @@
 #include "wiki.h"
+#include <boost/bind.hpp>
+#include <cgicc/HTTPRedirectHeader.h>
+#include <boost/format.hpp>
 
-wiki::wiki(manager const &s) :  worker_thread(s)
+using namespace dbixx;
+using cgicc::HTTPRedirectHeader;
+using cgicc::HTTPContentHeader;
+using cgicc::HTTPCookie;
+
+
+
+wiki::wiki(manager const &s) :
+	worker_thread(s)
 {
 	sql.driver("mysql");
 	sql.param("dbname",app.config.sval("mysql.db"));
@@ -13,17 +24,17 @@ wiki::wiki(manager const &s) :  worker_thread(s)
 	url.add("^/(\\w+)(/.*)$",
 		boost::bind(&wiki::lang,this,$1,$2));
 	url2.add("/(\\w+)/?",
-		boost::bind(wiki::page,this,$1));
+		boost::bind(&wiki::page,this,$1));
 	links.page=root+"/%1%/%2%";
 	links.main_page=root+"/en/main";
 	url2.add("/(\\w+)/edit/?",
-		boost::bind(wiki::edit_page,this,$1));
-	links.edit_page=page+"/edit/";
+		boost::bind(&wiki::edit_page,this,$1));
+	links.edit_page=links.page+"/edit/";
 
 	use_template("view");
 }
 
-wiki::lang(string lang,string url)
+void wiki::lang(string lang,string url)
 {
 	if(lang!="en") {
 		vector<string> const &lst=app.config.slist("locale.lang_list");
@@ -59,28 +70,29 @@ void wiki::page(string slug)
 		return;
 	data::page c;
 
-	sql<<"SELECT title,content WHERE lang=? AND slug=?" ,locale,slug;
+	sql<<"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?" ,locale,slug;
 	row r;
 	if(!sql.single(r)) {
-		string redirect=(boost::format(links.edit_page) % lang % slug ).str();
+		string redirect=(boost::format(links.edit_page) % locale % slug ).str();
 		set_header(new HTTPRedirectHeader(redirect));
 		return;
 	}
 	ini_share(c);
-	r >> c.title >> c.content;
+	r >> c.title >> c.content >> c.sidebar;
+	c.edit_link=str(boost::format(links.edit_page) % locale % slug);
 	render("page",c);
-	cache.store(key);
+	cache.store_page(key);
 }
 
 void wiki::edit_page(string slug)
 {
 	data::edit_page c(this);
 	if(env->getRequestMethod()=="POST") {
-		c.form.load();
+		c.form.load(*cgi);
 		if(c.form.validate()) {
 			if(c.form.save.pressed || c.form.save_cont.pressed) {
 				transaction tr(sql);
-				sql<<"SELECT id,users_only FROM pages where lang=? and slug=?",locale,slug;
+				sql<<"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale,slug;
 				row r;
 				int id,users_only;
 				if(sql.single(r)) {
@@ -90,21 +102,24 @@ void wiki::edit_page(string slug)
 					time(&now);
 					std::tm t;
 					localtime_r(&now,&t);
-					sql<<	"INSERT into history(id,created,version,title,content) "
-						"vlaues(?,?,"
-							"(select count(*) from history where id=?),"
-							"(select title from pages where id=?),"
-							"(select content from pages where id=?))",
-								id,t,id,id,id,exec();
-					sql<<	"UDPATE pages set content=?,title=? where lang=? and slug=?",
-						c.form.content.get(),c.form.title.get(),locale,slug,exec();
+					sql<<	"INSERT INTO history(id,created,title,content,sidebar) "
+						"SELECT id,?,title,content,sidebar from pages WHERE id=?",
+								t,id,exec();
+					sql<<	"UPDATE pages SET content=?,title=?,sidebar=? WHERE lang=? AND slug=?",
+						c.form.content.get(),c.form.title.get(),
+						c.form.sidebar.get(),locale,slug,exec();
 					tr.commit();
+					cache.rise("article_"+locale+":"+slug);
 							
 				}
 				else {
-					sql<<	"INSERT into pages(lang,slug,title,content,0) "
-						"values(?,?,?,?)",
-						locale,slug,c.form.title.get(),c.form.content.get(),exec();
+					sql<<	"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
+						"VALUES(?,?,?,?,?,0)",
+						locale,slug,
+						c.form.title.get(),
+						c.form.content.get(),
+						c.form.sidebar.get(),
+						exec();
 				}
 
 			}
@@ -113,26 +128,30 @@ void wiki::edit_page(string slug)
 				set_header(new HTTPRedirectHeader(red));
 				return;
 			}
+			if(c.form.preview.pressed) {
+				c.title=c.form.title.get();
+				c.content=c.form.content.get();
+				c.sidebar=c.form.content.get();
+			}
 		}
 	}
 	else {
-		sql<<"SELECT title,content from pages where lang=? and slug=?",locale,slug;
+		sql<<"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?",locale,slug;
 		row r;
 		if(sql.single(r)) {
-			r>>c.form.title.str()>>c.form.content.str();
+			r>>c.form.title.str()>>c.form.content.str()>>c.form.sidebar.str();
 		}
 		else {
 			c.new_page=true;
 		}
 	}
-	ini_edit_page(c);
+	ini_share(c);
 	render("edit_page",c);
 }
 
-void wiki::main()
+void wiki::ini_share(data::master &c)
 {
-	data::master c;
-	render("master",c);
+	c.media=app.config.sval("wikipp.media");
 }
 
 

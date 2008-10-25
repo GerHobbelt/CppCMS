@@ -1,0 +1,37 @@
+<% namespace view %>
+<% class page uses data::page extends master %>
+<% template navbar() %>
+	<% include master::navbar() %>
+	<% if not empty sidebar %>
+	<hr/>
+	<div id="navbar_links" >
+		<% sidebar | ext markdown %>
+	</div>
+	<% end %>
+<% end %>
+<% template title() %><% gt "WikiPP" %> :: <% title %><% end %>
+<% template page_title() %>
+<% include master::page_title() %> 
+<% if not empty edit_link %>
+	<p class="edit"><a href="<% edit_link %>"><% gt "Edit" %></a></p>
+<% end %>
+<% end template %>
+<% template main() %>
+<% content | ext markdown %>
+<% end %>
+<% end class %>
+<% class edit_page uses data::edit_page extends page %>
+<% template title() %><% if new_page %><% gt "New Article" %><% else %><% gt "Edit" %><% if not empty title %>:<% title %><% end %><% end %><% end %>
+<% template main() %>
+<% if not empty title %>
+	<div id="preview"><% include page::main() %></div>
+<% end %>
+	<form action="" method="post" >
+	<table>
+	<% form as_table form.fields %>
+	</table>
+	<p><% form as_space form.buttons %></p>
+	</form>
+<% end template %>
+<% end class %>
+<% end namespace %>

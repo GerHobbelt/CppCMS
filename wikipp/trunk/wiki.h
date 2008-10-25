@@ -3,6 +3,7 @@
 
 #include "data.h"
 #include <cppcms/worker_thread.h>
+#include <cppcms/manager.h>
 #include <dbixx/dbixx.h>
 
 using namespace cppcms;
@@ -21,10 +22,10 @@ class wiki : public worker_thread {
 public:
 	virtual void main(); 
 	void lang(string lang,string url);
-	void page(string lang,string slug);
-	void edit_page(string lang,string slug);
+	void page(string slug);
+	void edit_page(string slug);
+	void ini_share(data::master &c);
 	wiki(manager const &s);
-	virtual void main();
 };
 
 

@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include <cppcms/base_view.h>
+#include <cppcms/form.h>
 #include <string>
 
 class wiki;
@@ -14,6 +15,7 @@ using namespace cppcms;
 struct page_form : form {
 	widgets::text title;
 	widgets::textarea content;
+	widgets::textarea sidebar;
 	widgets::submit save;
 	widgets::submit save_cont;
 	widgets::submit preview;
@@ -29,7 +31,9 @@ struct master : public cppcms::base_content {
 
 struct page : public master {
 	string title,content;
-}
+	string sidebar;
+	string edit_link;
+};
 
 struct edit_page: public page {
 	page_form form;

@@ -15,6 +15,7 @@ create table pages (
 	slug varchar(128) not null,
 	title varchar(256) not null,
 	content text not null,
+	sidebar text not null,
 	users_only integer not null,
 	constraint unique (lang,slug)
 ) Engine = InnoDB;
@@ -30,12 +31,14 @@ create index connections_ind on connections(lang,slug);
 
 create table history (
 	id integer not null,
-	version integer not null default 1,
+	version integer auto_increment not null,
 	created datetime not null,
 	title varchar(256) not null,
 	content text not null,
+	sidebar text not null,
 	constraint unique(id,version),
-	foreign key(id) references pages(id)
+	foreign key(id) references pages(id),
+	primary key(id,version)
 ) Engine = InnoDB;
 
 

@@ -2,6 +2,7 @@
 <% namespace view %>
 <% class master uses data::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
+<% template page_title() %><h1><% include title() %></h1><% end %>
 <% template navbar() %><% end %>
 <% template main() %><% end %>
 <% template render() %>
@@ -20,7 +21,7 @@
 	</div>
 	<div id="main">
 		<div id="title">
-			<h1><% include title() %></h1>
+			<% include page_title() %>
 		</div>
 		<div id="content">
 			<% include main() %>
