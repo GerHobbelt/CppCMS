@@ -2,5 +2,5 @@
 
 main.cpp
 data.cpp
-data.h
+wiki.cpp
 templates/view.cpp
