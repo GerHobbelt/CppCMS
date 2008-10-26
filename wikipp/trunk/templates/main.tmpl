@@ -2,9 +2,13 @@
 <% namespace view %>
 <% class master uses data::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
-<% template page_title() %><h1><% include title() %></h1><% end %>
+<% template navigation() %>
+<a href="#">Login</a>
+&nbsp;/&nbsp;
+<a href="#">Users Area</a>
+
+<% end template %>
 <% template navbar() %>
-<h2><a href="<% main_link %>"><% gt "Main Page" %></a></h2>
 <% foreach l in languages %>
 <h2><% gt "This Wiki in other languages:" %></h2>
 <ul>
@@ -13,27 +17,42 @@
 <% end %>
 <% end template %>
 <% template main() %><% end %>
+<% template wiki_title() %><% gt "Wiki++ &mdash; CppCMS Powered Wiki" %><% end %>
+<% template sidebar() %><% end %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<title><% include title() %></title>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
-	</head>
-<body <% if rtl %>dir="rtl"<% end %>>
+<head>
+	<title><% include title() %></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
+	<link href="<% media %>/style-<% if rtl %>rtl<% else %>ltr<%end%>.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
 <div id="page" >
-	<div id="navbar">
-		<% include navbar() %>
+	<div id="header">
+		<h1 id="title"><% include wiki_title() %></h1>
 	</div>
-	<div id="main">
-		<div id="title">
-			<% include page_title() %>
-		</div>
-		<div id="content">
-			<% include main() %>
-		</div>
+	<div id="path"><% include navigation()%></div>
+	<div id="maincontent">
+		<h1><% include title() %></h1>
+		<% include main() %>
+	</div>
+	<div id="sidecontent">
+		<% include sidebar() %>
+		<% include navbar() %>
+		<hr/>
+		<p>Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> 
+		| Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.0</a>
+		</p>
+	</div>
+	<div id="footer">
+	<div id="copyrightdesign">
+	<% gt "The content of this Wiki Availible under GFDL" %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+	</div>
+	<div id="footercontact">
+	<a href="#">Contact</a>
 	</div>
 </div>
 </body>

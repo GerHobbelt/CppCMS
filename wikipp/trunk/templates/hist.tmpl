@@ -1,8 +1,12 @@
 <% namespace view %>
 <% class history uses data::history extends master %>
 <% template title() %><% gt "WikiPP :: History" %> :: <% title %><% end %>
+<% template navigation() %>
+<a href="<% page_link %>"><% gt "Back to page" %></a>
+&nbsp;/&nbsp;
+<% include master::navigation() %>
+<% end template %>
 <% template main() %>
-<p><a href="<% page_link %>"><% gt "Back to page" %></a></p>
 <% foreach row in hist %>
 	<ul>
 	<% item %>
