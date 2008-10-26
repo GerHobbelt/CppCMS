@@ -13,7 +13,10 @@
 <% template page_title() %>
 <% include master::page_title() %> 
 <% if not empty edit_link %>
-	<p class="edit"><a href="<% edit_link %>"><% gt "Edit" %></a></p>
+	<ul class="nav">
+		<li><a href="<% edit_link %>"><% gt "edit" %></a></li>
+		<li><a href="<% history_link %>"><% gt "history" %></a></li>
+	</ul>
 <% end %>
 <% end template %>
 <% template main() %>
@@ -32,6 +35,15 @@
 	</table>
 	<p><% form as_space form.buttons %></p>
 	</form>
+<% end template %>
+<% end class %>
+<% class page_hist uses data::page_hist extends page %>
+<% template title() %>
+<% include page::title() %> <p><% gt "(version %1%, from %2%)" using version, date %></p>
+<% end template %>
+<% template main() %>
+<p><a href="<% rollback %>"><% gt "Edit this version (rollback)" %></a></p>
+<% include page::main() %>
 <% end template %>
 <% end class %>
 <% end namespace %>

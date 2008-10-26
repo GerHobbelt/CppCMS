@@ -5,26 +5,46 @@
 #include <cppcms/worker_thread.h>
 #include <cppcms/manager.h>
 #include <dbixx/dbixx.h>
+#include <boost/format.hpp>
 
 using namespace cppcms;
 
+class wiki;
 struct links_str {
+	wiki *w;
 	string main_page;
 	string page;
 	string edit_page;
+	string edit_version;
+	string rollback;
+	string history;
+	string history_next;
+	string page_hist;
+	boost::format url(string);
+	links_str(wiki *);
 };
 
 class wiki : public worker_thread {
+	friend class links_str;
 	dbixx::session sql;
 	links_str links;
 	url_parser url2;
 	string locale;
+	string slug;
+	bool auth_done;
+	bool auth_ok;
+	void do_auth();
 public:
 	virtual void main(); 
-	void lang(string lang,string url);
-	void page(string slug);
-	void edit_page(string slug);
-	void ini_share(data::master &c);
+	bool auth();
+	void error_forbidden();
+	void lang(string lang,string slug,string url);
+	void page();
+	void edit_page(string version);
+	void ini_share(data::page &c);
+	void page_hist(string sid);
+	void history(string page);
+	void redirect(string loc="en",string page="main");
 	wiki(manager const &s);
 };
 

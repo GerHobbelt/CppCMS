@@ -1,4 +1,4 @@
-SUBDIRS = po ./templates cxxmarkdown
+SUBDIRS = templates cxxmarkdown po
 
 sbin_PROGRAMS = wikipp
 wikipp_SOURCES = main.cpp data.cpp wiki.cpp 
