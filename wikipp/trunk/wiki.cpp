@@ -128,6 +128,7 @@ void wiki::page_hist(string sid)
 	r>>c.title>>c.content>>c.sidebar>>c.date;
 	c.version=id;
 	c.rollback=(links.url(links.edit_version) % id).str();
+	ini_share(c);
 	render("page_hist",c);
 }
 
@@ -283,6 +284,7 @@ void wiki::edit_page(string version)
 		}
 	}
 	ini_share(c);
+	c.back=links.url(links.page).str();
 	render("edit_page",c);
 }
 
@@ -299,7 +301,7 @@ void wiki::ini_master(data::master &c)
 			/// Translate as the target language
 			/// for fr gettext("LANG")="Francis"
 			set_lang(*p);
-			string lname=gettext("LANG");
+			lname=gettext("LANG");
 			if(lname=="LANG") {
 				lname=*p;
 			}

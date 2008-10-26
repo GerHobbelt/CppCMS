@@ -2,7 +2,7 @@
 <% class page uses data::page extends master %>
 <% template sidebar() %>
 	<% if not empty sidebar %>
-	<h2><% gt "This plage in other languages:" %></h2>
+	<h2><% gt "This page in other languages:" %></h2>
 	<div id="navbar_links" >
 		<% sidebar | ext markdown %>
 	</div>
@@ -12,9 +12,9 @@
 <% template title() %><% title %><% end %>
 <% template navigation() %>
 <% if not empty edit_link %>
-<a href="<% edit_link %>"><% gt "edit" %></a>
+<a href="<% edit_link %>"><% gt "Edit" %></a>
 &nbsp;/&nbsp;
-<a href="<% history_link %>"><% gt "history" %></a>
+<a href="<% history_link %>"><% gt "History" %></a>
 &nbsp;/&nbsp;
 <% end %>
 <% include master::navigation() %>
@@ -25,6 +25,15 @@
 <% end class %>
 <% class edit_page uses data::edit_page extends page %>
 <% template title() %><% if new_page %><% gt "New Article" %><% else %><% gt "Edit" %><% if not empty title %>:<% title %><% end %><% end %><% end %>
+<% template navigation() %>
+<% if not empty edit_link %>
+<a href="<% back %>"><% gt "Back to page" %></a>
+&nbsp;/&nbsp;
+<a href="<% history_link %>"><% gt "History" %></a>
+&nbsp;/&nbsp;
+<% end %>
+<% include master::navigation() %>
+<% end template %>
 <% template main() %>
 <% if not empty title %>
 	<% include page::main() %>

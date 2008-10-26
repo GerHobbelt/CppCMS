@@ -63,6 +63,7 @@ struct history : public master {
 struct edit_page: public page {
 	page_form form;
 	bool new_page;
+	string back;
 	edit_page(wiki *w) : form(w),new_page(false) {}
 };
 

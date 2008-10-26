@@ -27,10 +27,10 @@ page_form::page_form(wiki *_w):
 	users_only.error_msg=w->gettext("Only registered users may switch this state");
 	title.set_nonempty();
 	content.set_nonempty();
-	content.rows=30;
-	content.cols=80;
+	content.rows=25;
+	content.cols=60;
 	sidebar.rows=10;
-	sidebar.cols=80;
+	sidebar.cols=60;
 }
 
 bool page_form::validate()
