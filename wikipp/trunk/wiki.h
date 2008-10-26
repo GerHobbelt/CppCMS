@@ -42,6 +42,7 @@ public:
 	void page();
 	void edit_page(string version);
 	void ini_share(data::page &c);
+	void ini_master(data::master &c);
 	void page_hist(string sid);
 	void history(string page);
 	void redirect(string loc="en",string page="main");

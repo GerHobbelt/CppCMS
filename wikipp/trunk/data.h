@@ -29,6 +29,8 @@ struct page_form : form {
 
 struct master : public cppcms::base_content {
 	string media;
+	string main_link;
+	map<string,string> languages;
 	virtual string markdown(string);
 };
 

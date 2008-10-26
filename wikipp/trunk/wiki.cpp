@@ -70,6 +70,7 @@ void wiki::history(string page)
 	unsigned const vers=10;
 	int offset;
 	data::history c;
+	ini_master(c);
 	if(page.empty())
 		offset=0;
 	else
@@ -285,12 +286,33 @@ void wiki::edit_page(string version)
 	render("edit_page",c);
 }
 
-void wiki::ini_share(data::page &c)
+void wiki::ini_master(data::master &c)
 {
 	c.media=app.config.sval("wikipp.media");
+	c.main_link=(boost::format(links.page) % locale % "main").str();
+	vector<string> const &langs=app.config.slist("locale.lang_list");
+	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
+		string lname;
+		if(*p=="en")
+			lname="English";
+		else {
+			/// Translate as the target language
+			/// for fr gettext("LANG")="Francis"
+			set_lang(*p);
+			string lname=gettext("LANG");
+			if(lname=="LANG") {
+				lname=*p;
+			}
+		}
+		c.languages[lname]=(boost::format(links.page) % *p % "main").str();
+	}
+	set_lang(locale);
+}
+void wiki::ini_share(data::page &c)
+{
+	ini_master(c);
 	c.edit_link=links.url(links.edit_page).str();
 	c.history_link=links.url(links.history).str();
-
 }
 
 links_str::links_str(wiki *_w) : w(_w) {}
