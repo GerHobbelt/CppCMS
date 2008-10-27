@@ -50,15 +50,15 @@ void wiki::get_options()
 			ops.global.users_only_edit=atoi(v.c_str());
 		}
 		else { 
-			ops.global.users_only_edit=1;
+			ops.global.users_only_edit=0;
 		}
 		cache.store_data("global_ops",ops.global);
 	}
 	if(cache.fetch_data("local_ops:"+locale,ops.local))
 		return;
-	sql<<	"SELECT value,name FROM options "
-		"WHERE  lang=?",locale;
 	result res;
+	sql<<	"SELECT value,name FROM options "
+		"WHERE  lang=?",locale,res;
 	row r;
 	while(res.next(r)) {
 		string v,n;
@@ -70,6 +70,16 @@ void wiki::get_options()
 		else if(n=="copyright")
 			ops.local.copyright=v;
 	}
+	if(ops.local.title.empty())
+		ops.local.title=gettext("Wiki++ &mdash; CppCMS Wiki");
+	if(ops.local.about.empty())
+		ops.local.about=
+			gettext("## About\n"
+				"\n"
+				"Wiki++ is a wiki engine powered by\n"
+				"[CppCMS](http://cppcms.sf.net/) web development framework.\n");
+	if(ops.local.copyright.empty())
+		ops.local.copyright=gettext("&copy; All Rights Reserverd");
 	cache.store_data("local_ops:"+locale,ops.local);
 }
 
@@ -468,6 +478,9 @@ void wiki::ini_master(data::master &c)
 	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
 	c.main_link=(boost::format(links.page) % locale % "main").str();
 	c.login_link=links.admin_url(links.login).str();
+	c.wiki_title=ops.local.title;
+	c.about=ops.local.about;
+	c.copyright=ops.local.copyright;
 	vector<string> const &langs=app.config.slist("locale.lang_list");
 	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
 		string lname;

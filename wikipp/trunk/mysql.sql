@@ -7,7 +7,7 @@ drop table if exists options;
 create table options (
 	lang varchar(16) not null,
 	name varchar(32) not null,
-	value smalltext not null,
+	value text not null,
 	constraint unique(lang,name)
 ) Engine = InnoDB;
 

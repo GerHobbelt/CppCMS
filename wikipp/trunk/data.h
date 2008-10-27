@@ -41,6 +41,7 @@ struct master : public cppcms::base_content {
 	string cookie_prefix;
 	string main_link;
 	string login_link;
+	string wiki_title,about,copyright;
 	map<string,string> languages;
 	virtual string markdown(string);
 };

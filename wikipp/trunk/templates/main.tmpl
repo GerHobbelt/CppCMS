@@ -8,6 +8,8 @@
 <a href="#"><% gt" Users Area" %></a>
 <% end template %>
 <% template navbar() %>
+<% about | ext markdown %>
+<hr/>
 <% foreach l in languages %>
 <h2><% gt "Languages:" %></h2>
 <ul>
@@ -16,7 +18,7 @@
 <% end %>
 <% end template %>
 <% template main() %><% end %>
-<% template wiki_title() %><% gt "Wiki++ &mdash; CppCMS Wiki" %><% end %>
+<% template wiki_title() %><% wiki_title | raw %><% end %>
 <% template sidebar() %><% end %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -67,8 +69,8 @@
 		<% include main() %>
 	</div>
 	<div id="sidecontent">
-		<% include sidebar() %>
 		<% include navbar() %>
+		<% include sidebar() %>
 		<hr/>
 		<p>Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> 
 		| Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.0</a>
@@ -76,7 +78,7 @@
 	</div>
 	<div id="footer">
 	<div id="copyrightdesign">
-	<% gt "The content of this Wiki Availible under GFDL" %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+	<% copyright | raw %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
 	</div>
 	<div id="footercontact">
 	<a href="#">Contact</a>
