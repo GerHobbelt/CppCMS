@@ -2,6 +2,14 @@ begin;
 drop table if exists history;
 drop table if exists pages;
 drop table if exists users;
+drop table if exists options;
+
+create table options (
+	lang varchar(16) not null,
+	name varchar(32) not null,
+	value text not null,
+	unique(lang,name)
+);
 
 create table users (
 	id integer primary key autoincrement not null,

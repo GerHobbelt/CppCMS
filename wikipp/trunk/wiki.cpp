@@ -17,6 +17,62 @@ void wiki::set_cookies(string p,string u,int time)
 	set_cookie(p_c);
 }
 
+void wiki::set_options()
+{
+	sql<<	"DELETE FROM options "
+		"WHERE lang='global' OR lang=?",
+		locale,exec();
+	sql<<	"INSERT INTO options(value,name,lang) "
+		"VALUES(?,'users_only_edit','global')",
+		ops.global.users_only_edit,exec();
+	sql<<	"INSERT INTO options(value,name,lang) "
+		"VALUES(?,'title',?)",
+		ops.local.title,locale,exec();
+	sql<<	"INSERT INTO options(value,name,lang) "
+		"VALUES(?,'about',?)",
+		ops.local.about,locale,exec();
+	sql<<	"INSERT INTO options(value,name,lang) "
+		"VALUES(?,'copyright',?)",
+		ops.local.copyright,locale,exec();
+	cache.rise("global_ops");
+	cache.rise("local_ops:"+locale);
+}
+
+void wiki::get_options()
+{
+	if(!cache.fetch_data("global_ops",ops.global)) {
+		sql<<	"SELECT value FROM options "
+			"WHERE	lang='global' AND name='users_only_edit' ";
+		row r;
+		if(sql.single(r)) {
+			string v;
+			r >> v;
+			ops.global.users_only_edit=atoi(v.c_str());
+		}
+		else { 
+			ops.global.users_only_edit=1;
+		}
+		cache.store_data("global_ops",ops.global);
+	}
+	if(cache.fetch_data("local_ops:"+locale,ops.local))
+		return;
+	sql<<	"SELECT value,name FROM options "
+		"WHERE  lang=?",locale;
+	result res;
+	row r;
+	while(res.next(r)) {
+		string v,n;
+		r>>v>>n;
+		if(n=="title")
+			ops.local.title=v;
+		else if(n=="about")
+			ops.local.about=v;
+		else if(n=="copyright")
+			ops.local.copyright=v;
+	}
+	cache.store_data("local_ops:"+locale,ops.local);
+}
+
 void wiki::on_login()
 {
 	data::login c(this);
@@ -244,6 +300,7 @@ void wiki::lang(string lang,string slug,string url)
 void wiki::main()
 {
 	auth_done=auth_ok=false;
+	get_options();
 	if(url.parse()<0) {
 		redirect();
 	}
@@ -322,13 +379,7 @@ bool wiki::load_page(data::page_form &form)
 		form.users_only.set(users_only);
 		return true;
 	}
-	form.users_only.set(default_edit_perssions());
-	return false;
-}
-
-int wiki::default_edit_perssions()
-{
-	// FIXME 
+	form.users_only.set(ops.global.users_only_edit);
 	return false;
 }
 
@@ -355,7 +406,7 @@ bool wiki::on_edit_post(data::edit_page &c)
 	transaction tr(sql);
 	sql<<"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale,slug;
 	row r;
-	int id=-1,users_only=default_edit_perssions();
+	int id=-1,users_only=ops.global.users_only_edit;
 	if(sql.single(r)) {
 		r>>id>>users_only;
 	}

@@ -2,6 +2,14 @@ drop table if exists history;
 drop table if exists pages;
 drop table if exists connections;
 drop table if exists users;
+drop table if exists options;
+
+create table options (
+	lang varchar(16) not null,
+	name varchar(32) not null,
+	value smalltext not null,
+	constraint unique(lang,name)
+) Engine = InnoDB;
 
 create table users (
 	id integer auto_increment primary key not null,
