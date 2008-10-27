@@ -4,6 +4,27 @@
 
 namespace data {
 
+login_form::login_form(wiki *_w) :
+	w(_w),
+	username("username",w->gettext("Username")),
+	password("password",w->gettext("Password")),
+	login("login",w->gettext("Login"))
+{
+	*this & username & password & login;
+	username.set_nonempty();
+	password.set_nonempty();
+}
+
+bool login_form::validate()
+{
+	if(!form::validate())
+		return false;
+	if(w->check_login(username.get(),password.get()))
+		return true;
+	password.not_valid();
+	return false;
+}
+
 string master::markdown(string s)
 {
 	string tmp;

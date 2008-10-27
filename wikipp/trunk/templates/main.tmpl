@@ -3,21 +3,20 @@
 <% class master uses data::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
 <% template navigation() %>
-<a href="#">Login</a>
+<a href="<% login_link %>"><span id="loginout"></span></a>
 &nbsp;/&nbsp;
-<a href="#">Users Area</a>
-
+<a href="#"><% gt" Users Area" %></a>
 <% end template %>
 <% template navbar() %>
 <% foreach l in languages %>
-<h2><% gt "This wiki in other languages:" %></h2>
+<h2><% gt "Languages:" %></h2>
 <ul>
 <% item %><li><a href="<% l.second %>"><% l.first %><a></li><% end %>
 </ul>
 <% end %>
 <% end template %>
 <% template main() %><% end %>
-<% template wiki_title() %><% gt "Wiki++ &mdash; CppCMS Powered Wiki" %><% end %>
+<% template wiki_title() %><% gt "Wiki++ &mdash; CppCMS Wiki" %><% end %>
 <% template sidebar() %><% end %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -29,7 +28,35 @@
 	<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
 	<link href="<% media %>/style-<% if rtl %>rtl<% else %>ltr<%end%>.css" rel="stylesheet" type="text/css" />
 </head>
-<body>
+<body onload="loginout()">
+	<script type="text/javascript">
+	<!--
+                function get_cookie(c_name)
+                {
+                	c_name='<% cookie_prefix %>' + c_name; 
+                        if (document.cookie.length>0){
+                                c_start=document.cookie.indexOf(c_name + "=");
+                                if (c_start!=-1){ 
+                                        c_start=c_start + c_name.length+1; 
+                                        c_end=document.cookie.indexOf(";",c_start);
+                                        if (c_end==-1) c_end=document.cookie.length;
+                                                return unescape(document.cookie.substring(c_start,c_end));
+                                } 
+                        }
+                        return "";
+                }
+		function loginout(){
+			var element=document.getElementById('loginout');
+			var username=get_cookie('username');
+			if(username=='')  {
+				element.innerHTML='<% gt "Login" %>';
+			}
+			else {
+				element.innerHTML='<% gt "Logout " %>('+username+')';
+			}
+		}
+		-->
+	</script>
 <div id="page" >
 	<div id="header">
 		<h1 id="title"><% include wiki_title() %></h1>

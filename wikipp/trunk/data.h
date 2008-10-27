@@ -12,6 +12,15 @@ namespace data {
 using namespace std;
 using namespace cppcms;
 
+struct login_form : form {
+	wiki *w;
+	widgets::text username;
+	widgets::password password;
+	widgets::submit login;
+	login_form(wiki *);
+	virtual bool validate();
+};
+
 struct page_form : form {
 	wiki *w;
 	widgets::text title;
@@ -29,9 +38,16 @@ struct page_form : form {
 
 struct master : public cppcms::base_content {
 	string media;
+	string cookie_prefix;
 	string main_link;
+	string login_link;
 	map<string,string> languages;
 	virtual string markdown(string);
+};
+
+struct login : public master {
+	login_form form;
+	login(wiki *w) : form(w){};
 };
 
 struct page : public master {
