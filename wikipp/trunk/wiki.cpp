@@ -181,6 +181,10 @@ wiki::wiki(manager const &s) :
 	url_admin.add("/login",
 		boost::bind(&wiki::on_login,this));
 	links.login=links.admin+"/login";
+	url_admin.add("/options",
+		boost::bind(&wiki::edit_options,this));
+	links.edit_options=links.admin+"/options";
+
 	url2.add("^/?$",
 		boost::bind(&wiki::page,this));
 	links.page=root+"/%1%/%2%";
@@ -201,6 +205,33 @@ wiki::wiki(manager const &s) :
 
 	predefined["content"]=&wiki::content;
 	links.toc=root+"/%1%/content/";
+}
+
+void wiki::edit_options()
+{
+	if(!auth()) {
+		error_forbidden();
+		return;
+	}
+	data::edit_options c(this);
+	if(env->getRequestMethod()=="POST") {
+		c.form.load(*cgi);
+		if(c.form.validate()) {
+			ops.global.users_only_edit=c.form.users_only.get();
+			ops.local.title=c.form.wiki_title.get();
+			ops.local.copyright=c.form.copyright.get();
+			ops.local.about=c.form.about.get();
+			set_options();
+		}
+	}
+	else {
+		c.form.users_only.set(ops.global.users_only_edit);
+		c.form.wiki_title.set(ops.local.title);
+		c.form.copyright.set(ops.local.copyright);
+		c.form.about.set(ops.local.about);
+	}
+	ini_master(c);
+	render("edit_options",c);
 }
 
 void wiki::content()
@@ -544,6 +575,7 @@ void wiki::ini_master(data::master &c)
 	c.wiki_title=ops.local.title;
 	c.about=ops.local.about;
 	c.copyright=ops.local.copyright;
+	c.edit_options=links.admin_url(links.edit_options).str();
 	vector<string> const &langs=app.config.slist("locale.lang_list");
 	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
 		string lname;

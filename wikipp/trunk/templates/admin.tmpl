@@ -9,4 +9,14 @@
 </form>
 <% end template %>
 <% end class %>
+<% class edit_options uses data::edit_options extends master %>
+<% template title() %><% gt "WikiPP :: Edit Options" %><% end %>
+<% template main() %>
+<form action="" method="post">
+<table style="width:100%" >
+<% form as_table form %>
+</table>
+</form>
+<% end template %>
+<% end class %>
 <% end namespace %>

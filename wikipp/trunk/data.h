@@ -36,15 +36,31 @@ struct page_form : form {
 	bool virtual validate();
 };
 
+struct options_form : form {
+	wiki *w;
+	widgets::checkbox users_only;
+	widgets::text wiki_title;
+	widgets::textarea about;
+	widgets::text copyright;
+	widgets::submit submit;
+	options_form(wiki *);
+};
+
 struct master : public cppcms::base_content {
 	string media;
 	string cookie_prefix;
 	string main_link;
 	string login_link;
 	string toc;
+	string edit_options;
 	string wiki_title,about,copyright;
 	map<string,string> languages;
 	virtual string markdown(string);
+};
+
+struct edit_options:  public master {
+	options_form form;
+	edit_options(wiki *w) : form(w){}
 };
 
 struct login : public master {

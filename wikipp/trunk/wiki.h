@@ -23,6 +23,7 @@ struct links_str {
 	string page_hist;
 	string login;
 	string admin;
+	string edit_options;
 	string toc;
 	boost::format url(string);
 	boost::format admin_url(string);
@@ -69,6 +70,7 @@ public:
 	virtual void main(); 
 	void content();
 	bool auth();
+	void edit_options();
 	void get_options();
 	void set_options();
 	void get_global_options(global_options &o);

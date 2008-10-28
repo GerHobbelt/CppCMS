@@ -66,4 +66,22 @@ bool page_form::validate()
 	return res;
 }
 
+options_form::options_form(wiki *_w):
+	w(_w),
+	users_only("uonly",w->gettext("Users Only")),
+	wiki_title("wtitle",w->gettext("Wiki Title")),
+	about("about",w->gettext("About Wiki")),
+	copyright("copy",w->gettext("Copyright String")),
+	submit("submit",w->gettext("Submit"))
+{
+	*this & users_only & wiki_title & copyright & about & submit;
+	wiki_title.set_nonempty();
+	copyright.set_nonempty();
+	about.set_nonempty();
+	about.rows=10;
+	about.cols=40;
+	users_only.help=w->gettext("Disable creation of new articles by visitors");
 }
+
+} // namespac data
+
