@@ -291,6 +291,7 @@ void wiki::admin(string lang,string url)
 		redirect();
 		return;
 	}
+	get_options();
 	if(url_admin.parse(url)<0)
 		redirect(lang);
 }
@@ -301,6 +302,7 @@ void wiki::lang(string lang,string slug,string url)
 		redirect();
 		return;
 	}
+	get_options();
 	this->slug=slug;
 	if(url2.parse(url)<0) {
 		redirect(lang);
@@ -310,7 +312,6 @@ void wiki::lang(string lang,string slug,string url)
 void wiki::main()
 {
 	auth_done=auth_ok=false;
-	get_options();
 	if(url.parse()<0) {
 		redirect();
 	}
