@@ -7,20 +7,15 @@
 #include <dbixx/dbixx.h>
 #include <boost/format.hpp>
 #include <cppcms/archive.h>
+#include "master.h"
+#include "page.h"
 
 using namespace cppcms;
 
 class wiki;
 struct links_str {
 	wiki *w;
-	string main_page;
-	string page;
-	string edit_page;
-	string edit_version;
 	string rollback;
-	string history;
-	string history_next;
-	string page_hist;
 	string login;
 	string admin;
 	string edit_options;
@@ -53,6 +48,8 @@ struct options {
 class wiki : public worker_thread {
 	friend class links_str;
 	friend class login_form;
+	friend class master;
+	friend class page;
 	dbixx::session sql;
 	links_str links;
 	url_parser url2;
@@ -65,11 +62,16 @@ class wiki : public worker_thread {
 	options ops;
 	typedef map<string,void (wiki::*)()> predefined_t;
 	predefined_t predefined;
+	///// Applications 
+	master master_app; 
+	page page_app;
 
 public:
+	string root(string locale="");
 	virtual void main(); 
 	void content();
 	bool auth();
+	void register_urls(string,url_parser &u);
 	void edit_options();
 	void get_options();
 	void set_options();
@@ -85,10 +87,8 @@ public:
 	void error_forbidden();
 	void lang(string lang,string slug,string url);
 	void admin(string lang,string url);
-	void page();
 	void edit_page(string version);
 	void ini_share(data::page &c);
-	void ini_master(data::master &c);
 	void page_hist(string sid);
 	void history(string page);
 	void redirect(string loc="en",string page="main");

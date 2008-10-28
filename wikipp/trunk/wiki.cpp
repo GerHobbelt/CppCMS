@@ -103,7 +103,7 @@ void wiki::on_login()
 			return;
 		}
 	}
-	ini_master(c);
+	master_app.ini(c);
 	render("login",c);
 }
 
@@ -154,9 +154,15 @@ void wiki::error_forbidden()
 	set_header(new HTTPRedirectHeader(links.admin_url(links.login).str()));
 }
 
+wiki::register_urls(string p,url_parser &u)
+{
+	url2.add(app,u);
+}
+
 wiki::wiki(manager const &s) :
 	worker_thread(s),
-	links(this)
+	links(this),
+	master_app(*this)
 {
 	string engine=app.config.sval("dbi.engine");
 	sql.driver(engine);
@@ -185,21 +191,6 @@ wiki::wiki(manager const &s) :
 		boost::bind(&wiki::edit_options,this));
 	links.edit_options=links.admin+"/options";
 
-	url2.add("^/?$",
-		boost::bind(&wiki::page,this));
-	links.page=root+"/%1%/%2%";
-	links.main_page=root+"/en/main";
-	url2.add("^/edit/(version/(\\d+))?$",
-		boost::bind(&wiki::edit_page,this,$2));
-	links.edit_page=links.page+"/edit/";
-	links.edit_version=links.edit_page+"version/%3%";
-	url2.add("^/version/(\\d+)/?$",
-		boost::bind(&wiki::page_hist,this,$1));
-	links.page_hist=links.page+"/version/%3%/";
-	url2.add("^/history/(\\d+)?$",
-		boost::bind(&wiki::history,this,$1));
-	links.history=links.page+"/history/";
-	links.history_next=links.history+"%3%";
 	
 	use_template("view");
 
@@ -230,14 +221,14 @@ void wiki::edit_options()
 		c.form.copyright.set(ops.local.copyright);
 		c.form.about.set(ops.local.about);
 	}
-	ini_master(c);
+	master_app.ini(c);
 	render("edit_options",c);
 }
 
 void wiki::content()
 {
 	data::toc c;
-	ini_master(c);
+	master_app.ini(c);
 	result res;
 	sql<<	"SELECT slug,title FROM pages "
 		"WHERE lang=? "
@@ -278,73 +269,6 @@ void wiki::content()
 	render("toc",c);
 }
 
-void wiki::history(string page)
-{
-	unsigned const vers=10;
-	int offset;
-	data::history c;
-	ini_master(c);
-	if(page.empty())
-		offset=0;
-	else
-		offset=atoi(page.c_str());
-	sql<<	"SELECT title,id FROM pages "
-		"WHERE pages.lang=? AND pages.slug=? ",
-		locale,slug;
-	row r;
-	if(!sql.single(r)) {
-		redirect();
-		return;
-	}
-	int id;
-	r>>c.title>>id;
-	result rs;
-	sql<<	"SELECT created,version FROM history "
-		"WHERE id=? "
-		"ORDER BY version DESC "
-		"LIMIT ?,?",
-		id,offset*vers,vers+1,
-		rs;
-	
-	if(rs.rows()>vers) {
-		c.hist.resize(vers);
-		c.page=(links.url(links.history_next) % (offset+1)).str() ;
-	}
-	else {
-		c.hist.resize(rs.rows());
-	}
-	for(unsigned i=0;rs.next(r) && i<vers;i++) {
-		int ver;
-		r>>c.hist[i].update >> ver;
-		c.hist[i].version=ver;
-		c.hist[i].show_url=(links.url(links.page_hist) % ver).str();
-		c.hist[i].edit_url=(links.url(links.edit_version) % ver).str();
-	}
-	c.page_link=links.url(links.page).str();
-	render("history",c);
-}
-
-void wiki::page_hist(string sid)
-{
-	data::page_hist c;
-	int id=atoi(sid.c_str());
-	sql<<	"SELECT history.title,history.content,history.sidebar,history.created "
-		"FROM pages "
-		"JOIN history ON pages.id=history.id "
-		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-			locale,slug,id;
-	row r;
-	if(!sql.single(r)) {
-		redirect(locale,slug);
-		return;
-	}
-	r>>c.title>>c.content>>c.sidebar>>c.date;
-	c.version=id;
-	c.rollback=(links.url(links.edit_version) % id).str();
-	ini_share(c);
-	render("page_hist",c);
-}
-
 bool wiki::set_locale(string lang)
 {
 	if(lang!="en") {
@@ -375,29 +299,16 @@ void wiki::admin(string lang,string url)
 		redirect(lang);
 }
 
-void wiki::lang(string lang,string slug,string url)
+void wiki::lang(string lang,string url)
 {
 	if(!set_locale(lang)) {
-		redirect();
+		page_app.redirect();
 		return;
 	}
 	get_options();
 
-	predefined_t::iterator p;
-	if((p=predefined.find(slug))!=predefined.end()) {
-		if(url.empty() || url=="/") {
-			(this->*p->second)();
-			// Yes, this is call to member function
-			// of this
-			return;
-		}
-		redirect(lang);
-		return;
-	}
-	this->slug=slug;
-
 	if(url2.parse(url)<0) {
-		redirect(lang);
+		page_app.redirect();
 	}
 }
 
@@ -431,175 +342,6 @@ void wiki::page()
 	cache.store_page(key);
 }
 
-void wiki::redirect(string loc,string slug)
-{
-	string redirect=(boost::format(links.page) % loc % slug ).str();
-	set_header(new HTTPRedirectHeader(redirect));
-}
-
-void wiki::save_page(int id,data::page_form &form)
-{
-	time_t now;
-	time(&now);
-	std::tm t;
-	localtime_r(&now,&t);
-	if(id!=-1) {
-		sql<<	"INSERT INTO history(id,version,created,title,content,sidebar) "
-			"SELECT id,"
-			"	(SELECT COALESCE(MAX(version),0)+1 FROM history WHERE id=?),"
-			"	?,title,content,sidebar from pages WHERE id=?",
-				id,t,id,exec();
-		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
-			"WHERE lang=? AND slug=?",
-				form.content.get(),form.title.get(),
-				form.sidebar.get(),int(form.users_only.get()),
-				locale,slug,exec();
-	}
-	else {
-		sql<<	"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
-			"VALUES(?,?,?,?,?,?)",
-			locale,slug,
-			form.title.get(),
-			form.content.get(),
-			form.sidebar.get(),
-			form.users_only.get(),
-			exec();
-	}
-}
-
-bool wiki::load_page(data::page_form &form)
-{
-	sql<<	"SELECT title,content,sidebar,users_only "
-		"FROM pages WHERE lang=? AND slug=?",
-		locale,slug;
-	row r;
-	if(sql.single(r)) {
-		int users_only;
-		r>>form.title.str()
-		 >>form.content.str()
-		 >>form.sidebar.str()
-		 >>users_only;
-		form.users_only.set(users_only);
-		return true;
-	}
-	form.users_only.set(ops.global.users_only_edit);
-	return false;
-}
-
-bool wiki::load_history_page(int ver,data::page_form &form)
-{
-	sql<<	"SELECT history.title,history.content,history.sidebar,pages.users_only "
-		"FROM pages "
-		"JOIN history ON pages.id=history.id "
-		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-		locale,slug,ver;
-	row r;
-	if(sql.single(r)) {
-		int uonly;
-		r>>form.title.str()>>form.content.str()
-		 >>form.sidebar.str()>>uonly;
-		 form.users_only.set(uonly);
-		return true;
-	}
-	return false;
-}
-
-bool wiki::on_edit_post(data::edit_page &c)
-{
-	transaction tr(sql);
-	sql<<"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale,slug;
-	row r;
-	int id=-1,users_only=ops.global.users_only_edit;
-	if(sql.single(r)) {
-		r>>id>>users_only;
-	}
-	if(users_only && !auth()) {
-		error_forbidden();
-		return false;
-	}
-	c.form.load(*cgi);
-	if(c.form.validate()) {
-		if(c.form.save.pressed || c.form.save_cont.pressed) {
-			save_page(id,c.form);
-			cache.rise("article_"+locale+":"+slug);
-		}
-		if(c.form.save.pressed) {
-			redirect(locale,slug);
-			tr.commit();
-			return false;
-		}
-		if(c.form.preview.pressed) {
-			c.title=c.form.title.get();
-			c.content=c.form.content.get();
-			c.sidebar=c.form.sidebar.get();
-		}
-	}
-	tr.commit();
-	return true;
-}
-
-void wiki::edit_page(string version)
-{
-	data::edit_page c(this);
-	if(env->getRequestMethod()=="POST") {
-		if(!on_edit_post(c))
-			return;
-	}
-	else {
-		if(version.empty()) {
-			c.new_page=!load_page(c.form);
-		}
-		else {
-			int ver=atoi(version.c_str());
-			if(!load_history_page(ver,c.form)) {
-				redirect(locale,slug);
-				return;
-			}
-		}
-		if(c.form.users_only.get() && !auth()) {
-			error_forbidden();
-		}
-	}
-	ini_share(c);
-	c.back=links.url(links.page).str();
-	render("edit_page",c);
-}
-
-void wiki::ini_master(data::master &c)
-{
-	c.media=app.config.sval("wikipp.media");
-	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
-	c.main_link=(boost::format(links.page) % locale % "main").str();
-	c.toc=links.admin_url(links.toc).str();
-	c.login_link=links.admin_url(links.login).str();
-	c.wiki_title=ops.local.title;
-	c.about=ops.local.about;
-	c.copyright=ops.local.copyright;
-	c.edit_options=links.admin_url(links.edit_options).str();
-	vector<string> const &langs=app.config.slist("locale.lang_list");
-	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
-		string lname;
-		if(*p=="en")
-			lname="English";
-		else {
-			/// Translate as the target language
-			/// for fr gettext("LANG")="Francis"
-			set_lang(*p);
-			lname=gettext("LANG");
-			if(lname=="LANG") {
-				lname=*p;
-			}
-		}
-		c.languages[lname]=(boost::format(links.page) % *p % "main").str();
-	}
-	set_lang(locale);
-}
-void wiki::ini_share(data::page &c)
-{
-	ini_master(c);
-	c.edit_link=links.url(links.edit_page).str();
-	c.history_link=links.url(links.history).str();
-}
 
 links_str::links_str(wiki *_w) : w(_w) {}
 
