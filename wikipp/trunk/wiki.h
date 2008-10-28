@@ -23,6 +23,7 @@ struct links_str {
 	string page_hist;
 	string login;
 	string admin;
+	string toc;
 	boost::format url(string);
 	boost::format admin_url(string);
 	links_str(wiki *);
@@ -61,8 +62,12 @@ class wiki : public worker_thread {
 	bool auth_ok;
 	void do_auth();
 	options ops;
+	typedef map<string,void (wiki::*)()> predefined_t;
+	predefined_t predefined;
+
 public:
 	virtual void main(); 
+	void content();
 	bool auth();
 	void get_options();
 	void set_options();

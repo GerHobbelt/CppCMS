@@ -10,8 +10,12 @@
 <% template navbar() %>
 <% about | ext markdown %>
 <hr/>
+<h2><% gt "Navigation" %></h2>
+<ul>
+	<li><a href="<% toc %>"><% gt "Index" %></a></li>
+</ul>
 <% foreach l in languages %>
-<h2><% gt "Languages:" %></h2>
+<h2><% gt "Main Page:" %></h2>
 <ul>
 <% item %><li><a href="<% l.second %>"><% l.first %></a></li><% end %>
 </ul>

@@ -40,12 +40,13 @@ page_form::page_form(wiki *_w):
 	save("save",w->gettext("Save")),
 	save_cont("save_cont",w->gettext("Save and Continue")),
 	preview("preview",w->gettext("Preview")),
-	users_only("users_only",w->gettext("Only registered users may edit this page"))
+	users_only("users_only")
 {
 	*this & title & content & sidebar & save & save_cont & preview & users_only;
 	fields<<title<<content<<sidebar;
 	buttons<<save<<save_cont<<preview<<users_only;
-	users_only.error_msg=w->gettext("Only registered users may switch this state");
+	users_only.help=w->gettext("Disable editing by visitors");
+	users_only.error_msg=w->gettext("Please Login");
 	title.set_nonempty();
 	content.set_nonempty();
 	content.rows=25;

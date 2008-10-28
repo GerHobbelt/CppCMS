@@ -2,6 +2,7 @@
 #include <boost/bind.hpp>
 #include <cgicc/HTTPRedirectHeader.h>
 #include <boost/format.hpp>
+#include "utf8/utf8.h"
 
 using namespace dbixx;
 using cgicc::HTTPRedirectHeader;
@@ -197,6 +198,53 @@ wiki::wiki(manager const &s) :
 	links.history_next=links.history+"%3%";
 	
 	use_template("view");
+
+	predefined["content"]=&wiki::content;
+	links.toc=root+"/%1%/content/";
+}
+
+void wiki::content()
+{
+	data::toc c;
+	ini_master(c);
+	result res;
+	sql<<	"SELECT slug,title FROM pages "
+		"WHERE lang=? "
+		"ORDER BY title ASC",locale,res;
+	unsigned items=res.rows();
+	unsigned items_left=items/3;
+	unsigned items_mid=items*2/3;
+	string letter="";
+	row r;
+	for(unsigned i=0;res.next(r);i++) {
+		vector<data::toc::element> *v;
+		if(i<items_left)
+			v=&c.left_col;
+		else if(i<items_mid)
+			v=&c.middle_col;
+		else 
+			v=&c.right_col;
+
+		string t,slug;
+		r>>slug>>t;
+		if(!t.empty() && utf8::is_valid(t.begin(),t.end()))
+		{
+			std::string::iterator p=t.begin();
+			utf8::next(p,t.end());
+			string l(t.begin(),p);
+			if(letter!=l) {
+				data::toc::element e;
+				e.letter=l;
+				v->push_back(e);
+				letter=l;
+			}
+			data::toc::element e;
+			e.title=t;
+			e.url=(links.admin_url(links.page) % slug).str();
+			v->push_back(e);
+		}
+	}
+	render("toc",c);
 }
 
 void wiki::history(string page)
@@ -303,7 +351,20 @@ void wiki::lang(string lang,string slug,string url)
 		return;
 	}
 	get_options();
+
+	predefined_t::iterator p;
+	if((p=predefined.find(slug))!=predefined.end()) {
+		if(url.empty() || url=="/") {
+			(this->*p->second)();
+			// Yes, this is call to member function
+			// of this
+			return;
+		}
+		redirect(lang);
+		return;
+	}
 	this->slug=slug;
+
 	if(url2.parse(url)<0) {
 		redirect(lang);
 	}
@@ -478,6 +539,7 @@ void wiki::ini_master(data::master &c)
 	c.media=app.config.sval("wikipp.media");
 	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
 	c.main_link=(boost::format(links.page) % locale % "main").str();
+	c.toc=links.admin_url(links.toc).str();
 	c.login_link=links.admin_url(links.login).str();
 	c.wiki_title=ops.local.title;
 	c.about=ops.local.about;

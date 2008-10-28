@@ -41,6 +41,7 @@ struct master : public cppcms::base_content {
 	string cookie_prefix;
 	string main_link;
 	string login_link;
+	string toc;
 	string wiki_title,about,copyright;
 	map<string,string> languages;
 	virtual string markdown(string);
@@ -56,6 +57,16 @@ struct page : public master {
 	string sidebar;
 	string edit_link;
 	string history_link;
+};
+
+struct toc : public master {
+	struct element {
+		string letter;
+		string title;
+		string url;
+	};
+	typedef vector<element> column_t;
+	column_t left_col,right_col,middle_col;
 };
 
 struct page_hist: public page {
