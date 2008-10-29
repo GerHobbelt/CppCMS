@@ -1,0 +1,239 @@
+# translation of he.po to
+# translation of wikipp.po to
+# Hebrew Translation.
+# Copyright (C) YEAR Artyom Tonkikh
+# This file is distributed under the same license as the wikipp package.
+# Artyom Tonkikg <artyomtnk@yahoo.com>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: he\n"
+"Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
+"POT-Creation-Date: 2008-10-29 22:07+0200\n"
+"PO-Revision-Date: 2008-10-29 22:33+0200\n"
+"Last-Translator: artik\n"
+"Language-Team:  <en@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: data.cpp:9 data.cpp:88
+msgid "Username"
+msgstr "שם משתמש"
+
+#: data.cpp:10 data.cpp:89
+msgid "Password"
+msgstr "ססמה"
+
+#: data.cpp:11 main.tmpl:59
+msgid "Login"
+msgstr "התחברות"
+
+#: data.cpp:37
+msgid "Title"
+msgstr "כותרת"
+
+#: data.cpp:38
+msgid "Content"
+msgstr "תוכן"
+
+#: data.cpp:39
+msgid "Sidebar"
+msgstr "סרגל־צד"
+
+#: data.cpp:40
+msgid "Save"
+msgstr "שמור"
+
+#: data.cpp:41
+msgid "Save and Continue"
+msgstr "שמור והמשך"
+
+#: data.cpp:42
+msgid "Preview"
+msgstr "תצוגה מקדימה"
+
+#: data.cpp:48
+msgid "Disable editing by visitors"
+msgstr "בטל עריכה למבקרים"
+
+#: data.cpp:49
+msgid "Please Login"
+msgstr "אנא התחבר"
+
+#: data.cpp:71
+msgid "Users Only"
+msgstr "משתמשים בלבד"
+
+#: data.cpp:72
+msgid "Wiki Title"
+msgstr "כותרת הויקי"
+
+#: data.cpp:73
+msgid "About Wiki"
+msgstr "אודות ויקי"
+
+#: data.cpp:74
+msgid "Copyright String"
+msgstr "זכויות היוצרים"
+
+#: data.cpp:75 data.cpp:91
+msgid "Submit"
+msgstr "שלח"
+
+#: data.cpp:83
+msgid "Disable creation of new articles by visitors"
+msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
+
+#: data.cpp:90
+msgid "Confirm"
+msgstr "אמת"
+
+#: data.cpp:121
+msgid "This user exists"
+msgstr "המשתמש קיים"
+
+#: master.cpp:37
+msgid "LANG"
+msgstr "עברית"
+
+#: options.cpp:79
+msgid "Wiki++ &mdash; CppCMS Wiki"
+msgstr "ויקי++ &mdash; ‏CppCMS ויקי"
+
+#: options.cpp:82
+msgid ""
+"## About\n"
+"\n"
+"Wiki++ is a wiki engine powered by\n"
+"[CppCMS](http://cppcms.sf.net/) web development framework.\n"
+msgstr ""
+"## אודות\n"
+"\n"
+"ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf.net/)\n"
+
+#: options.cpp:87
+msgid "&copy; All Rights Reserverd"
+msgstr "‏&copy; כל הזכויות שמורות"
+
+#: main.tmpl:4
+msgid "Wellcome to WikiPP"
+msgstr "ברוכים הבאים ל־ויקי++"
+
+#: main.tmpl:8
+msgid " Users Area"
+msgstr "אזור משתמשים"
+
+#: main.tmpl:13
+msgid "Navigation"
+msgstr "ניווט"
+
+#: main.tmpl:15
+msgid "Index"
+msgstr "אינדקס"
+
+#: main.tmpl:16
+msgid "Changes"
+msgstr "שינויים"
+
+#: main.tmpl:19
+msgid "Main Page:"
+msgstr "עמוד ראשי:"
+
+#: main.tmpl:36
+msgid "LTR"
+msgstr "RTL"
+
+#: main.tmpl:62
+msgid "Logout "
+msgstr "יציאה"
+
+#: main.tmpl:86
+msgid ""
+"Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+"התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+
+#: page.tmpl:14 page.tmpl:26
+msgid "Edit"
+msgstr "עריכה"
+
+#: page.tmpl:16 page.tmpl:31
+msgid "History"
+msgstr "היסטוריה"
+
+#: page.tmpl:26
+msgid "New Article"
+msgstr "מאמר חדש"
+
+#: page.tmpl:29 hist.tmpl:5
+msgid "Back to page"
+msgstr "חזרה מאמר"
+
+#: page.tmpl:67
+msgid "Edit this version (rollback)"
+msgstr "ערוך גרסה זו (שחזור)"
+
+#: page.tmpl:72
+msgid "(version %1%, from %2%)"
+msgstr "(גרסה %1%, ב־%2%)"
+
+#: hist.tmpl:3
+msgid "WikiPP :: History"
+msgstr "ויקי++ :: היסטוריה"
+
+#: hist.tmpl:14
+msgid "Version %1%, changed at %2%, by %3%"
+msgstr "גרסה %1%, עודכנה ב־%2% ע\"י %3%"
+
+#: hist.tmpl:15
+msgid "Show"
+msgstr "הצג"
+
+#: hist.tmpl:16
+msgid "Edit (rollback)"
+msgstr "עריכה (שחזור)"
+
+#: hist.tmpl:20
+msgid "History is empty"
+msgstr "היסטוריה ריקה"
+
+#: hist.tmpl:22
+msgid "Next page"
+msgstr "עמוד הבא"
+
+#: admin.tmpl:3
+msgid "WikiPP :: Login"
+msgstr "ויקי++ :: כניסה"
+
+#: admin.tmpl:11
+msgid "Register as new user"
+msgstr "הרשם כמשתמש חדש"
+
+#: admin.tmpl:16
+msgid "WikiPP :: Register"
+msgstr "ויקי :: הרשמה"
+
+#: admin.tmpl:36
+msgid "WikiPP :: Edit Options"
+msgstr "ויקי :: עריכת הגדרות"
+
+#: toc.tmpl:4
+msgid "Index of Articles"
+msgstr "אינסקס מאמרים"
+
+#: toc.tmpl:31
+msgid "Recent Changes"
+msgstr "שינויים אחרונים"
+
+#: toc.tmpl:37
+msgid "version %1%, at %2%, by %3%"
+msgstr "גרסה %1%, ב־%2%, ע\"י %3%"
+
+#: toc.tmpl:40
+msgid "Next Page"
+msgstr "עמוד הבא"
+
