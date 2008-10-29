@@ -11,7 +11,7 @@
 	<ul>
 	<% item %>
 	<li>
-		<% gt "Version %1%, changed at %2%" using row.version, row.update %>,
+		<% gt "Version %1%, changed at %2%, by %3%" using row.version, row.update, row.author %>,
 		<a href="<% row.show_url %>"><% gt "Show" %></a>,
 		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a>
 	</li>

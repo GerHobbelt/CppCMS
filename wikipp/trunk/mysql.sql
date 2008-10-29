@@ -32,6 +32,7 @@ create table history (
 	id integer not null,
 	version integer not null,
 	created datetime not null,
+	author varchar(32) not null,
 	title varchar(256) not null,
 	content text not null,
 	sidebar text not null,

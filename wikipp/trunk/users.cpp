@@ -127,6 +127,10 @@ void users::do_auth()
 		}
 	}
 	auth_ok=check_login(tmp_username,tmp_password);
+	if(auth_ok)
+		username=tmp_username;
+	else
+		username=env->getRemoteAddr();
 }
 
 void users::error_forbidden()

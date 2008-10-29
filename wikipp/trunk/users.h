@@ -22,6 +22,7 @@ public:
 	bool check_login(string,string);
 	bool auth();
 	void error_forbidden();
+	string username;
 	string login_url();
 	users(wiki &);
 	

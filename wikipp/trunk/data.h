@@ -114,6 +114,7 @@ struct history : public master {
 		string show_url;
 		string edit_url;
 		int version;
+		string author;
 	};
 	vector<item> hist;
 	string page;

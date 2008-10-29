@@ -72,7 +72,7 @@ void page::history(string slug,string page)
 	int id;
 	r>>c.title>>id;
 	result rs;
-	sql<<	"SELECT created,version FROM history "
+	sql<<	"SELECT created,version,author FROM history "
 		"WHERE id=? "
 		"ORDER BY version DESC "
 		"LIMIT ?,?",
@@ -89,7 +89,7 @@ void page::history(string slug,string page)
 
 	for(unsigned i=0;rs.next(r) && i<vers;i++) {
 		int ver;
-		r>>c.hist[i].update >> ver;
+		r>>c.hist[i].update >> ver >> c.hist[i].author ;
 		c.hist[i].version=ver;
 		c.hist[i].show_url=page_version_url(ver);
 		c.hist[i].edit_url=edit_version_url(ver);
@@ -191,12 +191,8 @@ void page::save(int id,data::page_form &form)
 	time(&now);
 	std::tm t;
 	localtime_r(&now,&t);
+	wi.users.auth();
 	if(id!=-1) {
-		sql<<	"INSERT INTO history(id,version,created,title,content,sidebar) "
-			"SELECT id,"
-			"	(SELECT COALESCE(MAX(version),0)+1 FROM history WHERE id=?),"
-			"	?,title,content,sidebar from pages WHERE id=?",
-				id,t,id,exec();
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
 			"WHERE lang=? AND slug=?",
 				form.content.get(),form.title.get(),
@@ -212,7 +208,18 @@ void page::save(int id,data::page_form &form)
 			form.sidebar.get(),
 			form.users_only.get(),
 			exec();
+		id=sql.rowid();
 	}
+	sql<<	"INSERT INTO history(id,version,created,title,content,sidebar,author) "
+		"SELECT ?,"
+		"	(SELECT COALESCE(MAX(version),0)+1 FROM history WHERE id=?),"
+		"	?,?,?,?,?",
+			id,id,t,
+			form.title.get(),
+			form.content.get(),
+			form.sidebar.get(),
+			wi.users.username,
+			exec();
 }
 
 
