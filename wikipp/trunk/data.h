@@ -12,7 +12,7 @@ namespace data {
 using namespace std;
 using namespace cppcms;
 
-struct login_form : form {
+struct login_form : public form {
 	wiki *w;
 	widgets::text username;
 	widgets::password password;
@@ -21,7 +21,7 @@ struct login_form : form {
 	virtual bool validate();
 };
 
-struct page_form : form {
+struct page_form : public form {
 	wiki *w;
 	widgets::text title;
 	widgets::textarea content;
@@ -34,6 +34,17 @@ struct page_form : form {
 	widgetset buttons;
 	page_form(wiki *w);
 	bool virtual validate();
+};
+
+struct new_user_form : public form {
+	wiki *w;
+	widgets::text username;
+	widgets::password password1;
+	widgets::password password2;
+	widgets::submit submit;
+	list<widgets::checkbox> quiz;
+	new_user_form(wiki *w);
+	bool virtual validate(); 
 };
 
 struct options_form : form {
@@ -63,8 +74,14 @@ struct edit_options:  public master {
 	edit_options(wiki *w) : form(w){}
 };
 
+struct new_user : public master {
+	new_user_form form;
+	new_user(wiki *w) : form(w){};
+};
+
 struct login : public master {
 	login_form form;
+	string new_user;
 	login(wiki *w) : form(w){};
 };
 

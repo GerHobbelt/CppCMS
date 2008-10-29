@@ -37,12 +37,26 @@
 <% if not empty title %>
 	<% include page::main() %>
 <% end %>
-	<form action="<% submit %>" method="post" >
+	<script type="text/javascript">
+	<!--
+		document.write('<for')
+		document.write('m actio')
+		document.write('n="')
+		document.write('<% submit %>" me')
+		document.write('thod="po')
+		document.write('st">')
+	-->
+	</script>
 	<table>
 	<% form as_table form.fields %>
 	</table>
 	<p><% form as_space form.buttons %></p>
-	</form>
+	<script type="text/javascript">
+	<!-- 
+		document.write('</fo')
+		document.write('rm>')
+	-->
+	</script>
 <% end template %>
 <% end class %>
 <% class page_hist uses data::page_hist extends page %>

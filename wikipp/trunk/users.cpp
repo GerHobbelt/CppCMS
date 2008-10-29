@@ -12,8 +12,36 @@ users::users(wiki &w) :	master(w)
 {
 	wi.url_next.add("^/login/?$",
 		boost::bind(&users::login,this));
+	disable_reg=app.config.lval("wikipp.disable_registration",1);
+	if(!disable_reg){
+		wi.url_next.add("^/register/?$",
+			boost::bind(&users::new_user,this));
+	}
 	on_start.connect(boost::bind(&users::reset,this));
 	reset();
+}
+
+void users::new_user()
+{
+	data::new_user c(&wi);
+	if(env->getRequestMethod()=="POST") {
+		c.form.load(*cgi);
+		transaction tr(sql);
+		if(c.form.validate()) {
+			sql<<	"INSERT INTO users(username,password) "
+				"VALUES(?,?)",
+				c.form.username.get(),
+				c.form.password1.get(),
+				exec();
+			tr.commit();
+			wi.page.redirect(locale);
+			wi.set_cookies(c.form.username.get(),c.form.password1.get(),3600*7*24);
+			return;
+		}
+		tr.commit();
+	}
+	ini(c);
+	render("new_user",c);
 }
 
 void users::reset()
@@ -24,6 +52,13 @@ void users::reset()
 string users::login_url()
 {
 	return wi.root()+"/login/";
+}
+
+bool users::user_exists(string u)
+{
+	sql<<"SELECT id FROM users WHERE username=?",u;
+	row r;
+	return sql.single(r);
 }
 
 void users::login()
@@ -46,6 +81,8 @@ void users::login()
 		}
 	}
 	ini(c);
+	if(!disable_reg)
+		c.new_user=wi.root()+"/register/";
 	render("login",c);
 }
 

@@ -11,11 +11,14 @@ using namespace std;
 class users : public master {
 	bool auth_done;
 	bool auth_ok;
+	bool disable_reg;
 
 	void login();
 	void do_auth();
+	void new_user();
 	void reset();
 public:
+	bool user_exists(string);
 	bool check_login(string,string);
 	bool auth();
 	void error_forbidden();

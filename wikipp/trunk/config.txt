@@ -3,6 +3,9 @@
 wikipp.script="/wikipp"
 wikipp.media="/templates"
 wikipp.cookie_id="wikipp_"
+wikipp.disable_registration=0
+wikipp.quiz_q = { "Is pinguin bird?"  "Are donkey fly?" }
+wikipp.quiz_a = { 1 0 }
 
 # CppCMS System Settings
 
