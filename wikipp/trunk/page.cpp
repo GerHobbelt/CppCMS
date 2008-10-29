@@ -6,24 +6,24 @@ using namespace dbixx;
 
 using cgicc::HTTPRedirectHeader;
 
+namespace apps {
+
 page::page(wiki &w):
 	master(w)
 {
-	wi.register_urls("^/page(/.*)$",url);
-	url.add("^/(\\w+)/version/(\\d+)$",
+	wi.url_next.add("^/page/(\\w+)/version/(\\d+)$",
 		boost::bind(&page::display_ver,this,$1,$2));
-	url.add("^/(\\w+)/$",
+	wi.url_next.add("^/page/(\\w+)/?$",
 		boost::bind(&page::display,this,$1));
-	url.add("^/(\\w+)/edit(/version/(\\d+))?$",
+	wi.url_next.add("^/page/(\\w+)/edit(/version/(\\d+))?$",
 		boost::bind(&page::edit,this,$1,$3));
-	url.add("^/(\\w)/history/(\\s+)?$",
+	wi.url_next.add("^/page/(\\w)/history(/(\\s+))?$",
 		boost::bind(&page::history,this,$1,$3));
-	url.add("^/.*$",boost::bind(&page::redirect,this,"en","main"));
 }
 
 string page::page_url(string l,string s)
 {
-	if(l.empty()) l=wi.locale;
+	if(l.empty()) l=locale;
 	if(s.empty()) s=slug;
 	return wi.root(l)+"/page/"+s;
 }
@@ -63,10 +63,10 @@ void page::history(string slug,string page)
 
 	wi.sql<<"SELECT title,id FROM pages "
 		"WHERE pages.lang=? AND pages.slug=? ",
-		wi.locale,slug;
+		locale,slug;
 	row r;
 	if(!wi.sql.single(r)) {
-		redirect(wi.locale);
+		redirect(locale);
 		return;
 	}
 	int id;
@@ -103,13 +103,13 @@ void page::history(string slug,string page)
 void page::display(string slug)
 {
 	this->slug=slug;
-	string key="article_"+wi.locale+":"+slug;
+	string key="article_"+locale+":"+slug;
 	if(wi.cache.fetch_page(key))
 		return;
 	data::page c;
 
 	wi.sql<<"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?",
-		wi.locale,slug;
+		locale,slug;
 	row r;
 	if(!wi.sql.single(r)) {
 		string redirect=edit_url();
@@ -144,12 +144,12 @@ void page::edit(string slug,string version)
 		else {
 			int ver=atoi(version.c_str());
 			if(!load_history(ver,c.form)) {
-				redirect(wi.locale,slug);
+				redirect(locale,slug);
 				return;
 			}
 		}
-		if(c.form.users_only.get() && !wi.auth()) {
-			wi.error_forbidden();
+		if(c.form.users_only.get() && !wi.users.auth()) {
+			wi.users.error_forbidden();
 		}
 	}
 	ini(c);
@@ -162,7 +162,7 @@ bool page::load(data::page_form &form)
 	wi.sql<<
 		"SELECT title,content,sidebar,users_only "
 		"FROM pages WHERE lang=? AND slug=?",
-		wi.locale,slug;
+		locale,slug;
 	row r;
 	if(wi.sql.single(r)) {
 		int users_only;
@@ -173,7 +173,8 @@ bool page::load(data::page_form &form)
 		form.users_only.set(users_only);
 		return true;
 	}
-	form.users_only.set(wi.ops.global.users_only_edit);
+	wi.options.load();
+	form.users_only.set(wi.options.global.users_only_edit);
 	return false;
 }
 
@@ -199,12 +200,12 @@ void page::save(int id,data::page_form &form)
 			"WHERE lang=? AND slug=?",
 				form.content.get(),form.title.get(),
 				form.sidebar.get(),int(form.users_only.get()),
-				wi.locale,slug,exec();
+				locale,slug,exec();
 	}
 	else {
 		wi.sql<<"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
 			"VALUES(?,?,?,?,?,?)",
-			wi.locale,slug,
+			locale,slug,
 			form.title.get(),
 			form.content.get(),
 			form.sidebar.get(),
@@ -216,25 +217,27 @@ void page::save(int id,data::page_form &form)
 
 bool page::edit_on_post(data::edit_page &c)
 {
+	wi.options.load();
+	
 	transaction tr(wi.sql);
-	wi.sql<<"SELECT id,users_only FROM pages WHERE lang=? and slug=?",wi.locale,slug;
+	wi.sql<<"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale,slug;
 	row r;
-	int id=-1,users_only=wi.ops.global.users_only_edit;
+	int id=-1,users_only=wi.options.global.users_only_edit;
 	if(wi.sql.single(r)) {
 		r>>id>>users_only;
 	}
-	if(users_only && !wi.auth()) {
-		wi.error_forbidden();
+	if(users_only && !wi.users.auth()) {
+		wi.users.error_forbidden();
 		return false;
 	}
 	c.form.load(*wi.cgi);
 	if(c.form.validate()) {
 		if(c.form.save.pressed || c.form.save_cont.pressed) {
 			save(id,c.form);
-			wi.cache.rise("article_"+wi.locale+":"+slug);
+			wi.cache.rise("article_"+locale+":"+slug);
 		}
 		if(c.form.save.pressed) {
-			redirect(wi.locale,slug);
+			redirect(locale,slug);
 			tr.commit();
 			return false;
 		}
@@ -254,7 +257,7 @@ bool page::load_history(int ver,data::page_form &form)
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
 		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-		wi.locale,slug,ver;
+		locale,slug,ver;
 	row r;
 	if(wi.sql.single(r)) {
 		int uonly;
@@ -275,10 +278,10 @@ void page::display_ver(string slug,string sid)
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
 		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-			wi.locale,slug,id;
+			locale,slug,id;
 	row r;
 	if(!wi.sql.single(r)) {
-		redirect(wi.locale,slug);
+		redirect(locale,slug);
 		return;
 	}
 	r>>c.title>>c.content>>c.sidebar>>c.date;
@@ -288,6 +291,6 @@ void page::display_ver(string slug,string sid)
 	wi.render("page_hist",c);
 }
 
-
+}
 
 

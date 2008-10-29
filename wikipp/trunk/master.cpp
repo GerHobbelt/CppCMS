@@ -2,21 +2,26 @@
 #include "master.h"
 #include "data.h"
 
-master::master(wiki &_w) : wi(_w)
+namespace apps {
+
+master::master(wiki &_w) : 
+	wi(_w),
+	locale(wi.locale)
 {
 }
 
 void master::ini(data::master &c)
 {
+	wi.options.load();
 	c.media=wi.app.config.sval("wikipp.media");
 	c.cookie_prefix=wi.app.config.sval("wikipp.cookie_id","");
-	c.main_link=wi.page_app.default_page_url();
-	c.toc=wi.links.admin_url(wi.links.toc).str();
-	c.login_link=wi.links.admin_url(wi.links.login).str();
-	c.wiki_title=wi.ops.local.title;
-	c.about=wi.ops.local.about;
-	c.copyright=wi.ops.local.copyright;
-	c.edit_options=wi.links.admin_url(wi.links.edit_options).str();
+	c.main_link=wi.page.default_page_url();
+	c.toc=wi.index.index_url();
+	c.login_link=wi.users.login_url();
+	c.wiki_title=wi.options.local.title;
+	c.about=wi.options.local.about;
+	c.copyright=wi.options.local.copyright;
+	c.edit_options=wi.options.edit_url();
 	vector<string> const &langs=wi.app.config.slist("locale.lang_list");
 	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
 		string lname;
@@ -31,8 +36,10 @@ void master::ini(data::master &c)
 				lname=*p;
 			}
 		}
-		c.languages[lname]=wi.page_app.default_page_url(*p);
+		c.languages[lname]=wi.page.default_page_url(*p);
 	}
-	wi.set_lang(wi.locale);
+	wi.set_lang(locale);
 }
 
+
+}

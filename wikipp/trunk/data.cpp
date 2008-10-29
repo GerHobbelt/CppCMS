@@ -19,7 +19,7 @@ bool login_form::validate()
 {
 	if(!form::validate())
 		return false;
-	if(w->check_login(username.get(),password.get()))
+	if(w->users.check_login(username.get(),password.get()))
 		return true;
 	password.not_valid();
 	return false;
@@ -58,7 +58,7 @@ page_form::page_form(wiki *_w):
 bool page_form::validate()
 {
 	bool res=form::validate();
-	if(users_only.get() && !w->auth()) {
+	if(users_only.get() && !w->users.auth()) {
 		users_only.not_valid();
 		users_only.set(false);
 		return false;

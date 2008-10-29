@@ -13,8 +13,9 @@ namespace data {
 	class page_form;
 }
 
+namespace apps {
+
 class page : public master {
-	url_parser url;
 	void save(int id,data::page_form &);
 	bool load(data::page_form &);
 	bool edit_on_post(data::edit_page &);
@@ -35,9 +36,11 @@ public:
 	page(wiki &w);
 	string page_url(string l="",string s="");
 	string default_page_url(string l="en",string s="main")
-		{ page_url(l,s); }
+		{ return page_url(l,s); }
 	void redirect(string locale="en",string slug="main");
 };
+
+}
 
 
 #endif
