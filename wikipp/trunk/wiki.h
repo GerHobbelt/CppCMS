@@ -17,16 +17,13 @@ using namespace cppcms;
 
 class wiki;
 
-class wiki : public worker_thread {
+class wiki : public application {
 	friend class apps::page;
 	friend class apps::options;
 	friend class apps::users;
 	friend class apps::index;
 	friend class apps::master;
 
-	// Internal Data
-	typedef list<boost::function<void()> > on_load_lst_t;
-	on_load_lst_t on_load_lst;
 	string script;
 public:
 	// Data 
@@ -36,21 +33,17 @@ public:
 
 	// Applications 
 
-
 	apps::page page;
 	apps::options options;
 	apps::users users;
 	apps::index index;
 
-	// funtions
-	void on_load(boost::function<void()>);
-
 	string root(string locale="");
-	virtual void main(); 
 	bool set_locale(string);
 	void run(string lang,string url);
 	void set_cookies(string,string,int);
-	wiki(manager const &s);
+	virtual void on_404();
+	wiki(worker_thread &w);
 };
 
 

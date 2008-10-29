@@ -5,7 +5,9 @@
 namespace apps {
 
 master::master(wiki &_w) : 
+	application(_w.worker),
 	wi(_w),
+	sql(wi.sql),
 	locale(wi.locale)
 {
 }
@@ -13,8 +15,8 @@ master::master(wiki &_w) :
 void master::ini(data::master &c)
 {
 	wi.options.load();
-	c.media=wi.app.config.sval("wikipp.media");
-	c.cookie_prefix=wi.app.config.sval("wikipp.cookie_id","");
+	c.media=app.config.sval("wikipp.media");
+	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
 	c.main_link=wi.page.default_page_url();
 	c.toc=wi.index.index_url();
 	c.login_link=wi.users.login_url();
@@ -22,7 +24,7 @@ void master::ini(data::master &c)
 	c.about=wi.options.local.about;
 	c.copyright=wi.options.local.copyright;
 	c.edit_options=wi.options.edit_url();
-	vector<string> const &langs=wi.app.config.slist("locale.lang_list");
+	vector<string> const &langs=app.config.slist("locale.lang_list");
 	for(vector<string>::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
 		string lname;
 		if(*p=="en")
@@ -30,15 +32,15 @@ void master::ini(data::master &c)
 		else {
 			/// Translate as the target language
 			/// for fr gettext("LANG")="Francis"
-			wi.set_lang(*p);
-			lname=wi.gettext("LANG");
+			set_lang(*p);
+			lname=gettext("LANG");
 			if(lname=="LANG") {
 				lname=*p;
 			}
 		}
 		c.languages[lname]=wi.page.default_page_url(*p);
 	}
-	wi.set_lang(locale);
+	set_lang(locale);
 }
 
 

@@ -17,13 +17,9 @@ void wiki::set_cookies(string p,string u,int time)
 	set_cookie(p_c);
 }
 
-void wiki::on_load(boost::function<void()> f)
-{
-	on_load_lst.push_back(f);
-}
 
-wiki::wiki(manager const &s) :
-	worker_thread(s),
+wiki::wiki(worker_thread &w) :
+	application(w),
 	page(*this),
 	options(*this),
 	users(*this),
@@ -77,21 +73,15 @@ bool wiki::set_locale(string lang)
 	return true;
 }
 
-
-void wiki::main()
+void wiki::on_404()
 {
-	for(on_load_lst_t::iterator p=on_load_lst.begin(),e=on_load_lst.end();p!=e;++p) {
-		(*p)();
-	}
-	if(url.parse()<0) {
-		page.redirect();
-	}
+	page.redirect();
 }
 
 void wiki::run(string l,string u)
 {
 	if(!set_locale(l)) {
-		page.redirect();
+		on_404();
 		return;
 	}
 	if(url_next.parse(u)<0) {

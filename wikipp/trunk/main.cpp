@@ -7,7 +7,7 @@ int main(int argc,char ** argv)
 {
 	try {
 		manager app(argc,argv);
-		app.set_worker(new simple_factory<wiki>());
+		app.set_worker(new application_factory<wiki>());
 		app.execute();
 	}
 	catch(std::exception const &e) {

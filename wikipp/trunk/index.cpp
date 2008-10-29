@@ -23,7 +23,7 @@ void index::display_index()
 	data::toc c;
 	ini(c);
 	result res;
-	wi.sql<<"SELECT slug,title FROM pages "
+	sql<<	"SELECT slug,title FROM pages "
 		"WHERE lang=? "
 		"ORDER BY title ASC",locale,res;
 	unsigned items=res.rows();
@@ -59,6 +59,6 @@ void index::display_index()
 			v->push_back(e);
 		}
 	}
-	wi.render("toc",c);
+	render("toc",c);
 }
 }

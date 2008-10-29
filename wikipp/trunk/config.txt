@@ -29,7 +29,7 @@ cache.limit=1000
 
 # Templates location
 templates.dirs = { "./templates/.libs/" }
-#templates.ext = ".dll"
+# templates.ext = ".dll"
 # Uncomment above for cygwin platform
 
 

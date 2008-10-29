@@ -108,6 +108,7 @@ struct edit_page: public page {
 	page_form form;
 	bool new_page;
 	string back;
+	string submit;
 	edit_page(wiki *w) : form(w),new_page(false) {}
 };
 

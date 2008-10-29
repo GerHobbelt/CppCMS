@@ -12,7 +12,7 @@ users::users(wiki &w) :	master(w)
 {
 	wi.url_next.add("^/login/?$",
 		boost::bind(&users::login,this));
-	wi.on_load(boost::bind(&users::reset,this));
+	on_start.connect(boost::bind(&users::reset,this));
 	reset();
 }
 
@@ -30,8 +30,8 @@ void users::login()
 {
 	data::login c(&wi);
 	int time=3600*24*7;
-	if(wi.env->getRequestMethod()=="POST") {
-		c.form.load(*wi.cgi);
+	if(env->getRequestMethod()=="POST") {
+		c.form.load(*cgi);
 		if(c.form.validate()) {
 			wi.page.redirect(locale);
 			wi.set_cookies(c.form.username.get(),c.form.password.get(),time);
@@ -40,23 +40,23 @@ void users::login()
 	}
 	else {
 		if(auth()) {
-			wi.set_header(new HTTPRedirectHeader(wi.env->getReferrer()));
+			set_header(new HTTPRedirectHeader(env->getReferrer()));
 			wi.set_cookies("","",-1);
 			return;
 		}
 	}
 	ini(c);
-	wi.render("login",c);
+	render("login",c);
 }
 
 bool users::check_login(string u,string p)
 {
 	if(u.empty() || p.empty())
 		return false;
-	wi.sql<<"SELECT password FROM users "
+	sql<<	"SELECT password FROM users "
 		"WHERE username=?",u;
 	row r;
-	if(!wi.sql.single(r) ) {
+	if(!sql.single(r) ) {
 		return false;
 	}
 	string pass;
@@ -78,8 +78,8 @@ void users::do_auth()
 	string tmp_username;
 	string tmp_password;
 
-	string cookie=wi.app.config.sval("wikipp.cookie_id","");
-	const vector<HTTPCookie> &cookies = wi.env->getCookieList();
+	string cookie=app.config.sval("wikipp.cookie_id","");
+	const vector<HTTPCookie> &cookies = env->getCookieList();
 	unsigned i;
 	for(i=0;i!=cookies.size();i++) {
 		if(cookies[i].getName()==cookie + "username") {
@@ -94,7 +94,7 @@ void users::do_auth()
 
 void users::error_forbidden()
 {
-	wi.set_header(new HTTPRedirectHeader(login_url()));
+	set_header(new HTTPRedirectHeader(login_url()));
 }
 
 

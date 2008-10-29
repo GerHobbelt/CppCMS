@@ -27,7 +27,7 @@ options::options(wiki &w):
 {
 	wi.url_next.add("^/options/?$",
 		boost::bind(&options::edit,this));
-	wi.on_load(boost::bind(&options::reset,this));
+	on_start.connect(boost::bind(&options::reset,this));
 	reset();
 }
 
@@ -45,11 +45,11 @@ void options::load()
 {
 	if(loaded)
 		return;
-	if(!wi.cache.fetch_data("global_ops",global)) {
-		wi.sql<<"SELECT value FROM options "
+	if(!cache.fetch_data("global_ops",global)) {
+		sql<<	"SELECT value FROM options "
 			"WHERE	lang='global' AND name='users_only_edit' ";
 		row r;
-		if(wi.sql.single(r)) {
+		if(sql.single(r)) {
 			string v;
 			r >> v;
 			global.users_only_edit=atoi(v.c_str());
@@ -57,12 +57,12 @@ void options::load()
 		else { 
 			global.users_only_edit=0;
 		}
-		wi.cache.store_data("global_ops",global);
+		cache.store_data("global_ops",global);
 	}
-	if(wi.cache.fetch_data("local_ops:"+locale,local))
+	if(cache.fetch_data("local_ops:"+locale,local))
 		return;
 	result res;
-	wi.sql<<"SELECT value,name FROM options "
+	sql<<	"SELECT value,name FROM options "
 		"WHERE  lang=?",locale,res;
 	row r;
 	while(res.next(r)) {
@@ -76,38 +76,38 @@ void options::load()
 			local.copyright=v;
 	}
 	if(local.title.empty())
-		local.title=wi.gettext("Wiki++ &mdash; CppCMS Wiki");
+		local.title=gettext("Wiki++ &mdash; CppCMS Wiki");
 	if(local.about.empty())
 		local.about=
-			wi.gettext("## About\n"
+			gettext("## About\n"
 				"\n"
 				"Wiki++ is a wiki engine powered by\n"
 				"[CppCMS](http://cppcms.sf.net/) web development framework.\n");
 	if(local.copyright.empty())
-		local.copyright=wi.gettext("&copy; All Rights Reserverd");
-	wi.cache.store_data("local_ops:"+locale,local);
+		local.copyright=gettext("&copy; All Rights Reserverd");
+	cache.store_data("local_ops:"+locale,local);
 }
 
 
 void options::save()
 {
-	wi.sql<<"DELETE FROM options "
+	sql<<	"DELETE FROM options "
 		"WHERE lang='global' OR lang=?",
 		locale,exec();
-	wi.sql<<"INSERT INTO options(value,name,lang) "
+	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')",
 		global.users_only_edit,exec();
-	wi.sql<<"INSERT INTO options(value,name,lang) "
+	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'title',?)",
 		local.title,locale,exec();
-	wi.sql<<"INSERT INTO options(value,name,lang) "
+	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'about',?)",
 		local.about,locale,exec();
-	wi.sql<<"INSERT INTO options(value,name,lang) "
+	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'copyright',?)",
 		local.copyright,locale,exec();
-	wi.cache.rise("global_ops");
-	wi.cache.rise("local_ops:"+locale);
+	cache.rise("global_ops");
+	cache.rise("local_ops:"+locale);
 }
 
 void options::edit()
@@ -117,8 +117,8 @@ void options::edit()
 		return;
 	}
 	data::edit_options c(&wi);
-	if(wi.env->getRequestMethod()=="POST") {
-		c.form.load(*wi.cgi);
+	if(env->getRequestMethod()=="POST") {
+		c.form.load(*cgi);
 		if(c.form.validate()) {
 			global.users_only_edit=c.form.users_only.get();
 			local.title=c.form.wiki_title.get();
@@ -135,7 +135,7 @@ void options::edit()
 		c.form.about.set(local.about);
 	}
 	ini(c);
-	wi.render("edit_options",c);
+	render("edit_options",c);
 }
 
 
