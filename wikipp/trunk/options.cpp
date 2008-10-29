@@ -25,7 +25,7 @@ void locale_options::save(archive &a) const
 options::options(wiki &w):
 	master(w)
 {
-	wi.url_next.add("^/options/",
+	wi.url_next.add("^/options/?$",
 		boost::bind(&options::edit,this));
 	wi.on_load(boost::bind(&options::reset,this));
 	reset();
@@ -128,6 +128,7 @@ void options::edit()
 		}
 	}
 	else {
+		load();
 		c.form.users_only.set(global.users_only_edit);
 		c.form.wiki_title.set(local.title);
 		c.form.copyright.set(local.copyright);

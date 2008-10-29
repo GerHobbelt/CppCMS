@@ -17,7 +17,7 @@ page::page(wiki &w):
 		boost::bind(&page::display,this,$1));
 	wi.url_next.add("^/page/(\\w+)/edit(/version/(\\d+))?$",
 		boost::bind(&page::edit,this,$1,$3));
-	wi.url_next.add("^/page/(\\w)/history(/(\\s+))?$",
+	wi.url_next.add("^/page/(\\w+)/history(/|(/\\d+))?$",
 		boost::bind(&page::history,this,$1,$3));
 }
 

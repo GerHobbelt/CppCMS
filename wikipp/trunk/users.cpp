@@ -10,7 +10,7 @@ namespace apps {
 
 users::users(wiki &w) :	master(w)
 {
-	wi.url_next.add("^/login$",
+	wi.url_next.add("^/login/?$",
 		boost::bind(&users::login,this));
 	wi.on_load(boost::bind(&users::reset,this));
 	reset();

@@ -9,7 +9,7 @@ using namespace dbixx;
 index::index(wiki &w):
 	master(w)
 {
-	wi.url_next.add("^/index",
+	wi.url_next.add("^/index/?",
 		boost::bind(&index::display_index,this));
 }
 
