@@ -3,4 +3,9 @@
 main.cpp
 data.cpp
 wiki.cpp
+index.cpp
+users.cpp
+page.cpp
+master.cpp
+options.cpp
 templates/view.cpp
