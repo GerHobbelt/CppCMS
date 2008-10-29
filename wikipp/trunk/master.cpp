@@ -19,6 +19,7 @@ void master::ini(data::master &c)
 	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
 	c.main_link=wi.page.default_page_url();
 	c.toc=wi.index.index_url();
+	c.changes=wi.index.changes_url();
 	c.login_link=wi.users.login_url();
 	c.wiki_title=wi.options.local.title;
 	c.about=wi.options.local.about;

@@ -27,4 +27,20 @@
 </table>
 <% end template %>
 <% end class %>
+<% class recent_changes uses data::recent_changes extends master %>
+<% template title() %><% gt "Recent Changes" %><% end %>
+<% template main() %>
+<% foreach c in data %>
+	<ul>
+	<% item %>
+	<li><a href="<% c.url %>"><% c.title %></a> &mdash; 
+		<% gt "version %1%, at %2%, by %3%" using c.version,c.created,c.author %></li>
+	<% end item %>
+	</ul>
+	<p><a href="<% next %>"><% gt "Next Page" %></a></p>
+<% empty %>
+<h2>No more changes</h2>
+<% end %>
+<% end template %>
+<% end class %>
 <% end namespace %>

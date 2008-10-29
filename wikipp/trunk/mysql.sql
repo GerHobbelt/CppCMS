@@ -41,4 +41,6 @@ create table history (
 	primary key(id,version)
 ) Engine = InnoDB;
 
+create index history_timeline on history(created);
+
 

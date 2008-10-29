@@ -11,11 +11,52 @@ index::index(wiki &w):
 {
 	wi.url_next.add("^/index/?",
 		boost::bind(&index::display_index,this));
+	wi.url_next.add("^/changes(/?|/(\\d+))$",
+		boost::bind(&index::changes,this,$2));
 }
 
 string index::index_url()
 {
 	return wi.root()+"/index/";
+}
+
+string index::changes_url(int p)
+{
+	if(p==0)
+		return wi.root()+"/changes/";
+	return wi.root()+(boost::format("/changes/%1%") % p).str();
+}
+
+void index::changes(string page_no)
+{
+	int p;
+	const int window=30;
+	if(page_no.empty())
+		p=0;
+	else
+		p=atoi(page_no.c_str());
+	result rs;
+	sql<<	"SELECT history.title,history.version,history.created,"
+		"	history.author,pages.lang,pages.slug "
+		"FROM history "
+		"JOIN pages ON history.id=pages.id "
+		"ORDER BY created DESC "
+		"LIMIT ?,?",
+		p*window,window,
+		rs;
+	data::recent_changes c;	
+	c.data.resize(rs.rows());
+	row r;
+	int n;
+	for(n=0;rs.next(r);n++) {
+		data::recent_changes::element &d=c.data[n];
+		string lang,slug;
+		r>>d.title>>d.version>>d.created>>d.author>>lang>>slug;
+		d.url=wi.page.page_version_url(d.version,lang,slug);
+	}
+	c.next=changes_url(p+1);
+	ini(c);
+	render("recent_changes",c);
 }
 
 void index::display_index()

@@ -28,13 +28,13 @@ protected:
 	void display_ver(string slug,string sid);
 	void edit(string slug,string version);
 
-	string page_version_url(int ver);
 	string edit_url();
 	string edit_version_url(int ver);
 	string history_url(int n=0);
 public:
 	page(wiki &w);
 	string page_url(string l="",string s="");
+	string page_version_url(int ver,string l="",string s="");
 	string default_page_url(string l="en",string s="main")
 		{ return page_url(l,s); }
 	void redirect(string locale="en",string slug="main");

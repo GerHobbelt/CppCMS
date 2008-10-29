@@ -63,6 +63,7 @@ struct master : public cppcms::base_content {
 	string main_link;
 	string login_link;
 	string toc;
+	string changes;
 	string edit_options;
 	string wiki_title,about,copyright;
 	map<string,string> languages;
@@ -100,6 +101,18 @@ struct toc : public master {
 	};
 	typedef vector<element> column_t;
 	column_t left_col,right_col,middle_col;
+};
+
+struct recent_changes : public master {
+	struct element {
+		string title;
+		int version;
+		std::tm created;
+		string author;
+		string url;
+	};
+	vector<element> data;
+	string next;
 };
 
 struct page_hist: public page {

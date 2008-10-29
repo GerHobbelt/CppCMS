@@ -28,10 +28,12 @@ string page::page_url(string l,string s)
 	return wi.root(l)+"/page/"+s;
 }
 
-string page::page_version_url(int ver)
+string page::page_version_url(int ver,string l,string s)
 {
-	return wi.root()+
-		(boost::format("/page/%1%/version/%2%") % slug % ver).str();
+	if(l.empty()) l=locale;
+	if(s.empty()) s=slug;
+	return wi.root(l)+
+		(boost::format("/page/%1%/version/%2%") % s % ver).str();
 }
 string page::edit_url()
 {
