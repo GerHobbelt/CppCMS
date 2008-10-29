@@ -50,6 +50,7 @@ struct new_user_form : public form {
 struct options_form : form {
 	wiki *w;
 	widgets::checkbox users_only;
+	widgets::text contact_mail;
 	widgets::text wiki_title;
 	widgets::textarea about;
 	widgets::text copyright;
@@ -61,10 +62,12 @@ struct master : public cppcms::base_content {
 	string media;
 	string cookie_prefix;
 	string main_link;
+	string main_local;
 	string login_link;
 	string toc;
 	string changes;
 	string edit_options;
+	string contact;
 	string wiki_title,about,copyright;
 	map<string,string> languages;
 	virtual string markdown(string);

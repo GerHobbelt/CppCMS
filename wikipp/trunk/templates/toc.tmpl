@@ -37,9 +37,9 @@
 		<% gt "version %1%, at %2%, by %3%" using c.version,c.created,c.author %></li>
 	<% end item %>
 	</ul>
-	<p><a href="<% next %>"><% gt "Next Page" %></a></p>
+	<% if not empty next %><p><a href="<% next %>"><% gt "Next Page" %></a></p><% end %>
 <% empty %>
-<h2>No more changes</h2>
+<h2><% gt "No more changes" %></h2>
 <% end %>
 <% end template %>
 <% end class %>

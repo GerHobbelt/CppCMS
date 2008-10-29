@@ -6,11 +6,11 @@ namespace apps {
 using namespace dbixx;
 
 void global_options::load(archive &a) {
-	a>>users_only_edit;
+	a>>users_only_edit>>contact;
 }
 void global_options::save(archive &a) const
 {
-	a<<users_only_edit;
+	a<<users_only_edit<<contact;
 }
 void locale_options::load(archive &a)
 {
@@ -45,18 +45,26 @@ void options::load()
 {
 	if(loaded)
 		return;
+	global.users_only_edit=0;
+	global.contact.clear();
+	local.about.clear();
+	local.title.clear();
+	local.copyright.clear();
 	if(!cache.fetch_data("global_ops",global)) {
-		sql<<	"SELECT value FROM options "
-			"WHERE	lang='global' AND name='users_only_edit' ";
+		result res;
+		sql<<	"SELECT name,value FROM options "
+			"WHERE	lang='global' ",res;
 		row r;
-		if(sql.single(r)) {
-			string v;
-			r >> v;
-			global.users_only_edit=atoi(v.c_str());
+		while(res.next(r)) {
+			string n,v;
+			r >> n >> v;
+			if(n=="users_only_edit")
+				global.users_only_edit=atoi(v.c_str());
+			else if(n=="contact")
+				global.contact=v;
 		}
-		else { 
-			global.users_only_edit=0;
-		}
+		if(global.contact.empty())
+			global.contact="no@mail";
 		cache.store_data("global_ops",global);
 	}
 	if(cache.fetch_data("local_ops:"+locale,local))
@@ -86,6 +94,7 @@ void options::load()
 	if(local.copyright.empty())
 		local.copyright=gettext("&copy; All Rights Reserverd");
 	cache.store_data("local_ops:"+locale,local);
+	loaded=true;
 }
 
 
@@ -97,6 +106,9 @@ void options::save()
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')",
 		global.users_only_edit,exec();
+	sql<<	"INSERT INTO options(value,name,lang) "
+		"VALUES(?,'contact','global')",
+		global.contact,exec();
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'title',?)",
 		local.title,locale,exec();
@@ -121,6 +133,7 @@ void options::edit()
 		c.form.load(*cgi);
 		if(c.form.validate()) {
 			global.users_only_edit=c.form.users_only.get();
+			global.contact=c.form.contact_mail.get();
 			local.title=c.form.wiki_title.get();
 			local.copyright=c.form.copyright.get();
 			local.about=c.form.about.get();
@@ -133,6 +146,7 @@ void options::edit()
 		c.form.wiki_title.set(local.title);
 		c.form.copyright.set(local.copyright);
 		c.form.about.set(local.about);
+		c.form.contact_mail.set(global.contact);
 	}
 	ini(c);
 	render("edit_options",c);

@@ -16,7 +16,7 @@
 	<li><a href="<% changes %>"><% gt "Changes" %></a></li>
 </ul>
 <% foreach l in languages %>
-<h2><% gt "Main Page:" %></h2>
+<h2><% gt "Main Page" %></h2>
 <ul>
 <% item %><li><a href="<% l.second %>"><% l.first %></a></li><% end %>
 </ul>
@@ -68,7 +68,11 @@
 	<div id="header">
 		<h1 id="title"><% include wiki_title() %></h1>
 	</div>
-	<div id="path"><% include navigation()%></div>
+	<div id="path">
+		<a href="<% main_local %>"><% gt "Main" %></a>
+		&nbsp;/&nbsp;
+		<% include navigation()%>
+	</div>
 	<div id="maincontent">
 		<h1><% include title() %></h1>
 		<% include main() %>
@@ -77,8 +81,8 @@
 		<% include navbar() %>
 		<% include sidebar() %>
 		<hr/>
-		<p>Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> 
-		| Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.0</a>
+		<p><a href="http://jigsaw.w3.org/css-validator/check/referer"><% gt "Valid CSS" %></a> 
+		| <a href="http://validator.w3.org/check?uri=referer"><% gt "Valid XHTML 1.0" %></a>
 		</p>
 	</div>
 	<div id="footer">
@@ -86,7 +90,7 @@
 	<% copyright | raw %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
 	</div>
 	<div id="footercontact">
-	<a href="#">Contact</a>
+	<a href="<% contact %>"><% gt "Contact" %></a>
 	</div>
 </div>
 </body>

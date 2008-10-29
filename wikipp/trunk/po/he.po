@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
-"POT-Creation-Date: 2008-10-29 22:07+0200\n"
-"PO-Revision-Date: 2008-10-29 22:33+0200\n"
+"POT-Creation-Date: 2008-10-30 00:05+0200\n"
+"PO-Revision-Date: 2008-10-30 00:06+0200\n"
 "Last-Translator: artik\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 
-#: data.cpp:9 data.cpp:88
+#: data.cpp:9 data.cpp:90
 msgid "Username"
 msgstr "שם משתמש"
 
-#: data.cpp:10 data.cpp:89
+#: data.cpp:10 data.cpp:91
 msgid "Password"
 msgstr "ססמה"
 
@@ -67,42 +67,46 @@ msgid "Users Only"
 msgstr "משתמשים בלבד"
 
 #: data.cpp:72
+msgid "Contact e-mail"
+msgstr "דוא\"ל ליצירת־קשר"
+
+#: data.cpp:73
 msgid "Wiki Title"
 msgstr "כותרת הויקי"
 
-#: data.cpp:73
+#: data.cpp:74
 msgid "About Wiki"
 msgstr "אודות ויקי"
 
-#: data.cpp:74
+#: data.cpp:75
 msgid "Copyright String"
 msgstr "זכויות היוצרים"
 
-#: data.cpp:75 data.cpp:91
+#: data.cpp:76 data.cpp:93
 msgid "Submit"
 msgstr "שלח"
 
-#: data.cpp:83
+#: data.cpp:85
 msgid "Disable creation of new articles by visitors"
 msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
 
-#: data.cpp:90
+#: data.cpp:92
 msgid "Confirm"
 msgstr "אמת"
 
-#: data.cpp:121
+#: data.cpp:123
 msgid "This user exists"
 msgstr "המשתמש קיים"
 
-#: master.cpp:37
+#: master.cpp:39
 msgid "LANG"
 msgstr "עברית"
 
-#: options.cpp:79
+#: options.cpp:87
 msgid "Wiki++ &mdash; CppCMS Wiki"
-msgstr "ויקי++ &mdash; ‏CppCMS ויקי"
+msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
 
-#: options.cpp:82
+#: options.cpp:90
 msgid ""
 "## About\n"
 "\n"
@@ -111,9 +115,10 @@ msgid ""
 msgstr ""
 "## אודות\n"
 "\n"
-"ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf.net/)\n"
+"ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf."
+"net/)\n"
 
-#: options.cpp:87
+#: options.cpp:95
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
@@ -138,8 +143,8 @@ msgid "Changes"
 msgstr "שינויים"
 
 #: main.tmpl:19
-msgid "Main Page:"
-msgstr "עמוד ראשי:"
+msgid "Main Page"
+msgstr "עמוד ראשי"
 
 #: main.tmpl:36
 msgid "LTR"
@@ -149,13 +154,29 @@ msgstr "RTL"
 msgid "Logout "
 msgstr "יציאה"
 
-#: main.tmpl:86
+#: main.tmpl:72
+msgid "Main"
+msgstr "ראשי"
+
+#: main.tmpl:84
+msgid "Valid CSS"
+msgstr "‏css תקני"
+
+#: main.tmpl:85
+msgid "Valid XHTML 1.0"
+msgstr "‏XHTML 1.0 תקני"
+
+#: main.tmpl:90
 msgid ""
 "Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
 msgstr ""
 "התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
+
+#: main.tmpl:93
+msgid "Contact"
+msgstr "צור קשר"
 
 #: page.tmpl:14 page.tmpl:26
 msgid "Edit"
@@ -236,4 +257,8 @@ msgstr "גרסה %1%, ב־%2%, ע\"י %3%"
 #: toc.tmpl:40
 msgid "Next Page"
 msgstr "עמוד הבא"
+
+#: toc.tmpl:42
+msgid "No more changes"
+msgstr "אין יותר שינויים"
 

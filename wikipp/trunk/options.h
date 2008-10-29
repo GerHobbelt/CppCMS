@@ -12,6 +12,7 @@ using namespace cppcms;
 
 struct global_options : public serializable {
 	int users_only_edit;
+	string contact;
 	virtual void load(archive &a);
 	virtual void save(archive &a) const;
 };

@@ -30,7 +30,7 @@ string index::changes_url(int p)
 void index::changes(string page_no)
 {
 	int p;
-	const int window=30;
+	const unsigned window=30;
 	if(page_no.empty())
 		p=0;
 	else
@@ -54,7 +54,8 @@ void index::changes(string page_no)
 		r>>d.title>>d.version>>d.created>>d.author>>lang>>slug;
 		d.url=wi.page.page_version_url(d.version,lang,slug);
 	}
-	c.next=changes_url(p+1);
+	if(c.data.size()==window)
+		c.next=changes_url(p+1);
 	ini(c);
 	render("recent_changes",c);
 }

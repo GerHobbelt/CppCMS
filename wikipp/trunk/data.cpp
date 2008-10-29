@@ -69,14 +69,16 @@ bool page_form::validate()
 options_form::options_form(wiki *_w):
 	w(_w),
 	users_only("uonly",w->gettext("Users Only")),
+	contact_mail("contact",w->gettext("Contact e-mail")),
 	wiki_title("wtitle",w->gettext("Wiki Title")),
 	about("about",w->gettext("About Wiki")),
 	copyright("copy",w->gettext("Copyright String")),
 	submit("submit",w->gettext("Submit"))
 {
-	*this & users_only & wiki_title & copyright & about & submit;
+	*this & users_only & contact_mail & wiki_title & copyright & about & submit;
 	wiki_title.set_nonempty();
 	copyright.set_nonempty();
+	contact_mail.set_nonempty();
 	about.set_nonempty();
 	about.rows=10;
 	about.cols=40;
