@@ -1,4 +1,5 @@
 <% c++ #include "../data.h" %>
+<% xhtml %>
 <% namespace view %>
 <% class master uses data::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
@@ -86,14 +87,16 @@
 		</p>
 	</div>
 	<div id="footer">
-	<div id="copyrightdesign">
-	<% copyright | raw %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
-	</div>
-	<div id="footercontact">
-	<a href="<% contact %>"><% gt "Contact" %></a>
+		<div id="copyrightdesign">
+		<% copyright | raw %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+		</div>
+		<div id="footercontact">
+		<a href="<% contact %>"><% gt "Contact" %></a>
+		</div>
 	</div>
 </div>
 </body>
+</html>
 <% end template %>
 <% end class %>
 <% end namespace %>
