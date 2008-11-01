@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
-"POT-Creation-Date: 2008-11-01 23:12+0200\n"
-"PO-Revision-Date: 2008-10-30 00:06+0200\n"
+"POT-Creation-Date: 2008-10-30 00:05+0200\n"
+"PO-Revision-Date: 2008-11-01 23:18+0200\n"
 "Last-Translator: artik\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -26,7 +26,7 @@ msgstr "שם משתמש"
 msgid "Password"
 msgstr "ססמה"
 
-#: data.cpp:11 main.tmpl:60
+#: data.cpp:11 main.tmpl:59
 msgid "Login"
 msgstr "התחברות"
 
@@ -34,11 +34,11 @@ msgstr "התחברות"
 msgid "Title"
 msgstr "כותרת"
 
-#: data.cpp:38 page.tmpl:110
+#: data.cpp:38
 msgid "Content"
 msgstr "תוכן"
 
-#: data.cpp:39 page.tmpl:114
+#: data.cpp:39
 msgid "Sidebar"
 msgstr "סרגל־צד"
 
@@ -122,51 +122,51 @@ msgstr ""
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
-#: main.tmpl:5
+#: main.tmpl:4
 msgid "Wellcome to WikiPP"
 msgstr "ברוכים הבאים ל־ויקי++"
 
-#: main.tmpl:9
+#: main.tmpl:8
 msgid " Users Area"
 msgstr "אזור משתמשים"
 
-#: main.tmpl:14
+#: main.tmpl:13
 msgid "Navigation"
 msgstr "ניווט"
 
-#: main.tmpl:16
+#: main.tmpl:15
 msgid "Index"
 msgstr "אינדקס"
 
-#: main.tmpl:17
+#: main.tmpl:16
 msgid "Changes"
 msgstr "שינויים"
 
-#: main.tmpl:20
+#: main.tmpl:19
 msgid "Main Page"
 msgstr "עמוד ראשי"
 
-#: main.tmpl:37
+#: main.tmpl:36
 msgid "LTR"
 msgstr "RTL"
 
-#: main.tmpl:63
+#: main.tmpl:62
 msgid "Logout "
 msgstr "יציאה"
 
-#: main.tmpl:73
+#: main.tmpl:72
 msgid "Main"
 msgstr "ראשי"
 
-#: main.tmpl:85
+#: main.tmpl:84
 msgid "Valid CSS"
 msgstr "‏css תקני"
 
-#: main.tmpl:86
+#: main.tmpl:85
 msgid "Valid XHTML 1.0"
 msgstr "‏XHTML 1.0 תקני"
 
-#: main.tmpl:91
+#: main.tmpl:90
 msgid ""
 "Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
@@ -174,7 +174,7 @@ msgstr ""
 "התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
 
-#: main.tmpl:94
+#: main.tmpl:93
 msgid "Contact"
 msgstr "צור קשר"
 
@@ -202,31 +202,6 @@ msgstr "ערוך גרסה זו (שחזור)"
 msgid "(version %1%, from %2%)"
 msgstr "(גרסה %1%, ב־%2%)"
 
-#: page.tmpl:77
-msgid "Difference \"%1%\" ver. %2% ver %3%"
-msgstr ""
-
-#: page.tmpl:79 page.tmpl:81
-msgid "Edit version %1%"
-msgstr ""
-
-#: page.tmpl:98
-msgid "No such page or version exist"
-msgstr ""
-
-#: page.tmpl:100
-msgid "No difference between these versions"
-msgstr ""
-
-#: page.tmpl:103
-#, fuzzy
-msgid "Titles"
-msgstr "כותרת"
-
-#: page.tmpl:105
-msgid "Version %1%"
-msgstr ""
-
 #: hist.tmpl:3
 msgid "WikiPP :: History"
 msgstr "ויקי++ :: היסטוריה"
@@ -243,15 +218,11 @@ msgstr "הצג"
 msgid "Edit (rollback)"
 msgstr "עריכה (שחזור)"
 
-#: hist.tmpl:17 toc.tmpl:38
-msgid "Diff to previous"
-msgstr ""
-
-#: hist.tmpl:23
+#: hist.tmpl:20
 msgid "History is empty"
 msgstr "היסטוריה ריקה"
 
-#: hist.tmpl:25
+#: hist.tmpl:22
 msgid "Next page"
 msgstr "עמוד הבא"
 
@@ -267,7 +238,7 @@ msgstr "הרשם כמשתמש חדש"
 msgid "WikiPP :: Register"
 msgstr "ויקי :: הרשמה"
 
-#: admin.tmpl:37
+#: admin.tmpl:36
 msgid "WikiPP :: Edit Options"
 msgstr "ויקי :: עריכת הגדרות"
 
@@ -283,10 +254,31 @@ msgstr "שינויים אחרונים"
 msgid "version %1%, at %2%, by %3%"
 msgstr "גרסה %1%, ב־%2%, ע\"י %3%"
 
-#: toc.tmpl:43
+#: toc.tmpl:40
 msgid "Next Page"
 msgstr "עמוד הבא"
 
-#: toc.tmpl:45
+#: toc.tmpl:42
 msgid "No more changes"
 msgstr "אין יותר שינויים"
+
+#~ msgid "Difference \"%1%\" ver. %2% ver %3%"
+#~ msgstr "השוואה של \"%1%\", גרסה %2%, גרסה %3%"
+
+#~ msgid "Edit version %1%"
+#~ msgstr "ערוך גרסה %1%"
+
+#~ msgid "No such page or version exist"
+#~ msgstr "עמוד או גרסאות כאלה לא קיימים"
+
+#~ msgid "No difference between these versions"
+#~ msgstr "אין הבדל בין הגרסאות"
+
+#~ msgid "Titles"
+#~ msgstr "כותרות"
+
+#~ msgid "Version %1%"
+#~ msgstr "גרסה %1"
+
+#~ msgid "Diff to previous"
+#~ msgstr "השוואה עם גרסה קודמת"
