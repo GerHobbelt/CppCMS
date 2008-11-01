@@ -27,12 +27,14 @@ protected:
 	void history(string slug,string page);
 	void display_ver(string slug,string sid);
 	void edit(string slug,string version);
+	void diff(string slug,string v1,string v2);
 
 	string edit_url();
 	string edit_version_url(int ver);
 	string history_url(int n=0);
 public:
 	page(wiki &w);
+	string diff_url(int v1,int v2,string lang="",string s="");
 	string page_url(string l="",string s="");
 	string page_version_url(int ver,string l="",string s="");
 	string default_page_url(string l="en",string s="main")

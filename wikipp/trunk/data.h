@@ -113,6 +113,7 @@ struct recent_changes : public master {
 		std::tm created;
 		string author;
 		string url;
+		string diff_url;
 	};
 	vector<element> data;
 	string next;
@@ -129,6 +130,7 @@ struct history : public master {
 		std::tm update;
 		string show_url;
 		string edit_url;
+		string diff_url;
 		int version;
 		string author;
 	};
@@ -145,6 +147,24 @@ struct edit_page: public page {
 	string submit;
 	edit_page(wiki *w) : form(w),new_page(false) {}
 };
+
+typedef list<std::pair<int,string> > diff_t;
+
+struct diff: public master {
+	string edit_v1,edit_v2;
+	int v1,v2;
+	diff_t content_diff_data;
+	diff_t sidebar_diff_data;
+	string title,title_1,title_2;
+	bool title_diff,content_diff,sidebar_diff,no_versions,no_diff;
+	diff() : 
+		title_diff(false),content_diff(false),
+		sidebar_diff(false),no_versions(false),
+		no_diff(false)
+	{
+	}
+};
+
 
 } // data
 

@@ -13,7 +13,9 @@
 	<li>
 		<% gt "Version %1%, changed at %2%, by %3%" using row.version, row.update, row.author %>,
 		<a href="<% row.show_url %>"><% gt "Show" %></a>,
-		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a>
+		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a><% if not empty row.diff_url %>, 
+			<a href="<% row.diff_url %>"><% gt "Diff to previous" %></a>
+			<% end %>
 	</li>
 	<% end %>
 	</ul>

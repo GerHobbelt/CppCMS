@@ -232,3 +232,5 @@ h1.categorytitle {
 	border-bottom:none;
 }
 
+tr.d_del{background:red;}
+tr.d_add{background:green;}

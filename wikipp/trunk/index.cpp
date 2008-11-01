@@ -53,6 +53,8 @@ void index::changes(string page_no)
 		string lang,slug;
 		r>>d.title>>d.version>>d.created>>d.author>>lang>>slug;
 		d.url=wi.page.page_version_url(d.version,lang,slug);
+		if(d.version>1)
+			d.diff_url=wi.page.diff_url(d.version-1,d.version,lang,slug);
 	}
 	if(c.data.size()==window)
 		c.next=changes_url(p+1);

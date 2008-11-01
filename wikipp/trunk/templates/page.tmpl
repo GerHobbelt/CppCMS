@@ -73,4 +73,49 @@
 <% include page::main() %>
 <% end template %>
 <% end class %>
+<% class diff uses data::diff extends master %>
+<% template title() %><% gt "Difference \"%1%\" ver. %2% versus ver. %3%" using title,v1,v2 %><% end template %>
+<% template navigation() %>
+	<a href="<% edit_v1 %>"><% gt "Edit version %1%" using v1 %></a>
+	&nbsp;/&nbsp;
+	<a href="<% edit_v2 %>"><% gt "Edit version %1%" using v2 %></a>
+	&nbsp;/&nbsp;
+	<% include master::navigation() %>
+<% end template %>
+<% template show_diff(data::diff_t &data) %>
+<table style="width:100%" >
+	<% foreach r in data %>
+	<% item %>
+	<tr class="<% if (r.first<0) %>d_del<% elif (r.first>0) %>d_add<% else %>d_no<% end %>" >
+		<td><code><% r.second %></code></td>
+	</tr>
+	<% end %>
+	<% end %>
+</table>
+<% end template %>
+<% template main() %>
+<% if no_versions %>
+	<h2><% gt "No such page or version exist" %></h2>
+<% elif no_diff %>
+	<h2><% gt "No difference between these versions" %></h2>
+<% else %>
+	<% if title_diff %>
+	<h2><% gt "Titles" %>:</h2>
+	<table style="width:100%">
+	<tr><th><% gt "Version %1%" using v1 %></th><th><% gt "Version %1%" using v2 %></th>
+	<tr><td><% title_1 %></td><td><% title_2 %></td></tr>
+	</table>
+	<% end %>
+	<% if content_diff %>
+		<h2><% gt "Content" %>:</h2>
+		<% include show_diff(content_diff_data) %>
+	<% end %>
+	<% if sidebar_diff %>
+		<h2><% gt "Sidebar" %>:</h2>
+		<% include show_diff(sidebar_diff_data) %>
+	<% end %>
+	</table>
+<% end %>
+<% end template %>
+<% end class %>
 <% end namespace %>

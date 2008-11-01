@@ -1,6 +1,7 @@
 #include <cgicc/HTTPRedirectHeader.h>
 #include "page.h"
 #include "wiki.h"
+#include "diff.h"
 
 using namespace dbixx;
 
@@ -19,6 +20,16 @@ page::page(wiki &w):
 		boost::bind(&page::edit,this,$1,$3));
 	wi.url_next.add("^/page/(\\w+)/history(/|/(\\d+))?$",
 		boost::bind(&page::history,this,$1,$3));
+	wi.url_next.add("^/page/(\\w+)/diff/(\\d+)vs(\\d+)/?$",
+		boost::bind(&page::diff,this,$1,$2,$3));
+}
+
+string page::diff_url(int v1,int v2,string l,string s)
+{
+	if(l.empty()) l=locale;
+	if(s.empty()) s=slug;
+	return wi.root(l) + 
+		(boost::format("/page/%1%/diff/%2%vs%3%") % s % v1 % v2).str();
 }
 
 string page::page_url(string l,string s)
@@ -49,6 +60,64 @@ string page::history_url(int n)
 	if(n)
 		u+=(boost::format("%1%") % n).str();
 	return u;
+}
+
+void page::diff(string slug,string sv1,string sv2)
+{
+	int v1=atoi(sv1.c_str()), v2=atoi(sv2.c_str());
+	this->slug=slug;
+	result rs;
+	data::diff c;
+	c.v1=v1;
+	c.v2=v2;
+	c.edit_v1=edit_version_url(v1);
+	c.edit_v2=edit_version_url(v2);
+	sql<<	"SELECT version,history.title,history.content,history.sidebar,pages.title FROM pages "
+		"JOIN history ON pages.id=history.id "
+		"WHERE lang=? AND slug=? AND version IN (?,?) ",
+		locale,slug,v1,v2,rs;
+	if(rs.rows()!=2) {
+		c.no_versions=true;
+		master::ini(c);
+		render("diff",c);
+		return;
+	}
+	string t1,c1,s1,t2,c2,s2;
+	row r;
+	while(rs.next(r)) {
+		int ver;
+		r>>ver;
+		if(ver==v1) {
+			r>>t1>>c1>>s1>>c.title;
+		}
+		else {
+			r>>t2>>c2>>s2;
+		}
+	}
+	if(t1!=t2) {
+		c.title_diff=true;
+		c.title_1=t1;
+		c.title_2=t2;
+	}
+	else {
+		c.title=t1;
+	}
+	if(c1!=c2) {
+		c.content_diff=true;
+		vector<string> X=split(c1);
+		vector<string> Y=split(c2);
+		diff::diff(X,Y,c.content_diff_data);
+	}
+	if(s1!=s2) {
+		c.sidebar_diff=true;
+		vector<string> X=split(s1);
+		vector<string> Y=split(s2);
+		diff::diff(X,Y,c.sidebar_diff_data);
+	}
+	if(t1==t2 && c1==c2 && s1==s2) 
+		c.no_diff=true;
+	master::ini(c);
+	render("diff",c);
 }
 
 void page::history(string slug,string page)
@@ -95,6 +164,8 @@ void page::history(string slug,string page)
 		c.hist[i].version=ver;
 		c.hist[i].show_url=page_version_url(ver);
 		c.hist[i].edit_url=edit_version_url(ver);
+		if(ver>1)
+			c.hist[i].diff_url=diff_url(ver-1,ver);
 	}
 
 	c.page_link=page_url();
