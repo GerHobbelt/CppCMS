@@ -1,0 +1,161 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+
+AC_INIT([cppcms], [0.0.2], [artyomtnk@yahoo.com])
+AC_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE([1.9 foreign])
+
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
+
+AC_LANG_CPLUSPLUS
+AC_CONFIG_FILES([Makefile transtext/Makefile])
+
+AC_ARG_ENABLE(forkcache,[AS_HELP_STRING([--disable-forkcache],[Disable shared memory cache])])
+AC_ARG_ENABLE(fastcgi,[AS_HELP_STRING([--disable-fastcgi],[Disable fastcgi interface])])
+AC_ARG_ENABLE(tcpcache,[AS_HELP_STRING([--disable-tcpcache],[Disable distributed cache system])])
+
+CPPCMS_LIBS=""
+
+if test "x$enable_forkcache" != "xno" ; then
+	case $host in 
+	*cygwin*)	echo "=============================================="
+			echo "Cygwin pthread process shared mutex is broken "
+			echo "Shared memory/fork cache will be disabled " 
+			echo "==============================================" ;;
+	*)
+	AC_CHECK_LIB(mm,main,[
+		have_mm=yes
+		CPPCMS_LIBS="-lmm $CPPCMS_LIBS"
+		AC_DEFINE([EN_FORK_CACHE],[],["Enable fork cache"])
+		],
+		[	echo "======================================================================"
+			echo "OSSP mm library (libmm) not installed" 
+			echo "============== The fork cache backend will be disabled ===============" ]) ;;
+	esac
+fi
+
+if test "x$enable_fastcgi" != "xno" ; then
+	AC_CHECK_LIB(fcgi++,main,[
+		have_fcgi=yes
+		CPPCMS_LIBS="-lfcgi++ -lfcgi $CPPCMS_LIBS"
+		AC_DEFINE([EN_FCGI_BACKEND],[],["Enable fastcgi backend"])
+		],
+		[	echo "======================================================================"
+			echo "Fast CGI library not installed"  
+			echo "============== FastCGI API will be disabled ==========================" 
+			echo "You still have scgi and cgi API" ])
+fi
+
+have_auto_type_detection=no
+
+AC_TRY_COMPILE([#include <list>
+		],
+		[std::list<int> l; auto p=l.begin();],
+		[AC_DEFINE([HAVE_CPP_0X_AUTO],[],["Have C++0x auto"])
+			have_auto_type_detection=yes
+			echo "C++0x auto... ok"	],[echo "C++0x auto... not supported"])
+AC_TRY_COMPILE([#include <list>
+		],
+		[std::list<int> l; decltype(l.begin()) p=l.begin();],
+		[AC_DEFINE([HAVE_CPP_0X_DECLTYPE],[],["Have C++0x decltype"])
+			have_auto_type_detection=yes
+			echo "C++0x decltype... ok"],[echo "C++0x decltype... not supported"])
+AC_TRY_COMPILE([#include <list>
+		],
+		[std::list<int> l; typeof(l.begin()) p=l.begin();],
+		[AC_DEFINE([HAVE_GCC_TYPEOF],[],["Have g++ typeof"])
+			have_auto_type_detection=yes
+			echo "g++ typeof... ok"],[echo "g++ typeof... not supported"])
+AC_TRY_COMPILE([#include <list>
+		#include <vector>
+		#include #include <boost/typeof/typeof.hpp>
+		],
+		[	{std::list<int> l; BOOST_TYPEOF(l.begin()) p=l.begin(); BOOST_TYPEOF(*p) &refp=*p;}
+			{std::vector<int> l; BOOST_TYPEOF(l.begin()) p=l.begin(); BOOST_TYPEOF(*p) &refp=*p;}],
+		[AC_DEFINE([HAVE_WORKING_BOOST_TYPEOF],[],["Have working BOOST_TYPEOF"])
+			have_auto_type_detection=yes
+			echo "Useful BOOST_TYPEOF... ok"],[echo "Useful BOOST_TYPEOF... not supported"])
+
+if test x$have_auto_type_detection != xyes ; then
+	echo "No useful type detection method for this compiler found"
+	echo "Supported methods: C++0x auto, C++0x decltype, Boost.Typeof, GCC typeof"
+	exit -1
+fi
+
+
+
+
+AM_CONDITIONAL(EN_FORK_CACHE,[test "x$have_mm" == "xyes" ])
+AM_CONDITIONAL(EN_FCGI_BACKEND,[test "x$have_fcgi" == "xyes" ])
+
+AC_CHECK_HEADER(fastcgi/fcgiapp.h ,[AC_DEFINE([EN_FASTCGI_LONG_PATH],[],["Fastcgi headers in fastcgi dir"])],[])
+
+if test "x$enable_tcpcache" != "xno" ; then
+
+	store_flags="$CXXFLAGS"
+
+	case $host in
+		*cygwin*) CXXFLAGS="-D_WIN32_WINNT -D__USE_W32_SOCKETS $CXXFLAGS"
+	esac
+
+	AC_CHECK_HEADER([asio.hpp],[have_asio=yes
+			need_system=no],[AC_CHECK_HEADER([boost/asio.hpp],[
+					have_asio=yes
+					AC_DEFINE([USE_BOOST_ASIO],[],["Use boost::asio"])
+					need_system=yes],[
+					have_asio=no
+					need_system=no
+					echo "===================================================="
+					echo "ASIO library not found... TCP cache will be disabled"
+					echo "===================================================="  ])])
+
+	CXXFLAGS="$store_flags"
+fi
+
+if test "x$need_system" == "xyes" 
+then
+	AC_CHECK_LIB(boost_system,main,
+		[ LIBS="-lboost_system $LIBS" ],
+		[	AC_CHECK_LIB(boost_system-gcc-mt,main,
+				[LIBS="-lboost_system-gcc-mt $LIBS"],
+				[	have_asio=no 
+				echo "boost::asio found however boost::system not found"
+				echo "     TCP cache disabled"])])
+fi
+
+if test "x$have_asio" == "xyes" 
+then
+	AC_DEFINE([EN_TCP_CACHE],[],["Enable tcp cache"])
+	case $host in 
+		*cygwin*) LIBS="-lws2_32 $LIBS"
+	esac
+fi
+
+
+AM_CONDITIONAL(EN_TCP_CACHE,[test "x$have_asio" == "xyes" ])
+
+AC_CHECK_LIB(cgicc,main,[CPPCMS_LIBS="-lcgicc $CPPCMS_LIBS"],[echo "cgicc not found" ; exit -1])
+AC_CHECK_LIB(dl,dlopen,[CPPCMS_LIBS="-ldl $CPPCMS_LIBS"],[])
+AC_CHECK_LIB(pthread,pthread_sigmask,[],[echo "Pthreads library not found" ; exit -1])
+AC_CHECK_LIB(boost_regex,main,[
+	CPPCMS_LIBS="-lboost_regex $CPPCMS_LIBS"
+	],
+	[AC_CHECK_LIB(boost_regex-gcc-mt,main,[
+		CPPCMS_LIBS="-lboost_regex-gcc-mt $CPPCMS_LIBS"
+		],[ echo "boost::regex not found" ; exit -1])])
+AC_CHECK_LIB(boost_iostreams,main,[
+	CPPCMS_LIBS="-lboost_iostreams $CPPCMS_LIBS"
+	],[AC_CHECK_LIB(boost_iostreams-gcc-mt,main,[
+		CPPCMS_LIBS="-lboost_iostreams-gcc-mt $CPPCMS_LIBS"
+		],[ echo "boost::iostreams not found" ; exit -1])])
+AC_CHECK_LIB(boost_signals,main,[
+	CPPCMS_LIBS="-lboost_signals $CPPCMS_LIBS"
+	],[AC_CHECK_LIB(boost_signals-gcc-mt,main,[
+		CPPCMS_LIBS="-lboost_signals-gcc-mt $CPPCMS_LIBS"
+		],[ echo "boost::signals not found" ; exit -1])])
+
+AC_SUBST(CPPCMS_LIBS)
+AC_OUTPUT
