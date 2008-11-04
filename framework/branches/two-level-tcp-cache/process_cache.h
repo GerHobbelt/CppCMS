@@ -54,16 +54,17 @@ class process_cache : public base_cache {
 	typedef  container::pointer_list::iterator lru_ptr;
 	unsigned memsize;
 
-	shr_string *get(string const &key,set<string> *triggers);
+	shr_string *get(string const &key,set<string> *triggers,time_t &timeout);
 	void delete_node(pointer p);
 	int fd;
 
 public:
 	process_cache(size_t memsize);
-	virtual bool fetch_page(string const &key,string &output,bool gzip);
-	virtual bool fetch(string const &key,archive &a,set<string> &tags);
-	virtual void rise(string const &trigger);
+	virtual bool fetch_page(string const &key,string &output,bool gzip,time_t &);
+	virtual bool fetch(string const &key,archive &a,set<string> &tags,time_t &);
+	virtual int rise(string const &trigger,list<string> *);
 	virtual void clear();
+	virtual void remove(string const &);
 	virtual void stats(unsigned &keys,unsigned &triggers);
 	virtual void store(string const &key,set<string> const &triggers,time_t timeout,archive const &a);
 	virtual ~process_cache();

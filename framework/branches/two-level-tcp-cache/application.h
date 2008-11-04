@@ -5,7 +5,7 @@
 
 namespace cppcms {
 
-struct application {
+struct application : private boost::noncopyable {
 
 	// Data 
 	worker_thread &worker;

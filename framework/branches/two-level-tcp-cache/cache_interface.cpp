@@ -86,7 +86,8 @@ bool cache_iface::fetch_data(string const &key,serializable &data)
 	if(!cms->caching_module) return false;
 	archive a;
 	set<string> new_trig;
-	if(cms->caching_module->fetch(key,a,new_trig)) {
+	time_t t;
+	if(cms->caching_module->fetch(key,a,new_trig,t)) {
 		data.load(a);
 		triggers.insert(new_trig.begin(),new_trig.end());
 		return true;
@@ -110,7 +111,8 @@ bool cache_iface::fetch_frame(string const &key,string &result)
 	if(!cms->caching_module) return false;
 	archive a;
 	set<string> new_trig;
-	if(cms->caching_module->fetch(key,a,new_trig)) {
+	time_t t;
+	if(cms->caching_module->fetch(key,a,new_trig,t)) {
 		a>>result;
 		triggers.insert(new_trig.begin(),new_trig.end());
 		return true;

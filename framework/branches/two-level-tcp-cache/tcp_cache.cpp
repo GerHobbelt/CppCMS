@@ -25,6 +25,110 @@ using aio::ip::tcp;
 
 namespace cppcms {
 
+
+class l1_cleanup_connection : boost::noncopyable : boost::enable_shared_from_this<l1_cleanup_connection> {
+	aio::io_service &srv_
+	tcp::socket s_
+	string ip;
+	int port;
+	base_cache *cache;
+	cache_factory *cf;
+
+	aio::streambuf buf;
+
+	void connect(string ip,int port) {
+		ip_=ip;
+		port_=port;
+		error_code e;
+		s_.connect(tcp::endpoint(aio::ip::address::from_string(ip),port),e);
+		if(e) throw cppcms_error("connect:"+e.message());
+		tcp::no_delay nd(true);
+		socket_.set_option(nd);
+	}
+public:
+	l1_cleanup_connection(aio::io_service &srv,string _ip,int _port,cache_factory *f) :
+		srv_(srv),
+		s_(srv),
+		ip(_ip),
+		port(_port+1),
+		cf(f)
+	{
+		cache=cf->get();
+		connect(ip,port);
+	}
+	~l1_cleanup_connection() 
+	{
+		cf->del(cache);
+	}
+	void run(error_code const &e=error_code())
+	{
+		if(e) {
+			cache->clear();
+			s_.close();
+			s_.async_connect(tcp::endpoint(aio::ip::address::from_string(ip),port),
+				boost::bind(&l1_cleanup_connection::run,shared_from_this(),_1));
+			return;
+		}
+		asio::async_read_untill(s_,buf,'\n',
+			boost::bind(&l1_cleanup_connection::exec,shared_from_this(),_1));
+	}
+	void exec(error_code const &e)
+	{
+		if(e) {
+			run(e)
+			return;
+		}
+		istream is(&buf);
+		string cmd;
+		getline(is,cmd);
+		if(cmd=="clear:") {
+			cache->clear();
+		}
+		else if(cmd.size()>5 && memcmp(cmd.c_str(),"drop:")==0) {
+			cache->remove(cmd.substr(5));
+		}
+		run();
+	}
+};
+
+class l1_cleanup_service : boost::noncopyable {
+	aio::io_service srv;
+	pthread_t pid;
+
+	static void *thread_func(void *self_ptr)
+	{
+		l1_cleanup_service &self=*(l1_cleanup_service*)self_ptr;
+		try {
+			self.srv.run()
+		}
+		catch(std::exception &e) {
+			std::cerr<<e.what()<<endl;
+		}
+		catch(...) {}
+		return NULL;
+	}
+	
+public:
+	l1_cleanup_service(vector<string> const &ips,vector<long> const &ports) 
+	{
+		unsigned i;
+		for(i=0;i<ips.size() && i<ports.size();i++) {
+			shared_ptr<l1_cleanup_connection> 
+				ptr(new l1_cleanup_connection(srv,ips[i],ports[i],cache_factory));
+			ptr->run();
+		}
+		pthread_create(&pid,NULL,l1_cleanup_service::thread_func,this);
+	}
+	~l1_cleanup_service()
+	{
+		try {
+			srv.stop();
+			pthread_join(pid,NULL);
+		}
+		catch(...){}
+	}
+};
+
 class messenger : boost::noncopyable {
 	aio::io_service srv_;
 	tcp::socket socket_;
@@ -82,8 +186,10 @@ public:
 	
 };
 
-tcp_cache::tcp_cache(vector<string> const& ip,vector<long> const &port)
+tcp_cache::tcp_cache(vector<string> const& ip,vector<long> const &port,cache_factory *cf)
 {
+	L1=NULL;
+	L1_factory=cf;
 	if(ip.size()<1 || port.size()!=ip.size()) {
 		throw cppcms_error("Incorrect parameters for tcp cache");
 	}
@@ -93,10 +199,12 @@ tcp_cache::tcp_cache(vector<string> const& ip,vector<long> const &port)
 		for(int i=0;i<conns;i++) {
 			tcp[i].connect(ip[i],port[i]);
 		}
+		if(cf)	L1=cf->get();
 	}
 	catch(...) {
 		delete [] tcp;
 		tcp=NULL;
+		if(L1 && cf) cf->del(L1);
 		throw;
 	}
 }
@@ -104,6 +212,7 @@ tcp_cache::tcp_cache(vector<string> const& ip,vector<long> const &port)
 tcp_cache::~tcp_cache()
 {
 	delete [] tcp;
+	if(L1) L1_factory->del(L1);
 }
 
 void tcp_cache::broadcast(tcp_operation_header &h,string &data)
@@ -116,7 +225,7 @@ void tcp_cache::broadcast(tcp_operation_header &h,string &data)
 	}
 }
 
-void tcp_cache::rise(string const &trigger)
+int tcp_cache::rise(string const &trigger,list<string> *l)
 {
 	tcp_operation_header h={0};
 	h.opcode=opcodes::rise;
@@ -124,6 +233,7 @@ void tcp_cache::rise(string const &trigger)
 	string data=trigger;
 	h.operations.rise.trigger_len=trigger.size();
 	broadcast(h,data);
+	return 0;
 }
 
 void tcp_cache::clear()
@@ -135,23 +245,7 @@ void tcp_cache::clear()
 	broadcast(h,empty);
 }
 
-bool tcp_cache::fetch_page(string const  &key,string &output,bool gzip)
-{
-	string data=key;
-	tcp_operation_header h={0};
-	h.opcode=opcodes::fetch_page;
-	h.size=data.size();
-	h.operations.fetch_page.gzip=gzip;
-	h.operations.fetch_page.strlen=data.size();
-	get(key).transmit(h,data);
-	if(h.opcode==opcodes::page_data) {
-		output=data;
-		return true;
-	}
-	return false;
-}
-
-bool tcp_cache::fetch(string const &key,archive &a,set<string> &tags)
+bool tcp_cache::base_fetch(string const &key,archive &a,set<string> &tags,time_t &t)
 {
 	string data=key;
 	tcp_operation_header h={0};
@@ -163,6 +257,7 @@ bool tcp_cache::fetch(string const &key,archive &a,set<string> &tags)
 		return false;
 	char const *ptr=data.c_str();
 	a.set(ptr,h.operations.data.data_len);
+	t=h.operations.data.timeout;
 	ptr+=h.operations.data.data_len;
 	int len=h.operations.data.triggers_len;
 	while(len>0) {
@@ -174,6 +269,76 @@ bool tcp_cache::fetch(string const &key,archive &a,set<string> &tags)
 		tags.insert(tag);
 	}
 	return true;
+}
+
+bool tcp_cache::l1_fetch_page(string const  &key,string &output,bool gzip)
+{
+	static char const *no_gzip_key="CPPCmsAbRAKaDABRA";
+	if(L1->fetch_page(key,output,gzip)) {
+		if(gzip)
+			return true;
+		else if(output!=no_gzip_key)
+			return true;
+		L1->remove(key);
+	}
+	archive &a;
+	set<string> &tags;
+	time_t timeout;
+
+	if(!gzip) {
+		if(!base_fetch(key,a,tags,timeout)) {
+			return false;
+		}
+		L1->store(key,a,tags,timeout);
+		a>>output;
+	}
+	else {
+		if(!base_fetch_page(key,output,timeout))
+			return false;
+		a<<string(no_gzip_key)<<output;
+		L1->store(key,a,tags,timeout);
+	}
+	return true;
+}
+
+bool tcp_cache::base_fetch_page(string const  &key,string &output,bool gzip,time_t &timeout)
+{
+	string data=key;
+	tcp_operation_header h={0};
+	h.opcode=opcodes::fetch_page;
+	h.size=data.size();
+	h.operations.fetch_page.gzip=gzip;
+	h.operations.fetch_page.strlen=data.size();
+	get(key).transmit(h,data);
+	if(h.opcode==opcodes::page_data) {
+		output=data;
+		timeout=h.operations.page_data.timeout;
+		return true;
+	}
+	return false;
+}
+
+bool tcp_cache::fetch_page(string const  &key,string &output,bool gzip,time_t &timeout)
+{
+	if(L1) return l1_fetch_page(key,output,gzip);
+	return base_fetch_page(key,output,gzip,timeout);
+}
+
+bool tcp_cache::fetch(string const &key,archive &a,set<string> &tags,time_t &t)
+{
+	if(L1 && L1->fetch(key,a,tags,t)) {
+		return true;
+	}
+	if(!base_fetch(key,a,tags,t)) {
+		return false;
+	}
+	if(L1) L1->store(key,a,tags,t);
+	return true;
+}
+
+void tcp_cache::remove(string const &s)
+{
+	// NOT USED
 }
 
 void tcp_cache::stats(unsigned &keys,unsigned &triggers)
@@ -223,6 +388,29 @@ messenger &tcp_cache::get(string const &key)
 	return tcp[val % conns];
 }
 
+tcp_cache_factory::tcp_cache_factory(vector<string> const &_ip,vector<long> const &_port,auto_ptr<cache_factory> l1) :
+		ip(_ip),
+		port(_port),
+		L1_factory(l1)
+{
+	if(!L1_factory.get())
+		return;
+	cleanup=auto_ptr<l1_cleanup_service>(new l1_cleanup_service(_ip,_port));
+	cleanup->run();
+}
+base_cache *tcp_cache_factory::get() const
+{
+	return new tcp_cache(ip,port,l1.get());
+};
+void tcp_cache_factory::del(base_cache *p) const
+{
+	delete p;
+};
+
+tcp_cache_factory::~tcp_cache_factory()
+{
+	cleanup->stop();
+}
 
 }
 
@@ -243,8 +431,9 @@ int main(int argc,char **argv)
 	try {
 		archive a;
 		set<string> s;
+		time_t tin;
 		tcp_cache tcp(argv[1],atoi(argv[2]));
-		assert(tcp.fetch("something",a,s)==false);
+		assert(tcp.fetch("something",a,s,tin)==false);
 		time_t t;
 		time(&t);
 		t+=2;
@@ -256,12 +445,12 @@ int main(int argc,char **argv)
 		assert(triggers==1);
 		s.clear();
 		a.set("");
-		assert(tcp.fetch("key",a,s)==true);
+		assert(tcp.fetch("key",a,s,tin)==true);
 		assert(s.size()==1);
 		assert(*(s.begin())=="key");
 		assert(a.get()=="data");
 		sleep(3);
-		assert(tcp.fetch("key",a,s)==false);
+		assert(tcp.fetch("key",a,s,tin)==false);
 		a.set("");
 		a<<string("msg1");
 		a<<string("msg2");
@@ -278,21 +467,21 @@ int main(int argc,char **argv)
 		assert(x=="msg1");
 		a.set("");
 		s.clear();
-		assert(tcp.fetch("k",a,s)==true);
+		assert(tcp.fetch("k",a,s,tin)==true);
 		assert(s.size()==3);
 		set<string>::iterator ptr=s.begin();
 		assert(*ptr++=="a");
 		assert(*ptr++=="b");
 		assert(*ptr++=="k");
 		tcp.rise("a");
-		assert(tcp.fetch("k",a,s)==false);
+		assert(tcp.fetch("k",a,s,tin)==false);
 		a.set("Something");
 		s.clear();
 		tcp.store("bb",s,t,a);
-		assert(tcp.fetch("xx",a,s)==false);
-		assert(tcp.fetch("bb",a,s)==true);
+		assert(tcp.fetch("xx",a,s,tin)==false);
+		assert(tcp.fetch("bb",a,s,tin)==true);
 		tcp.clear();
-		assert(tcp.fetch("bb",a,s)==false);
+		assert(tcp.fetch("bb",a,s,tin)==false);
 		cout<<"Done... OK!\n";
 	}
 	catch(std::exception const &e) {

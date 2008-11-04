@@ -10,57 +10,69 @@ using namespace std;
 
 class archive {
 	string data;
-	size_t ptr;
+	uint32_t ptr;
 public:
 	archive() { ptr=0; };
 	archive(string const &s) : data(s) { ptr=0; };
 	void set(string const &s) { data=s; ptr=0; };
-	void set(char const *ptr,size_t len) { data.assign(ptr,len); };
+	void set(char const *ptr,uint32_t len) { data.assign(ptr,len); };
 	string const &get() const { return data; };
 	template<typename T>
 	archive &operator<<(T const &val) {
-		size_t size=sizeof(T);
-		data.append((char const *)&size,sizeof(size_t));
+		uint32_t size=sizeof(T);
+		data.append((char const *)&size,4);
 		data.append((char const *)&val,size);
 		return *this;
 	}
 	archive &operator<<(string const &val) {
-		size_t size=val.size();
-		data.append((char const *)&size,sizeof(size_t));
+		uint32_t size=val.size();
+		data.append((char const *)&size,4);
 		data.append(val.c_str(),size);
 		return *this;
 	}
 	template<typename T>
 	archive &operator>>(T &val)
 	{
-		if(ptr+sizeof(size_t)+sizeof(T)>data.size()) {
+		if(ptr+4+sizeof(T)>data.size()) {
 			throw cppcms_error("Format violation");
 		}
 		char const *start=data.c_str()+ptr;
-		if(*(size_t const *)start!=sizeof(T)) {
+		if(*(uint32_t const *)start!=sizeof(T)) {
 			throw cppcms_error("Invalid size read");
 		}
-		start+=sizeof(size_t);
+		start+=4;
 
 		memcpy(&val,start,sizeof(T));
 
-		ptr+=sizeof(size_t)+sizeof(T);
+		ptr+=4+sizeof(T);
 		return *this;
 	}
 	archive &operator>>(string &val)
 	{
-		if(ptr+sizeof(size_t)>data.size()) {
+		if(ptr+4>data.size()) {
 			throw cppcms_error("Format violation");
 		}
 		char const *start=data.c_str()+ptr;
-		size_t s=*(size_t const *)start;
-		if(ptr+sizeof(size_t)+s>data.size()) {
+		uint32_t s=*(uint32_t const *)start;
+		if(ptr+4+s>data.size()) {
 			throw cppcms_error("String too long");
 		}
-		start+=sizeof(size_t);
-		val=string(start,s);
-		ptr+=sizeof(size_t)+s;
+		start+=4;
+		val.assign(start,s);
+		ptr+=4+s;
 		return *this;
+	}
+	void skip()
+	{
+		if(ptr+4>data.size()) {
+			throw cppcms_error("Format violation");
+		}
+		char const *start=data.c_str()+ptr;
+		uint32_t s=*(uint32_t const *)start;
+		if(ptr+4+s>data.size()) {
+			throw cppcms_error("String too long");
+		}
+		ptr+=4+s;
 	}
 };
 

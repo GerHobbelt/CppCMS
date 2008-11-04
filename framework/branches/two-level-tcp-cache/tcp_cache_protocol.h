@@ -37,10 +37,12 @@ struct tcp_operation_header {
 		} store;
 		struct {
 			uint32_t strlen;
+			uint32_t timeout;
 		} page_data;
 		struct {
 			uint32_t data_len;
 			uint32_t triggers_len;
+			uint32_t timeout;
 		} data;
 		struct {
 			uint32_t keys;

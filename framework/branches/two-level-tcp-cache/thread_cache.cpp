@@ -14,7 +14,7 @@ thread_cache::~thread_cache()
 	pthread_rwlock_destroy(&access_lock);
 }
 
-string *thread_cache::get(string const &key,set<string> *triggers)
+string *thread_cache::get(string const &key,set<string> *triggers,time_t &timeout)
 {
 	pointer p;
 	time_t now;
@@ -34,6 +34,7 @@ string *thread_cache::get(string const &key,set<string> *triggers)
 		}
 		return NULL;
 	}
+	timeout=now - p->second.timeout->first;
 	if(triggers) {
 		list<triggers_ptr>::iterator tp;
 		for(tp=p->second.triggers.begin();tp!=p->second.triggers.end();tp++) {
@@ -61,33 +62,33 @@ string *thread_cache::get(string const &key,set<string> *triggers)
 	return &(p->second.data);
 }
 
-bool thread_cache::fetch_page(string const &key,string &out,bool gzip)
+bool thread_cache::fetch_page(string const &key,string &out,bool gzip,time_t &timeout)
 {
 	rwlock_rdlock lock(access_lock);
-	string *r=get(key,NULL);
+	string *r=get(key,NULL,timeout);
 	if(!r) return false;
-	size_t size=r->size();
-	size_t s;
+	uint32_t size=r->size();
+	uint32_t s;
 	char const *ptr=r->c_str();
-	if(size<sizeof(size_t) || (s=*(size_t const *)ptr)>size-sizeof(size_t))
+	if(size<4 || (s=*(uint32_t const *)ptr)>size-4)
 		return false;
 	if(!gzip){
-		out.assign(ptr+sizeof(size_t),s);
+		out.assign(ptr+4,s);
 	}
 	else {
-		ptr+=s+sizeof(size_t);
-		size-=s+sizeof(size_t);
-		if(size<sizeof(size_t) || (s=*(size_t const *)ptr)!=size-sizeof(size_t))
+		ptr+=s+4;
+		size-=s+4;
+		if(size<4 || (s=*(uint32_t const *)ptr)!=size-4)
 			return false;
-		out.assign(ptr+sizeof(size_t),s);
+		out.assign(ptr+4,s);
 	}
 	return true;
 }
 
-bool thread_cache::fetch(string const  &key,archive &a,set<string> &tags)
+bool thread_cache::fetch(string const  &key,archive &a,set<string> &tags,time_t &tm)
 {
 	rwlock_rdlock lock(access_lock);
-	string *r=get(key,&tags);
+	string *r=get(key,&tags,tm);
 	if(!r) return false;
 	a.set(*r);
 	return true;
@@ -108,8 +109,9 @@ void thread_cache::stats(unsigned &keys,unsigned &triggers)
 	triggers=this->triggers.size();
 }
 
-void thread_cache::rise(string const &trigger)
+int thread_cache::rise(string const &trigger,list<string> *removed)
 {
+	int counter=0;
 	rwlock_wrlock lock(access_lock);
 	if(debug_mode)	print_all();
 	pair<triggers_ptr,triggers_ptr> range=triggers.equal_range(trigger);
@@ -129,10 +131,24 @@ void thread_cache::rise(string const &trigger)
 			write(fd,(*lptr)->first.c_str(),(*lptr)->first.size());
 			write(fd," ",1);
 		}
+		if(removed) {
+			removed->push_back((*lptr)->first.c_str());
+			counter++;
+		}
 		delete_node(*lptr);
 	}
 	if(debug_mode)
 		write(fd,"\n",1);
+	return counter;
+}
+
+void thread_cache::remove(string const &key)
+{
+	rwlock_wrlock lock(access_lock);
+	pointer main;
+	if((main=primary.find(key))!=primary.end()) {
+		delete_node(main);
+	}
 }
 
 void thread_cache::store(string const &key,set<string> const &triggers_in,time_t timeout_in,archive const &a)

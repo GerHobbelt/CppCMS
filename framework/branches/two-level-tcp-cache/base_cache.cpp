@@ -7,7 +7,7 @@ bool base_cache::fetch_page(string const &key,string &output,bool gzip)
 {
 	return false;
 }
-bool base_cache::fetch(string const &key,archive &a,set<string> &tags)
+bool base_cache::fetch(string const &key,archive &a,set<string> &tags,time_t &t)
 {
 	return false;
 };
@@ -16,9 +16,10 @@ void base_cache::clear()
 {
 	// Nothing
 }
-void base_cache::rise(string const &trigger)
+int base_cache::rise(string const &trigger,list<string> *p)
 {
 	// Nothing
+	return 0;
 }
 
 void base_cache::store(string const &key,set<string> const &triggers,time_t timeout,archive const &a)
@@ -27,6 +28,11 @@ void base_cache::store(string const &key,set<string> const &triggers,time_t time
 }
 
 base_cache::~base_cache()
+{
+	// Nothing
+}
+
+void base_cache::remove(string const &t)
 {
 	// Nothing
 }

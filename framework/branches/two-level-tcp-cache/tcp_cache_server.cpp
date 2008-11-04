@@ -58,10 +58,12 @@ public:
 	{
 		string key;
 		key.assign(data_in.begin(),data_in.end());
-		if(cache.fetch_page(key,data_out,hin.operations.fetch_page.gzip)) {
+		time_t timeout;
+		if(cache.fetch_page(key,data_out,hin.operations.fetch_page.gzip,timeout)) {
 			hout.opcode=opcodes::page_data;
 			hout.size=data_out.size();
 			hout.operations.page_data.strlen=data_out.size();
+			hout.operations.page_data.timeout=timeout;
 		}
 		else {
 			hout.opcode=opcodes::no_data;
@@ -73,13 +75,15 @@ public:
 		set<string> tags;
 		string key;
 		key.assign(data_in.begin(),data_in.end());
-		if(!cache.fetch(key,a,tags)) {
+		time_t timeout;
+		if(!cache.fetch(key,a,tags,timeout)) {
 			hout.opcode=opcodes::no_data;
 		}
 		else {
 			hout.opcode=opcodes::data;
 			data_out=a.get();
 			hout.operations.data.data_len=data_out.size();
+			hout.operations.data.timeout=timeout;
 			for(set<string>::iterator p=tags.begin(),e=tags.end();p!=e;++p) {
 				data_out.append(p->c_str(),p->size()+1);
 			}
@@ -234,6 +238,7 @@ int main(int argc,char **argv)
 	}
 	try 
 	{
+
 		aio::io_service io;
 		thread_cache cache(atoi(argv[3]));
 		tcp_cache_server srv_cache(io,argv[1],atoi(argv[2]),cache);

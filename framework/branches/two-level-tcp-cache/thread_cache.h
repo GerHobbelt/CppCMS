@@ -29,7 +29,7 @@ class thread_cache : public base_cache {
 	typedef list<pointer>::iterator lru_ptr;
 	unsigned limit;
 
-	string *get(string const &key,set<string> *triggers);
+	string *get(string const &key,set<string> *triggers,time_t &);
 	void delete_node(pointer p);
 	void print_all();
 	bool debug_mode;
@@ -43,9 +43,10 @@ public:
 		debug_mode=false;
 	};
 	void set_size(unsigned l) { limit=l; };
-	virtual bool fetch_page(string const &key,string &output,bool gzip);
-	virtual bool fetch(string const &key,archive &a,set<string> &tags);
-	virtual void rise(string const &trigger);
+	virtual bool fetch_page(string const &key,string &output,bool gzip,time_t &timeout);
+	virtual bool fetch(string const &key,archive &a,set<string> &tags,time_t &);
+	virtual int rise(string const &trigger,list<string> *);
+	virtual void remove(string const &trigger);
 	virtual void clear();
 	virtual void stats(unsigned &keys,unsigned &triggers);
 	virtual void store(string const &key,set<string> const &triggers,time_t timeout,archive const &a);
