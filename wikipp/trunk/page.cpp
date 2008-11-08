@@ -187,6 +187,7 @@ void page::display(string slug)
 	if(!sql.single(r)) {
 		string redirect=edit_url();
 		set_header(new HTTPRedirectHeader(redirect));
+		add_header("Status: 302 Found");
 		return;
 	}
 	ini(c);
@@ -256,6 +257,7 @@ void page::redirect(string loc,string slug)
 {
 	string redirect=page_url(loc,slug);
 	set_header(new HTTPRedirectHeader(redirect));
+	add_header("Status: 302 Found");
 }
 
 void page::save(int id,data::page_form &form)

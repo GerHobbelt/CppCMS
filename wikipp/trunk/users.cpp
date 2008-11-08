@@ -76,6 +76,7 @@ void users::login()
 	else {
 		if(auth()) {
 			set_header(new HTTPRedirectHeader(env->getReferrer()));
+			add_header("Status: 302 Found");
 			wi.set_cookies("","",-1);
 			return;
 		}
@@ -136,6 +137,7 @@ void users::do_auth()
 void users::error_forbidden()
 {
 	set_header(new HTTPRedirectHeader(login_url()));
+	add_header("Status: 302 Found");
 }
 
 
