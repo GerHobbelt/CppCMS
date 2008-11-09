@@ -1,4 +1,5 @@
 #include "index.h"
+#include "index_data.h"
 #include "wiki.h"
 #include "utf8/utf8.h"
 

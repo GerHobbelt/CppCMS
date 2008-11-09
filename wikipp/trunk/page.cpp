@@ -1,11 +1,50 @@
 #include <cgicc/HTTPRedirectHeader.h>
 #include "page.h"
+#include "page_data.h"
 #include "wiki.h"
 #include "diff.h"
 
 using namespace dbixx;
 
 using cgicc::HTTPRedirectHeader;
+
+namespace data { 
+// Page data
+page_form::page_form(wiki *_w):
+	w(_w),
+	title("title",w->gettext("Title")),
+	content("content",w->gettext("Content")),
+	sidebar("sidebar",w->gettext("Sidebar")),
+	save("save",w->gettext("Save")),
+	save_cont("save_cont",w->gettext("Save and Continue")),
+	preview("preview",w->gettext("Preview")),
+	users_only("users_only")
+{
+	*this & title & content & sidebar & save & save_cont & preview & users_only;
+	fields<<title<<content<<sidebar;
+	buttons<<save<<save_cont<<preview<<users_only;
+	users_only.help=w->gettext("Disable editing by visitors");
+	users_only.error_msg=w->gettext("Please Login");
+	title.set_nonempty();
+	content.set_nonempty();
+	content.rows=25;
+	content.cols=60;
+	sidebar.rows=10;
+	sidebar.cols=60;
+}
+
+bool page_form::validate()
+{
+	bool res=form::validate();
+	if(users_only.get() && !w->users.auth()) {
+		users_only.not_valid();
+		users_only.set(false);
+		return false;
+	}
+	return res;
+}
+
+} // namespace data
 
 namespace apps {
 

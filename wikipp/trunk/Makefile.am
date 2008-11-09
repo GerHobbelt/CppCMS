@@ -1,12 +1,14 @@
 SUBDIRS = templates cxxmarkdown po
 
 sbin_PROGRAMS = wikipp
-wikipp_SOURCES = data.cpp  index.cpp  main.cpp  master.cpp  options.cpp  page.cpp  users.cpp  wiki.cpp
+wikipp_SOURCES = index.cpp  main.cpp  master.cpp  options.cpp  page.cpp  users.cpp  wiki.cpp
 wikipp_LDFLAGS = -export-dynamic @CMSLIBS@
 wikipp_LDADD = cxxmarkdown/libmarkdowncxx.a
 wikipp_CXXFLAGS =-Wall
 
-noinst_HEADERS = data.h wiki.h
+noinst_HEADERS = data.h diff.h index.h index_data.h master.h \
+		 master_data.h options.h options_data.h page.h \
+		 page_data.h users.h users_data.h wiki.h
 
 sysconf_DATA = config.txt mysql.sql
 

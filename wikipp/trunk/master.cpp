@@ -1,6 +1,18 @@
 #include "wiki.h"
 #include "master.h"
-#include "data.h"
+#include "master_data.h"
+#include "cxxmarkdown/markdowncxx.h"
+
+namespace data {
+
+string master::markdown(string s)
+{
+	string tmp;
+	markdown2html(s,tmp);
+	return tmp;
+}
+
+}
 
 namespace apps {
 

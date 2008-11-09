@@ -1,13 +1,11 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include <cppcms/archive.h>
-#include "data.h"
 #include "master.h"
 
-class wiki;
 
 namespace apps {
-
+class wiki;
 using namespace cppcms;
 
 struct global_options : public serializable {

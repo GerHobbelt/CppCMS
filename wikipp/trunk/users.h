@@ -1,7 +1,6 @@
 #ifndef USERS_H
 #define USERS_H
 
-#include "data.h"
 #include "master.h"
 
 namespace apps {

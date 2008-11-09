@@ -3,12 +3,11 @@
 
 #include <cppcms/application.h>
 
-class wiki;
 namespace data { class master; }
-
 namespace dbixx { class session; }
-
 namespace apps {
+
+class wiki;
 
 class master : public cppcms::application {
 protected:
@@ -20,7 +19,7 @@ public:
 	void ini(data::master &);
 };
 
-}
+} // namespace wiki
 
 
 #endif

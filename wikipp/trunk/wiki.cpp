@@ -7,6 +7,7 @@
 using namespace dbixx;
 using cgicc::HTTPRedirectHeader;
 using cgicc::HTTPCookie;
+namespace apps {
 
 void wiki::set_cookies(string p,string u,int time)
 {
@@ -90,3 +91,4 @@ void wiki::run(string l,string u)
 
 }
 
+}

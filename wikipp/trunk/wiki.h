@@ -6,7 +6,6 @@
 #include <boost/format.hpp>
 #include <cppcms/archive.h>
 
-#include "data.h"
 #include "page.h"
 #include "users.h"
 #include "index.h"
@@ -15,7 +14,7 @@
 
 using namespace cppcms;
 
-class wiki;
+namespace apps {
 
 class wiki : public application {
 	friend class apps::page;
@@ -46,6 +45,7 @@ public:
 	wiki(worker_thread &w);
 };
 
+}
 
 #endif
 

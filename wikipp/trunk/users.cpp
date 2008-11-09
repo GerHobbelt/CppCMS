@@ -1,10 +1,80 @@
 #include <cgicc/HTTPRedirectHeader.h>
 #include "users.h"
 #include "wiki.h"
+#include "users_data.h"
 
 using cgicc::HTTPRedirectHeader;
 using cgicc::HTTPCookie;
 using namespace dbixx;
+
+namespace data {
+login_form::login_form(wiki *_w) :
+	w(_w),
+	username("username",w->gettext("Username")),
+	password("password",w->gettext("Password")),
+	login("login",w->gettext("Login"))
+{
+	*this & username & password & login;
+	username.set_nonempty();
+	password.set_nonempty();
+}
+
+bool login_form::validate()
+{
+	if(!form::validate())
+		return false;
+	if(w->users.check_login(username.get(),password.get()))
+		return true;
+	password.not_valid();
+	return false;
+}
+
+
+
+new_user_form::new_user_form(wiki *_w):
+	w(_w),
+	username("username",w->gettext("Username")),
+	password1("p1",w->gettext("Password")),
+	password2("p2",w->gettext("Confirm")),
+	submit("submit",w->gettext("Submit"))
+{
+	*this & username & password1 & password2 ;
+	username.set_nonempty();
+	password1.set_nonempty();
+	password2.set_equal(password1);
+
+	vector<string> const &quiz=w->app.config.slist("wikipp.quiz_q");
+	int i=1;
+	for(vector<string>::const_iterator p=quiz.begin(),e=quiz.end();p!=e;++p) {
+		this->quiz.push_back(widgets::checkbox((boost::format("%d") % i).str()));
+		this->quiz.back().help=*p; 
+		*this & this->quiz.back();
+		i++;
+	}
+	*this & submit;
+}
+
+bool new_user_form::validate()
+{
+	if(!form::validate())
+		return false;
+	vector<long> const &quiz=w->app.config.llist("wikipp.quiz_a");
+	list<widgets::checkbox>::iterator qp=this->quiz.begin();
+	for(vector<long>::const_iterator p=quiz.begin(),e=quiz.end();p!=e;++p) {
+		if(qp==this->quiz.end() || qp->get()!=*p)
+			return false;
+		++qp;
+	}
+	if(w->users.user_exists(username.get())) {
+		username.error_msg=w->gettext("This user exists");
+		username.not_valid();
+		return false;
+	}
+	return true;
+}
+
+
+} 
 
 namespace apps {
 
