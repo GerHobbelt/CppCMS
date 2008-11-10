@@ -1,6 +1,0 @@
-Build:
-   make
-Run Server (lighttpd):
-   ./run.sh
-Browsing: 
-   http://127.0.0.1:8080/bb
