@@ -7,4 +7,4 @@ view.cpp: first.tmpl data.h
 	cppcms_tmpl_cc first.tmpl -o view.cpp
 
 clean:
-	rm -f *.fcgi *.exe *.so view.cpp
+	rm -fr *.fcgi *.exe *.so view.cpp cppcms_rundir
