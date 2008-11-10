@@ -10,7 +10,7 @@ public:
     hello(worker_thread &worker) :
         application(worker) 
     {
-	    url.add("^/(en|he)/hello/?$",
+	    url.add("^/(en|he)/?$",
 	    	boost::bind(&hello::say_hello,this,$1));
 	    use_template("view");
     }
