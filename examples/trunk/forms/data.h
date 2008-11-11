@@ -16,30 +16,30 @@ using namespace std;
 struct info_form : public form {
 	widgets::text name;
 	widgets::radio sex;
-	widgets::select matrial;
+	widgets::select martial;
 	widgets::number<double> age;
 	widgets::submit submit;
 	info_form() :
 		name("name","Your Name"),
 		sex("sex","Sex"),
-		matrial("mat","Matrial State"),
+		martial("mat","martial State"),
 		age("age","Your Age"),
 		submit("submit","Send")
 	{
-		*this & name & sex & matrial & age & submit;
+		*this & name & sex & martial & age & submit;
 		sex.add("Male");
 		sex.add("Female");
-		matrial.add("Single");
-		matrial.add("Married");
-		matrial.add("Divorced");
+		martial.add("Single");
+		martial.add("Married");
+		martial.add("Divorced");
 		name.set_nonempty();
 		age.set_range(0,120);
 	}
 	virtual bool validate()
 	{
 		if(!form::validate()) return false;
-		if(matrial.get()!="Single" && age.get()<18) {
-			matrial.is_valid=false;
+		if(martial.get()!="Single" && age.get()<18) {
+			martial.not_valid();
 			return false;
 		}
 		return true;

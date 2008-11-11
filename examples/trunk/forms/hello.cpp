@@ -11,10 +11,10 @@ public:
         application(worker) 
     {
 	    url.add("^/?$",
-	    	boost::bind(&hello::say_hello,this));
+	    	boost::bind(&hello::info,this));
 	    use_template("view");
     }
-    void say_hello()
+    void info()
     {
 	    data::message c;
 	    if(env->getRequestMethod()=="POST") {
@@ -22,9 +22,9 @@ public:
 		    if(c.info.validate()) {
 			    c.name=c.info.name.get();
 			    c.sex=c.info.sex.get();
-			    c.state=c.info.matrial.get();
+			    c.state=c.info.martial.get();
 			    c.age=c.info.age.get();
-		    	    c.info.clear();
+				c.info.clear();
 		    }
 	    }
 	    render("message",c);
