@@ -1074,9 +1074,9 @@ printcode(Line *t, MMIOT *f)
 	}
 	else blanks++;
 
-    Qstring("<pre><code>", f);
+    Qstring("<pre name=\"code\" class=\"cpp\" >", f);
     code(0, f);
-    Qstring("</code></pre>", f);
+    Qstring("</pre>", f);
 }
 
 
