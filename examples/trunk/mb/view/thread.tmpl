@@ -1,0 +1,61 @@
+<% namespace vary %>
+<% class base_thread uses data::base_thread  extends master %>
+<% template msg(data::msg &m) %>
+<dt><% m.author %>, <a href="<% m.reply_url %>"><% gt "Reply to this comment" %></a></dt>
+<dd><% m.content | ext text2html %></dd>
+<% end %>
+<% template body() %>
+<h1><% title %></h1>
+<p><a href="<% reply_to_thread %>"><% gt "Add comment to this topic" %></p>
+<% end %>
+<% end class %>
+<% class flat_thread uses data::flat_thread  extends base_thread %>
+<% template body() %>
+<% include base_thread::body() %>
+<% foreach message in messages %>
+	<dl>
+	<% item %><% include msg(message) %><% end %>
+	</dl>
+<% empty %>
+<h2><% gt "There is no comments" %></h2>
+<% end %>
+<% end template %>
+<% end class %>
+<% class tree_thread uses data::tree_thread  extends base_thread %>
+<% template display(data::tree_thread::tree_msg::tree_t &tree) %>
+<% foreach message in tree %>
+	<dl>
+	<% item %>
+	<% include msg(message.second) %>
+	<% include display(message.second.repl) %>
+	<% end %>
+	</dl>
+<% end %>
+<% end template %>
+<% template body() %>
+<% include base_thread::body() %>
+<% if empty messages %>
+<h2><% gt "There is no comments" %></h2>
+<% else %>
+<% include display(messages) %>
+<% end %>
+<% end template %>
+<% end class %>
+<% class reply uses data::reply extends base_thread %>
+<% template body() %>
+<h1><% gt "Comment to thread: %1%" using title %></h1>
+<% if not empty content %>
+<dl>
+<dt><% author %></dt>
+<dd><% content | ext text2html %></dd>
+</dl>
+<% end %>
+<form action="" method="post" >
+<table>
+<% form as_table form %>
+</table>
+</form>
+<% end template %>
+<% end class %>
+<% end namespace %>
+

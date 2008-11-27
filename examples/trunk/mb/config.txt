@@ -1,0 +1,19 @@
+server.api="fastcgi"
+server.mod="thread"
+server.socket="/tmp/mb.sock"
+
+templates.dirs = { "./view" }
+# templates.ext = ".dll"
+
+
+locale.dir = "./locale"
+locale.lang_list = { "he" "en" }
+locale.lang_default = "en"
+locale.domain_list = { "mb" }
+
+mb.media=""
+
+mb.dbname="mb"
+mb.username="root"
+mb.password="root"
+
