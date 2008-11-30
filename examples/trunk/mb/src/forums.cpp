@@ -23,7 +23,7 @@ forums::forums(mb &b) :
 	application(b.worker),
 	board(b)
 {
-	url.add("^(/(\\w+)?)?$",boost::bind(&forums::display_forums,this,$1));
+	url.add("^(/(\\w+)?)?$",boost::bind(&forums::display_forums,this,$2));
 }
 
 string forums::forums_url(int offset)
@@ -47,6 +47,7 @@ void forums::display_forums(string page)
 				"INSERT INTO threads(title) VALUES(?)",
 				c.form.title.get(),exec();
 		}
+		c.form.clear();
 	}
 	int offset= page.empty() ? 0 : atoi(page.c_str());
 	dbixx::result res;

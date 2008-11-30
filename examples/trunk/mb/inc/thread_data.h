@@ -22,6 +22,8 @@ struct msg {
 struct base_thread : public master {
 	string title;
 	string reply_to_thread;
+	string flat_view;
+	string tree_view;
 	virtual string text2html(string const &s);
 };
 
@@ -37,8 +39,12 @@ struct tree_thread : public base_thread  {
 	tree_msg::tree_t messages;
 };
 
+typedef tree_thread::tree_msg::tree_t tree_t;
+
 struct reply : public base_thread , public msg {
 	reply_form form;
+	bool send;
+	string redirect;
 	reply(cppcms::application &a);
 };
 

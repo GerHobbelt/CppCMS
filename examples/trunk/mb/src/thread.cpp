@@ -13,14 +13,15 @@ reply_form::reply_form(application &a) :
 	send("send",a.gettext("Send"))
 {
 	*this & author & comment & send;
-	author.set_limits(3,64);
-	author.error_msg=a.gettext("Name too short or long");
-	comment.set_limits(5,256);
-	author.error_msg=a.gettext("Comment too short or long (at most 256 letters)");
+	author.set_limits(1,64);
+	comment.set_limits(1,256);
+	comment.rows=20;
+	comment.cols=60;
 }
 
 reply::reply(application &a) : form(a)
 {
+	send=false;
 }
 
 string base_thread::text2html(string const &s)
@@ -46,10 +47,11 @@ thread::thread(mb &b) : application(b.worker) , board(b)
 {
 	url.add("^/flat/(\\d+)/?$",
 		boost::bind(&thread::flat,this,$1));
-	url.add("^/tree(\\d+)/?$",
+	url.add("^/tree/(\\d+)/?$",
 		boost::bind(&thread::tree,this,$1));
+	url.add("^/comment/(\\d+)(/to/(\\d+))?$",
+		boost::bind(&thread::reply,this,$1,$3));
 }
-
 
 string thread::flat_url(int id)
 {
@@ -80,6 +82,8 @@ int thread::ini(string sid,data::base_thread &c)
 	board.ini(c);
 	r>>c.title;
 	c.reply_to_thread=reply_url(id);
+	c.flat_view=flat_url(id);
+	c.tree_view=tree_url(id);
 	return id;
 }
 
@@ -89,8 +93,8 @@ void thread::flat(string sid)
 	int id=ini(sid,c);
 	board.sql<<
 		"SELECT id,author,content "
-		"FROM threads WHERE thread_id=? "
-		"ORDER BY id DESC",
+		"FROM messages WHERE thread_id=? "
+		"ORDER BY id",
 		id;
 	dbixx::result res;
 	dbixx::row r;
@@ -99,20 +103,21 @@ void thread::flat(string sid)
 	int i;
 	for(i=0;res.next(r);i++) {
 		int msg_id;
-		r>>msg_id>>c.messages[i].author>>c.messages[id].content;
+		r>>msg_id>>c.messages[i].author>>c.messages[i].content;
 		c.messages[i].reply_url=reply_url(id,msg_id);
 	}
 	render("flat_thread",c);
 }
 
+typedef map<int,map<int,data::msg> > msg_ord_t;
+
 namespace {
 
-void make_tree(data::tree_thread::tree_msg::tree_t &messages,map<int,map<int,data::msg> > &data,int start)
+void make_tree(data::tree_t &messages,map<int,map<int,data::msg> > &data,int start)
 {
-	typedef map<int,map<int,data::msg> > all_t;
-	std::pair<all_t::iterator,all_t::iterator>
+	std::pair<msg_ord_t::iterator,msg_ord_t::iterator>
 		range=data.equal_range(start);
-	for(all_t::iterator p=range.first;p!=range.second;++p) {
+	for(msg_ord_t::iterator p=range.first;p!=range.second;++p) {
 		for(map<int,data::msg>::iterator p2=p->second.begin(),e=p->second.end();p2!=e;++p2) {
 			data::tree_thread::tree_msg &m=messages[p2->first];
 			m.author=p2->second.author;
@@ -131,15 +136,14 @@ void thread::tree(string sid)
 	data::tree_thread c;
 	int id=ini(sid,c);
 	board.sql<<
-		"SELECT reply_id,id,author,content "
-		"FROM threads WHERE thread_id=? "
+		"SELECT reply_to,id,author,content "
+		"FROM messages WHERE thread_id=? "
 		"ORDER BY reply_to,id DESC",
 		id;
 	dbixx::result res;
 	dbixx::row r;
 	board.sql.fetch(res);
-	typedef map<int,map<int,data::msg> > all_t;
-	all_t all;
+	msg_ord_t all;
 	while(res.next(r)) {
 		int msg_id,rpl_id;
 		string author,comment;
@@ -165,7 +169,7 @@ void thread::reply(string stid,string smid)
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		if(c.form.validate()) {
-			dbixx:: transaction tr(board.sql);
+			dbixx::transaction tr(board.sql);
 			dbixx::row r;
 			board.sql<<"SELECT count(*) FROM threads WHERE id=?",tid,r;
 			int count;
@@ -177,6 +181,10 @@ void thread::reply(string stid,string smid)
 				"VALUES(?,?,?,?) ",
 				mid,tid,c.form.author.get(),c.form.comment.get();
 			board.sql.exec();
+			tr.commit();
+			c.form.clear();
+			c.send=true;
+			c.redirect=tree_url(tid);
 		}
 	}
 
@@ -199,6 +207,7 @@ void thread::reply(string stid,string smid)
 		mid=0;
 		tid=ini(stid,c);
 	}
+	render("reply",c);
 }
 
 } // namespace apps
