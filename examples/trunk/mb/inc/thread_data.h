@@ -19,12 +19,14 @@ struct msg {
 	string reply_url;
 };
 
-struct base_thread : public master {
+struct thread_shared : public master {
 	string title;
-	string reply_to_thread;
+	virtual string text2html(string const &s);
+};
+
+struct base_thread : public thread_shared {
 	string flat_view;
 	string tree_view;
-	virtual string text2html(string const &s);
 };
 
 struct flat_thread : public base_thread {
@@ -41,10 +43,9 @@ struct tree_thread : public base_thread  {
 
 typedef tree_thread::tree_msg::tree_t tree_t;
 
-struct reply : public base_thread , public msg {
+struct reply : public thread_shared , public msg {
 	reply_form form;
-	bool send;
-	string redirect;
+	string back;
 	reply(cppcms::application &a);
 };
 

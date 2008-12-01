@@ -9,6 +9,8 @@ namespace data {
 
 struct new_topic_form : public cppcms::form {
 	widgets::text title;
+	widgets::text author;
+	widgets::textarea comment;
 	widgets::submit submit;
 	new_topic_form(cppcms::application &app);
 };
@@ -19,7 +21,7 @@ struct forums : public master {
 		string url;
 	};
 	vector<topic> topics;
-	string next_page;
+	string next_page,prev_page;
 	new_topic_form form;
 	forums(cppcms::application &a) : form(a) {};
 };

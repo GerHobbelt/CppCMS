@@ -13,8 +13,8 @@ class thread : public cppcms::application {
 	mb &board;
 	void flat(string id);
 	void tree(string id);
-	void reply(string,string);
-	string reply_url(int thread_id,int msg_id=0);
+	void reply(string);
+	string reply_url(int msg_id);
 	int ini(string sid,data::base_thread &);
 public:
 	thread(mb &);

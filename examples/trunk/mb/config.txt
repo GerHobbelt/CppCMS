@@ -11,7 +11,7 @@ locale.lang_list = { "he" "en" }
 locale.lang_default = "en"
 locale.domain_list = { "mb" }
 
-mb.media=""
+mb.media="/media"
 
 dbixx.driver="sqlite3"
 

@@ -2,6 +2,7 @@
 #include "forums_data.h"
 #include "mb.h"
 #include <boost/lexical_cast.hpp>
+#include <cgicc/HTTPRedirectHeader.h>
 
 using namespace dbixx;
 
@@ -9,10 +10,16 @@ namespace data {
 
 new_topic_form::new_topic_form(cppcms::application &a) :
 	title("title",a.gettext("Tittle")),
+	author("author",a.gettext("Author")),
+	comment("comment",a.gettext("Comment")),
 	submit("submit",a.gettext("Create"))
 {
-	*this & title & submit;
+	*this & title & author & comment & submit;
 	title.set_nonempty();
+	author.set_limits(1,64);
+	comment.set_limits(1,256);
+	comment.rows=20;
+	comment.cols=60;
 }
 
 };
@@ -38,16 +45,26 @@ string forums::forums_url(int offset)
 
 void forums::display_forums(string page)
 {
+	const unsigned topics_per_page=10;
 	data::forums c(*this);
 	board.ini(c);
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		if(c.form.validate()) {
+			dbixx::transaction tr(board.sql);
 			board.sql<<
 				"INSERT INTO threads(title) VALUES(?)",
 				c.form.title.get(),exec();
+			int id=board.sql.rowid();
+			board.sql<<
+				"INSERT INTO messages(thread_id,reply_to,content,author) "
+				"VALUES (?,0,?,?)",
+				id,c.form.comment.get(),c.form.author.get(),exec();
+			tr.commit();
+			add_header("Status: 302 Found");
+			set_header(new cgicc::HTTPRedirectHeader(board.thread.tree_url(id)));
+			return;
 		}
-		c.form.clear();
 	}
 	int offset= page.empty() ? 0 : atoi(page.c_str());
 	dbixx::result res;
@@ -55,7 +72,7 @@ void forums::display_forums(string page)
 		"SELECT id,title "
 		"FROM threads "
 		"ORDER BY id DESC "
-		"LIMIT ?,?",offset*10,10,res;
+		"LIMIT ?,?",offset*topics_per_page,topics_per_page,res;
 	c.topics.resize(res.rows());
 	dbixx::row r;
 	for(int i=0;res.next(r);i++) {
@@ -63,8 +80,11 @@ void forums::display_forums(string page)
 		r>>id>>c.topics[i].title;
 		c.topics[i].url=board.thread.tree_url(id);
 	}
-	if(c.topics.size()==10) {
+	if(c.topics.size()==topics_per_page) {
 		c.next_page=forums_url(offset+1);
+	}
+	if(offset>0) {
+		c.prev_page=forums_url(offset-1);
 	}
 	render("forums",c);
 }

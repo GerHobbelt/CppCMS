@@ -10,12 +10,24 @@
 	<% empty %>
 		<h2><% gt "No Topics" %></h2>
 	<% end %>
+	<h2><% gt "Create New Disussion" %></h2>
 	<form action="" method="post" >
 	<% form as_p form %>
 	</form>
-	<% if not empty next_page %>
-	<p><a href="<% next_page %>"><% gt "Next Page" %></a></p>
-	<% end %>
 <% end template %>
+
+<% template links() %>
+	<% include master::links() %>
+	<p>
+	<% if not empty next_page %>
+	<a href="<% next_page %>"><% gt "Next Page" %></a>
+	<% end %>
+	<% if not empty prev_page %>
+	<a href="<% prev_page %>"><% gt "Prev Page" %></a>
+	<% end %>
+	</p>
+<% end template %>
+
+
 <% end class %>
 <% end namespace %>

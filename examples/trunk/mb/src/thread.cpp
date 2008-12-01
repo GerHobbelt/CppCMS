@@ -2,6 +2,7 @@
 #include "thread_data.h"
 #include "mb.h"
 #include <cppcms/util.h>
+#include <cgicc/HTTPRedirectHeader.h>
 
 using boost::lexical_cast;
 
@@ -21,10 +22,9 @@ reply_form::reply_form(application &a) :
 
 reply::reply(application &a) : form(a)
 {
-	send=false;
 }
 
-string base_thread::text2html(string const &s)
+string thread_shared::text2html(string const &s)
 {
 	string tmp=cppcms::escape(s);
 	string res;
@@ -49,8 +49,8 @@ thread::thread(mb &b) : application(b.worker) , board(b)
 		boost::bind(&thread::flat,this,$1));
 	url.add("^/tree/(\\d+)/?$",
 		boost::bind(&thread::tree,this,$1));
-	url.add("^/comment/(\\d+)(/to/(\\d+))?$",
-		boost::bind(&thread::reply,this,$1,$3));
+	url.add("^/comment/(\\d+)?$",
+		boost::bind(&thread::reply,this,$1));
 }
 
 string thread::flat_url(int id)
@@ -63,12 +63,11 @@ string thread::tree_url(int id)
 	return env->getScriptName()+"/tree/"+lexical_cast<string>(id);
 }
 
-string thread::reply_url(int thread_id,int message_id)
+string thread::reply_url(int message_id)
 {
-	string tmp=env->getScriptName()+"/comment/"+lexical_cast<string>(thread_id);
-	if(message_id!=0) {
-		tmp+="/to/"+lexical_cast<string>(message_id);
-	}
+	string tmp=env->getScriptName();
+	tmp+="/comment/";
+	tmp+=lexical_cast<string>(message_id);
 	return tmp;
 }
 int thread::ini(string sid,data::base_thread &c)
@@ -81,7 +80,6 @@ int thread::ini(string sid,data::base_thread &c)
 	}
 	board.ini(c);
 	r>>c.title;
-	c.reply_to_thread=reply_url(id);
 	c.flat_view=flat_url(id);
 	c.tree_view=tree_url(id);
 	return id;
@@ -104,7 +102,7 @@ void thread::flat(string sid)
 	for(i=0;res.next(r);i++) {
 		int msg_id;
 		r>>msg_id>>c.messages[i].author>>c.messages[i].content;
-		c.messages[i].reply_url=reply_url(id,msg_id);
+		c.messages[i].reply_url=reply_url(msg_id);
 	}
 	render("flat_thread",c);
 }
@@ -150,7 +148,7 @@ void thread::tree(string sid)
 		r>>rpl_id>>msg_id;
 		data::msg &message=all[rpl_id][msg_id];
 		r>>message.author>>message.content;
-		message.reply_url=reply_url(id,msg_id);
+		message.reply_url=reply_url(msg_id);
 	}
 	
 	make_tree(c.messages,all,0);
@@ -158,11 +156,10 @@ void thread::tree(string sid)
 	render("tree_thread",c);
 }
 
-void thread::reply(string stid,string smid)
+void thread::reply(string smid)
 {
-	int tid,mid;
-	mid = smid.empty() ? 0 : lexical_cast<int>(smid);
-	tid=lexical_cast<int>(stid);
+	int mid;
+	mid=lexical_cast<int>(smid);
 
 	data::reply c(*this);
 
@@ -171,42 +168,42 @@ void thread::reply(string stid,string smid)
 		if(c.form.validate()) {
 			dbixx::transaction tr(board.sql);
 			dbixx::row r;
-			board.sql<<"SELECT count(*) FROM threads WHERE id=?",tid,r;
-			int count;
-			r>>count;
-			if(count==0)
+			board.sql<<"SELECT thread_id FROM messages WHERE id=?",mid;
+			if(!board.sql.single(r))
 				throw e404();
+			int tid;
+			r>>tid;
 			board.sql<<
 				"INSERT INTO messages(reply_to,thread_id,author,content) "
 				"VALUES(?,?,?,?) ",
 				mid,tid,c.form.author.get(),c.form.comment.get();
 			board.sql.exec();
 			tr.commit();
-			c.form.clear();
-			c.send=true;
-			c.redirect=tree_url(tid);
+
+			add_header("Status: 302 Found");
+			set_header(new cgicc::HTTPRedirectHeader(tree_url(tid)));
+			return;
 		}
 	}
 
-	if(!smid.empty()) {
-		mid=lexical_cast<int>(smid);
-		tid=lexical_cast<int>(stid);
-		board.sql<<
-			"SELECT author,content,title "
-			"FROM messages "
-			"JOIN threads ON thread_id=threads.id "
-			"WHERE messages.id=?",
-			mid;
-		dbixx::row r;
-		if(!board.sql.single(r)) {
-			throw e404();
-		}
-		r>>c.author>>c.content>>c.title;
+	board.ini(c);
+	dbixx::row r;
+	board.sql<<
+		"SELECT threads.id,author,content,title "
+		"FROM messages "
+		"JOIN threads ON thread_id=threads.id "
+		"WHERE messages.id=?",
+		mid;
+	if(!board.sql.single(r)) {
+		throw e404();
 	}
-	else {
-		mid=0;
-		tid=ini(stid,c);
-	}
+
+	int tid;
+
+	r>>tid>>c.author>>c.content>>c.title;
+
+	c.back=tree_url(tid);
+
 	render("reply",c);
 }
 
