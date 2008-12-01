@@ -26,19 +26,7 @@ wiki::wiki(worker_thread &w) :
 	users(*this),
 	index(*this)
 {
-	string engine=app.config.sval("dbi.engine");
-	sql.driver(engine);
-	if(engine=="mysql"){
-		sql.param("dbname",app.config.sval("mysql.db"));
-		sql.param("username",app.config.sval("mysql.user"));
-		sql.param("password",app.config.sval("mysql.pass"));
-	}
-	else if(engine=="sqlite3") {
-		sql.param("dbname",app.config.sval("sqlite3.db"));
-		sql.param("sqlite3_dbdir",app.config.sval("sqlite3.dir"));
-	}
-
-	sql.connect();
+	dbixx_load(sql);
 	
 	script=app.config.sval("wikipp.script");
 

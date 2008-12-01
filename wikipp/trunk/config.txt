@@ -36,20 +36,18 @@ templates.dirs = { "./templates/.libs/" }
 # Uncomment above for cygwin platform
 
 
-# dbi.debug=1
-dbi.engine="mysql"
-#dbi.engine="sqlite3"
-#dbi.engine="pgsql"
+#dbixx.driver="mysql"
+dbixx.driver="sqlite3"
+#dbixx.driver="postgresql"
 
-mysql.db="wikipp"
-mysql.user="root"
-mysql.pass="root"
+mysql.dbname="wikipp"
+mysql.username="root"
+mysql.password="root"
 
-sqlite3.db="wikipp.db"
-sqlite3.dir="./db/"
+sqlite3.dbname="wikipp.db"
+sqlite3.sqlite3_dbdir="./db/"
 
-
-pgsql.db="cppcms"
-pgsql.user="artik"
+postgresql.dbname="cppcms"
+postgresql.username="artik"
 
 
