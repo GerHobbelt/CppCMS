@@ -58,9 +58,9 @@ bool new_user_form::validate()
 {
 	if(!form::validate())
 		return false;
-	vector<long> const &quiz=w->app.config.llist("wikipp.quiz_a");
+	vector<int> const &quiz=w->app.config.llist("wikipp.quiz_a");
 	list<widgets::checkbox>::iterator qp=this->quiz.begin();
-	for(vector<long>::const_iterator p=quiz.begin(),e=quiz.end();p!=e;++p) {
+	for(vector<int>::const_iterator p=quiz.begin(),e=quiz.end();p!=e;++p) {
 		if(qp==this->quiz.end() || qp->get()!=*p)
 			return false;
 		++qp;
@@ -82,7 +82,7 @@ users::users(wiki &w) :	master(w)
 {
 	wi.url_next.add("^/login/?$",
 		boost::bind(&users::login,this));
-	disable_reg=app.config.lval("wikipp.disable_registration",1);
+	disable_reg=app.config.get<int>("wikipp.disable_registration",1);
 	if(!disable_reg){
 		wi.url_next.add("^/register/?$",
 			boost::bind(&users::new_user,this));
