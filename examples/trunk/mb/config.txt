@@ -13,7 +13,12 @@ locale.domain_list = { "mb" }
 
 mb.media=""
 
-mb.dbname="mb"
-mb.username="root"
-mb.password="root"
+dbixx.driver="sqlite3"
+
+mysql.dbname="mb"
+mysql.username="root"
+mysql.password="root"
+
+sqlite3.dbname="mb.db"
+sqlite3.sqlite3_dbdir="./"
 

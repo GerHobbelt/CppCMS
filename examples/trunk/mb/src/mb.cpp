@@ -8,11 +8,7 @@ mb::mb(cppcms::worker_thread &w) :
 	forums(*this),
 	thread(*this)
 {
-	sql.driver("mysql");
-	sql.param("dbname",app.config.sval("mb.dbname"));
-	sql.param("username",app.config.sval("mb.username"));
-	sql.param("password",app.config.sval("mb.password"));
-	sql.connect();
+	dbixx_load(sql);
 	use_template("simple");
 }
 
