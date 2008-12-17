@@ -3,7 +3,7 @@ SRC=forums.cpp mb.cpp thread.cpp main.cpp
 OBJ=$(patsubst %.cpp,%.o,$(SRC))
 DEPS=$(patsubst %.o,.deps/%.o.dep,$(OBJ))
 
-TARGET=../mb
+TARGET=../mb$(EXEC_EXT)
 
 all: .deps $(TARGET)
 
@@ -11,10 +11,10 @@ all: .deps $(TARGET)
 	mkdir -p .deps
 
 $(TARGET): $(OBJ)
-	$(CXX)  $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
+	$(CXX)  $(EXEC_LDFLAGS) -o $@ $(OBJ) $(EXEC_LIBS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -MD -MF .deps/$@.dep -c -o $@ $<
+	$(CXX) $(EXEC_CXXFLAGS) -MD -MF .deps/$@.dep -c -o $@ $<
 
 clean:
 	rm -fr .deps *.o $(TARGET)

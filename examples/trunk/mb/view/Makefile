@@ -2,12 +2,8 @@
 TEMPLATES= master.tmpl forums.tmpl thread.tmpl
 TARGET=simple
 NAMESPACE=simple
-SO_EXT=so
 
 DLL=$(TARGET).$(SO_EXT)
-
-
-CXXFLAGS+= -shared -fPIC -DPIC
 
 all: .deps $(DLL)
 
@@ -15,12 +11,12 @@ all: .deps $(DLL)
 	mkdir .deps
 
 $(DLL): $(TARGET).cpp
-	$(CXX) -MD -MF .deps/$@.deps $(CXXFLAGS) -o $@ $< $(LIBS)
+	$(CXX) -MD -MF .deps/$@.deps $(VIEW_CXXFLAGS) $(VIEW_LDFLAGS) -o $@ $< $(VIEW_LIBS)
 
 $(TARGET).cpp: $(TEMPLATES)
 	$(CTMPL) -o $@ -d $(GETTEXT_DOMAIN) -n $(NAMESPACE) $(TEMPLATES)
 
 clean:
-	rm -fr *.cpp *.so .deps
+	rm -fr *.cpp $(DLL) .deps
 
 -include .deps/$(DLL).deps
