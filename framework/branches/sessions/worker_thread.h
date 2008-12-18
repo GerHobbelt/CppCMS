@@ -51,7 +51,12 @@ class worker_thread: private boost::noncopyable {
 	string current_template;
 	
 public:
-	
+
+	void log(int level,std::string const &s)
+	{
+		cerr<<s<<endl;
+	}
+
 	url_parser url;
 	manager const &app;
 	Cgicc *cgi;

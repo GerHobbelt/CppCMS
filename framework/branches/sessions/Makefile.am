@@ -19,7 +19,7 @@ hello_world_view2.cpp: hello_world_skin2.tmpl hello_world_view1.tmpl
 lib_LTLIBRARIES     = libcppcms.la
 libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp \
 	text_tool.cpp 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp \
-	base_view.cpp util.cpp form.cpp application.cpp
+	base_view.cpp util.cpp form.cpp application.cpp session_interface.cpp
 
 libcppcms_la_LDFLAGS  = -no-undefined -version-info 0:0:0
 libcppcms_la_LIBADD = @CPPCMS_LIBS@ transtext/libcppcmstranstext.la
