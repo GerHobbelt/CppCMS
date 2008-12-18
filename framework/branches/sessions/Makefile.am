@@ -19,7 +19,8 @@ hello_world_view2.cpp: hello_world_skin2.tmpl hello_world_view1.tmpl
 lib_LTLIBRARIES     = libcppcms.la
 libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp \
 	text_tool.cpp 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp \
-	base_view.cpp util.cpp form.cpp application.cpp session_interface.cpp
+	base_view.cpp util.cpp form.cpp application.cpp session_interface.cpp \
+	session_cookies.cpp hmac_encryptor.cpp encryptor.cpp md5.c base64.cpp 
 
 libcppcms_la_LDFLAGS  = -no-undefined -version-info 0:0:0
 libcppcms_la_LIBADD = @CPPCMS_LIBS@ transtext/libcppcmstranstext.la
@@ -33,11 +34,16 @@ if EN_FCGI_BACKEND
 libcppcms_la_SOURCES += fcgi.cpp
 endif
 
+if EN_ENCR_SESSIONS
+libcppcms_la_SOURCES += aes_encryptor.cpp
+endif
+
 nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	manager.h worker_thread.h fcgi.h cache_interface.h archive.h \
 	base_cache.h thread_cache.h cgicc_connection.h scgi.h cgi_api.h \
 	process_cache.h shmem_allocator.h posix_mutex.h config.h cgi.h base_view.h \
-	util.h form.h application.h
+	util.h form.h application.h session_interface.h session_api.h session_cookies.h \
+	hmac_encryptor.h aes_encryptor.h encryptor.h md5.h base64.h session_backend_factory.h
 
 if EN_TCP_CACHE
 libcppcms_la_SOURCES += tcp_cache.cpp

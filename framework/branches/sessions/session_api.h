@@ -9,10 +9,7 @@ class worker_thread;
 class session_interface;
 
 class session_api : private boost::noncopyable {
-protected:
-	worker_thread &worker;
 public:
-	session_api(worker_thread &w) : worker(w) {};
 	virtual void save(session_interface *,std::string const &data,time_t timeout) = 0;
 	virtual bool load(session_interface *,std::string &data,time_t &timeout) = 0;
 	virtual void clear(session_interface *) = 0;

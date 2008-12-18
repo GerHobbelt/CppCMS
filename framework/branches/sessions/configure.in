@@ -56,14 +56,14 @@ AM_CONDITIONAL(EN_FCGI_BACKEND,[test "x$have_fcgi" == "xyes" ])
 if test "x$enable_crypt" != "xno" ; then
 	AC_CHECK_LIB(gcrypt,main,[
 		have_gcrypt=yes
-		CPPCMS_LIBGS="-lgcrypt $CPPCMS_LIBS"
+		CPPCMS_LIBS="-lgcrypt $CPPCMS_LIBS"
 		AC_DEFINE([EN_ENCR_SESSIONS],[],["Enable encrypted sessions"])
 		],
 		[	echo "====================================================================="
 			echo "libgcrypt not found, Encrypted Sessions backend is disabled"
 			echo "=====================================================================" ])
 fi
-AM_CONDITIONAL(EN_ENCR_SESSIONS,[test "x$have_crypt" == "xyes" ])
+AM_CONDITIONAL(EN_ENCR_SESSIONS,[test "x$have_gcrypt" == "xyes" ])
 
 
 have_auto_type_detection=no

@@ -5,7 +5,7 @@
 
 namespace cppcms {
 
-session_interface::session_interface(worker_thread &w,boost::shared_ptr<session_api> api_ptr) :
+session_interface::session_interface(worker_thread &w) :
 	worker(w)
 {
 	timeout_val_def=w.app.config.ival("session.timeout",24*3600);
@@ -22,28 +22,24 @@ session_interface::session_interface(worker_thread &w,boost::shared_ptr<session_
 	else {
 		throw cppcms_error("Unsupported `session.expire' type `"+s_how+"'");
 	}
-	string api=w.app.config.sval("session.api","none");
-	if(api_ptr.get()!=NULL) {
-		storage=api_ptr;
-	}
-	else {
-		if(api=="none")
-			return;
-		// TODO
-	}
-	w.on_start.connect(on_start());
-	w.on_end.connect(on_end());
+
+
+	storage=w.app.sessions(w);
 }
 
+
+void session_interface::set_api(boost::shared_ptr<session_api> s)
+{
+	storage=s;
+}
 bool session_interface::load()
 {
-	check();
 	data.clear();
 	data_copy.clear();
 	timeout_val=timeout_val_def;
 	how=how_def;
 	archive ar;
-	if(!storage->load(this,ar.set(),timeout_in)) {
+	if(!storage.get() || !storage->load(this,ar.set(),timeout_in)) {
 		return false;
 	}
 	int i,num;
@@ -61,7 +57,7 @@ int session_interface::cookie_age()
 {
 	if(how==browser)
 		return 0;
-	if(how==renew || ( how==fixed && new_session )) 
+	if(how==renew || ( how==fixed && new_session ))
 		return timeout_val;
 	return timeout_in - time(NULL);
 }
@@ -78,10 +74,10 @@ void session_interface::save()
 	check();
 	new_session  = data_copy.empty() && !data.empty();
 	if(data.empty()) {
-		if(session_cookie()!="")
+		if(get_session_cookie()!="")
 			storage->clear(this);
 		return;
-	}	
+	}
 
 	time_t now = time(NULL);
 
@@ -100,31 +96,20 @@ void session_interface::save()
 	archive ar;
 	ar<<num;
 	for(map<string,string>::iterator p=data.begin(),e=data.end();p!=e;++p) {
-		a<<p->first<<p->second;
+		ar<<p->first<<p->second;
 	}
-	storage->save(this,session_age(),ar.get());
+	storage->save(this,ar.get(),session_age());
 }
 
 void session_interface::on_start()
 {
-	if(storage.get()!=NULL)
-		load();
-	}
+	load();
 }
 
 void session_interface::on_end()
 {
-	try{
-		if(storage.get()!=NULL)
-			save();
-	}
-	catch(std::error const &e) {
-		worker.log(0,e.what());
-	}
-	catch(...)
-	{
-		worker.log(0,"Catched unknown exception!!!");
-	}
+	if(storage.get()!=NULL)
+		save();
 }
 
 void session_interface::check()
@@ -162,7 +147,7 @@ void session_interface::set_session_cookie(int64_t age,string const &data)
 {
 	cgicc::HTTPCookie
 		cookie(	worker.app.config.sval("session.cookies_prefix","cppcms_session"), // name
-			(age < 0 ? data : ""), // value
+			(age >= 0 ? data : ""), // value
 			"",   // comment
 			worker.app.config.sval("session.cookies_domain",""), // domain
 			( age < 0 ? 0 : age ),
@@ -178,8 +163,8 @@ void session_interface::set_session_cookie(string const &data)
 string session_interface::get_session_cookie()
 {
 	string name=worker.app.config.sval("session.cookies_prefix","cppcms_session");
-	vector<cgicc::HTTPCookie> const &cookies=worker.env->getCookiesList();
-	for(i=0;i<cookies.size;i++) {
+	vector<cgicc::HTTPCookie> const &cookies=worker.env->getCookieList();
+	for(unsigned i=0;i<cookies.size();i++) {
 		if(cookies[i].getName()==name)
 			return cookies[i].getValue();
 	}

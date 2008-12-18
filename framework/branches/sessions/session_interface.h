@@ -19,7 +19,7 @@ class session_interface : private boost::noncopyable {
 	// Cached defaults
 	int timeout_val_def;
 	int how_def;
-	
+
 	// User Values
 	int timeout_val;
 	int how;
@@ -27,18 +27,19 @@ class session_interface : private boost::noncopyable {
 	// Information from session data
 	time_t timeout_in;
 	bool new_session;
-	
+
 	int cookie_age();
 	time_t   session_age();
 
-	void on_start();
 	void check();
 	bool load();
 	void save();
 
 	boost::shared_ptr<session_api> storage;
+
+
 public:
-	session_interface(worker_thread &w,boost::shared_ptr<session_api> api);
+	session_interface(worker_thread &w);
 	bool is_set(std::string const &key);
 	void del(std::string const &key);
 	std::string &operator[](std::string const &);
@@ -52,7 +53,7 @@ public:
 	}
 
 	void clear();
-	
+
 	enum { fixed, renew, browser };
 	void set_age(int t) { timeout_val=t;}
 	void set_expiration(int h) { how=h; };
@@ -63,6 +64,10 @@ public:
 	void clear_session_cookie();
 	std::string get_session_cookie();
 	void set_api(boost::shared_ptr<session_api>);
+
+	void on_start();
+	void on_end();
+
 };
 
 } // cppcms

@@ -19,6 +19,7 @@
 #include "thread_cache.h"
 #include "scgi.h"
 #include "cgi.h"
+#include "session_cookies.h"
 
 
 #ifdef EN_FORK_CACHE
@@ -504,26 +505,50 @@ web_application *manager::get_mod()
 	throw cppcms_error("Unknown mod:" + mod);
 }
 
+namespace {
+	struct empty_backend {
+		shared_ptr<session_api> operator()(worker_thread &a)
+		{
+			return shared_ptr<session_api>(); // EMPTY
+		}
+	};
+}
+
+session_backend_factory manager::get_sessions()
+{
+	string backend=config.sval("session.backend","none");
+	if(backend=="none") {
+		return empty_backend();
+	}
+	if(backend=="cookies") {
+		return session_cookies::factory();
+	}
+	throw cppcms_error("Unknown session backend:" + backend);
+}
+
 void manager::execute()
 {
+	if(!workers.get()) {
+		throw cppcms_error("No workers factory set up");
+	}
 	if(!cache.get()) {
 		set_cache(get_cache_factory());
+	}
+	if(sessions.empty()) {
+		set_sessions(get_sessions());
 	}
 	if(!api.get()) {
 		set_api(get_api());
 	}
-	if(!web_app.get()) {
-		set_mod(get_mod());
-	}
 	if(!gettext.get()){
 		set_gettext(get_gettext());
 	}
-	if(!workers.get()) {
-		throw cppcms_error("No workers factory set up");
+	if(!web_app.get()) {
+		set_mod(get_mod());
 	}
 
 	load_templates();
-	
+
 	web_app->execute();
 }
 
@@ -560,6 +585,11 @@ manager::~manager()
 	for_each(templates_list.begin(),templates_list.end(),::dlclose);
 }
 
+void manager::set_sessions(session_backend_factory s)
+{
+	sessions=s;
+}
+
 void manager::set_worker(base_factory *w)
 {
 	workers=auto_ptr<base_factory>(w);
@@ -585,7 +615,7 @@ transtext::trans_factory *manager::get_gettext()
 	transtext::trans_factory *tmp=NULL;
 	try{
 		tmp=new transtext::trans_factory();
-		
+
 		tmp->load(	config.sval ("locale.dir",""),
 				config.slist("locale.lang_list"),
 				config.sval ("locale.lang_default",""),
