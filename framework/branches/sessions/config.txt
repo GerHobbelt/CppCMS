@@ -64,7 +64,14 @@ locale.domain_default = "test"			# default domain (default first one)
 
 
 session.backend = "cookies"
-session.cookies_encryptor = "hmac"
-#session.cookies_encryptor = "aes"
+session.expire = "browser"			# "browser" "renew" "fixed"
+#session.timeout = 10 				# 24*3600
+#session.cookies_encryptor = "hmac"
+session.cookies_encryptor = "aes"
 session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
+
+# session.cookies_prefix = "cppcms_session"
+# session.cookies_domain = ""
+# session.cookies_path = "/"
+# session.cookies_secure = 0
 
