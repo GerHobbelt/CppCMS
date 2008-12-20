@@ -67,7 +67,7 @@ public:
 
 	void on_start();
 	void on_end();
-
+	worker_thread &get_worker();
 };
 
 } // cppcms

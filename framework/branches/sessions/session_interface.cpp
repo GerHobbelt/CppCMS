@@ -27,6 +27,10 @@ session_interface::session_interface(worker_thread &w) :
 	storage=w.app.sessions(w);
 }
 
+worker_thread &session_interface::get_worker()
+{
+	return worker;
+}
 
 void session_interface::set_api(boost::shared_ptr<session_api> s)
 {
