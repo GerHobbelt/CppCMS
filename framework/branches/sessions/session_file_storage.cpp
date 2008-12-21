@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <boost/crc.hpp>
 #include <boost/bind.hpp>
+#include "manager.h"
 
 #include "session_file_storage.h"
 #include "cppcms_error.h"
+#include "session_sid.h"
 
 #include "config.h"
 
@@ -351,6 +353,110 @@ void session_file_storage::gc(boost::shared_ptr<storage::io> io)
 		throw;
 	}
 }
+
+
+namespace {
+
+	static pthread_mutex_t gc_mutex=PTHREAD_MUTEX_INITIALIZER;
+	static pthread_cond_t  gc_cond=PTHREAD_COND_INITIALIZER;
+	static int gc_exit=-1;
+	static int gc_period=-1;
+	static int starter_pid=-1;
+
+	void *thread_func(void *param);
+
+struct builder_impl : private boost::noncopyable {
+public:
+	shared_ptr<storage::io> io;
+	bool has_thread;
+	pthread_t pid;
+	int cache;
+	
+	builder_impl(manager &app)
+	{
+		gc_exit=-1;
+		cache==app.config.ival("session.server_enable_cache",0);
+		string dir=app.config.sval("session.files_dir");
+		string type=app.config.sval("session.files_comp","thread");
+		if(type=="thread")
+			io.reset(new storage::thread_io(dir));
+#ifdef HAVE_PTHREADS_PSHARED
+		else if(type=="prefork")
+			io.reset(new storage::shmem_io(dir));
+#endif
+		else if(type=="nfs")
+			io.reset(new storage::nfs_io(dir));
+		else
+			throw cppcms_error("Unknown option for session.files_comp `"+type+"'");
+		gc_period=app.config.ival("session.files_gc_frequency",-1);
+		if(gc_period>0) {
+			has_thread=true;
+			gc_exit=0;
+			starter_pid=getpid();
+			pthread_create(&pid,NULL,thread_func,io.get());
+		}
+		else
+			has_thread=false;
+
+	}
+	~builder_impl()
+	{
+		if(has_thread) {
+			pthread_mutex_lock(&gc_mutex);
+			gc_exit=1;
+			pthread_cond_signal(&gc_cond);
+			pthread_mutex_unlock(&gc_mutex);
+			pthread_join(pid,NULL);
+		}
+	}
+
+	boost::shared_ptr<session_api> operator()(worker_thread &w)
+	{
+		boost::shared_ptr<session_server_storage> ss(new session_file_storage(io));
+		return boost::shared_ptr<session_sid>(new session_sid(ss,cache));
+	}
+};
+
+struct builder {
+	boost::shared_ptr<builder_impl> the_builder;
+
+	builder(boost::shared_ptr<builder_impl> b) :
+		the_builder(b)
+	{
+	}
+	boost::shared_ptr<session_api> operator()(worker_thread &w)
+	{
+		return (*the_builder)(w);
+	}
+
+};
+
+void *thread_func(void *param)
+{
+	builder_impl *blder=(builder_impl*)param;
+	int exit=0;
+	while(!exit) {
+		pthread_mutex_lock(&gc_mutex);
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_sec+=gc_period;
+		pthread_cond_timedwait(&gc_cond,&gc_mutex,&ts);
+		if(starter_pid!=getpid() || gc_exit) exit=1;
+		pthread_mutex_unlock(&gc_mutex);
+		if(!exit)	
+			session_file_storage::gc(blder->io);
+	}
+	return NULL;
+}
+
+} // anon namespace
+
+session_backend_factory session_file_storage::factory(manager &m)
+{
+	return builder(boost::shared_ptr<builder_impl>(new builder_impl(m)));
+}
+
+
 
 
 } // namespace cppcms

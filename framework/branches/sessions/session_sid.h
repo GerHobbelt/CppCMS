@@ -1,6 +1,7 @@
 #ifndef CPPCMS_SESSION_SID_H
 #define CPPCMS_SESSION_SID_H
 
+#include <sys/time.h>
 #include <boost/shared_ptr.hpp>
 #include "session_api.h"
 
@@ -11,8 +12,11 @@ class session_interface;
 	
 namespace details {
 class sid_generator : public boost::noncopyable {
-	uint64_t session_counter;
-	char uid[16];
+	struct for_hash {
+		char uid[16];
+		uint64_t session_counter;
+		struct timeval tv;
+	} hashed;
 public:
 	sid_generator();
 	std::string operator()();

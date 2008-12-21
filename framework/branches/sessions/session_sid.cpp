@@ -14,22 +14,23 @@ namespace details {
 
 sid_generator::sid_generator()
 {
-	session_counter=0;
+	hashed.session_counter=0;
 	ifstream urandom("/dev/urandom");
-	if(!urandom.good() || urandom.get(uid,16).fail()) {
+	if(!urandom.good() || urandom.get(hashed.uid,16).fail()) {
 		throw cppcms_error("Failed to read /dev/urandom");
 	}
 }
 
 std::string sid_generator::operator()()
 {
-	md5_state_t st;
+	hashed.session_counter++;
+	gettimeofday(&hashed.tv,NULL);
+	
+	md5_byte_t md5[16];
 	char res[33];
-	unsigned char md5[16];
+	md5_state_t st;
 	md5_init(&st);
-	md5_append(&st,(md5_byte_t*)uid,sizeof(uid));
-	md5_append(&st,(md5_byte_t*)&session_counter,sizeof(session_counter));
-	session_counter++;
+	md5_append(&st,(md5_byte_t*)&hashed,sizeof(hashed));
 	md5_finish(&st,md5);
 	for(int i=0;i<16;i++) {
 		snprintf(res+i*2,3,"%02x",md5[i]);

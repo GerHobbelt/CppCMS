@@ -20,6 +20,7 @@
 #include "scgi.h"
 #include "cgi.h"
 #include "session_cookies.h"
+#include "session_file_storage.h"
 
 
 #ifdef EN_FORK_CACHE
@@ -522,6 +523,9 @@ session_backend_factory manager::get_sessions()
 	}
 	if(backend=="cookies") {
 		return session_cookies::factory();
+	}
+	if(backend=="files") {
+		return session_file_storage::factory(*this);
 	}
 	throw cppcms_error("Unknown session backend:" + backend);
 }
