@@ -85,6 +85,7 @@ public:
 	session_file_storage(boost::shared_ptr<storage::io> io_) : io(io_) {}
 	virtual void save(std::string const &sid,time_t timeout,std::string const &in);
 	virtual bool load(std::string const &sid,time_t *timeout,std::string &out);
+	virtual bool check(std::string const &sid);
 	virtual void remove(std::string const &sid) ;
 	virtual ~session_file_storage(){};
 };

@@ -102,7 +102,10 @@ void session_interface::save()
 	for(map<string,string>::iterator p=data.begin(),e=data.end();p!=e;++p) {
 		ar<<p->first<<p->second;
 	}
+	temp_cookie.clear();
 	storage->save(this,ar.get(),session_age());
+	set_session_cookie(cookie_age(),temp_cookie);
+	temp_cookie.clear();
 }
 
 void session_interface::on_start()
@@ -149,6 +152,8 @@ void session_interface::clear_session_cookie()
 }
 void session_interface::set_session_cookie(int64_t age,string const &data)
 {
+	if(data.empty())
+		age=0;
 	cgicc::HTTPCookie
 		cookie(	worker.app.config.sval("session.cookies_prefix","cppcms_session"), // name
 			(age >= 0 ? data : ""), // value
@@ -161,7 +166,7 @@ void session_interface::set_session_cookie(int64_t age,string const &data)
 }
 void session_interface::set_session_cookie(string const &data)
 {
-	set_session_cookie(cookie_age(),data);
+	temp_cookie=data;
 }
 
 string session_interface::get_session_cookie()

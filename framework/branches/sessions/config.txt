@@ -8,7 +8,7 @@ server.api = "fastcgi"				# fastcgi -- preferred API
 
 # Server work mode
 
-server.mod="process"				# process -- process runs single instance of worker thread. Very simple 
+server.mod="prefork"				# process -- process runs single instance of worker thread. Very simple 
 						#	     suitable for server that manages process startup/shutdown
 						#	     This is only mod that supports CGI api
 						# thread  -- thread pool execute several instances of worker. More dengerous
@@ -63,12 +63,17 @@ locale.domain_list = { "app" "test" }		# list of supported domains
 locale.domain_default = "test"			# default domain (default first one)
 
 
-session.backend = "cookies"
+#session.backend = "cookies"
+session.backend = "files"
 session.expire = "browser"			# "browser" "renew" "fixed"
-#session.timeout = 10 				# 24*3600
+session.timeout = 10 				# 24*3600
 #session.cookies_encryptor = "hmac"
 session.cookies_encryptor = "aes"
 session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
+
+session.files_dir = "./sessions"
+session.files_comp = "prefork"
+session.files_gc_frequency = 10
 
 # session.cookies_prefix = "cppcms_session"
 # session.cookies_domain = ""

@@ -285,6 +285,21 @@ void session_file_storage::save(string const &sid,time_t timeout,string const &i
 	}
 }
 
+bool session_file_storage::check(string const &sid)
+{
+	try {
+		io->rdlock(sid);
+		time_t tmp;
+		bool res=io->read(sid,tmp,NULL);
+		io->unlock(sid);
+		return res;
+	}
+	catch(...) {
+		io->unlock(sid);
+		throw;
+	}
+}
+
 bool session_file_storage::load(string const &sid,time_t *timeout,string &out)
 {
 	try {
@@ -375,7 +390,7 @@ public:
 	builder_impl(manager &app)
 	{
 		gc_exit=-1;
-		cache==app.config.ival("session.server_enable_cache",0);
+		cache=app.config.ival("session.server_enable_cache",0);
 		string dir=app.config.sval("session.files_dir");
 		string type=app.config.sval("session.files_comp","thread");
 		if(type=="thread")
@@ -393,7 +408,7 @@ public:
 			has_thread=true;
 			gc_exit=0;
 			starter_pid=getpid();
-			pthread_create(&pid,NULL,thread_func,io.get());
+			pthread_create(&pid,NULL,thread_func,this);
 		}
 		else
 			has_thread=false;
@@ -443,8 +458,19 @@ void *thread_func(void *param)
 		pthread_cond_timedwait(&gc_cond,&gc_mutex,&ts);
 		if(starter_pid!=getpid() || gc_exit) exit=1;
 		pthread_mutex_unlock(&gc_mutex);
-		if(!exit)	
-			session_file_storage::gc(blder->io);
+		if(!exit) {
+			try {
+				session_file_storage::gc(blder->io);
+			}
+			catch(std::exception const &e) {
+				fprintf(stderr,"%s\n",e.what());
+				return NULL;
+			}
+			catch(...)
+			{
+				return NULL;
+			}
+		}
 	}
 	return NULL;
 }

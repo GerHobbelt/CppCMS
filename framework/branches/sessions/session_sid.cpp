@@ -79,7 +79,7 @@ string session_sid::key(std::string sid)
 void session_sid::save(session_interface *session,std::string const &data,time_t timeout)
 {
 	string id=session->get_session_cookie();
-	if(!valid_sid(id)) {
+	if(!valid_sid(id) || !storage->check(id)) {
 		id=sid(); // if id not valid create new one
 	}
 	else if(cache){
