@@ -63,16 +63,16 @@ locale.domain_list = { "app" "test" }		# list of supported domains
 locale.domain_default = "test"			# default domain (default first one)
 
 
-#session.backend = "cookies"
-session.backend = "files"
+session.backend = "cookies"
+#session.backend = "files"
 session.expire = "browser"			# "browser" "renew" "fixed"
 session.timeout = 10 				# 24*3600
-#session.cookies_encryptor = "hmac"
-session.cookies_encryptor = "aes"
+session.cookies_encryptor = "hmac"
+#session.cookies_encryptor = "aes"
 session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
 
 session.files_dir = "./sessions"
-session.files_comp = "prefork"
+session.files_comp = "nfs"  # "thread" "prefork" "nfs"
 session.files_gc_frequency = 10
 
 # session.cookies_prefix = "cppcms_session"

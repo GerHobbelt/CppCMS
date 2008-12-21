@@ -403,7 +403,11 @@ public:
 			io.reset(new storage::nfs_io(dir));
 		else
 			throw cppcms_error("Unknown option for session.files_comp `"+type+"'");
+		// Clean first time
+		session_file_storage::gc(io);
+
 		gc_period=app.config.ival("session.files_gc_frequency",-1);
+
 		if(gc_period>0) {
 			has_thread=true;
 			gc_exit=0;
