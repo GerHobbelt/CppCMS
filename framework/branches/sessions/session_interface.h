@@ -35,8 +35,10 @@ class session_interface : private boost::noncopyable {
 	bool load();
 	void save();
 
-	boost::shared_ptr<session_api> storage;
+	std::string temp_cookie;
 
+	boost::shared_ptr<session_api> storage;
+	void set_session_cookie(int64_t age,std::string const &data);
 
 public:
 	session_interface(worker_thread &w);
@@ -59,7 +61,6 @@ public:
 	void set_expiration(int h) { how=h; };
 
 // Special interface
-	void set_session_cookie(int64_t age,std::string const &data);
 	void set_session_cookie(std::string const &data);
 	void clear_session_cookie();
 	std::string get_session_cookie();
