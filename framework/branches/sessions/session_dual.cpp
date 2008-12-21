@@ -1,10 +1,13 @@
 #include "session_dual.h"
+#include "session_interface.h"
+
+using namespace std;
 
 namespace cppcms {
 
-session_dual::save(session_interface *session,string const &data,time_t timeout)
+void session_dual::save(session_interface *session,string const &data,time_t timeout)
 {
-	if(data > limit) {
+	if(data.size() > limit) {
 		server->save(session,data,timeout);
 	}
 	else {
@@ -15,17 +18,17 @@ session_dual::save(session_interface *session,string const &data,time_t timeout)
 	}
 }
 
-session_dual::load(session_interface *session,string &data,time_t &timeout)
+bool session_dual::load(session_interface *session,string &data,time_t &timeout)
 {
 	if(session->get_session_cookie().size()==32) {
-		server->load(session,data,timeout);
+		return server->load(session,data,timeout);
 	}
 	else {
-		client->load(session,data,timeout);
+		return client->load(session,data,timeout);
 	}
 }
 
-session_dual::clear(session_interface *session)
+void session_dual::clear(session_interface *session)
 {
 	if(session->get_session_cookie().size()==32) {
 		server->clear(session);
@@ -35,4 +38,28 @@ session_dual::clear(session_interface *session)
 	}
 }
 
+namespace {
+struct builder {
+	session_backend_factory client,server;
+	size_t limit;
+	builder(session_backend_factory c,session_backend_factory s,size_t l) :
+		client(c),
+		server(s),
+		limit(l)
+	{
+	}
+	boost::shared_ptr<session_api> operator()(worker_thread &w)
+	{
+		boost::shared_ptr<session_api> c,s;
+		c=client(w);
+		s=server(w);
+		return boost::shared_ptr<session_api>(new session_dual(c,s,limit));
+	}
+};
+}
+
+session_backend_factory session_dual::factory(session_backend_factory c,session_backend_factory s,size_t l)
+{
+	return builder(c,s,l);
+}
 } // cppcms

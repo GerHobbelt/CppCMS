@@ -21,7 +21,7 @@ libcppcms_la_SOURCES = global_config.cpp manager.cpp 	url.cpp worker_thread.cpp 
 	text_tool.cpp 	cache_interface.cpp base_cache.cpp thread_cache.cpp scgi.cpp \
 	base_view.cpp util.cpp form.cpp application.cpp session_interface.cpp \
 	session_cookies.cpp hmac_encryptor.cpp encryptor.cpp md5.c base64.cpp \
-	session_sid.cpp session_file_storage.cpp
+	session_sid.cpp session_file_storage.cpp session_dual.cpp
 
 libcppcms_la_LDFLAGS  = -no-undefined -version-info 0:0:0
 libcppcms_la_LIBADD = @CPPCMS_LIBS@ transtext/libcppcmstranstext.la
@@ -45,7 +45,8 @@ nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	process_cache.h shmem_allocator.h posix_mutex.h config.h cgi.h base_view.h \
 	util.h form.h application.h session_interface.h session_api.h session_cookies.h \
 	hmac_encryptor.h aes_encryptor.h encryptor.h md5.h base64.h session_backend_factory.h \
-	session_sid.h session_storage.h session_file_storage.h
+	session_sid.h session_storage.h session_file_storage.h session_dual.h \
+	session_cache_backend.h
 
 if EN_TCP_CACHE
 libcppcms_la_SOURCES += tcp_cache.cpp

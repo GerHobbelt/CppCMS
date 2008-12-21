@@ -21,7 +21,8 @@
 #include "cgi.h"
 #include "session_cookies.h"
 #include "session_file_storage.h"
-
+#include "session_cache_backend.h"
+#include "session_dual.h"
 
 #ifdef EN_FORK_CACHE
 # include "process_cache.h"
@@ -517,17 +518,31 @@ namespace {
 
 session_backend_factory manager::get_sessions()
 {
-	string backend=config.sval("session.backend","none");
-	if(backend=="none") {
+	string lock=config.sval("session.location","none");
+	if(lock=="none")
 		return empty_backend();
+	session_backend_factory srv;
+	session_backend_factory clnt;
+	if(lock=="client" || lock=="both") {
+		clnt=session_cookies::factory();
 	}
-	if(backend=="cookies") {
-		return session_cookies::factory();
+	else if(lock=="server" || lock=="both") {
+		string srv_backend=config.sval("session.backend","cache");
+		if(srv_backend=="cache")
+			srv=session_cache_backend::factory();
+		else if(srv_backend=="files")
+			srv=session_file_storage::factory(*this);
+		else
+			throw cppcms_error("Unknown backend:"+srv_backend);
 	}
-	if(backend=="files") {
-		return session_file_storage::factory(*this);
+	else {
+		throw cppcms_error("Unknown location:"+lock);
 	}
-	throw cppcms_error("Unknown session backend:" + backend);
+	if(lock=="server") 
+		return srv;
+	if(lock=="client")
+		return clnt;
+	return session_dual::factory(clnt,srv,config.ival("session.clinet_size_limit",2048));		
 }
 
 void manager::execute()

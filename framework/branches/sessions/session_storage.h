@@ -29,6 +29,10 @@ public:
 	{
 		return false;
 	}
+	bool check(std::string const &sid)
+	{
+		return false;
+	}
 	void remove(std::string const &sid)
 	{
 	}
