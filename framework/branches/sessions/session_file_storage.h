@@ -37,7 +37,7 @@ public:
 	local_io(std::string dir,pthread_rwlock_t *l);
 	virtual void wrlock(std::string const &sid) const;
 	virtual void rdlock(std::string const &sid) const;
-	virtual void unlock(std::string sid) const;
+	virtual void unlock(std::string const &sid) const;
 };
 
 class nfs_io : public io {
@@ -48,7 +48,7 @@ public:
 	nfs_io(std::string dir);
 	virtual void wrlock(std::string const &sid) const;
 	virtual void rdlock(std::string const &sid) const;
-	virtual void unlock(std::string sid) const;
+	virtual void unlock(std::string const &sid) const;
 	~nfs_io();
 };
 

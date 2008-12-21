@@ -126,21 +126,21 @@ void local_io::rdlock(std::string const &sid) const
 {
 	pthread_rwlock_rdlock(&locks[lock_id(sid)]);
 }
-void local_io::unlock(std::string sid) const
+void local_io::unlock(std::string const &sid) const
 {
 	pthread_rwlock_unlock(&locks[lock_id(sid)]);
 }
 
 void nfs_io::close(int fid)
 {
-	fsync(fid);
-	close(fid);
+	::fsync(fid);
+	::close(fid);
 }
 
 nfs_io::nfs_io(std::string dir) : io(dir)
 {
 	string lockf=dir+"/"+"nfs.lock";
-	fid=::open(lockf.c_str(),O_CREAT | O_RDWR);
+	fid=::open(lockf.c_str(),O_CREAT | O_RDWR,0666);
 	if(fid<0) {
 		throw cppcms_error(errno,"storage::nfs_io::open");
 	}
@@ -150,7 +150,7 @@ nfs_io::nfs_io(std::string dir) : io(dir)
 
 nfs_io::~nfs_io()
 {
-	close(fid);
+	::close(fid);
 }
 
 namespace {
@@ -183,7 +183,7 @@ void nfs_io::rdlock(std::string const &sid) const
 	if(!flock(fid,F_RDLCK,lock_id(sid)))
 		throw cppcms_error(errno,"storage::nfs_io::fcntl::READ LOCK");
 }
-void nfs_io::unlock(std::string sid) const
+void nfs_io::unlock(std::string const &sid) const
 {
 	flock(fid,F_UNLCK,lock_id(sid));
 }
@@ -316,7 +316,7 @@ void session_file_storage::gc(boost::shared_ptr<storage::io> io)
 		string dir=io->get_dir();
 		d=opendir(dir.c_str());
 		struct dirent entry,*entry_p;
-		while(readdir_r(d,&entry,&entry_p)==0) {
+		while(readdir_r(d,&entry,&entry_p)==0 && entry_p!=NULL) {
 			int i;
 			for(i=0;i<32;i++) {
 				if(!isxdigit(entry.d_name[i]))
