@@ -11,6 +11,8 @@
 #include "session_file_storage.h"
 #include "cppcms_error.h"
 
+#include "config.h"
+
 using namespace std;
 
 namespace cppcms {
@@ -219,6 +221,8 @@ thread_io::~thread_io()
 	delete [] locks;
 }
 
+#ifdef HAVE_PTHREADS_PSHARED
+
 pthread_rwlock_t *shmem_io::create_locks()
 {
 	int size=sizeof(pthread_rwlock_t)*LOCK_SIZE;
@@ -261,6 +265,8 @@ shmem_io::~shmem_io()
 	}
 	munmap(locks,sizeof(*locks)*LOCK_SIZE);
 }
+
+#endif // HAVE_PTHREADS_PSHARED
 
 } // namespace storeage
 

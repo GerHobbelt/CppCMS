@@ -60,6 +60,8 @@ public:
 	~thread_io();
 };
 
+#ifdef HAVE_PTHREADS_PSHARED
+
 class shmem_io : public local_io
 {
 	int creator_pid;
@@ -68,6 +70,8 @@ public:
 	shmem_io(std::string dir);
 	~shmem_io();
 };
+
+#endif
 
 } // storage
 

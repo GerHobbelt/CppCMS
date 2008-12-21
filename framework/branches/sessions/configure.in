@@ -35,7 +35,8 @@ if test "x$enable_forkcache" != "xno" ; then
 	if test "x$have_pthreads_pshared" != "xyes" ; then
 		echo "======================================================================"
 		echo "          Pthread process shared mutex/rwlock not supported " 
-		echo "               The fork cache backend is disabled "
+		echo "                  The fork cache backend is disabled "
+		echo "    File based session storage process-shared backend is disabled"
 		echo "======================================================================"
 		enable_forkcache=no
 	fi
