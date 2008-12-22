@@ -86,7 +86,7 @@ session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
 						# Secret Private key: 32 hexadeximal digits
 
 
-session.backend = "files"			# Server side storage backend: "cache", "files"
+session.backend = "bdb"			# Server side storage backend: "cache", "files"
 						# cache -- does not preserverd withing restarti!!!
 						#          It is actually "empty" backend with enabled cache
 						# files -- save information in "files_dir" directory
@@ -106,5 +106,7 @@ session.files_comp = "prefork"			# Serialization method for file backend
 session.files_dir = "./sessions"		# Location of session date for file backend
 session.files_gc_frequency = 3600		# Frequency of "garbage collection" --- cleaning sessions that
 						# had allready "time out". Default -1 --- disabled
+session.bdb_dir = "./sessions"
+session.bdb_cache_size = 1
 
 
