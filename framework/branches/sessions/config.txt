@@ -8,7 +8,7 @@ server.api = "fastcgi"				# fastcgi -- preferred API
 
 # Server work mode
 
-server.mod="prefork"				# process -- process runs single instance of worker thread. Very simple 
+server.mod="thread"				# process -- process runs single instance of worker thread. Very simple 
 						#	     suitable for server that manages process startup/shutdown
 						#	     This is only mod that supports CGI api
 						# thread  -- thread pool execute several instances of worker. More dengerous
@@ -37,7 +37,7 @@ server.socket = "/tmp/hello-fastcgi.socket"     # Default is "" -- use default s
 # gzip.level = 1				# Default: zlib defailt, defines compression level 
 # gzip.buffer = 4096				# Default: zlib default, defines buffer size for zlib
 
-# cache.backend = "fork"			# Default "none" -- defines the cache backend to be used 
+cache.backend = "threaded"			# Default "none" -- defines the cache backend to be used 
 						#        "threaded" inprocess server suitable only for mod thread
 						#	 "fork"     suitable for mod prefork only uses shared memory
 						#	 "tcp"      distributed suitable for any other mod
@@ -63,20 +63,48 @@ locale.domain_list = { "app" "test" }		# list of supported domains
 locale.domain_default = "test"			# default domain (default first one)
 
 
-session.backend = "cookies"
-#session.backend = "files"
+# General Session settings
+# Default Expiration
+
 session.expire = "browser"			# "browser" "renew" "fixed"
 session.timeout = 10 				# 24*3600
-session.cookies_encryptor = "hmac"
-#session.cookies_encryptor = "aes"
-session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
-
-session.files_dir = "./sessions"
-session.files_comp = "nfs"  # "thread" "prefork" "nfs"
-session.files_gc_frequency = 10
 
 # session.cookies_prefix = "cppcms_session"
 # session.cookies_domain = ""
 # session.cookies_path = "/"
 # session.cookies_secure = 0
+
+session.location = "server" 			# "none" "client" "server" "both" default none
+session.client_size_limit = 2048		# The threshold for clinet/server storage defaul 2048
+
+
+# Clinet side storage configuration
+session.cookies_encryptor = "hmac"		# "hmac" "aes" 
+						# hmac -- Preserves consistency
+						# aes  ---Preserves consistency and secrecy 
+session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
+						# Secret Private key: 32 hexadeximal digits
+
+
+session.backend = "files"			# Server side storage backend: "cache", "files"
+						# cache -- does not preserverd withing restarti!!!
+						#          It is actually "empty" backend with enabled cache
+						# files -- save information in "files_dir" directory
+
+session.server_enable_cache = 0			# Add standard caching layer over storage backend
+						# May improve performance when working with "heavy sorages"
+						# like databases or files --- default disabled
+
+session.files_comp = "prefork"			# Serialization method for file backend
+						# "thread"  -- safe for use with thread mod uses in memory mutexes
+						# "prefork" -- safe for use with prefork mod -- uses shared
+						#              memory with mutexes 
+						# "nfs"     -- uses fcntl locking, safe for use over NFS when
+						#              locking is supported and enabled 
+						#              allows sharing cache data over distributed network
+
+session.files_dir = "./sessions"		# Location of session date for file backend
+session.files_gc_frequency = 3600		# Frequency of "garbage collection" --- cleaning sessions that
+						# had allready "time out". Default -1 --- disabled
+
 

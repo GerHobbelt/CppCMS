@@ -76,13 +76,20 @@ string session_sid::key(std::string sid)
 	return "cppcms_session_"+sid;
 }
 
-void session_sid::save(session_interface *session,std::string const &data,time_t timeout)
+void session_sid::save(session_interface *session,std::string const &data,time_t timeout,bool new_data)
 {
-	string id=session->get_session_cookie();
-	if(!valid_sid(id) || !storage->check(id)) {
-		id=sid(); // if id not valid create new one
+	string id;
+	if(!new_data) {
+		id=session->get_session_cookie();
+		if(!valid_sid(id)) {
+			id=sid(); // if id not valid create new one
+		}
 	}
-	else if(cache){
+	else {
+		id=sid();
+	}
+
+	if(cache){
 		session->get_worker().cache.rise(key(id));
 	}
 	storage->save(id,timeout,data);

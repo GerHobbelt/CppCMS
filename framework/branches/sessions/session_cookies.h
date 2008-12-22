@@ -18,7 +18,7 @@ public:
 	static session_backend_factory factory();
 	session_cookies(worker_thread &w);
 	session_cookies(worker_thread &w,std::auto_ptr<encryptor>);
-	virtual void save(session_interface *,std::string const &data,time_t timeout);
+	virtual void save(session_interface *,std::string const &data,time_t timeout,bool );
 	virtual bool load(session_interface *,std::string &data,time_t &timeout);
 	virtual void clear(session_interface *);
 };

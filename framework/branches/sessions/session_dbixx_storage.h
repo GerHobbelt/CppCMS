@@ -13,7 +13,7 @@ public:
 	{
 	}
 protected:	
-	virtual void save(std::string const &sid,time_t timeout,std::string const &in) = 0;
+	virtual void save(std::string const &sid,time_t timeout,std::string const &in)
 	{
 		dbixx::transaction tr(sql);
 		remove(sid);
@@ -23,13 +23,9 @@ protected:
 		     "VALUES (?,?,?)",sid,t,in;
 		sql.exec();
 		tr.commit();
-		time(&now);
-		localtime_r(&now,&t);
-		sql<<"DELETE FROM cppcms_sessions WHERE timeout < ?",t;
-		sql.exec();
 	}
 
-	virtual bool load(std::string const &sid,time_t *timeout,std::string &out) = 0;
+	virtual bool load(std::string const &sid,time_t *timeout,std::string &out)
 	{
 		sql<<"SELECT timeout,data FROM cppcms_sessions WHERE sid=?",sid;
 		dbixx::row r;
@@ -48,7 +44,10 @@ protected:
 	}
 	virtual void remove(std::string const &sid)
 	{
-		sql<<"DELETE FROM cppcms_sessions WHERE sid=?",sid;
+		time_t now=time(NULL);
+		std::tm tnow;
+		localtime_r(&tnow,&now);
+		sql<<"DELETE FROM cppcms_sessions WHERE sid=? OR timeout < ?",sid,tnow;
 		sql.exec();
 	}
 };

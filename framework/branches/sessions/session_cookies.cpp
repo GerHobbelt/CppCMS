@@ -53,7 +53,7 @@ session_cookies::session_cookies(worker_thread &w) :
 	throw cppcms_error("Unknown encryptor "+type);
 }
 
-void session_cookies::save(session_interface *session,string const &data,time_t timeout)
+void session_cookies::save(session_interface *session,string const &data,time_t timeout,bool not_used)
 {
 	string cdata=encr->encrypt(data,timeout);
 	session->set_session_cookie(cdata);

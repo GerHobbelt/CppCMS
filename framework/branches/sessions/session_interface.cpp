@@ -103,7 +103,7 @@ void session_interface::save()
 		ar<<p->first<<p->second;
 	}
 	temp_cookie.clear();
-	storage->save(this,ar.get(),session_age());
+	storage->save(this,ar.get(),session_age(),new_session);
 	set_session_cookie(cookie_age(),temp_cookie);
 	temp_cookie.clear();
 }

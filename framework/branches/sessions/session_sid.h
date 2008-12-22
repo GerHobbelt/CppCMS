@@ -35,7 +35,7 @@ public:
 		cache(c)
 	{
 	}
-	virtual void save(session_interface *,std::string const &data,time_t timeout);
+	virtual void save(session_interface *,std::string const &data,time_t timeout,bool);
 	virtual bool load(session_interface *,std::string &data,time_t &timeout);
 	virtual void clear(session_interface *);
 

@@ -285,21 +285,6 @@ void session_file_storage::save(string const &sid,time_t timeout,string const &i
 	}
 }
 
-bool session_file_storage::check(string const &sid)
-{
-	try {
-		io->rdlock(sid);
-		time_t tmp;
-		bool res=io->read(sid,tmp,NULL);
-		io->unlock(sid);
-		return res;
-	}
-	catch(...) {
-		io->unlock(sid);
-		throw;
-	}
-}
-
 bool session_file_storage::load(string const &sid,time_t *timeout,string &out)
 {
 	try {

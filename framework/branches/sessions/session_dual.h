@@ -19,7 +19,7 @@ public:
 		limit(l)
 	{
 	}
-	virtual void save(session_interface *,std::string const &data,time_t timeout);
+	virtual void save(session_interface *,std::string const &data,time_t timeout,bool new_session);
 	virtual bool load(session_interface *,std::string &data,time_t &timeout);
 	virtual void clear(session_interface *);
 

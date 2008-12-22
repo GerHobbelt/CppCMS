@@ -5,16 +5,16 @@ using namespace std;
 
 namespace cppcms {
 
-void session_dual::save(session_interface *session,string const &data,time_t timeout)
+void session_dual::save(session_interface *session,string const &data,time_t timeout,bool isnew)
 {
 	if(data.size() > limit) {
-		server->save(session,data,timeout);
+		server->save(session,data,timeout,isnew);
 	}
 	else {
 		if(session->get_session_cookie().size() == 32) {
 			server->clear(session);
 		}
-		client->save(session,data,timeout);
+		client->save(session,data,timeout,isnew);
 	}
 }
 
