@@ -28,13 +28,14 @@ public:
 		if(a == b) return 0;
 		/*if(a > b)*/ return 1; 
 	}
-	bdb(string dir,int cache_size=0) :
+	bdb(string dir,int cache_size=-1) :
 		env(NULL), prim(NULL), sec(NULL)
 	{
 		try{
 			try{
 				env=new DbEnv(0);		
-				env->set_cachesize(cache_size/(1<<20),(cache_size % (1<<20)) * 1024,0);
+				if(cache_size>=0)
+					env->set_cachesize(cache_size/(1<<20),(cache_size % (1<<20)) * 1024,0);
 				env->open(dir.c_str(),DB_CREATE | DB_THREAD | DB_INIT_MPOOL,0666);
 				prim=new Db(env,0);
 				prim->open(NULL,"prim.db",NULL,DB_HASH,DB_THREAD | DB_CREATE,0666);
@@ -180,7 +181,7 @@ struct builder {
 session_backend_factory session_bdb_storage::factory(manager &app)
 {
 	string dbdir=app.config.sval("session.bdb_dir");
-	int memsize=app.config.ival("session.bdb_cache_size",4);
+	int memsize=app.config.ival("session.bdb_cache_size",-1);
 	return builder(new storage::bdb(dbdir,memsize));
 }
 
