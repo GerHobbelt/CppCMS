@@ -526,13 +526,15 @@ session_backend_factory manager::get_sessions()
 	string lock=config.sval("session.location","none");
 	if(lock=="none")
 		return empty_backend();
-	session_backend_factory srv;
+	
 	session_backend_factory clnt;
+	session_backend_factory srv;
+	
 	if(lock=="client" || lock=="both") {
 		clnt=session_cookies::factory();
 	}
-	else if(lock=="server" || lock=="both") {
-		string srv_backend=config.sval("session.backend","cache");
+	if(lock=="server" || lock=="both") {
+		string srv_backend=config.sval("session.backend","files");
 		if(srv_backend=="cache")
 			srv=session_cache_backend::factory();
 		else if(srv_backend=="files")
@@ -544,14 +546,17 @@ session_backend_factory manager::get_sessions()
 		else
 			throw cppcms_error("Unknown backend:"+srv_backend);
 	}
-	else {
-		throw cppcms_error("Unknown location:"+lock);
-	}
+
 	if(lock=="server") 
 		return srv;
 	if(lock=="client")
 		return clnt;
-	return session_dual::factory(clnt,srv,config.ival("session.clinet_size_limit",2048));		
+	if(lock=="both") {
+		int limit=config.ival("session.client_size_limit",2048);
+		return session_dual::factory(clnt,srv,limit);
+	}
+	
+	throw cppcms_error("Unknown location:"+lock);
 }
 
 void manager::execute()

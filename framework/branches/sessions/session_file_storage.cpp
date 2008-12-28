@@ -371,13 +371,37 @@ public:
 	bool has_thread;
 	pthread_t pid;
 	int cache;
+
+	string def_dir()
+	{
+		char const *d=getenv("TEMP");
+		if(!d) d=getenv("TMP");
+		if(!d) d="/tmp";
+		string dir=string(d)+"/cppcms_sessions";
+		if(::mkdir(dir.c_str(),0777)!=0 && errno!=EEXIST)
+			throw cppcms_error(errno,"session::file_storage::mkdir");
+		return dir;
+	}
 	
 	builder_impl(manager &app)
 	{
 		gc_exit=-1;
 		cache=app.config.ival("session.server_enable_cache",0);
-		string dir=app.config.sval("session.files_dir");
-		string type=app.config.sval("session.files_comp","thread");
+		string dir=app.config.sval("session.files_dir","");
+		if(dir=="") {
+			dir=def_dir();
+		}
+		string mod = app.config.sval("server.mod","");
+		string default_type;
+		if(mod=="thread")
+			default_type = "thread";
+#ifdef HAVE_PTHREADS_PSHARED
+		else if(mod=="prefork")
+			default_type = "prefork";
+#endif
+		else 
+			default_type = "nfs";
+		string type=app.config.sval("session.files_comp",default_type);
 		if(type=="thread")
 			io.reset(new storage::thread_io(dir));
 #ifdef HAVE_PTHREADS_PSHARED

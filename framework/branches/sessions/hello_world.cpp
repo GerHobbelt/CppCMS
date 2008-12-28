@@ -24,8 +24,19 @@ void my_hello_world::test()
 	}
 	else {
 		time_t given=session.get<time_t>("time");
-		cout<<asctime(gmtime(&given));
-		session.clear();
+		cout<<asctime(gmtime(&given))<<"<br/>\n";
+		if(session.is_set("msg")) {
+			cout<<session["msg"]<<"<br/>";
+		}
+		if(given % 3 == 0) {
+			cout<<"SET LONG MESSAGE";
+			session["msg"]="Looooooooooooooooooooooooooooooong msg";
+		}
+		else {
+			cout<<"UNSET LONG MESSAGE";
+			session.del("msg");
+		}
+		//session.clear();
 	}
 	session.set<time_t>("time",time(NULL));
 }

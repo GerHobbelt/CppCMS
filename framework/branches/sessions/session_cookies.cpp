@@ -38,7 +38,12 @@ session_cookies::session_cookies(worker_thread &w,auto_ptr<encryptor> enc) :
 session_cookies::session_cookies(worker_thread &w) :
 	worker(w)
 {
-	string type=w.app.config.sval("session.cookies_encryptor");
+#ifdef EN_ENCR_SESSIONS
+	string default_type="aes";
+#else
+	string default_type="hmac";
+#endif
+	string type=w.app.config.sval("session.cookies_encryptor",default_type);
 	string key=w.app.config.sval("session.cookies_key");
 	if(type=="hmac") {
 		encr.reset(new hmac::cipher(key));
