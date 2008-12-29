@@ -11,6 +11,7 @@ namespace cppcms {
 
 class session_api;
 class worker_thread;
+class serializable;
 
 class session_interface : private boost::noncopyable {
 	std::map<std::string,std::string> data,data_copy;
@@ -53,6 +54,10 @@ public:
 	void set(std::string const &key,T const &val) {
 		(*this)[key]=boost::lexical_cast<std::string>(val);
 	}
+	
+	void get(std::string const &key,serializable &);
+	void set(std::string const &key,serializable const &);
+
 
 	void clear();
 

@@ -2,6 +2,7 @@
 #include "session_interface.h"
 #include "session_api.h"
 #include "manager.h"
+#include "archive.h"
 
 namespace cppcms {
 
@@ -178,6 +179,15 @@ string session_interface::get_session_cookie()
 			return cookies[i].getValue();
 	}
 	return string("");
+}
+	
+void session_interface::get(std::string const &key,serializable &s)
+{
+	s=(*this)[key];
+}
+void session_interface::set(std::string const &key,serializable const &s)
+{
+	(*this)[key]=s;
 }
 
 

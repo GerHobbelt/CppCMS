@@ -75,7 +75,24 @@ class serializable {
 public:
 	virtual void load(archive &a) = 0;
 	virtual void save(archive &a) const = 0;
-	operator std::string()
+	
+	operator std::string() const 
+	{
+		return str();
+	}
+	serializable const &operator=(std::string const &s)
+	{
+		str(s);
+		return *this;
+	}
+
+	void str(std::string const &s)
+	{
+		archive a(s);
+		load(a);
+	}	
+	
+	std::string str() const
 	{
 		archive a;
 		save(a);
@@ -83,12 +100,7 @@ public:
 		str.swap(a.get());
 		return str;
 	}
-	serializable const &operator=(std::string const &s)
-	{
-		archive a(s);
-		load(a);
-		return *this;
-	}	
+
 	virtual ~serializable() {};
 };
 
