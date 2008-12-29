@@ -8,7 +8,7 @@ server.api = "fastcgi"				# fastcgi -- preferred API
 
 # Server work mode
 
-server.mod="thread"				# process -- process runs single instance of worker thread. Very simple 
+server.mod="prefork"				# process -- process runs single instance of worker thread. Very simple 
 						#	     suitable for server that manages process startup/shutdown
 						#	     This is only mod that supports CGI api
 						# thread  -- thread pool execute several instances of worker. More dengerous
@@ -74,7 +74,7 @@ session.timeout = 10 				# 24*3600
 # session.cookies_path = "/"
 # session.cookies_secure = 0
 
-session.location = "both" 			# "none" "client" "server" "both" default none
+session.location = "server" 			# "none" "client" "server" "both" default none
 #session.client_size_limit = 2048		# The threshold for clinet/server storage defaul 2048
 
 
@@ -86,7 +86,8 @@ session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
 						# Secret Private key: 32 hexadeximal digits
 
 
-#session.backend = "files"			# Server side storage backend: "cache", "files", default -- "iles"
+session.backend = "sqlite"			# Server side storage backend: "cache", "files", "sqlite",
+						#	default -- "files"
 						# cache -- does not preserverd withing restarti!!!
 						#          It is actually "empty" backend with enabled cache
 						# files -- save information in "files_dir" directory
@@ -108,5 +109,6 @@ session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
 						# default getenv("TMP")+/cppcms_sessions
 session.files_gc_frequency = 3600		# Frequency of "garbage collection" --- cleaning sessions that
 						# had allready "time out". Default -1 --- disabled
+session.sqlite_db = "./sessions/s.db"
 
 

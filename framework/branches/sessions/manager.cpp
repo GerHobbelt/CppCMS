@@ -24,8 +24,8 @@
 #include "session_cache_backend.h"
 #include "session_dual.h"
 
-#ifdef EN_BDB_SESSIONS
-# include "session_bdb_storage.h"
+#ifdef EN_SQLITE_SESSIONS
+# include "session_sqlite_storage.h"
 #endif
 
 #ifdef EN_FORK_CACHE
@@ -539,9 +539,9 @@ session_backend_factory manager::get_sessions()
 			srv=session_cache_backend::factory();
 		else if(srv_backend=="files")
 			srv=session_file_storage::factory(*this);
-#ifdef EN_BDB_SESSIONS
-		else if(srv_backend=="bdb")
-			srv=session_bdb_storage::factory(*this);
+#ifdef EN_SQLITE_SESSIONS
+		else if(srv_backend=="sqlite")
+			srv=session_sqlite_storage::factory(*this);
 #endif
 		else
 			throw cppcms_error("Unknown backend:"+srv_backend);

@@ -39,8 +39,8 @@ if EN_ENCR_SESSIONS
 libcppcms_la_SOURCES += aes_encryptor.cpp
 endif
 
-if EN_BDB_SESSIONS
-libcppcms_la_SOURCES += session_bdb_storage.cpp
+if EN_SQLITE_SESSIONS
+libcppcms_la_SOURCES += session_sqlite_storage.cpp
 endif
 
 nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
@@ -50,7 +50,7 @@ nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	util.h form.h application.h session_interface.h session_api.h session_cookies.h \
 	hmac_encryptor.h aes_encryptor.h encryptor.h md5.h base64.h session_backend_factory.h \
 	session_sid.h session_storage.h session_file_storage.h session_dual.h \
-	session_cache_backend.h session_bdb_storage.h
+	session_cache_backend.h session_sqlite_storage.h
 
 if EN_TCP_CACHE
 libcppcms_la_SOURCES += tcp_cache.cpp

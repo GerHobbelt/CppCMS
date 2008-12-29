@@ -1,5 +1,5 @@
-#ifndef SESSION_BDB_STORAGE_H
-#define SESSION_BDB_STORAGE_H
+#ifndef SESSION_SQLITE_STORAGE_H
+#define SESSION_SQLITE_STORAGE_H
 
 #include <string>
 #include <vector>
@@ -12,14 +12,14 @@ namespace cppcms {
 class manager;
 
 namespace storage {
-class bdb;
+class sqlite_N;
 } // storage
 
-class session_bdb_storage : public session_server_storage {
-	boost::shared_ptr<storage::bdb> db;
+class session_sqlite_storage : public session_server_storage {
+	boost::shared_ptr<storage::sqlite_N> db;
 public:
 	static session_backend_factory factory(manager &);
-	session_bdb_storage(boost::shared_ptr<storage::bdb> );
+	session_sqlite_storage(boost::shared_ptr<storage::sqlite_N> );
 	virtual void save(std::string const &sid,time_t timeout,std::string const &in);
 	virtual bool load(std::string const &sid,time_t *timeout,std::string &out);
 	virtual void remove(std::string const &sid) ;
