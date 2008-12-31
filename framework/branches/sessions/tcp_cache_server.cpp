@@ -15,6 +15,7 @@ namespace aio = asio;
 using asio::error_code;
 #endif
 #include "tcp_cache_protocol.h"
+#include "session_storage.h"
 #include "archive.h"
 #include "thread_cache.h"
 #include <boost/bind.hpp>
@@ -39,7 +40,11 @@ class session : public boost::enable_shared_from_this<session> {
 public:
 	tcp::socket socket_;
 	base_cache &cache;
-	session(aio::io_service &srv,base_cache &c) : socket_(srv), cache(c) {}
+	session_server_storage &sessions;
+	session(aio::io_service &srv,base_cache &c,session_server_storage &s) : 
+		socket_(srv), cache(c),sessions(s)
+	{
+	}
 	void run()
 	{
 		aio::async_read(socket_,aio::buffer(&hin,sizeof(hin)),
@@ -157,6 +162,46 @@ public:
 		cache.store(key,triggers,timeout,a);
 		hout.opcode=opcodes::done;
 	}
+	
+	void save()
+	{
+		if(hin.size <= 32)
+		{
+			hout.opcode=opcodes::error;
+			return;
+		}
+		time_t timeout=hin.operations.session_save.timeout + time(NULL);
+		string sid(data_in.begin(),data_in.begin()+32);
+		string value(data_in.begin()+32,data_in.end());
+		sessions.save(sid,timeout,value);
+		hout.opcode=opcodes::done;
+	}
+	void load()
+	{
+		if(hin.size!=32) {
+			hout.opcode=opcodes::error;
+			return;
+		}
+		time_t timeout;
+		int toffset;
+		string sid(data_in.begin(),data_in.end());
+		if(!sessions.load(sid,&timeout,data_out) && (toffset=(timeout-time(NULL))) < 0) {
+			hout.opcode=opcodes::no_data;
+			return;
+		}
+		hout.opcode=opcodes::session_load_data;
+		hout.operations.session_data.timeout=toffset;
+		hout.opcode=opcodes::done;
+	}
+	void remove()
+	{
+		if(hin.size!=32) {
+			hout.opcode=opcodes::error;
+			return;
+		}
+		string sid(data_in.begin(),data_in.end());
+		sessions.remove(sid);
+	}
 	void on_data_in(error_code const &e)
 	{
 		if(e) return;
@@ -168,6 +213,9 @@ public:
 		case opcodes::clear:		clear(); break;
 		case opcodes::store:		store(); break;
 		case opcodes::stats:		stats(); break;
+		case opcodes::session_save:	save(); break;
+		case opcodes::session_load:	load(); break;
+		case opcodes::session_remove:	remove(); break;
 		default:
 			hout.opcode=opcodes::error;
 		}
@@ -197,6 +245,7 @@ public:
 class tcp_cache_server  {
 	tcp::acceptor acceptor_;
 	base_cache &cache;
+	session_server_storage &sessions;
 	void on_accept(error_code const &e,shared_ptr<session> s)
 	{
 		if(!e) {
@@ -208,18 +257,20 @@ class tcp_cache_server  {
 	}
 	void start_accept()
 	{
-		shared_ptr<session> s(new session(acceptor_.io_service(),cache));
+		shared_ptr<session> s(new session(acceptor_.io_service(),cache,sessions));
 		acceptor_.async_accept(s->socket_,boost::bind(&tcp_cache_server::on_accept,this,aio::placeholders::error,s));
 	}
 public:
 	tcp_cache_server(	aio::io_service &io,
 				string ip,
 				int port,
-				base_cache &c) : 
+				base_cache &c,
+				session_server_storage &s) : 
 		acceptor_(io,
 			  tcp::endpoint(aio::ip::address::from_string(ip),
 			  port)),
-		cache(c)
+		cache(c),
+		sessions(s)
 	{
 		start_accept();
 	}
@@ -236,7 +287,8 @@ int main(int argc,char **argv)
 	{
 		aio::io_service io;
 		thread_cache cache(atoi(argv[3]));
-		tcp_cache_server srv_cache(io,argv[1],atoi(argv[2]),cache);
+		empty_session_server_storage storage; 
+		tcp_cache_server srv_cache(io,argv[1],atoi(argv[2]),cache,storage);
 		for(;;) {
 			try {
 				io.run();

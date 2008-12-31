@@ -538,10 +538,10 @@ session_backend_factory manager::get_sessions()
 		if(srv_backend=="cache")
 			srv=session_cache_backend::factory();
 		else if(srv_backend=="files")
-			srv=session_file_storage::factory(*this);
+			srv=session_file_storage::factory(config);
 #ifdef EN_SQLITE_SESSIONS
 		else if(srv_backend=="sqlite")
-			srv=session_sqlite_storage::factory(*this);
+			srv=session_sqlite_storage::factory(config);
 #endif
 		else
 			throw cppcms_error("Unknown backend:"+srv_backend);

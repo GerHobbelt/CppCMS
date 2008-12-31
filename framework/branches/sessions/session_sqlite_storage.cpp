@@ -1,10 +1,12 @@
 #include "session_sid.h"
-#include "manager.h"
+#include "global_config.h"
 #include "session_sqlite_storage.h"
 #include "cppcms_error.h"
+#include "posix_mutex.h"
 #include <sqlite3.h>
 #include <pthread.h>
 #include <poll.h>
+#include <boost/lexical_cast.hpp>
 
 namespace cppcms {
 namespace storage {
@@ -259,27 +261,27 @@ struct builder_proc {
 
 }
 
-session_backend_factory session_sqlite_storage::factory(manager &app)
+session_backend_factory session_sqlite_storage::factory(cppcms_config const  &config)
 {
-	string db=app.config.sval("session.sqlite_db");
-	int db_count=app.config.ival("session.sqlite_db_num",4);
+	string db=config.sval("session.sqlite_db");
+	int db_count=config.ival("session.sqlite_db_num",4);
 	if(db_count>8)
 		db_count=8;
 	if(db_count<0)
 		db_count=0;
 	db_count=1<<db_count;
 	string def="fork";
-	if(app.config.sval("server.mod","")=="thread")
+	if(config.sval("server.mod","")=="thread")
 		def="thread";
-	string mod=app.config.sval("session.sqlite_mod",def);
+	string mod=config.sval("session.sqlite_mod",def);
 	if(mod=="fork") {
-		bool sync=app.config.ival("session.sqlite_sync",0);
+		bool sync=config.ival("session.sqlite_sync",0);
 		return builder_proc(db,db_count,sync);
 	}
 	else if(mod=="thread") {
-		bool sync=app.config.ival("session.sqlite_sync",1);
-		int  dc=app.config.ival("session.sqlite_commits",1000);
-		int  dt=app.config.ival("session.sqlite_commit_timeout",5);
+		bool sync=config.ival("session.sqlite_sync",1);
+		int  dc=config.ival("session.sqlite_commits",1000);
+		int  dt=config.ival("session.sqlite_commit_timeout",5);
 		return builder_thread(db,db_count,sync,dc,dt);
 	}
 	else {

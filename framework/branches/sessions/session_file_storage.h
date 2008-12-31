@@ -8,9 +8,11 @@
 #include <pthread.h>
 #include "session_storage.h"
 #include "session_backend_factory.h"
+#include "config.h"
+
 
 namespace cppcms {
-class manager;
+class cppcms_config;
 
 namespace storage {
 
@@ -81,7 +83,7 @@ class session_file_storage : public session_server_storage {
 	boost::shared_ptr<storage::io> io;
 public:
 	static void gc(boost::shared_ptr<storage::io>);
-	static session_backend_factory factory(manager &);
+	static session_backend_factory factory(cppcms_config const &);
 	session_file_storage(boost::shared_ptr<storage::io> io_) : io(io_) {}
 	virtual void save(std::string const &sid,time_t timeout,std::string const &in);
 	virtual bool load(std::string const &sid,time_t *timeout,std::string &out);

@@ -53,7 +53,7 @@ nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	session_cache_backend.h session_sqlite_storage.h
 
 if EN_TCP_CACHE
-libcppcms_la_SOURCES += tcp_cache.cpp
+libcppcms_la_SOURCES += tcp_cache.cpp tcp_messenger.cpp session_tcp_storage.cpp tcp_connector.cpp
 bin_PROGRAMS = tcp_cache_server
 tcp_cache_server_SOURCES = base_cache.cpp thread_cache.cpp tcp_cache_server.cpp
 nobase_pkginclude_HEADERS += tcp_cache_protocol.h tcp_cache.h

@@ -9,7 +9,7 @@
 #include "session_backend_factory.h"
 
 namespace cppcms {
-class manager;
+class cppcms_config;
 
 namespace storage {
 class sqlite_N;
@@ -18,7 +18,7 @@ class sqlite_N;
 class session_sqlite_storage : public session_server_storage {
 	boost::shared_ptr<storage::sqlite_N> db;
 public:
-	static session_backend_factory factory(manager &);
+	static session_backend_factory factory(cppcms_config const &);
 	session_sqlite_storage(boost::shared_ptr<storage::sqlite_N> );
 	virtual void save(std::string const &sid,time_t timeout,std::string const &in);
 	virtual bool load(std::string const &sid,time_t *timeout,std::string &out);

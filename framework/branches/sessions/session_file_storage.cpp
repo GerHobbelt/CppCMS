@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <boost/crc.hpp>
 #include <boost/bind.hpp>
-#include "manager.h"
+#include "global_config.h"
 
 #include "session_file_storage.h"
 #include "cppcms_error.h"
@@ -367,7 +367,7 @@ namespace {
 
 struct builder_impl : private boost::noncopyable {
 public:
-	shared_ptr<storage::io> io;
+	boost::shared_ptr<storage::io> io;
 	bool has_thread;
 	pthread_t pid;
 	int cache;
@@ -383,15 +383,15 @@ public:
 		return dir;
 	}
 	
-	builder_impl(manager &app)
+	builder_impl(cppcms_config const config)
 	{
 		gc_exit=-1;
-		cache=app.config.ival("session.server_enable_cache",0);
-		string dir=app.config.sval("session.files_dir","");
+		cache=config.ival("session.server_enable_cache",0);
+		string dir=config.sval("session.files_dir","");
 		if(dir=="") {
 			dir=def_dir();
 		}
-		string mod = app.config.sval("server.mod","");
+		string mod = config.sval("server.mod","");
 		string default_type;
 		if(mod=="thread")
 			default_type = "thread";
@@ -401,7 +401,7 @@ public:
 #endif
 		else 
 			default_type = "nfs";
-		string type=app.config.sval("session.files_comp",default_type);
+		string type=config.sval("session.files_comp",default_type);
 		if(type=="thread")
 			io.reset(new storage::thread_io(dir));
 #ifdef HAVE_PTHREADS_PSHARED
@@ -415,7 +415,7 @@ public:
 		// Clean first time
 		session_file_storage::gc(io);
 
-		gc_period=app.config.ival("session.files_gc_frequency",-1);
+		gc_period=config.ival("session.files_gc_frequency",-1);
 
 		if(gc_period>0) {
 			has_thread=true;
@@ -490,9 +490,9 @@ void *thread_func(void *param)
 
 } // anon namespace
 
-session_backend_factory session_file_storage::factory(manager &m)
+session_backend_factory session_file_storage::factory(cppcms_config const &conf)
 {
-	return builder(boost::shared_ptr<builder_impl>(new builder_impl(m)));
+	return builder(boost::shared_ptr<builder_impl>(new builder_impl(conf)));
 }
 
 
