@@ -198,8 +198,8 @@ public:
 			return;
 		}
 		hout.opcode=opcodes::session_load_data;
+		hout.size=data_out.size();
 		hout.operations.session_data.timeout=toffset;
-		hout.opcode=opcodes::done;
 	}
 	void remove()
 	{
@@ -426,8 +426,10 @@ class garbage_collector
 {
 	aio::deadline_timer timer;
 	boost::shared_ptr<storage::io> io;
+	int seconds;
 	void submit()
 	{
+		timer.expires_from_now(boost::posix_time::seconds(seconds));
 		timer.async_wait(boost::bind(&garbage_collector::gc,this,_1));
 	}
 	void gc(aio::error_code const &e)
@@ -436,8 +438,9 @@ class garbage_collector
 		submit();
 	}
 public:
-	garbage_collector(aio::io_service &srv,int seconds,boost::shared_ptr<storage::io> io_) :
-		timer(srv,boost::posix_time::seconds(seconds)),
+	garbage_collector(aio::io_service &srv,int sec,boost::shared_ptr<storage::io> io_) :
+		timer(srv),
+		seconds(sec),
 		io(io_)
 	{
 		submit();	

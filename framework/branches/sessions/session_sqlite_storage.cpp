@@ -83,7 +83,7 @@ public:
 	}
 	void check_commits()
 	{
-		int64_t now=time(NULL);
+		long long int now=time(NULL);
 		if(	write_ops >= deferred_commit_count 
 			|| (deferred_commit_time > 0 && last_commit + deferred_commit_time < now))
 		{

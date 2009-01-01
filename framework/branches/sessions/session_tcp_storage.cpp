@@ -21,7 +21,7 @@ void session_tcp_storage::save(std::string const &sid,time_t timeout,std::string
 	}
 	tcp_operation_header h={0};
 	h.opcode=opcodes::session_save;
-	h.size=sid.size() + 32;
+	h.size=in.size() + 32;
 	h.operations.session_save.timeout=timeout - now;
 	string data=sid;
 	data.append(in.begin(),in.end());
@@ -32,6 +32,7 @@ bool session_tcp_storage::load(std::string const &sid,time_t *timeout,std::strin
 {
 	tcp_operation_header h={0};
 	h.opcode=opcodes::session_load;
+	h.size=sid.size();
 	string data=sid;
 	get(sid).transmit(h,data);
 	if(h.opcode==opcodes::session_load_data) {
