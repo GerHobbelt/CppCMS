@@ -12,7 +12,20 @@ namespace cppcms {
 class cppcms_config;
 
 namespace storage {
-class sqlite_N;
+
+struct sqlite;
+
+class sqlite_N {
+	vector<boost::shared_ptr<sqlite> > dbs;
+	unsigned size;
+	sqlite &db(std::string const &sid);
+public:
+	sqlite_N(string db,int n,bool sync,int def_commits,int def_timeout);
+	void save(string const &sid,time_t timeout,string const &data);
+	bool load(std::string const &sid,time_t *timeout,std::string &out);
+	void remove(string const &sid);
+};
+
 } // storage
 
 class session_sqlite_storage : public session_server_storage {

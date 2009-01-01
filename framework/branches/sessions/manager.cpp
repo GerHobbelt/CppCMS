@@ -39,6 +39,7 @@
 
 #ifdef EN_TCP_CACHE
 # include "tcp_cache.h"
+# include "session_tcp_storage.h"
 #endif
 
 namespace cppcms {
@@ -543,7 +544,11 @@ session_backend_factory manager::get_sessions()
 		else if(srv_backend=="sqlite")
 			srv=session_sqlite_storage::factory(config);
 #endif
-		else
+#ifdef EN_TCP_CACHE
+		else if(srv_backend=="tcp")
+			srv=session_tcp_storage::factory(config);
+#endif
+	else
 			throw cppcms_error("Unknown backend:"+srv_backend);
 	}
 

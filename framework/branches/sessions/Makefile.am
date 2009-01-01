@@ -50,13 +50,17 @@ nobase_pkginclude_HEADERS = global_config.h text_tool.h url.h cppcms_error.h \
 	util.h form.h application.h session_interface.h session_api.h session_cookies.h \
 	hmac_encryptor.h aes_encryptor.h encryptor.h md5.h base64.h session_backend_factory.h \
 	session_sid.h session_storage.h session_file_storage.h session_dual.h \
-	session_cache_backend.h session_sqlite_storage.h
+	session_cache_backend.h session_sqlite_storage.h tcp_cache_protocol.h tcp_cache.h
 
 if EN_TCP_CACHE
 libcppcms_la_SOURCES += tcp_cache.cpp tcp_messenger.cpp session_tcp_storage.cpp tcp_connector.cpp
-bin_PROGRAMS = tcp_cache_server
-tcp_cache_server_SOURCES = base_cache.cpp thread_cache.cpp tcp_cache_server.cpp
-nobase_pkginclude_HEADERS += tcp_cache_protocol.h tcp_cache.h
+bin_PROGRAMS = cppcms_tcp_scale
+cppcms_tcp_scale_SOURCES = base_cache.cpp thread_cache.cpp tcp_cache_server.cpp session_file_storage.cpp 
+cppcms_tcp_scale_CXXFLAGS=-DNO_BUILDER_INTERFACE
+if EN_SQLITE_SESSIONS
+cppcms_tcp_scale_SOURCES += session_sqlite_storage.cpp
+endif
+
 endif
 
 

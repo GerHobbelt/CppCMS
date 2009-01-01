@@ -90,7 +90,7 @@ AM_CONDITIONAL(EN_ENCR_SESSIONS,[test "x$have_gcrypt" == "xyes" ])
 if test "x$enable_sqlite" != "xno" ; then
 	AC_CHECK_LIB(sqlite3,sqlite3_open,[
 		have_sqlite3=yes
-		CPPCMS_LIBS="-lsqlite3 $CPPCMS_LIBS"
+		LIBS="-lsqlite3 $LIBS"
 		AC_DEFINE([EN_SQLITE_SESSIONS],[],["Enable sqlite sessions"])
 		],
 		[	echo "====================================================================="

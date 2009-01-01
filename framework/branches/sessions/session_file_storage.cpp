@@ -355,6 +355,8 @@ void session_file_storage::gc(boost::shared_ptr<storage::io> io)
 }
 
 
+#ifndef NO_BUILDER_INTERFACE
+
 namespace {
 
 	static pthread_mutex_t gc_mutex=PTHREAD_MUTEX_INITIALIZER;
@@ -490,11 +492,20 @@ void *thread_func(void *param)
 
 } // anon namespace
 
+
 session_backend_factory session_file_storage::factory(cppcms_config const &conf)
 {
 	return builder(boost::shared_ptr<builder_impl>(new builder_impl(conf)));
 }
 
+#else // !NO_BUILDER_INTERFACE 
+
+session_backend_factory session_file_storage::factory(cppcms_config const &conf)
+{
+	throw runtime_error("session_file_storage::factory should not be used");
+}
+
+#endif 
 
 
 

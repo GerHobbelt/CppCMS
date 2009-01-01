@@ -23,6 +23,14 @@ using asio::error_code;
 #include <boost/enable_shared_from_this.hpp>
 #include <ctime>
 #include <cstdlib>
+#include <pthread.h>
+#include <signal.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+#include "session_file_storage.h"
+#ifdef EN_SQLITE_SESSIONS
+#include "session_sqlite_storage.h"
+#endif
 
 using namespace std;
 using namespace cppcms;
@@ -276,30 +284,268 @@ public:
 	}
 };
 
+struct params {
+	bool en_cache;
+	enum { none , files , sqlite3 } en_sessions;
+	string session_backend;
+	string session_file;
+	string session_dir;
+	int items_limit;
+	int gc_frequency;
+	int files_no;
+	int port;
+	string ip;
+	int threads;
 
-int main(int argc,char **argv)
-{
-	if(argc!=4) {
-		cerr<<"Usage: tcp_cache_server ip port entries-limit"<<endl;
-		return 1;
-	}
-	try 
+	void help()
 	{
-		aio::io_service io;
-		thread_cache cache(atoi(argv[3]));
-		empty_session_server_storage storage; 
-		tcp_cache_server srv_cache(io,argv[1],atoi(argv[2]),cache,storage);
-		for(;;) {
+		cerr<<	"Usage cppcms_tcp_scale [parameter]\n"
+			"    --bind IP          ipv4/ipv6 IPto bind (default 0.0.0.0)\n"
+			"    --port N           port to bind -- MANDATORY\n"
+			"    --threads N        number of threads, default 1\n"
+			"    --cache            Enable cache module\n"
+			"    --limit N          maximal Number of items to store\n"
+			"                       mandatory if cache enabled\n"
+			"    --session-files    Enable files bases session backend\n"
+			"    --dir              Directory where files stored\n"
+			"                       mandatory if session-files enabled\n"
+			"    --gc N             gc frequencty seconds (default 600)\n"
+			"                       it is enabled if threads > 1\n"
+#ifdef EN_SQLITE_SESSIONS
+			"    --session-sqlite3  Enable sqlite session backend\n"
+			"    --file             Sqlite3 DB file. Mandatory for sqlite\n"
+			"                       session backend\n"
+			"    --dbfiles          Number of DB files, default 0\n"
+			"                       0->1 file, 1-> 2 files, 2 -> 4 files, etc\n"
+#endif
+			"\n"
+			"    At least one of   --session-files,"
+#ifdef EN_SQLITE_SESSIONS
+			" --session-sqlite3,"
+#endif
+			" --cache\n"
+			"    should be defined\n"
+			"\n";
+	}
+	params(int argc,char **argv) :
+		en_cache(false),
+		en_sessions(none),
+		items_limit(-1),
+		gc_frequency(-1),
+		files_no(0),
+		port(-1),
+		ip("0.0.0.0"),
+		threads(1)
+	{
+		argv++;
+		while(*argv) {
+			string param=*argv;
+			char *next= *(argv+1);
+			if(param=="--bind" && next) {
+				ip=next;
+				argv++;
+			}
+			else if(param=="--port" && next) {
+				port=atoi(next);
+				argv++;
+			}
+			else if(param=="--threads" && next) {
+				threads=atoi(next);
+				argv++;
+			}
+			else if(param=="--gc" && next) {
+				gc_frequency=atoi(next);
+				argv++;
+			}
+			else if(param=="--limit" && next) {
+				items_limit=atoi(next);
+				argv++;
+			}
+			else if(param=="--session-files") {
+				en_sessions=files;
+			}
+			else if(param=="--dir" && next) {
+				session_dir=next;
+				argv++;
+			}
+#ifdef EN_SQLITE_SESSIONS
+			else if(param=="--file" && next) {
+				session_file=next;
+				argv++;
+			}
+			else if(param=="--dbfiles" && next) {
+				files_no=atoi(next);
+				argv++;
+			}
+			else if(param=="--session-sqlite3") {
+				en_sessions=sqlite3;
+			}
+#endif
+			else if(param=="--cache") {
+				en_cache=true;
+			}
+			else {
+				help();
+				throw runtime_error("Incorrect parameter:"+param);
+			}
+			argv++;
+		}
+		if(!en_cache && !en_sessions) {
+			help();
+			throw runtime_error("Neither cache nor sessions mods are defined");
+		}
+		if(en_sessions == files && session_dir.empty()) {
+			help();
+			throw runtime_error("parameter --dir undefined");
+		}
+		if(en_sessions == sqlite3 && session_file.empty()) {
+			help();
+			throw runtime_error("patameter --file undefined");
+		}
+		if(files_no == -1) files_no=1;
+		if(port==-1) {
+			help();
+			throw runtime_error("parameter --port undefined");
+		}
+		if(en_cache && items_limit == -1) {
+			help();
+			throw runtime_error("parameter --limit undefined");
+		}
+		if(gc_frequency != -1) {
+			if(threads == 1) {
+				throw runtime_error("You have to use more then one thread to enable gc");
+			}
+		}
+		if(threads > 1 && gc_frequency==-1) {
+			gc_frequency = 600;
+		}
+	}
+};
+
+class garbage_collector
+{
+	aio::deadline_timer timer;
+	boost::shared_ptr<storage::io> io;
+	void submit()
+	{
+		timer.async_wait(boost::bind(&garbage_collector::gc,this,_1));
+	}
+	void gc(aio::error_code const &e)
+	{
+		session_file_storage::gc(io);
+		submit();
+	}
+public:
+	garbage_collector(aio::io_service &srv,int seconds,boost::shared_ptr<storage::io> io_) :
+		timer(srv,boost::posix_time::seconds(seconds)),
+		io(io_)
+	{
+		submit();	
+	}
+};
+
+
+void *thread_function(void *ptr)
+{
+	aio::io_service &io=*(aio::io_service *)(ptr);
+	bool stop=false;
+	try{
+		while(!stop) {
 			try {
 				io.run();
-				break;
+				stop=true;
 			}
 			catch(cppcms_error const &e) {
 				// Not much to do...
 				// Object will be destroyed automatically 
 				// Because it does not resubmit itself
-				cerr<<"CppCMS Error:"<<e.what()<<endl;
+				fprintf(stderr,"CppCMS Error %s\n",e.what());
 			}
+		}
+	}
+	catch(exception const &e)
+	{
+		fprintf(stderr,"Fatal:%s",e.what());
+	}
+	catch(...){
+		fprintf(stderr,"Unknown exception");
+	}
+	io.stop();
+	return NULL;
+}
+
+
+int main(int argc,char **argv)
+{
+	try 
+	{
+		params par(argc,argv);
+
+		aio::io_service io;
+
+		auto_ptr<base_cache> cache;
+		auto_ptr<session_server_storage> storage;
+		auto_ptr <garbage_collector> gc;
+
+		if(par.en_cache)
+			cache.reset(new thread_cache(par.items_limit));
+		else
+			cache.reset(new base_cache());
+
+		if(par.en_sessions==params::files) {
+			boost::shared_ptr<storage::io> storage_io(new storage::thread_io(par.session_dir));
+			storage.reset(new session_file_storage(storage_io));
+			if(par.threads > 1 && par.gc_frequency > 0) {
+				gc.reset(new garbage_collector(io,par.gc_frequency,storage_io));
+			}
+		}
+#ifdef EN_SQLITE_SESSIONS
+		else if(par.en_sessions==params::sqlite3) {
+			boost::shared_ptr<storage::sqlite_N>
+				sql(new storage::sqlite_N(par.session_file,1<<par.files_no,true,1000,5));
+			storage.reset(new session_sqlite_storage(sql));
+		}
+#endif
+		else {
+			storage.reset(new empty_session_server_storage());
+		}
+		
+
+		tcp_cache_server srv_cache(io,par.ip,par.port,*cache,*storage);
+
+		sigset_t new_mask;
+		sigfillset(&new_mask);
+		sigset_t old_mask;
+		pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
+
+		vector<pthread_t> threads;
+		threads.resize(par.threads);
+
+		int i;
+		for(i=0;i<par.threads;i++){
+			if(pthread_create(&threads[i],NULL,thread_function,&io)!=0) {
+				perror("pthread_create failed:");
+				io.stop();
+				for(i=i-1;i>=0;i--) {
+					pthread_join(threads[i],NULL);
+				}
+			}
+		}
+
+		// Wait for signlas for exit
+		sigset_t wait_mask;
+		sigemptyset(&wait_mask);
+		sigaddset(&wait_mask, SIGINT);
+		sigaddset(&wait_mask, SIGQUIT);
+		sigaddset(&wait_mask, SIGTERM);
+		pthread_sigmask(SIG_BLOCK, &wait_mask, 0);
+		int sig = 0;
+		sigwait(&wait_mask, &sig);		
+
+		io.stop();
+
+		for(i=0;i<par.threads;i++) {
+			pthread_join(threads[i],NULL);
 		}
 	}
 	catch(std::exception const &e) {

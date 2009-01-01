@@ -86,7 +86,7 @@ session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"
 						# Secret Private key: 32 hexadeximal digits
 
 
-session.backend = "sqlite"			# Server side storage backend: "cache", "files", "sqlite",
+session.backend = "tcp"				# Server side storage backend: "cache", "files", "sqlite",
 						#	default -- "files"
 						# cache -- does not preserverd withing restarti!!!
 						#          It is actually "empty" backend with enabled cache
@@ -110,5 +110,6 @@ session.backend = "sqlite"			# Server side storage backend: "cache", "files", "s
 session.files_gc_frequency = 3600		# Frequency of "garbage collection" --- cleaning sessions that
 						# had allready "time out". Default -1 --- disabled
 session.sqlite_db = "./sessions/s.db"
-
+session.tcp_ips = { "127.0.0.1" }
+session.tcp_ports = { 3000 }
 

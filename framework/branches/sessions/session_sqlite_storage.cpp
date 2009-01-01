@@ -187,44 +187,42 @@ public:
 };
 
 
-struct sqlite_N {
-	vector<boost::shared_ptr<sqlite> > dbs;
-	unsigned size;
-	sqlite &db(string const &sid) 
-	{
-		char buf[3]={ sid.at(10) , sid.at(15) , 0 };
-		int v;
-		sscanf(buf,"%x",&v);
-		v = v%size;
-		return *dbs.at(v);
+sqlite &sqlite_N::db(string const &sid) 
+{
+	char buf[3]={ sid.at(10) , sid.at(15) , 0 };
+	int v;
+	sscanf(buf,"%x",&v);
+	v = v%size;
+	return *dbs.at(v);
+}
+sqlite_N::sqlite_N(string db,int n,bool sync,int def_comm,int def_to) :
+	size(n)
+{
+	dbs.resize(n);
+	int i;
+	for(i=0;i<n;i++) {
+		string fname=db+"_"+boost::lexical_cast<string>(i);
+		dbs[i]=boost::shared_ptr<sqlite>(new sqlite(fname,sync,def_comm,def_to));
 	}
-	sqlite_N(string db,int n,bool sync,int def_comm,int def_to) :
-		size(n)
-	{
-		dbs.resize(n);
-		int i;
-		for(i=0;i<n;i++) {
-			string fname=db+"_"+boost::lexical_cast<string>(i);
-			dbs[i]=boost::shared_ptr<sqlite>(new sqlite(fname,sync,def_comm,def_to));
-		}
-	}
+}
+
+bool sqlite_N::load(std::string const &sid,time_t *timeout,std::string &out)
+{
+	return db(sid).load(sid,timeout,out);
+}
+void sqlite_N::remove(string const &sid)
+{	
+	db(sid).remove(sid);
+}
+void sqlite_N::save(string const &sid,time_t timeout,string const &data)
+{
+	db(sid).save(sid,timeout,data);
+}
 	
-	bool load(std::string const &sid,time_t *timeout,std::string &out)
-	{
-		return db(sid).load(sid,timeout,out);
-	}
-	void remove(string const &sid)
-	{	
-		db(sid).remove(sid);
-	}
-	void save(string const &sid,time_t timeout,string const &data)
-	{
-		db(sid).save(sid,timeout,data);
-	}
-	
-};
 
 } // storage
+
+#ifndef NO_BUILDER_INTERFACE
 
 namespace {
 
@@ -288,6 +286,14 @@ session_backend_factory session_sqlite_storage::factory(cppcms_config const  &co
 		throw cppcms_error("Unknown sqlite mode:"+mod);
 	}
 }
+
+#else // NO_BUILDER_INTERFACE
+session_backend_factory session_sqlite_storage::factory(cppcms_config const  &config)
+{
+	throw runtime_error("session_sqlite_storage::factory should bot be used");
+}
+#endif
+
 
 session_sqlite_storage::session_sqlite_storage(boost::shared_ptr<storage::sqlite_N> db_):
 	db(db_)
