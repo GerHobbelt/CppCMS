@@ -180,6 +180,8 @@ void thread::reply(string smid)
 			board.sql.exec();
 			tr.commit();
 
+			session["author"]=c.form.author.get();
+
 			add_header("Status: 302 Found");
 			set_header(new cgicc::HTTPRedirectHeader(tree_url(tid)));
 			return;
@@ -187,6 +189,9 @@ void thread::reply(string smid)
 	}
 
 	board.ini(c);
+	if(session.is_set("author")) {
+		c.form.author.set(session["author"]);
+	}
 	dbixx::row r;
 	board.sql<<
 		"SELECT threads.id,author,content,title "

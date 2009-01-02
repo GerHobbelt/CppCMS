@@ -22,3 +22,9 @@ mysql.password="root"
 sqlite3.dbname="mb.db"
 sqlite3.sqlite3_dbdir="./"
 
+
+session.expire = "renew"
+session.timeout = 604800		# week
+session.location = "client"
+session.cookies_key = "232074faa0fd37de20858bf8cd0a7d04"
+
