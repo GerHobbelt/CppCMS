@@ -40,7 +40,6 @@ public:
 	string root(string locale="");
 	bool set_locale(string);
 	void run(string lang,string url);
-	void set_cookies(string,string,int);
 	virtual void on_404();
 	wiki(worker_thread &w);
 };

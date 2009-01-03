@@ -28,7 +28,7 @@ void master::ini(data::master &c)
 {
 	wi.options.load();
 	c.media=app.config.sval("wikipp.media");
-	c.cookie_prefix=app.config.sval("wikipp.cookie_id","");
+	c.cookie_prefix=app.config.sval("session.cookies_prefix","cppcms_session")+"_";
 	c.main_link=wi.page.default_page_url();
 	c.main_local=wi.page.default_page_url(locale);
 	c.toc=wi.index.index_url();

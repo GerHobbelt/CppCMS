@@ -9,16 +9,6 @@ using cgicc::HTTPRedirectHeader;
 using cgicc::HTTPCookie;
 namespace apps {
 
-void wiki::set_cookies(string p,string u,int time)
-{
-	string cookie=app.config.sval("wikipp.cookie_id","");
-	HTTPCookie u_c(cookie + "username",p,"","",time,"/",false);
-	set_cookie(u_c);
-	HTTPCookie p_c(cookie + "password",u,"","",time,"/",false);
-	set_cookie(p_c);
-}
-
-
 wiki::wiki(worker_thread &w) :
 	application(w),
 	page(*this),

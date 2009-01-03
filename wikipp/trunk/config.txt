@@ -2,7 +2,6 @@
 
 wikipp.script="/wikipp"
 wikipp.media="/templates"
-wikipp.cookie_id="wikipp_"
 wikipp.disable_registration=0
 wikipp.quiz_q = { "Is pinguin bird?"  "Are donkey fly?" }
 wikipp.quiz_a = { 1 0 }
@@ -15,6 +14,14 @@ server.mod="thread"
 server.threads = 5
 server.buffer = 100
 server.socket = "/tmp/wikipp.socket"
+
+#
+#
+session.expire = "renew"
+session.timeout = 2592000	# 30 days
+session.location = "client"
+session.cookies_prefix="wikipp"
+session.cookies_key = "9bc6dbda707cb72ea1205dd5b1c90464"
 
 # Localization
 locale.dir = "./locale"

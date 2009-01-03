@@ -105,7 +105,8 @@ void users::new_user()
 				exec();
 			tr.commit();
 			wi.page.redirect(locale);
-			wi.set_cookies(c.form.username.get(),c.form.password1.get(),3600*7*24);
+			session["username"]=c.form.username.get();
+			session.expose("username");
 			return;
 		}
 		tr.commit();
@@ -134,12 +135,12 @@ bool users::user_exists(string u)
 void users::login()
 {
 	data::login c(&wi);
-	int time=3600*24*7;
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		if(c.form.validate()) {
 			wi.page.redirect(locale);
-			wi.set_cookies(c.form.username.get(),c.form.password.get(),time);
+			session["username"]=c.form.username.get();
+			session.expose("username");
 			return;
 		}
 	}
@@ -147,7 +148,7 @@ void users::login()
 		if(auth()) {
 			set_header(new HTTPRedirectHeader(env->getReferrer()));
 			add_header("Status: 302 Found");
-			wi.set_cookies("","",-1);
+			session.clear();
 			return;
 		}
 	}
@@ -183,23 +184,9 @@ bool users::auth()
 
 void users::do_auth()
 {
-	string tmp_username;
-	string tmp_password;
-
-	string cookie=app.config.sval("wikipp.cookie_id","");
-	const vector<HTTPCookie> &cookies = env->getCookieList();
-	unsigned i;
-	for(i=0;i!=cookies.size();i++) {
-		if(cookies[i].getName()==cookie + "username") {
-			tmp_username=cookies[i].getValue();
-		}
-		else if(cookies[i].getName()==cookie + "password") {
-			tmp_password=cookies[i].getValue();
-		}
-	}
-	auth_ok=check_login(tmp_username,tmp_password);
+	auth_ok=session.is_set("username");
 	if(auth_ok)
-		username=tmp_username;
+		username=session["username"];
 	else
 		username=env->getRemoteAddr();
 }
