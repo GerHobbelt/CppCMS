@@ -31,14 +31,14 @@ public:
 	    if(session.is_set("name")) {
 		c.name=session["name"];
 		if(session["sex"]=="Male") {
-			c.who="Mr.";
+			c.who="Mr";
 		}
 		else {
 			if(session["state"]=="Single") {
 				c.who="Miss";
 			}
 			else {
-				c.who="Missis";
+				c.who="Mrs";
 			}
 		}
 		c.age=session.get<double>("age");
