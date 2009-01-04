@@ -6,7 +6,6 @@
 
 using namespace dbixx;
 using cgicc::HTTPRedirectHeader;
-using cgicc::HTTPCookie;
 namespace apps {
 
 wiki::wiki(worker_thread &w) :

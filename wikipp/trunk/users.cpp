@@ -4,7 +4,6 @@
 #include "users_data.h"
 
 using cgicc::HTTPRedirectHeader;
-using cgicc::HTTPCookie;
 using namespace dbixx;
 
 namespace data {
@@ -127,9 +126,18 @@ string users::login_url()
 
 bool users::user_exists(string u)
 {
+	string key="user_exists_"+u;
+	string tmp;
+	if(cache.fetch_frame(key,tmp,true)) { // No triggers
+		return true;
+	}
 	sql<<"SELECT id FROM users WHERE username=?",u;
 	row r;
-	return sql.single(r);
+	if(sql.single(r)) {
+		cache.store_frame(key,tmp);
+		return true;
+	}
+	return false;
 }
 
 void users::login()
@@ -184,11 +192,17 @@ bool users::auth()
 
 void users::do_auth()
 {
-	auth_ok=session.is_set("username");
+	if(session.is_set("username") && user_exists(session["username"])) {
+		auth_ok=true;
+	}
+	else {
+		auth_ok=false;
+	}
 	if(auth_ok)
 		username=session["username"];
 	else
 		username=env->getRemoteAddr();
+	auth_done=true;
 }
 
 void users::error_forbidden()
