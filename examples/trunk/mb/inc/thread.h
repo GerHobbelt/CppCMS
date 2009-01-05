@@ -20,6 +20,7 @@ public:
 	thread(mb &);
 	string flat_url(int id);
 	string tree_url(int id);
+	string user_url(int id);
 };
 
 } // apps

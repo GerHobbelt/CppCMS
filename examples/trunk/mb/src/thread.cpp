@@ -63,6 +63,14 @@ string thread::tree_url(int id)
 	return env->getScriptName()+"/tree/"+lexical_cast<string>(id);
 }
 
+string thread::user_url(int id)
+{
+	if(!session.is_set("view") || session["view"]=="tree") {
+		return tree_url(id);
+	}
+	return flat_url(id);
+}
+
 string thread::reply_url(int message_id)
 {
 	string tmp=env->getScriptName();
@@ -104,6 +112,7 @@ void thread::flat(string sid)
 		r>>msg_id>>c.messages[i].author>>c.messages[i].content;
 		c.messages[i].reply_url=reply_url(msg_id);
 	}
+	session["view"]="flat";
 	render("flat_thread",c);
 }
 
@@ -153,6 +162,7 @@ void thread::tree(string sid)
 	
 	make_tree(c.messages,all,0);
 
+	session["view"]="tree";
 	render("tree_thread",c);
 }
 
@@ -183,7 +193,7 @@ void thread::reply(string smid)
 			session["author"]=c.form.author.get();
 
 			add_header("Status: 302 Found");
-			set_header(new cgicc::HTTPRedirectHeader(tree_url(tid)));
+			set_header(new cgicc::HTTPRedirectHeader(user_url(tid)));
 			return;
 		}
 	}
@@ -207,7 +217,7 @@ void thread::reply(string smid)
 
 	r>>tid>>c.author>>c.content>>c.title;
 
-	c.back=tree_url(tid);
+	c.back=user_url(tid);
 
 	render("reply",c);
 }

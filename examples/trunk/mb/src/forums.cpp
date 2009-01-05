@@ -61,8 +61,9 @@ void forums::display_forums(string page)
 				"VALUES (?,0,?,?)",
 				id,c.form.comment.get(),c.form.author.get(),exec();
 			tr.commit();
+			session["author"]=c.form.author.get();
 			add_header("Status: 302 Found");
-			set_header(new cgicc::HTTPRedirectHeader(board.thread.tree_url(id)));
+			set_header(new cgicc::HTTPRedirectHeader(board.thread.user_url(id)));
 			return;
 		}
 	}
@@ -78,13 +79,16 @@ void forums::display_forums(string page)
 	for(int i=0;res.next(r);i++) {
 		int id;
 		r>>id>>c.topics[i].title;
-		c.topics[i].url=board.thread.tree_url(id);
+		c.topics[i].url=board.thread.user_url(id);
 	}
 	if(c.topics.size()==topics_per_page) {
 		c.next_page=forums_url(offset+1);
 	}
 	if(offset>0) {
 		c.prev_page=forums_url(offset-1);
+	}
+	if(session.is_set("author")) {
+		c.form.author.set(session["author"]);
 	}
 	render("forums",c);
 }
