@@ -18,8 +18,8 @@ new_topic_form::new_topic_form(cppcms::application &a) :
 	title.set_nonempty();
 	author.set_limits(1,64);
 	comment.set_limits(1,256);
-	comment.rows=20;
-	comment.cols=60;
+	comment.rows=15;
+	comment.cols=40;
 }
 
 };

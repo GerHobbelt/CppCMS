@@ -16,8 +16,8 @@ reply_form::reply_form(application &a) :
 	*this & author & comment & send;
 	author.set_limits(1,64);
 	comment.set_limits(1,256);
-	comment.rows=20;
-	comment.cols=60;
+	comment.rows=15;
+	comment.cols=40;
 }
 
 reply::reply(application &a) : form(a)
