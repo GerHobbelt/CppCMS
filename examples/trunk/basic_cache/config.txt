@@ -1,0 +1,8 @@
+server.api = "fastcgi"
+server.mod = "thread"
+server.socket = "/tmp/hello-world.sock"
+
+cache.backend="threaded"
+cache.limit=10
+
+
