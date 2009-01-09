@@ -1,3 +1,4 @@
+# Configuration
 server.api = "fastcgi"
 server.mod = "thread"
 server.socket = "/tmp/hello-world.sock"

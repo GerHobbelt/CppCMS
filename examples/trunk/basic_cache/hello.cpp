@@ -19,13 +19,19 @@ public:
     {
 	    data::message c;
 	    c.arg=0;
+	    c.fact=1;
 	    if(env->getRequestMethod()=="POST") {
 		    c.info.load(*cgi);
 		    if(c.info.validate()) {
 		        c.arg=c.info.arg.get(); 
 			c.info.clear();
 		    }
+		    else { // No cache should be used
+		   	render("message",c);
+			return;
+		    }
 	    }
+
 	    string key="factorial_"+boost::lexical_cast<string>(c.arg);
 	    if(cache.fetch_page(key))
 	    	return;
