@@ -19,9 +19,10 @@ struct new_user_form : public form {
 	widgets::text username;
 	widgets::password password1;
 	widgets::password password2;
+	widgets::text captcha;
 	widgets::submit submit;
-	list<widgets::checkbox> quiz;
 	new_user_form(wiki *w);
+	void generate_captcha();
 	bool virtual validate(); 
 };
 
