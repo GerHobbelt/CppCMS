@@ -10,7 +10,9 @@ noinst_HEADERS = data.h diff.h index.h index_data.h master.h \
 		 master_data.h options.h options_data.h page.h \
 		 page_data.h users.h users_data.h wiki.h index_data.h 
 
-sysconf_DATA = config.txt mysql.sql sqlite3.sql
+pkgsysconfdir=$(sysconfdir)/wikipp
+dist_pkgdata_DATA = mysql.sql sqlite3.sql
+dist_pkgsysconf_DATA = config.txt
 
 build_static:
 	g++ -g -Wall -O2 *.o templates/*.o \

@@ -1,4 +1,4 @@
-nobase_lib_LTLIBRARIES = libview.la
+nobase_pkglib_LTLIBRARIES = libview.la
 
 libview_la_SOURCES = view.cpp
 libview_la_LDFLAGS = -no-undefined
