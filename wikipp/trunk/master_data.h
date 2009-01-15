@@ -14,6 +14,7 @@ using apps::wiki;
 
 struct master : public cppcms::base_content {
 	string media;
+	string syntax_highlighter;
 	string cookie_prefix;
 	string main_link;
 	string main_local;

@@ -2,6 +2,7 @@
 
 wikipp.script="/wikipp"
 wikipp.media="/templates"
+wikipp.syntax_highlighter="/templates/sh"
 wikipp.disable_registration=0
 wikipp.quiz_q = { "Is pinguin bird?"  "Are donkey fly?" }
 wikipp.quiz_a = { 1 0 }
