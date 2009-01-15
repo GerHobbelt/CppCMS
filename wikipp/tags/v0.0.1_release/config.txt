@@ -1,0 +1,61 @@
+# WikiPP
+
+wikipp.script="/wikipp"
+wikipp.media="/templates"
+wikipp.syntax_highlighter="/templates/sh"
+wikipp.disable_registration=0
+
+# CppCMS System Settings
+
+# Server
+server.api="fastcgi"
+server.mod="thread"
+server.threads = 5
+server.buffer = 100
+server.socket = "/tmp/wikipp.socket"
+
+#
+#
+session.expire = "renew"
+session.timeout = 2592000	# 30 days
+session.location = "client"
+session.cookies_prefix="wikipp"
+session.cookies_key = "9bc6dbda707cb72ea1205dd5b1c90464"
+
+# Localization
+locale.dir = "./locale"
+# locale.dir = "/usr/local/share/locale"
+locale.lang_list = { "he" "en" }
+locale.lang_default = "en"
+locale.domain_list = { "wikipp" }
+
+# gzip - default disabled
+gzip.enable=1
+gzip.level=1
+
+# Cache
+cache.backend="threaded"
+cache.limit=1000
+
+# Templates location
+templates.dirs = { "./templates/.libs/" }
+# templates.dirs = { "/usr/local/lib/wikipp" }
+# templates.ext = ".dll"
+# Uncomment above for cygwin platform
+
+
+#dbixx.driver="mysql"
+dbixx.driver="sqlite3"
+#dbixx.driver="postgresql"
+
+mysql.dbname="wikipp"
+mysql.username="root"
+mysql.password="root"
+
+sqlite3.dbname="wikipp.db"
+sqlite3.sqlite3_dbdir="./db/"
+
+postgresql.dbname="cppcms"
+postgresql.username="artik"
+
+
