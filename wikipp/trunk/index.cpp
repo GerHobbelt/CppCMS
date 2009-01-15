@@ -30,6 +30,9 @@ string index::changes_url(int p)
 
 void index::changes(string page_no)
 {
+	string key="changes_"+page_no;
+	if(cache.fetch_page(key))
+		return;
 	int p;
 	const unsigned window=30;
 	if(page_no.empty())
@@ -61,10 +64,15 @@ void index::changes(string page_no)
 		c.next=changes_url(p+1);
 	ini(c);
 	render("recent_changes",c);
+	cache.store_page(key,60);
+	// Cache changes for at most 30 sec
+	// Generally -- prevent cache drop with frequent updates
 }
 
 void index::display_index()
 {
+	if(cache.fetch_page("toc_index"))
+		return;
 	data::toc c;
 	ini(c);
 	result res;
@@ -105,5 +113,7 @@ void index::display_index()
 		}
 	}
 	render("toc",c);
+	cache.store_page("toc_index",30);
+	// Cache TOC for at most 30 seconds
 }
 }
