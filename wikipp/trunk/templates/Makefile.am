@@ -1,4 +1,3 @@
-pkgdata_DATA = style.css 
 nobase_lib_LTLIBRARIES = libview.la
 
 libview_la_SOURCES = view.cpp
@@ -11,3 +10,6 @@ view.cpp: ${TEMPLATES}
 
 clean-local:
 	rm -f *.cpp
+
+EXTRA_DIST=style.css  style-ltr.css  style-rtl.css ${TEMPLATES}
+

@@ -1,4 +1,4 @@
-SUBDIRS = templates cxxmarkdown po
+SUBDIRS = templates cxxmarkdown po utf8
 
 sbin_PROGRAMS = wikipp
 wikipp_SOURCES = index.cpp  main.cpp  master.cpp  options.cpp  page.cpp  users.cpp  wiki.cpp
@@ -8,9 +8,9 @@ wikipp_CXXFLAGS =-Wall
 
 noinst_HEADERS = data.h diff.h index.h index_data.h master.h \
 		 master_data.h options.h options_data.h page.h \
-		 page_data.h users.h users_data.h wiki.h
+		 page_data.h users.h users_data.h wiki.h index_data.h 
 
-sysconf_DATA = config.txt mysql.sql
+sysconf_DATA = config.txt mysql.sql sqlite3.sql
 
 build_static:
 	g++ -g -Wall -O2 *.o templates/*.o \
@@ -21,4 +21,5 @@ build_static:
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = config.rpath m4/ChangeLog
+EXTRA_DIST = config.rpath m4/ChangeLog \
+	config.txt mysql.sql sqlite3.sql

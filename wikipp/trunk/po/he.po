@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
-"POT-Creation-Date: 2008-11-01 23:22+0200\n"
+"POT-Creation-Date: 2009-01-15 21:52+0200\n"
 "PO-Revision-Date: 2008-11-01 23:24+0200\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
@@ -20,95 +20,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 
-#: data.cpp:9 data.cpp:90
+#: users.cpp:12 users.cpp:35
 msgid "Username"
 msgstr "שם משתמש"
 
-#: data.cpp:10 data.cpp:91
+#: users.cpp:13 users.cpp:36
 msgid "Password"
 msgstr "ססמה"
 
-#: data.cpp:11 main.tmpl:60
+#: users.cpp:14 main.tmpl:65
 msgid "Login"
 msgstr "התחברות"
 
-#: data.cpp:37
-msgid "Title"
-msgstr "כותרת"
-
-#: data.cpp:38 page.tmpl:110
-msgid "Content"
-msgstr "תוכן"
-
-#: data.cpp:39 page.tmpl:114
-msgid "Sidebar"
-msgstr "סרגל־צד"
-
-#: data.cpp:40
-msgid "Save"
-msgstr "שמור"
-
-#: data.cpp:41
-msgid "Save and Continue"
-msgstr "שמור והמשך"
-
-#: data.cpp:42
-msgid "Preview"
-msgstr "תצוגה מקדימה"
-
-#: data.cpp:48
-msgid "Disable editing by visitors"
-msgstr "בטל עריכה למבקרים"
-
-#: data.cpp:49
-msgid "Please Login"
-msgstr "אנא התחבר"
-
-#: data.cpp:71
-msgid "Users Only"
-msgstr "משתמשים בלבד"
-
-#: data.cpp:72
-msgid "Contact e-mail"
-msgstr "דוא\"ל ליצירת־קשר"
-
-#: data.cpp:73
-msgid "Wiki Title"
-msgstr "כותרת הויקי"
-
-#: data.cpp:74
-msgid "About Wiki"
-msgstr "אודות ויקי"
-
-#: data.cpp:75
-msgid "Copyright String"
-msgstr "זכויות היוצרים"
-
-#: data.cpp:76 data.cpp:93
-msgid "Submit"
-msgstr "שלח"
-
-#: data.cpp:85
-msgid "Disable creation of new articles by visitors"
-msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
-
-#: data.cpp:92
+#: users.cpp:37
 msgid "Confirm"
 msgstr "אמת"
 
-#: data.cpp:123
+#: users.cpp:38 options.cpp:13
+msgid "Submit"
+msgstr "שלח"
+
+#: users.cpp:68
 msgid "This user exists"
 msgstr "המשתמש קיים"
 
-#: master.cpp:39
+#: page.cpp:15
+msgid "Title"
+msgstr "כותרת"
+
+#: page.cpp:16 page.tmpl:110
+msgid "Content"
+msgstr "תוכן"
+
+#: page.cpp:17 page.tmpl:114
+msgid "Sidebar"
+msgstr "סרגל־צד"
+
+#: page.cpp:18
+msgid "Save"
+msgstr "שמור"
+
+#: page.cpp:19
+msgid "Save and Continue"
+msgstr "שמור והמשך"
+
+#: page.cpp:20
+msgid "Preview"
+msgstr "תצוגה מקדימה"
+
+#: page.cpp:26
+msgid "Disable editing by visitors"
+msgstr "בטל עריכה למבקרים"
+
+#: page.cpp:27
+msgid "Please Login"
+msgstr "אנא התחבר"
+
+#: master.cpp:52
 msgid "LANG"
 msgstr "עברית"
 
-#: options.cpp:87
+#: options.cpp:8
+msgid "Users Only"
+msgstr "משתמשים בלבד"
+
+#: options.cpp:9
+msgid "Contact e-mail"
+msgstr "דוא\"ל ליצירת־קשר"
+
+#: options.cpp:10
+msgid "Wiki Title"
+msgstr "כותרת הויקי"
+
+#: options.cpp:11
+msgid "About Wiki"
+msgstr "אודות ויקי"
+
+#: options.cpp:12
+msgid "Copyright String"
+msgstr "זכויות היוצרים"
+
+#: options.cpp:22
+msgid "Disable creation of new articles by visitors"
+msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
+
+#: options.cpp:110
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
 
-#: options.cpp:90
+#: options.cpp:113
 msgid ""
 "## About\n"
 "\n"
@@ -120,7 +120,7 @@ msgstr ""
 "ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf."
 "net/)\n"
 
-#: options.cpp:95
+#: options.cpp:118
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
@@ -148,27 +148,27 @@ msgstr "שינויים"
 msgid "Main Page"
 msgstr "עמוד ראשי"
 
-#: main.tmpl:37
+#: main.tmpl:42
 msgid "LTR"
 msgstr "RTL"
 
-#: main.tmpl:63
+#: main.tmpl:68
 msgid "Logout "
 msgstr "יציאה"
 
-#: main.tmpl:73
+#: main.tmpl:78
 msgid "Main"
 msgstr "ראשי"
 
-#: main.tmpl:85
+#: main.tmpl:90
 msgid "Valid CSS"
 msgstr "‏css תקני"
 
-#: main.tmpl:86
+#: main.tmpl:91
 msgid "Valid XHTML 1.0"
 msgstr "‏XHTML 1.0 תקני"
 
-#: main.tmpl:91
+#: main.tmpl:96
 msgid ""
 "Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
@@ -176,7 +176,7 @@ msgstr ""
 "התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
 
-#: main.tmpl:94
+#: main.tmpl:99
 msgid "Contact"
 msgstr "צור קשר"
 

@@ -34,9 +34,11 @@
 	<title><% include title() %></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
-	<script language="javascript"  src="<% media %>/sh/Scripts/shCore.js"></script>
-	<script language="javascript"  src="<% media %>/sh/Scripts/shBrushCpp.js"></script>
-	<link href="<% media %>/sh/Styles/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+	<% if not empty syntax_highlighter %>
+		<script language="javascript"  src="<% media %>/sh/Scripts/shCore.js"></script>
+		<script language="javascript"  src="<% media %>/sh/Scripts/shBrushCpp.js"></script>
+		<link href="<% media %>/sh/Styles/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+	<% end %>
 	<link href="<% media %>/style-<% if rtl %>rtl<% else %>ltr<%end%>.css" rel="stylesheet" type="text/css" />
 </head>
 <body onload="loginout()">
@@ -98,11 +100,13 @@
 		</div>
 	</div>
 </div>
+	<% if not empty syntax_highlighter %>
 	<script language="javascript" >
 	<!--
 	dp.SyntaxHighlighter.HighlightAll('code');
 	-->
 	</script>
+	<% end %>
 </body>
 </html>
 <% end template %>
