@@ -11,5 +11,7 @@ view.cpp: ${TEMPLATES}
 clean-local:
 	rm -f *.cpp
 
+dist_pkgdata_DATA =style.css style-ltr.css style-rtl.css
+
 EXTRA_DIST=style.css  style-ltr.css  style-rtl.css ${TEMPLATES}
 

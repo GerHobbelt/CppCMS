@@ -56,6 +56,7 @@ void new_user_form::generate_captcha()
 	int sol=num1+num2;
 	captcha.help=(boost::format("%1% + %2%") % num1 % num2).str();
 	w->session.set("captcha",sol);
+	w->session.set_age(5*60); // at most 5 minutes
 }
 
 bool new_user_form::validate()

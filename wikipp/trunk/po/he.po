@@ -6,13 +6,13 @@
 # This file is distributed under the same license as the wikipp package.
 #
 # Artyom Tonkikg <artyomtnk@yahoo.com>, 2008.
-# artik <artyomtnk@yahoo.com>, 2008.
+# artik <artyomtnk@yahoo.com>, 2008, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
-"POT-Creation-Date: 2009-01-15 21:52+0200\n"
-"PO-Revision-Date: 2008-11-01 23:24+0200\n"
+"POT-Creation-Date: 2009-01-15 23:37+0200\n"
+"PO-Revision-Date: 2009-01-15 23:39+0200\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,27 +20,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 
-#: users.cpp:12 users.cpp:35
+#: users.cpp:14 users.cpp:37
 msgid "Username"
 msgstr "שם משתמש"
 
-#: users.cpp:13 users.cpp:36
+#: users.cpp:15 users.cpp:38
 msgid "Password"
 msgstr "ססמה"
 
-#: users.cpp:14 main.tmpl:65
+#: users.cpp:16 main.tmpl:65
 msgid "Login"
 msgstr "התחברות"
 
-#: users.cpp:37
+#: users.cpp:39
 msgid "Confirm"
 msgstr "אמת"
 
-#: users.cpp:38 options.cpp:13
+#: users.cpp:40
+msgid "Solve"
+msgstr "פתור"
+
+#: users.cpp:41 options.cpp:13
 msgid "Submit"
 msgstr "שלח"
 
-#: users.cpp:68
+#: users.cpp:72
 msgid "This user exists"
 msgstr "המשתמש קיים"
 
@@ -291,3 +295,4 @@ msgstr "עמוד הבא"
 #: toc.tmpl:45
 msgid "No more changes"
 msgstr "אין יותר שינויים"
+

@@ -24,6 +24,7 @@ session.cookies_key = "9bc6dbda707cb72ea1205dd5b1c90464"
 
 # Localization
 locale.dir = "./locale"
+# locale.dir = "/usr/local/share/locale"
 locale.lang_list = { "he" "en" }
 locale.lang_default = "en"
 locale.domain_list = { "wikipp" }
@@ -38,6 +39,7 @@ cache.limit=1000
 
 # Templates location
 templates.dirs = { "./templates/.libs/" }
+# templates.dirs = { "/usr/local/lib/wikipp" }
 # templates.ext = ".dll"
 # Uncomment above for cygwin platform
 
