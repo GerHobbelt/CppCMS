@@ -1,0 +1,12 @@
+<% c++ #include "data.h" %>
+<% namespace my_view %>
+<% class message uses data::message %>
+<% template render() %>
+<html>
+  <body>
+    <h1><% message %> World!</h1>
+  </body>
+<html>
+<% end template %>
+<% end class %>
+<% end namespace %>

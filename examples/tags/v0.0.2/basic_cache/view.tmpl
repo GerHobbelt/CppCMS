@@ -1,0 +1,16 @@
+<% c++ #include "data.h" %>
+<% namespace view %>
+<% class message uses data::message %>
+<% template render() %>
+<html>
+    <body>
+    <h1>Factorial Calculator</h1>
+    <h2><% arg %>! = <% fact %></h2>
+    <form method="post" action="" >
+    <% form as_p info %>
+    </form>
+  </body>
+<html>
+<% end template %>
+<% end class %>
+<% end namespace %>
