@@ -1,7 +1,6 @@
 # List of source files which contain translatable strings.
 
 main.cpp
-data.cpp
 wiki.cpp
 index.cpp
 users.cpp
