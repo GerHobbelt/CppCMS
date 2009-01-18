@@ -110,6 +110,7 @@ void users::new_user()
 			wi.page.redirect(locale);
 			session["username"]=c.form.username.get();
 			session.expose("username");
+			session.set_age(); // return to default
 			return;
 		}
 		tr.commit();
