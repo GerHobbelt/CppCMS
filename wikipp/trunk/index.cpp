@@ -30,7 +30,7 @@ string index::changes_url(int p)
 
 void index::changes(string page_no)
 {
-	string key="changes_"+page_no;
+	string key=locale+"_changes_"+page_no;
 	if(cache.fetch_page(key))
 		return;
 	int p;
@@ -71,7 +71,8 @@ void index::changes(string page_no)
 
 void index::display_index()
 {
-	if(cache.fetch_page("toc_index"))
+	string key=locale+"_toc_index";
+	if(cache.fetch_page(key))
 		return;
 	data::toc c;
 	ini(c);
@@ -113,7 +114,7 @@ void index::display_index()
 		}
 	}
 	render("toc",c);
-	cache.store_page("toc_index",30);
+	cache.store_page(key,30);
 	// Cache TOC for at most 30 seconds
 }
 }
