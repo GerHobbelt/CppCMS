@@ -1,0 +1,8 @@
+server.api = "fastcgi"
+server.mod = "prefork"
+server.socket = "/tmp/hello-world.sock"
+
+locale.dir = "./locale"
+locale.lang_list = { "he" "en" }
+locale.domain_list = { "hello" }
+
