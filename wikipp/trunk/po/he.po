@@ -295,4 +295,3 @@ msgstr "עמוד הבא"
 #: toc.tmpl:45
 msgid "No more changes"
 msgstr "אין יותר שינויים"
-

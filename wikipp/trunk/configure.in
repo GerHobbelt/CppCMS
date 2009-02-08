@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
 
-AC_INIT([wikipp], [0.0.1], [artyomtnk@yahoo.com])
+AC_INIT([wikipp], [0.0.2], [artyomtnk@yahoo.com])
 AM_GNU_GETTEXT([external])
 AC_CONFIG_HEADER(config.h)
 
