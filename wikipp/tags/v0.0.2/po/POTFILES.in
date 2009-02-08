@@ -1,0 +1,10 @@
+# List of source files which contain translatable strings.
+
+main.cpp
+wiki.cpp
+index.cpp
+users.cpp
+page.cpp
+master.cpp
+options.cpp
+templates/view.cpp

@@ -1,0 +1,49 @@
+<% c++ #include "../data.h" %>
+<% namespace view %>
+<% class toc uses data::toc extends master %>
+<% template title() %><% gt "Index of Articles" %><% end %>
+<% template column(data::toc::column_t &col) %>
+<% foreach row in col %>
+<td>
+	<dl>
+	<% item %>
+	<% if not empty row.letter %>
+	<dt>&mdash; <b><% row.letter %></b></dt>
+	<% else %>
+	<dd><a href="<% row.url %>"><% row.title %></a></dd>
+	<% end %>
+	<% end item %>
+	</dl>
+</td>
+<% end foreach %>
+<% end template %>
+<% template main() %>
+<table style="width:100%">
+<tr>
+	<% include column(left_col) %>
+	<% include column(middle_col) %>
+	<% include column(right_col) %>
+</tr>
+</table>
+<% end template %>
+<% end class %>
+<% class recent_changes uses data::recent_changes extends master %>
+<% template title() %><% gt "Recent Changes" %><% end %>
+<% template main() %>
+<% foreach c in data %>
+	<ul>
+	<% item %>
+	<li><a href="<% c.url %>"><% c.title %></a> &mdash; 
+		<% gt "version %1%, at %2%, by %3%" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
+			<a href="<% c.diff_url %>"><% gt "Diff to previous" %></a><% end %>
+
+	</li>
+	<% end item %>
+	</ul>
+	<% if not empty next %><p><a href="<% next %>"><% gt "Next Page" %></a></p><% end %>
+<% empty %>
+<h2><% gt "No more changes" %></h2>
+<% end %>
+<% end template %>
+<% end class %>
+<% end namespace %>
