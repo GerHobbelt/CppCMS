@@ -15,6 +15,14 @@ struct toc : public master {
 	column_t left_col,right_col,middle_col;
 };
 
+struct sitemap : public base_content {
+	struct url {
+		string loc;
+		std::tm lastmod;
+	};
+	vector<url> urls;
+};
+
 struct recent_changes : public master {
 	struct element {
 		string title;

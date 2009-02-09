@@ -10,6 +10,7 @@ class wiki;
 class index : public master {
 	void changes(std::string);
 	void display_index();
+	void sitemap();
 public:
 	index(wiki &);
 	std::string index_url();
