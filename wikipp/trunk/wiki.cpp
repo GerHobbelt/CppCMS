@@ -20,7 +20,7 @@ wiki::wiki(worker_thread &w) :
 	script=app.config.sval("wikipp.script");
 
 	url.add("^/(\\w+)(/.*)$",
-		boost::bind(&wiki::run,this,$1,$2));
+		boost::bind(&wiki::run,this,_1,_2));
 		
 	use_template("view");
 

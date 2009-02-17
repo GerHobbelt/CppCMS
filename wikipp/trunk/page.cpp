@@ -52,15 +52,15 @@ page::page(wiki &w):
 	master(w)
 {
 	wi.url_next.add("^/page/(\\w+)/version/(\\d+)$",
-		boost::bind(&page::display_ver,this,$1,$2));
+		boost::bind(&page::display_ver,this,_1,_2));
 	wi.url_next.add("^/page/(\\w+)/?$",
-		boost::bind(&page::display,this,$1));
+		boost::bind(&page::display,this,_1));
 	wi.url_next.add("^/page/(\\w+)/edit(/version/(\\d+))?$",
-		boost::bind(&page::edit,this,$1,$3));
+		boost::bind(&page::edit,this,_1,_3));
 	wi.url_next.add("^/page/(\\w+)/history(/|/(\\d+))?$",
-		boost::bind(&page::history,this,$1,$3));
+		boost::bind(&page::history,this,_1,_3));
 	wi.url_next.add("^/page/(\\w+)/diff/(\\d+)vs(\\d+)/?$",
-		boost::bind(&page::diff,this,$1,$2,$3));
+		boost::bind(&page::diff,this,_1,_2,_3));
 }
 
 string page::diff_url(int v1,int v2,string l,string s)

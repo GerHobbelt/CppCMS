@@ -13,7 +13,7 @@ index::index(wiki &w):
 	wi.url_next.add("^/index/?",
 		boost::bind(&index::display_index,this));
 	wi.url_next.add("^/changes(/?|/(\\d+))$",
-		boost::bind(&index::changes,this,$2));
+		boost::bind(&index::changes,this,_2));
 }
 
 string index::index_url()
