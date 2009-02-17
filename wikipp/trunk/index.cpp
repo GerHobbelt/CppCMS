@@ -14,8 +14,6 @@ index::index(wiki &w):
 		boost::bind(&index::display_index,this));
 	wi.url_next.add("^/changes(/?|/(\\d+))$",
 		boost::bind(&index::changes,this,$2));
-	wi.url_next.add("^/site_map.xml$",
-		boost::bind(&index::sitemap,this));
 }
 
 string index::index_url()
@@ -28,30 +26,6 @@ string index::changes_url(int p)
 	if(p==0)
 		return wi.root()+"/changes/";
 	return wi.root()+(boost::format("/changes/%1%") % p).str();
-}
-
-void index::sitemap()
-{
-	string key=locale+"_sitemap";
-	set_header(new cgicc::HTTPContentHeader("text/xml"));
-	if(cache.fetch_page(key))
-		return;
-	result res;
-	sql<<	"SELECT pages.slug,history.created FROM pages "
-		"JOIN history ON pages.id=history.id "
-		"WHERE lang=?",locale;
-	sql.fetch(res);
-	data::sitemap c;
-	unsigned rows=res.rows();
-	c.urls.resize(rows);
-	row r;
-	for(unsigned i=0;i<rows && res.next(r);i++) {
-		string slug;
-		r>>slug>>c.urls[i].lastmod;
-		c.urls[i].loc=app.config.sval("wikipp.base_url","")+wi.page.page_url(locale,slug);
-	}
-	render("sitemap",c);
-	cache.store_page(key,3600*12);
 }
 
 void index::changes(string page_no)
@@ -94,8 +68,6 @@ void index::changes(string page_no)
 	// Cache changes for at most 30 sec
 	// Generally -- prevent cache drop with frequent updates
 }
-
-
 
 void index::display_index()
 {

@@ -4,7 +4,6 @@ wikipp.script="/wikipp"
 wikipp.media="/templates"
 wikipp.syntax_highlighter="/templates/sh"
 wikipp.disable_registration=0
-wikipp.base_url="http://localhost:8080"
 
 # CppCMS System Settings
 
