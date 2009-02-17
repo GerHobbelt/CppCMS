@@ -88,36 +88,36 @@ void Blog::init()
 			boost::bind(&Blog::main_page,this,"end","all"));
 		fmt.main=root + "/";
 		url.add("^/from/(\\d+)$",
-			boost::bind(&Blog::main_page,this,$1,"all"));
+			boost::bind(&Blog::main_page,this,_1,"all"));
 		fmt.main_from=root + "/from/%1%";
 
 		url.add("^/cat/(\\d+)$",
-			boost::bind(&Blog::main_page,this,"end",$1));
+			boost::bind(&Blog::main_page,this,"end",_1));
 		fmt.cat=root + "/cat/%1%";
 
 		url.add("^/cat/(\\d+)/from/(\\d+)$",
-			boost::bind(&Blog::main_page,this,$2,$1));
+			boost::bind(&Blog::main_page,this,_2,_1));
 		fmt.cat_from=root + "/cat/%1%/from/%2%";
 
 
 		url.add("^/post/(\\d+)$",
-			boost::bind(&Blog::post,this,$1,false));
+			boost::bind(&Blog::post,this,_1,false));
 		fmt.post=root + "/post/%1%";
 
 		url.add("^/trackback/(\\d+)$",
-			boost::bind(&Blog::trackback,this,$1));
+			boost::bind(&Blog::trackback,this,_1));
 		fmt.trackback=root + "/trackback/%1%";
 
 		url.add("^/page/(\\d+)$",
-			boost::bind(&Blog::page,this,$1,false));
+			boost::bind(&Blog::page,this,_1,false));
 		fmt.page=root + "/page/%1%";
 
 		url.add("^/page/preview/(\\d+)$",
-			boost::bind(&Blog::page,this,$1,true));
+			boost::bind(&Blog::page,this,_1,true));
 		fmt.page_preview=root + "/page/preview/%1%";
 
 		url.add("^/post/preview/(\\d+)$",
-			boost::bind(&Blog::post,this,$1,true));
+			boost::bind(&Blog::post,this,_1,true));
 		fmt.preview=root + "/post/preview/%1%";
 
 		url.add("^/admin$",
@@ -129,7 +129,7 @@ void Blog::init()
 		fmt.new_page=root + "/admin/new_page";
 
 		url.add("^/admin/edit_page/(\\d+)$",
-			boost::bind(&Blog::edit_post,this,$1,"page"));
+			boost::bind(&Blog::edit_post,this,_1,"page"));
 		fmt.edit_page=root+"/admin/edit_page/%1%";
 
 		url.add("^/admin/new_post$",
@@ -137,17 +137,17 @@ void Blog::init()
 		fmt.new_post=root + "/admin/new_post";
 
 		url.add("^/admin/edit_post/(\\d+)$",
-			boost::bind(&Blog::edit_post,this,$1,"post"));
+			boost::bind(&Blog::edit_post,this,_1,"post"));
 		fmt.edit_post=root+"/admin/edit_post/%1%";
 
 		url.add("^/admin/edit_comment/(\\d+)$",
-			boost::bind(&Blog::edit_comment,this,$1));
+			boost::bind(&Blog::edit_comment,this,_1));
 		fmt.edit_comment=root+"/admin/edit_comment/%1%";
 
 		// All incoming information
 
 		url.add("^/postback/comment/(\\d+)$",
-			boost::bind(&Blog::add_comment,this,$1));
+			boost::bind(&Blog::add_comment,this,_1));
 		fmt.add_comment=root+"/postback/comment/%1%";
 
 		url.add("^/postback/page/new$",
@@ -155,7 +155,7 @@ void Blog::init()
 		fmt.add_page=root+"/postback/page/new";
 
 		url.add("^/postback/page/(\\d+)$",
-			boost::bind(&Blog::get_post,this,$1,"page"));
+			boost::bind(&Blog::get_post,this,_1,"page"));
 		fmt.update_page=root+"/postback/page/%1%";
 
 		url.add("^/postback/post/new$",
@@ -163,11 +163,11 @@ void Blog::init()
 		fmt.add_post=root+"/postback/post/new";
 
 		url.add("^/postback/post/(\\d+)$",
-			boost::bind(&Blog::get_post,this,$1,"post"));
+			boost::bind(&Blog::get_post,this,_1,"post"));
 		fmt.update_post=root+"/postback/post/%1%";
 
 		url.add("^/postback/update_comment/(\\d+)$",
-			boost::bind(&Blog::update_comment,this,$1));
+			boost::bind(&Blog::update_comment,this,_1));
 		fmt.update_comment=root+"/postback/update_comment/%1%";
 
 		url.add("^/admin/login$",
@@ -192,13 +192,13 @@ void Blog::init()
 		fmt.logout=root+"/admin/logout";
 
 		url.add("^/postback/delete/comment/(\\d+)$",
-			boost::bind(&Blog::del_comment,this,$1));
+			boost::bind(&Blog::del_comment,this,_1));
 		fmt.del_comment=
 			root+"/postback/delete/comment/%1%";
 		url.add("^/rss$",boost::bind(&Blog::feed,this,"all"));
 		fmt.feed=root+"/rss";
 
-		url.add("^/rss/cat/(\\d+)$",boost::bind(&Blog::feed,this,$1));
+		url.add("^/rss/cat/(\\d+)$",boost::bind(&Blog::feed,this,_1));
 		fmt.feed_cats=root+"/rss/cat/%1%";
 
 		url.add("^/rss/comments$",boost::bind(&Blog::feed_comments,this));
