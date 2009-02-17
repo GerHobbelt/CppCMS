@@ -11,7 +11,7 @@ public:
         application(worker) 
     {
 	    url.add("^/(en|he)/?$",
-	    	boost::bind(&hello::say_hello,this,$1));
+	    	boost::bind(&hello::say_hello,this,_1));
 	    use_template("view");
     }
     void say_hello(string lang)

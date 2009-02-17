@@ -1,7 +1,7 @@
 all: clean hello.fcgi locale/he/LC_MESSAGES/hello.mo
 
 hello.fcgi: hello.cpp view.cpp data.h
-	g++ -Wall hello.cpp view.cpp -o hello.fcgi -lcppcms
+	$(CXX) -Wall hello.cpp view.cpp -o hello.fcgi -lcppcms
 
 view.cpp: view.tmpl data.h
 	cppcms_tmpl_cc -d hello view.tmpl -o view.cpp

@@ -46,11 +46,11 @@ namespace apps {
 thread::thread(mb &b) : application(b.worker) , board(b) 
 {
 	url.add("^/flat/(\\d+)/?$",
-		boost::bind(&thread::flat,this,$1));
+		boost::bind(&thread::flat,this,_1));
 	url.add("^/tree/(\\d+)/?$",
-		boost::bind(&thread::tree,this,$1));
+		boost::bind(&thread::tree,this,_1));
 	url.add("^/comment/(\\d+)?$",
-		boost::bind(&thread::reply,this,$1));
+		boost::bind(&thread::reply,this,_1));
 }
 
 string thread::flat_url(int id)

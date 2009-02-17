@@ -14,6 +14,7 @@ public:
 
 void my_hello_world::main()
 {
+    flush_headers();
     cout<<"<html>\n"
           "<body>\n"
           "  <h1>Hello World</h1>\n"

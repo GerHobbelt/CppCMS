@@ -30,7 +30,7 @@ forums::forums(mb &b) :
 	application(b.worker),
 	board(b)
 {
-	url.add("^(/(\\w+)?)?$",boost::bind(&forums::display_forums,this,$2));
+	url.add("^(/(\\w+)?)?$",boost::bind(&forums::display_forums,this,_2));
 }
 
 string forums::forums_url(int offset)
