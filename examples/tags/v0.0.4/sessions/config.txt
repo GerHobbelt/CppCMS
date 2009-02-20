@@ -1,0 +1,8 @@
+server.api = "fastcgi"
+server.mod = "prefork"
+server.socket = "/tmp/hello-world.sock"
+
+session.location = "client"
+session.cookies_key = "10b74ef35431d95c420dc67b52b3f166"
+
+
