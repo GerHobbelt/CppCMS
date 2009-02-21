@@ -191,7 +191,7 @@ struct admin_editcats : public admin_base {
 	bool constraint_error;
 	string submit_url;
 	vector<category> cats;
-
+	admin_editcats() : constraint_error(false) {}
 };
 
 struct link {
@@ -251,6 +251,7 @@ struct admin_sendtrackback : public admin_base {
 	string error_message;
 	bool success;
 	string goback;
+	admin_sendtrackback() : error_no_url(false) , success(false) {}
 };
 
 struct admin_setupblog : public admin_base {

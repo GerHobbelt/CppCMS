@@ -11,13 +11,13 @@ noinst_HEADERS = blog.h data.h views.h error.h
 sysconf_DATA = config.txt
 
 build_static:
-	g++ -g -Wall -O2 md5.c trackback.cpp main.cpp views.cpp blog.cpp \
+	g++ -g -Wall -O2 *.o\
 		cxxmarkdown/libmarkdowncxx.a \
 		-Wl,--whole-archive \
 		templates/.libs/libadmin_view.a templates/.libs/libcontendend.a templates/.libs/liborangesky.a \
 		-Wl,--no-whole-archive \
 		/usr/lib/libdbixx.a /usr/lib/libcppcms.a /usr/lib/libcppcmstranstext.a \
-		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lcurl -lmm -o cppblog
+		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lcurl -lmm -lsqlite3 -lgcrypt -o cppblog
 
 all: locale/he/LC_MESSAGES/cppblog.mo
 
