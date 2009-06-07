@@ -17,6 +17,8 @@
 #include <cppcms/base_view.h>
 #include <string>
 #include <ctime>
+#include <list>
+#include <vector>
 
 using namespace cppcms;
 

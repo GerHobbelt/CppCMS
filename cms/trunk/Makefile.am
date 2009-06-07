@@ -17,7 +17,7 @@ build_static:
 		templates/.libs/libadmin_view.a templates/.libs/libcontendend.a templates/.libs/liborangesky.a \
 		-Wl,--no-whole-archive \
 		/usr/lib/libdbixx.a /usr/lib/libcppcms.a /usr/lib/libcppcmstranstext.a \
-		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lcurl -lmm -lsqlite3 -lgcrypt -o cppblog
+		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -lboost_system -ldbi -lcurl -lmm -lsqlite3 -lgcrypt -lrt -o cppblog
 
 all: locale/he/LC_MESSAGES/cppblog.mo
 

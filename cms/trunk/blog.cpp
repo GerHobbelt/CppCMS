@@ -894,8 +894,8 @@ void Blog::add_comment(string &postid)
 	cache.rise("comments");
 	tr.commit();
 
-	string redirect=str(format(fmt.post) % post_id) +
-		str(format("#comment_%d") % comment_id);
+	string redirect=str(boost::format(fmt.post) % post_id) +
+		str(boost::format("#comment_%d") % comment_id);
 	set_header(new HTTPRedirectHeader(redirect));
 }
 void Blog::count_comments(int id)
@@ -1323,14 +1323,14 @@ void Blog::get_post(string sid,string ptype)
 		set_header(new HTTPRedirectHeader(fmt.admin));
 	}
 	else if(type==PREVIEW || type==UNPUBLISH) {
-		edit_post(str(format("%1%") % id),ptype);
+		edit_post(str(boost::format("%1%") % id),ptype);
 	}
 	else /*(type==PUBLISH )*/{
 		string redirect;
 		if(ptype=="post")
-			redirect=str(format(fmt.post)%id);
+			redirect=str(boost::format(fmt.post)%id);
 		else
-			redirect=str(format(fmt.page)%id);
+			redirect=str(boost::format(fmt.page)%id);
 
 		set_header(new HTTPRedirectHeader(redirect));
 	}

@@ -17,7 +17,6 @@
 #include "cxxmarkdown/markdowncxx.h"
 #include <set>
 
-using boost::format;
 using boost::str;
 
 using namespace dbixx;
@@ -26,9 +25,9 @@ using namespace dbixx;
 void View_Post::ini_share(data::post_data &c)
 {
 	if(blog->userid!=-1){
-		c.edit_url=str(format(blog->fmt.edit_post) % c.id);
+		c.edit_url=str(boost::format(blog->fmt.edit_post) % c.id);
 	}
-	c.permlink=str(format(blog->fmt.post) % c.id);
+	c.permlink=str(boost::format(blog->fmt.post) % c.id);
 }
 
 void View_Post::ini_full(data::post &c)
@@ -45,14 +44,14 @@ void View_Post::ini_full(data::post &c)
 	}
 
 	// Simple ANTI SPAM protection
-	string post_comment=str(format(blog->fmt.add_comment) % c.id);
+	string post_comment=str(boost::format(blog->fmt.add_comment) % c.id);
 	int n=post_comment.size()/2;
 	string post_comment_url_2=post_comment.substr(n);
 	string post_comment_url_1=post_comment.substr(0,n);
 	c.post_comment_url_1=post_comment_url_1;
 	c.post_comment_url_2=post_comment_url_2;
 
-	string trackback=str(format(blog->fmt.trackback) % c.id);
+	string trackback=str(boost::format(blog->fmt.trackback) % c.id);
 	n=trackback.size()/2;
 	string tb_2=trackback.substr(n);
 	string tb_1=trackback.substr(0,n);
@@ -78,8 +77,8 @@ void View_Post::ini_full(data::post &c)
 		cur	>> com.id >>com.username >> com.url
 			>> com.date >> com.content ;
 		if(blog->userid!=-1){
-			com.delete_url=str(format(blog->fmt.del_comment) % com.id);
-			com.edit_url=str(format(blog->fmt.edit_comment) % com.id);
+			com.delete_url=str(boost::format(blog->fmt.del_comment) % com.id);
+			com.edit_url=str(boost::format(blog->fmt.edit_comment) % com.id);
 		}
 	}
 
@@ -92,7 +91,7 @@ void View_Post::ini_full(data::post &c)
 		data::category cat;
 		int id;
 		cur>>id>>cat.name;
-		cat.url=str(format(blog->fmt.cat) % id);
+		cat.url=str(boost::format(blog->fmt.cat) % id);
 		c.post_cats.push_back(cat);
 	}
 }
@@ -352,9 +351,9 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id,data::main_page &c)
 			int id;
 			r>>id;
 			if(cat_id==-1)
-				c.next_page_link=str(format(blog->fmt.main_from) % id);
+				c.next_page_link=str(boost::format(blog->fmt.main_from) % id);
 			else
-				c.next_page_link=str(format(blog->fmt.cat_from) % cat_id % id);
+				c.next_page_link=str(boost::format(blog->fmt.cat_from) % cat_id % id);
 			break;
 		}
 		
@@ -423,7 +422,7 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id,data::main_page &c)
 				list<data::category> &temp=(*(ptr->second));
 				temp.push_back(data::category());
 				temp.back().name=name;
-				temp.back().url=str(format(blog->fmt.cat) % cid);
+				temp.back().url=str(boost::format(blog->fmt.cat) % cid);
 			}
 		}
 	}
@@ -437,7 +436,7 @@ void View_Main_Page::ini_main(int id,bool feed,int cat_id,data::main_page &c)
 			r>>cat_name;
 		}
 		c.category_name=cat_name;
-		c.category_rss=str(format(blog->fmt.feed_cats) % cat_id);
+		c.category_rss=str(boost::format(blog->fmt.feed_cats) % cat_id);
 		c.subtitle=cat_name;
 	}
 	
@@ -563,7 +562,7 @@ void View_Admin::ini_cedit(int id,data::admin_editcomment &c)
 {
 	ini_share(c);
 
-	c.edit_comment_url=str(format(blog->fmt.update_comment) % id);
+	c.edit_comment_url=str(boost::format(blog->fmt.update_comment) % id);
 	c.id=id;
 	string author,url,content,email;
 	blog->sql<<
@@ -585,8 +584,8 @@ void View_Admin::ini_editpage(int id,data::admin_editpage &c)
 
 	if(id!=-1) {
 		c.post_id=id;
-		c.submit_post_url=str(format( blog->fmt.update_page) % id);
-		c.preview_url=str(format(blog->fmt.page_preview) % id);
+		c.submit_post_url=str(boost::format( blog->fmt.update_page) % id);
+		c.preview_url=str(boost::format(blog->fmt.page_preview) % id);
 	}
 	else {
 		c.submit_post_url=blog->fmt.add_page;
@@ -640,8 +639,8 @@ void View_Admin::ini_editpost(int id,data::admin_editpost &c)
 	}
 
 	if(id!=-1) {
-		c.submit_post_url=str(format( blog->fmt.update_post) % id);
-		c.preview_url=str(format(blog->fmt.preview) % id);
+		c.submit_post_url=str(boost::format( blog->fmt.update_post) % id);
+		c.preview_url=str(boost::format(blog->fmt.preview) % id);
 		c.send_trackback_url=blog->fmt.send_trackback;
 	}
 	else {
@@ -682,7 +681,7 @@ void View_Admin::ini_main(data::admin_main &c)
 		int id;
 		string intitle;
 		r>>id>>c.posts[i].title;
-		string edit_url=str(format(blog->fmt.edit_post) % id);
+		string edit_url=str(boost::format(blog->fmt.edit_post) % id);
 		c.posts[i].edit_url=edit_url;
 	}
 
@@ -696,7 +695,7 @@ void View_Admin::ini_main(data::admin_main &c)
 	for(i=0;rs.next(r);i++) {
 		int id;
 		r>>id>>c.pages[i].title>>c.pages[i].published;
-		string edit_url=str(format(blog->fmt.edit_page) % id);
+		string edit_url=str(boost::format(blog->fmt.edit_page) % id);
 		c.pages[i].edit_url=edit_url;
 	}
 	blog->sql<<
@@ -712,8 +711,8 @@ void View_Admin::ini_main(data::admin_main &c)
 		string author;
 		r>>c_id>>id>>c.comments[i].username;
 
-		c.comments[i].post_permlink=str(format(blog->fmt.post) % id);
-		c.comments[i].edit_url=str(format(blog->fmt.edit_comment) % c_id );
+		c.comments[i].post_permlink=str(boost::format(blog->fmt.post) % id);
+		c.comments[i].edit_url=str(boost::format(blog->fmt.edit_comment) % c_id );
 		c.comments[i].id=c_id;
 	}
 }
