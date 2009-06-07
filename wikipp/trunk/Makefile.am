@@ -18,7 +18,7 @@ build_static:
 	g++ -g -Wall -O2 *.o templates/*.o \
 		cxxmarkdown/libmarkdowncxx.a \
 		/usr/lib/libdbixx.a /usr/lib/libcppcms.a /usr/lib/libcppcmstranstext.a \
-		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lmm -lgcrypt -lsqlite3 -o wikipp
+		-lfcgi++ -lcgicc -lboost_system -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lmm -lgcrypt -lsqlite3 -lrt -o wikipp
 
 
 ACLOCAL_AMFLAGS = -I m4
