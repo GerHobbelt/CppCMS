@@ -1,0 +1,125 @@
+#ifndef BOOST_LOCALE_CONVERTER_HPP_INCLUDED
+#define BOOST_LOCALE_CONVERTER_HPP_INCLUDED
+
+#include <locale>
+
+namespace boost {
+    namespace locale {
+
+        class converter_base {
+        public:
+
+            typedef enum {
+                normalization,
+                upper_case,
+                lower_case,
+                case_folding,
+                title_case
+            } conversion_type;
+
+            typedef enum {
+                norm_default = 0,
+                norm_nfd,
+                norm_nfc,
+                norm_nfkd,
+                norm_nfkc
+            } normalization_type;
+
+        };
+
+        template<typename CharType>
+        class converter : 
+            public std::locale::facet,
+            public converter_base
+        {
+        public:
+            
+            typedef std::basic_string<CharType> string_type;
+            typedef CharType char_type;
+
+            static std::locale::id id;
+
+       
+            string_type to_upper(string_type const &str) const
+            {
+                return convert(upper_case,str);
+            }
+            
+            string_type to_lower(string_type const &str) const
+            {
+                return convert(lower_case,str);
+            }
+
+            string_type to_title(string_type const &str) const
+            {
+                return convert(title_case,str);
+            }
+
+            string_type fold_case(string_type const &str) const
+            {
+                return convert(case_folding,str);
+            }
+
+            string_type normalize(string_type const &str,normalization_type norm=norm_default) const
+            {
+                return convet(normalization,str,norm);
+            }
+
+            string_type to_upper(char const *begin, char const *end) const
+            {
+                return convert(upper_case,begin,end);
+            }
+            
+            string_type to_lower(char const *begin, char const *end) const
+            {
+                return convert(lower_case,begin,end);
+            }
+
+            string_type to_title(char const *begin, char const *end) const
+            {
+                return convert(title_case,begin,end);
+            }
+
+            string_type fold_case(char const *begin, char const *end) const
+            {
+                return convert(case_folding,begin,end);
+            }
+
+            string_type normalize(char const *begin, char const *end,normalization_type norm=norm_default) const
+            {
+                return convert(normalization,begin,end,norm);
+            }
+            
+            
+            string_type convert(conversion_type how,std::string const &str,int flags = 0) const
+            {
+                return do_convert(how,str.data(),str.data()+str.size(),flags);
+            }
+            
+            string_type convert(conversion_type how,char_type const *begin,char_type const *end,int flags = 0) const
+            {
+                return do_convert(how,begin,end,flags);
+            }
+
+            converter(size_t refs=0) : std::locale::facet(refs)
+            {
+            }
+            
+        protected:
+
+            virtual ~converter()
+            {
+            }
+
+            virtual string_type do_convert(conversion_type how,char_type const *begin,char_type const *end,int flags) const = 0;
+
+        };
+    }
+
+}
+
+
+#endif
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+
