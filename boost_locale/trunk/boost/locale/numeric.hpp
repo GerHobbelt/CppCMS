@@ -1,5 +1,5 @@
-#ifndef BOOST_LOCALE_HPP_INCLUDED
-#define BOOST_LOCALE_HPP_INCLUDED
+#ifndef BOOST_LOCALE_NUMERIC_HPP_INCLUDED
+#define BOOST_LOCALE_NUMERIC_HPP_INCLUDED
 
 #include <locale>
 #include <string>
