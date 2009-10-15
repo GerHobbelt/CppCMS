@@ -278,7 +278,7 @@ msgstr "ויקי :: עריכת הגדרות"
 
 #: toc.tmpl:4
 msgid "Index of Articles"
-msgstr "אינסקס מאמרים"
+msgstr "אינדקס מאמרים"
 
 #: toc.tmpl:31
 msgid "Recent Changes"
