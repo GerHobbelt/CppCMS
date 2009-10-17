@@ -110,7 +110,7 @@ namespace boost {
             }
 
         }; /// num_format
-        
+       /* 
         template<typname CharType>
         class num_parse : public std::num_get<CharType>,
         {
@@ -153,7 +153,7 @@ namespace boost {
         };
 
         template<sizeoe>
-        stru
+        stru*/
 
 
     }
