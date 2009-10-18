@@ -1,3 +1,5 @@
+#include <unicode/numfmt.h>
+
 namespace boost {
 namespace locale {
     namespace impl {
@@ -153,10 +155,32 @@ namespace locale {
         {
             std::auto_ptr<formatter<CharType> > fmt;
             ios_info &info=ios_prop<ios_info>::get(ios);
-            if((into.flags() &  flags::display_flags_mask) == posix)
+            uint64_t disp = into.flags() &  flags::display_flags_mask;
+            icu::Locale const &locale = std::use_facet<icu_locale>(ios.getloc());
+            if(disp == posix)
                 return fmt;
-            switch(into.flags() & flags::display_flags_mask) {
+            switch(disp) {
             case number:
+                {
+                    std::ios_base::fmtflags how = (ios.flags() & std::ios_base::floatfield) == std::ios_base::scientific;
+                    UErrorCode err=U_ZERO_ERROR;
+                    if(how == std::ios_base::scientific)
+                        fmt.reset(icu::NumberFormat::createScientificInstance(locale,err));
+                    else
+                        fmt.reset(icu::NumberFormat::createInstance(locale,err));
+                    if(U_FAILURE(err)) {
+                        fmt.reset();
+                        return fmt;
+                    }
+                    if(how == std::ios_base::scientific || how == std::ios_base::fixed ) {
+                        fmt->setMaximumFractionDigits(ios.precision());
+                        fmt->setMinimumFractionDigits(ios.precision());
+                    }
+                    return fmt;
+                }
+            case currency:
+                {
+                }
                 
             }
         }
