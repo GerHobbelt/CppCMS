@@ -6,7 +6,6 @@ namespace boost {
     namespace locale {
         namespace impl {
         
-            template<typename Property>
             class ios_prop {
             public:
                 static void set(Property const &prop,std::ios_base &ios)
@@ -51,6 +50,7 @@ namespace boost {
                 }
             private:
                 static const void *deleted=static_cast<void *>(-1);
+                
                 static void callback(std::ios_base::event ev,std::ios_base &ios,int id)
                 {
                     switch(ev) {
@@ -64,6 +64,12 @@ namespace boost {
                             break;
                         ios.pword(id)=new Property(*reinterpret_cast<Property *>(ios.pword(id)));
                         break;
+                    case std::ios_base::imbue_event:
+                        if(ios.pword(id)==deleted || ios.pword(id)==0)
+                            break;
+                        reinterpret_cast<Property *>(ios.pword(id))->on_imbue(); 
+                        break;
+                        
                     default: ;
                     }
                 }

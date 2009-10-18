@@ -7,6 +7,13 @@
 namespace boost {
     namespace locale {
 
+        class base_formatter {
+        public:
+            virtual ~base_formatter()
+            {
+            }
+        };
+
         template<typename CharType>
         class formatter {
         public:
@@ -25,26 +32,18 @@ namespace boost {
             virtual bool parse(string_type &str,int32_t &value) const = 0;
             virtual bool parse(string_type &str,uint32_t &value) const = 0;
 
+            static std::auto_ptr<formatter> create(std::ios_base &ios);
+
             virtual ~formatter()
             {
             }
         };
+        
+        template<>
+        static std::auto_ptr<formatter<char> > create(std::ios_base &ios);
 
-        template<typename CharType>
-        class value_format : public std::locale::facet {
-        public:
-            static std::locale::id id;
-            virtual formatter const &get_formatter(std::ios_base &ios) const = 0;  
-            virtual ~value_format()
-            {
-            }
-        };
-
-        template<typename CharType>
-        std::locale::id value_format::id;
-
-
-}
+    } // namespace locale
+} // namespace boost
 
 
 

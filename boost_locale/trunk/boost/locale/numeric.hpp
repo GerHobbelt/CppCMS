@@ -109,7 +109,9 @@ namespace boost {
 
             }
 
-        }; /// num_format
+        };  /// num_format
+       
+       
        /* 
         template<typname CharType>
         class num_parse : public std::num_get<CharType>,

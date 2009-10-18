@@ -14,9 +14,10 @@ namespace boost {
                 date                = 4
                 time                = 5,
                 datetime            = 6,
-                spellout            = 7,
-                ordinal             = 8,
-                duration            = 9,
+                strftime            = 7,
+                spellout            = 8,
+                ordinal             = 9,
+                duration            = 10,
 
                 display_flags_mask  = 31,
 
@@ -46,7 +47,7 @@ namespace boost {
 
             typedef enum {
                 datetime_pattern,
-                separator_pattern,
+                separator_pattern
             } pattern_type;
 
             
@@ -115,6 +116,7 @@ namespace boost {
             BOOST_LOCALE_AS_MANIPULATOR(date,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(time,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(datetime,display_flags_mask)
+            BOOST_LOCALE_AS_MANIPULATOR(strftime,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(spellout,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(ordinal,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(duration,display_flags_mask)
@@ -138,38 +140,39 @@ namespace boost {
             
             namespace details {
                 template<typename CharType>
-                struct pattern_formatter {
-                    flags::pattern_type type;
-                    std::basic_string<CharType> format;
-                };
+                struct add_ftime {
 
+                    std::basic_string<CharType> ftime;
+
+                    template<typename CharType>
+                    void apply(std::base_ios<CharType> &ios) const
+                    {
+                        ext_pattern(ios,flags::datetime_pattern,ftime);
+                        as::strftime(ios);
+                    }
+
+                }
                 template<typename CharType>
-                std::basic_ostream<CharType> &operator<<(std::basic_ostream &out,pattern_formatter<CharType> const &fmt)
+                std::basic_ostream<CharType> &operator<<(std::basic_ostream &out,add_ftime<CharType> const &fmt)
                 {
-                    ext_pattern(out,fmt.type,fmt.format);
+                    fmt.apply(out);
                     return out;
                 }
                 
                 template<typename CharType>
-                std::basic_istream<CharType> &operator>>(std::basic_istream &in,pattern_formatter<CharType> const &fmt)
+                std::basic_istream<CharType> &operator>>(std::basic_istream &in,add_ftime<CharType> const &fmt)
                 {
-                    ext_pattern(in,fmt.type,fmt.format);
+                    fmt.apply(in);
                     return in;
                 }
 
-                template<typename CharType>
-                struct parsing_formatter {
-                    std::basic_string<CharType> seprarators;
-                    flags::pattern_type type;
-                };
             }
 
             template<typename CharType>
-            details::pattern_formatter<CharType> ftime(std::basic_string<CharType> const &format)
+            details::add_ftime<CharType> ftime(std::basic_string<CharType> const &format)
             {
-                details::pattern_formatter<CharType> fmt;
-                fmt.type=datetime_pattern;
-                fmt.format=format;
+                details::add_ftime<CharType> fmt;
+                fmt.ftime=format;
                 return fmt;
             }
 
@@ -221,6 +224,8 @@ namespace boost {
 
 
         } // as manipulators
+        
+        #undef BOOST_LOCALE_AS_MANIPULATOR
 
 
 
