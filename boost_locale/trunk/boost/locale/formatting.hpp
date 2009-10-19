@@ -17,7 +17,6 @@ namespace boost {
                 strftime            = 7,
                 spellout            = 8,
                 ordinal             = 9,
-                duration            = 10,
 
                 display_flags_mask  = 31,
 
@@ -47,7 +46,8 @@ namespace boost {
 
             typedef enum {
                 datetime_pattern,
-                separator_pattern
+                separator_pattern,
+                time_zone_id,
             } pattern_type;
 
             
