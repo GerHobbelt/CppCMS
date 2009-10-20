@@ -2,6 +2,7 @@
 #define BOOST_LOCALE_FORMATTING_HPP_INCLUDED
 
 #include <boost/config.hpp>
+#include <boost/cstdint.hpp>
 #include <ostream>
 #include <istream>
 #include <string>

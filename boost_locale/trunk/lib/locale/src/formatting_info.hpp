@@ -16,7 +16,7 @@ namespace boost {
 
             struct string_set {
                 template<typename Char> 
-                void string_set::set(std::basic_string<Char> const &s);
+                void set(std::basic_string<Char> const &s);
 
                 template<typename Char> 
                 std::basic_string<Char> get() const;

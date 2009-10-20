@@ -3,6 +3,7 @@
 #include <locale>
 #include <string>
 #include <map>
+#include <memory>
 
 namespace boost {
     namespace locale {

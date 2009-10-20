@@ -1,5 +1,6 @@
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/formatter.hpp>
+#include <typeinfo>
 #include "formatting_info.hpp"
 #include "ios_prop.hpp"
 
@@ -77,44 +78,44 @@ namespace boost {
         #ifndef BOOST_NO_STD_WSTRING
         
         template<>
-        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::wstring const &pattern);
+        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::wstring const &pattern)
         {
             do_ext_pattern(ios,pattern_id,pattern);
         }
 
         template<>
-        std::wstring ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id);
+        std::wstring ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
         {
-            return do_ext_pattern<wchar_t>(ios,pattern_id)
+            return do_ext_pattern<wchar_t>(ios,pattern_id);
         }
 
         #endif // BOOST_NO_STD_WSTRING
 
         #ifdef BOOST_HAS_CHAR16_T
         template<>
-        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u16string const &pattern);
+        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u16string const &pattern)
         {
             do_ext_pattern(ios,pattern_id,pattern);
         }
 
         template<>
-        std::u16string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id);
+        std::u16string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
         {
-            return do_ext_pattern<char16_t>(ios,pattern_id)
+            return do_ext_pattern<char16_t>(ios,pattern_id);
         }
         #endif // char16_t, u16string
 
         #ifdef BOOST_HAS_CHAR32_T
         template<>
-        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u32string const &pattern);
+        void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u32string const &pattern)
         {
             do_ext_pattern(ios,pattern_id,pattern);
         }
 
         template<>
-        std::u32string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id);
+        std::u32string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
         {
-            return do_ext_pattern<char32_t>(ios,pattern_id)
+            return do_ext_pattern<char32_t>(ios,pattern_id);
         }
         #endif // char32_t, u32string
     } // locale

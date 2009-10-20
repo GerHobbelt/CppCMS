@@ -242,8 +242,7 @@ namespace locale {
                     err=U_ZERO_ERROR;
                     icu::DecimalFormat *df;
 
-                    if(curr == currency_default || curr == currency_national){
-
+                    if(curr == currency_iso){
                         if((df=dynamic_cast<icu::DecimalFormat *>(nf.get()))!=0) {
                             icu::UnicodeString tmp =
                                 df->getDecimalFormatSymbols()->getSymbol(icu::DecimalFormatSymbols::kIntlCurrencySymbol);

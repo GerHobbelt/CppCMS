@@ -2,6 +2,7 @@
 #define BOOST_LOCALE_FORMATTER_HPP_INCLUDED
 
 #include <string>
+#include <memory>
 #include <boost/cstdint.hpp>
 
 namespace boost {

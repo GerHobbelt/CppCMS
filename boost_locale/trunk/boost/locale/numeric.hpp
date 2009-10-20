@@ -3,44 +3,73 @@
 
 #include <locale>
 #include <string>
+#include <ios>
+#include <limits>
+#include <boost/locale/formatter.hpp>
+#include <algorithm>
 
 namespace boost {
     namespace locale {
 
 
         class num_base {
-        proctected:
-            
-            template<ValueType>
-            bool use_parent(std::ios_base &ios) const
+        protected:
+
+            template<typename ValueType>
+            static bool use_parent(std::ios_base &ios)
             {
                 uint64_t flg = ext_flags(ios) & flags::display_flags_mask;
                 if(flg == flags::posix)
                     return true;
 
-                switch(ValueType) {
-                case float:
-                case double:
-                case long double:
+                if(!std::numeric_limits<ValueType>::is_integer)
                     return false;
-                default:
-                    if(flg == flags::number && (ios.flags() & std::ios_base::basefield) != std::ios_base::dec)
-                        return true;
-                    }
+                if(flg == flags::number && (ios.flags() & std::ios_base::basefield) != std::ios_base::dec) {
+                    return true;
                 }
                 return false;
             }
         };
 
+        namespace details {
+            template<typename V,int n=std::numeric_limits<V>::digits,bool integer=std::numeric_limits<V>::is_integer>
+            struct cast_traits;
 
-        template<typname CharType>
+            template<typename v>
+            struct cast_traits<v,31,true> {
+                typedef int32_t cast_type;
+            };
+            template<typename v>
+            struct cast_traits<v,32,true> {
+                typedef uint32_t cast_type;
+            };
+            template<typename v>
+            struct cast_traits<v,63,true> {
+                typedef int64_t cast_type;
+            };
+            template<typename v>
+            struct cast_traits<v,64,true> {
+                typedef uint64_t cast_type;
+            };
+            template<typename V,int u>
+            struct cast_traits<V,u,false> {
+                typedef double cast_type;
+            };
+        }
+
+        template<typename CharType>
         class num_format : public std::num_put<CharType>, protected num_base
         {
-        protected: 
-            typedef typename std::num_put::iter_type iter_type;
+        public:
+            typedef typename std::num_put<CharType>::iter_type iter_type;
             typedef std::basic_string<CharType> string_type;
             typedef CharType char_type;
             typedef formatter<CharType> formatter_type;
+
+            num_format(size_t refs = 0) : std::num_put<CharType>(refs)
+            {
+            }
+        protected: 
             
 
             iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long val) const
@@ -75,7 +104,8 @@ namespace boost {
        private:
 
 
-            template<ValueType>
+
+            template<typename ValueType>
             iter_type do_real_put (iter_type out, std::ios_base &ios, char_type fill, ValueType val) const
             {
                 formatter_type const *formatter = 0;
@@ -85,24 +115,29 @@ namespace boost {
                 }
                 
                 size_t code_points;
-                string_type const &str = formatter->format(val,points);
-                size_t on_left=0,on_right = 0;
+                typedef typename details::cast_traits<ValueType>::cast_type cast_type;
+                string_type const &str = formatter->format(static_cast<cast_type>(val),code_points);
+                std::streamsize on_left=0,on_right = 0,points = code_points;
                 if(points < ios.width()) {
-                    size_t n = ios.width() - points;
+                    std::streamsize n = ios.width() - points;
                     
-                    std::ios_base::fmtflags flags = ios.flags() & std::ios_base::adjustment;
+                    std::ios_base::fmtflags flags = ios.flags() & std::ios_base::adjustfield;
                     
-                    if(flags == internal)
+                    if(flags == std::ios_base::internal)
                         on_left = n/2;
-                    else if(flags == left)
+                    else if(flags == std::ios_base::left)
                         on_left = n;
                     on_right = n - on_left;
                 }
-                while(on_left > 0)
+                while(on_left > 0) {
                     *out++ = fill;
+                    on_left--;
+                }
                 std::copy(str.begin(),str.end(),out);
-                while(on_right > 0)
+                while(on_right > 0) {
                     *out++ = fill;
+                    on_right--;
+                }
                 return out;
 
             }
