@@ -3,6 +3,7 @@
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+#include <boost/noncopyable.hpp>
 
 #include <string>
 #include "icu_util.hpp"

@@ -5,7 +5,8 @@
 namespace boost {
     namespace locale {
         namespace impl {
-        
+       
+            template<typename Property> 
             class ios_prop {
             public:
                 static void set(Property const &prop,std::ios_base &ios)
@@ -15,7 +16,7 @@ namespace boost {
                         ios.pword(id) = new Property(prop);
                         ios.register_callback(callback,id);
                     }
-                    else if(ios.pword(id)==deleted) {
+                    else if(ios.pword(id)==invalid) {
                         ios.pword(id) = new Property(prop);
                     }
                     else {
@@ -34,7 +35,7 @@ namespace boost {
                 static bool has(std::ios_base &ios)
                 {
                     int id=get_id();
-                    if(ios.pword(id)==0 || ios.pword(id)==deleted)
+                    if(ios.pword(id)==0 || ios.pword(id)==invalid)
                         return false;
                     return true;
                 }
@@ -48,8 +49,12 @@ namespace boost {
                         ios.pword(id)=static_cast<void *>(-1);
                     }
                 }
+                static void global_init()
+                {
+                    get_id();
+                }
             private:
-                static const void *deleted=static_cast<void *>(-1);
+                static void * const invalid;
                 
                 static void callback(std::ios_base::event ev,std::ios_base &ios,int id)
                 {
@@ -60,12 +65,12 @@ namespace boost {
                         delete reinterpret_cast<Property *>(ios.pword(id));
                         break;
                     case std::ios_base::copyfmt_event:
-                        if(ios.pword(id)==deleted || ios.pword(id)==0)
+                        if(ios.pword(id)==invalid || ios.pword(id)==0)
                             break;
                         ios.pword(id)=new Property(*reinterpret_cast<Property *>(ios.pword(id)));
                         break;
                     case std::ios_base::imbue_event:
-                        if(ios.pword(id)==deleted || ios.pword(id)==0)
+                        if(ios.pword(id)==invalid || ios.pword(id)==0)
                             break;
                         reinterpret_cast<Property *>(ios.pword(id))->on_imbue(); 
                         break;
@@ -75,17 +80,13 @@ namespace boost {
                 }
                 static int get_id()
                 {
-                    static const int id;
-                    static boost::once_flag f=BOOST_ONCE_INIT;
-                    boost::call_once(f,boost::bind(call_get_id,&id));
+                    static const int id = std::ios_base::xalloc();
                     return id;
-                }
-                static void call_get_id(int *ptr)
-                {
-                    *ptr = std::ios_base::xalloc();
                 }
             };
 
+            template<typename Property>
+            void * const ios_prop<Property>::invalid = (void *)(-1);
 
 
 

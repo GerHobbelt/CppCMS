@@ -1,6 +1,7 @@
 #ifndef BOOST_LOCALE_CONVERTER_HPP_INCLUDED
 #define BOOST_LOCALE_CONVERTER_HPP_INCLUDED
 
+#include <boost/config.hpp>
 #include <locale>
 
 namespace boost {
@@ -26,6 +27,8 @@ namespace boost {
             } normalization_type;
 
         };
+
+        class info;
 
         template<typename CharType>
         class converter : 
@@ -101,11 +104,14 @@ namespace boost {
                 return do_convert(how,begin,end,flags);
             }
 
+            
+            static converter *create(info const &inf);
+            
+        protected:
+            
             converter(size_t refs=0) : std::locale::facet(refs)
             {
             }
-            
-        protected:
 
             virtual ~converter()
             {
@@ -114,6 +120,24 @@ namespace boost {
             virtual string_type do_convert(conversion_type how,char_type const *begin,char_type const *end,int flags) const = 0;
 
         };
+
+        template<>
+        converter<char> *converter<char>::create(info const &inf);
+        #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        converter<wchar_t> *converter<wchar_t>::create(info const &inf);
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR16_T
+        template<>
+        converter<char16_t> *converter<char16_t>::create(info const &inf);
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR32_T
+        template<>
+        converter<char32_t> *converter<char32_t>::create(info const &inf);
+        #endif
+
     }
 
 }

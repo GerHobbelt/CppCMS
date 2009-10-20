@@ -1,7 +1,14 @@
 #ifndef BOOST_SRC_LOCALE_FORMATTING_INFO_HPP_INCLUDED
 #define BOOST_SRC_LOCALE_FORMATTING_INFO_HPP_INCLUDED
 
-#include <boost/variant.hpp>
+
+#include <boost/config.hpp>
+#include <boost/locale/formatter.hpp>
+#include <boost/cstdint.hpp>
+#include <string>
+#include <ios>
+
+#include "ios_prop.hpp"
 
 namespace boost {
     namespace locale {
@@ -9,7 +16,7 @@ namespace boost {
 
             struct string_set {
                 template<typename Char> 
-                void set(std::basic_string<Char> const &s);
+                void string_set::set(std::basic_string<Char> const &s);
 
                 template<typename Char> 
                 std::basic_string<Char> get() const;
@@ -18,6 +25,7 @@ namespace boost {
                 string_set const &operator=(std::basic_string<Char> const &s)
                 {
                     set(s);
+                    return *this;
                 }
 
             public:
@@ -35,26 +43,26 @@ namespace boost {
             };
 
             template<> 
-            inline void set(std::string const &s)
+            inline void string_set::set(std::string const &s)
             {
                 str_=s;
             }
 
             template<> 
-            inline std::string get() const
+            inline std::string string_set::get() const
             {
                 return str_;
             }
 
             #ifndef BOOST_NO_STD_WSTRING
             template<> 
-            inline void set(std::wstring const &s)
+            inline void string_set::set(std::wstring const &s)
             {
                 wstr_=s;
             }
 
             template<> 
-            inline std::wstring get() const
+            inline std::wstring string_set::get() const
             {
                 return wstr_;
             }
@@ -62,13 +70,13 @@ namespace boost {
 
             #ifdef BOOST_HAS_CHAR16_T
             template<> 
-            inline void set(std::u16string const &s)
+            inline void string_set::set(std::u16string const &s)
             {
                 u16str_=s;
             }
 
             template<> 
-            inline std::u16string get() const
+            inline std::u16string string_set::get() const
             {
                 return u16str_;
             }
@@ -76,13 +84,13 @@ namespace boost {
 
             #ifdef BOOST_HAS_CHAR32_T
             template<> 
-            inline void set(std::u32string const &s)
+            inline void string_set::set(std::u32string const &s)
             {
                 u32str_=s;
             }
 
             template<> 
-            inline std::u32string get() const
+            inline std::u32string string_set::get() const
             {
                 return u32str_;
             }
@@ -102,17 +110,19 @@ namespace boost {
                     flags_(other.flags_),
                     datetime_(other.datetime_),
                     separator_(other.separator_),
+                    timezone_(other.timezone_),
                     valid_(false)
                 {
                 }
 
                 /// never copy formatter
-                ios_info const &operator=(ios_info const &other) const
+                ios_info const &operator=(ios_info const &other)
                 {
                     if(this!=&other) {
                         flags_=other.flags_;
                         datetime_=other.datetime_;
                         separator_=other.separator_;
+                        timezone_=other.timezone_;
                         valid_=false;
                     }
                     return *this;
@@ -120,7 +130,7 @@ namespace boost {
 
                 uint64_t flags() const
                 {
-                    return flags_
+                    return flags_;
                 }
                 void flags(uint64_t f)
                 {
@@ -141,6 +151,17 @@ namespace boost {
                     return datetime_.get<Char>();
                 }
                 
+                void timezone(std::string const &str)
+                {
+                    timezone_=str;
+                    valid_ = false;
+                }
+
+                std::string timezone() const
+                {
+                    return timezone_;
+                }
+                
                 template<typename Char>
                 void separator(std::basic_string<Char> const &str)
                 {
@@ -151,7 +172,7 @@ namespace boost {
                 template<typename Char>
                 std::basic_string<Char> separator() const
                 {
-                    return separator_.get<Char>()
+                    return separator_.get<Char>();
                 }
                 
                 bool valid(std::ios_base &ios)
@@ -164,14 +185,15 @@ namespace boost {
                         formatter_.reset();
                         return false;
                     }
+                    return true;
                 }
 
                 template<typename CharType>
-                formatter<CharType> const *formatter(std::ios_base &ios)
+                boost::locale::formatter<CharType> const *formatter(std::ios_base &ios)
                 {
                     if(!valid(ios)) {
 
-                        formatter_ = formatter<CharType>::create(ios)
+                        formatter_  = boost::locale::formatter<CharType>::create(ios);
 
                         width_      = ios.width();
                         precision_  = ios.precision();
@@ -179,23 +201,30 @@ namespace boost {
                         valid_      = true;
                     }
 
-                    return dynamic_cast<formatter<CharType> const *>(formatter_.get());
+                    return dynamic_cast<boost::locale::formatter<CharType> const *>(formatter_.get());
+                }
+
+                void on_imbue()
+                {
+                    valid_=false;
                 }
 
 
             private:
-                std::streamsize width_,
+                std::streamsize width_;
                 std::streamsize precision_;
                 std::ios_base::fmtflags ios_flags_;
                 uint64_t flags_;
                           
-                variant_string_type datetime_;
-                variant_string_type separator_; 
+                string_set datetime_;
+                string_set separator_; 
+                std::string timezone_; 
                 bool valid_;
 
                 std::auto_ptr<base_formatter> formatter_;
 
             };
+
 
         }
     }

@@ -1,8 +1,10 @@
 #include <boost/locale/converter.hpp>
+#include <boost/locale/info.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <unicode/normlzr.h>
+#include <unicode/locid.h>
 
+#include "info_impl.hpp"
 #include "uconv.hpp"
 
 
@@ -11,9 +13,7 @@ namespace boost {
         class converter_impl : public boost::noncopyable {
         public:
 
-            typedef boost::shared_ptr<icu::Locale> locale_pointer_type;
-
-            converter_impl(locale_pointer_type locale) : 
+            converter_impl(icu::Locale const &locale) : 
                 locale_(locale)
             {
             }
@@ -22,13 +22,13 @@ namespace boost {
             {
                 switch(how) {
                 case converter_base::upper_case:
-                    str.toUpper(*locale_);
+                    str.toUpper(locale_);
                     return;
                 case converter_base::lower_case:
-                    str.toLower(*locale_);
+                    str.toLower(locale_);
                     return;
                 case converter_base::title_case:
-                    str.toTitle(0,*locale_);
+                    str.toTitle(0,locale_);
                     return;
                 case converter_base::case_folding:
                     str.foldCase();
@@ -65,7 +65,7 @@ namespace boost {
                 str=tmp;
             }
         private:
-            locale_pointer_type locale_;
+            icu::Locale locale_;
         };
 
 
@@ -73,7 +73,7 @@ namespace boost {
         class converter_derived : public converter<CharType>
         {
         public:
-            converter_derived(boost::shared_ptr<icu::Locale> locale,std::string charset,size_t refs = 0) :
+            converter_derived(icu::Locale const &locale,std::string charset,size_t refs = 0) :
                 converter<CharType>(refs),
                 impl_(locale),
                 code_page_converter_(charset)
@@ -96,22 +96,40 @@ namespace boost {
         };
 
         template<typename CharType>
-        converter<CharType> *generate(boost::shared_ptr<icu::Locale> locale,std::string charset)
+        converter<CharType> *create_converter(info const &inf)
         {
-            return new converter_derived<CharType>(locale,charset);
+            return new converter_derived<CharType>(inf.impl()->locale,inf.encoding());
+        }
+        
+        template<>
+        converter<char> *converter<char>::create(info const &inf)
+        {
+            return create_converter<char>(inf);
         }
 
-        std::locale generate_all()
+        #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        converter<wchar_t> *converter<wchar_t>::create(info const &inf);
         {
-            boost::shared_ptr<icu::Locale> locale;
-            std::string set;
-            std::locale a("");
-            std::locale b(a,generate<char>(locale,set));
-            std::locale c(b,generate<wchar_t>(locale,set));
-            std::locale d(c,generate<char16_t>(locale,set));
-            std::locale e(d,generate<char32_t>(locale,set));
-	    return e;
-	 }
+            return create_converter<wchar_t>(inf);
+        }
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR16_T
+        template<>
+        converter<char16_t> *converter<char16_t>::create(info const &inf);
+        {
+            return create_converter<char16_t>(inf);
+        }
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR32_T
+        template<>
+        converter<char32_t> *converter<char32_t>::create(info const &inf);
+        {
+            return create_converter<char32_t>(inf);
+        }
+        #endif
 
 
     } // locale

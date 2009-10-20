@@ -2,6 +2,9 @@
 #define BOOST_LOCALE_FORMATTING_HPP_INCLUDED
 
 #include <boost/config.hpp>
+#include <ostream>
+#include <istream>
+#include <string>
 
 namespace boost {
     namespace locale {
@@ -11,7 +14,7 @@ namespace boost {
                 number              = 1,
                 currency            = 2,
                 percent             = 3,
-                date                = 4
+                date                = 4,
                 time                = 5,
                 datetime            = 6,
                 strftime            = 7,
@@ -24,7 +27,7 @@ namespace boost {
                 currency_iso        = 1 << 5,
                 currency_national   = 2 << 5,
 
-                currency_flags_mask = 3 << 5
+                currency_flags_mask = 3 << 5,
 
                 time_default        = 0 << 7,
                 time_short          = 1 << 7,
@@ -40,7 +43,7 @@ namespace boost {
                 date_full           = 4 << 10,
                 date_flags_mask     = 7 << 10,
 
-                datetime_flags_mask = date_flags_mask | time_flags_mask;
+                datetime_flags_mask = date_flags_mask | time_flags_mask
 
             } display_flags_type;
 
@@ -105,7 +108,7 @@ namespace boost {
             #define BOOST_LOCALE_AS_MANIPULATOR(name,mask)  \
             inline std::ios_base &name(std::ios_base &ios)  \
             {                                               \
-                ext_setf(ios,flags::name,flags::mask)       \
+                ext_setf(ios,flags::name,flags::mask);      \
                 return ios;                                 \
             }
 
@@ -119,7 +122,6 @@ namespace boost {
             BOOST_LOCALE_AS_MANIPULATOR(strftime,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(spellout,display_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(ordinal,display_flags_mask)
-            BOOST_LOCALE_AS_MANIPULATOR(duration,display_flags_mask)
 
             BOOST_LOCALE_AS_MANIPULATOR(currency_default,currency_flags_mask)
             BOOST_LOCALE_AS_MANIPULATOR(currency_iso,currency_flags_mask)
@@ -144,23 +146,23 @@ namespace boost {
 
                     std::basic_string<CharType> ftime;
 
-                    template<typename CharType>
-                    void apply(std::base_ios<CharType> &ios) const
+                    void apply(std::basic_ios<CharType> &ios) const
                     {
                         ext_pattern(ios,flags::datetime_pattern,ftime);
                         as::strftime(ios);
                     }
 
-                }
+                };
+
                 template<typename CharType>
-                std::basic_ostream<CharType> &operator<<(std::basic_ostream &out,add_ftime<CharType> const &fmt)
+                std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,add_ftime<CharType> const &fmt)
                 {
                     fmt.apply(out);
                     return out;
                 }
                 
                 template<typename CharType>
-                std::basic_istream<CharType> &operator>>(std::basic_istream &in,add_ftime<CharType> const &fmt)
+                std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,add_ftime<CharType> const &fmt)
                 {
                     fmt.apply(in);
                     return in;
@@ -184,23 +186,24 @@ namespace boost {
 
                     void apply(std::ios &ios) const
                     {
-                        std::basic_ostream<CharType> pat=ext_pattern(ios,flags::separator_pattern);
+                        std::basic_ostream<CharType> pat=ext_pattern<CharType>(ios,flags::separator_pattern);
                         if(!pat.empty())
                             pat.append(ios.widen('\n'));
                         pat+=sep;
-                        ext_pattern(ios,flags::separator_pattern,pat)
+                        ext_pattern(ios,flags::separator_pattern,pat);
                     }
 
-                }
+                };
+
                 template<typename CharType>
-                std::basic_ostream<CharType> &operator<<(std::basic_ostream &out,add_separator<CharType> const &fmt)
+                std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,add_separator<CharType> const &fmt)
                 {
                     fmt.apply(out);
                     return out;
                 }
                 
                 template<typename CharType>
-                std::basic_istream<CharType> &operator>>(std::basic_istream &in,add_separator<CharType> const &fmt)
+                std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,add_separator<CharType> const &fmt)
                 {
                     fmt.apply(in);
                     return in;
@@ -215,10 +218,50 @@ namespace boost {
             }
 
             template<typename CharType>
-            std::base_ios<CharType> &noseparators(std::base_ios<CharType> &ios)
+            std::basic_ios<CharType> &noseparators(std::basic_ios<CharType> &ios)
             {
                 ext_pattern(ios,flags::separator_pattern,std::basic_string<CharType>());
                 return ios;
+            }
+
+
+            namespace details {
+                struct set_timezone {
+                    std::string id;
+                };
+                template<typename CharType>
+                std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,set_timezone const &fmt)
+                {
+                    ext_pattern(out,flags::time_zone_id,fmt.id);
+                    return out;
+                }
+                
+                template<typename CharType>
+                std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,set_timezone const &fmt)
+                {
+                    ext_pattern(in,flags::time_zone_id,fmt.id);
+                    return in;
+                }
+            }
+            
+            
+            inline std::ios_base &gmt(std::ios_base &ios)
+            {
+                ext_pattern<char>(ios,flags::time_zone_id,"GMT");
+                return ios;
+            }
+
+            inline std::ios_base &local_time(std::ios_base &ios)
+            {
+                ext_pattern(ios,flags::time_zone_id,std::string());
+                return ios;
+            }
+
+            inline details::set_timezone time_zone(std::string const &id) 
+            {
+                details::set_timezone tz;
+                tz.id=id;
+                return tz;
             }
 
 

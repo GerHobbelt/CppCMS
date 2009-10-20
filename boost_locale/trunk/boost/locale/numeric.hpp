@@ -41,7 +41,6 @@ namespace boost {
             typedef std::basic_string<CharType> string_type;
             typedef CharType char_type;
             typedef formatter<CharType> formatter_type;
-            typedef value_format<CharType> facet_type;
             
 
             iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long val) const
@@ -79,15 +78,14 @@ namespace boost {
             template<ValueType>
             iter_type do_real_put (iter_type out, std::ios_base &ios, char_type fill, ValueType val) const
             {
-                if(use_parent<ValueType>(ios)) {
+                formatter_type const *formatter = 0;
+                
+                if(use_parent<ValueType>(ios) || (formatter = formatter_type::get(ios)) == 0) {
                     return std::num_put<char_type>::do_put(out,ios,fill,val);
                 }
-
-                facet_type const &fct = std::use_facet<facet_type>(ios.getloc());
-                formatter_type const &formatter = fct.get_formatter(ios);
-
+                
                 size_t code_points;
-                string_type const &str = formatter.format(val,points);
+                string_type const &str = formatter->format(val,points);
                 size_t on_left=0,on_right = 0;
                 if(points < ios.width()) {
                     size_t n = ios.width() - points;

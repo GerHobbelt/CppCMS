@@ -1,10 +1,32 @@
+#include <boost/locale/formatting.hpp>
+#include <boost/locale/formatter.hpp>
+#include <boost/locale/info.hpp>
+#include "ios_prop.hpp"
+#include "formatting_info.hpp"
+#include "uconv.hpp"
+#include "info_impl.hpp"
+
+
 #include <unicode/numfmt.h>
 #include <unicode/rbnf.h>
 #include <unicode/datefmt.h>
+#include <unicode/decimfmt.h>
 
 namespace boost {
 namespace locale {
     namespace impl {
+        
+        typedef ios_prop<ios_info> ios_prop_info_type;
+
+        namespace {
+            struct  initializer {
+                initializer()
+                {
+                    /// make sure xalloc called
+                    ios_prop_info_type::global_init();
+                }
+            };
+        }
 
         template<typename CharType>
         class number_format : public formatter<CharType> {
@@ -17,14 +39,14 @@ namespace locale {
                 icu::UnicodeString tmp;
                 icu_fmt_->format(value,tmp);
                 code_points=tmp.countChar32();
-                return std(tmp);
+                return cvt_.std(tmp);
             }
             virtual string_type format(int64_t value,size_t &code_points) const
             {
                 icu::UnicodeString tmp;
                 icu_fmt_->format(value,tmp);
                 code_points=tmp.countChar32();
-                return std(tmp);
+                return cvt_.std(tmp);
             }
 
             virtual string_type format(uint64_t value,size_t &code_points) const
@@ -32,21 +54,21 @@ namespace locale {
                 icu::UnicodeString tmp;
                 icu_fmt_->format(static_cast<int64_t>(value),tmp);
                 code_points=tmp.countChar32();
-                return std(tmp);
+                return cvt_.std(tmp);
             }
             virtual string_type format(int32_t value,size_t &code_points) const
             {
                 icu::UnicodeString tmp;
                 icu_fmt_->format(value,tmp);
                 code_points=tmp.countChar32();
-                return std(tmp);
+                return cvt_.std(tmp);
             }
             virtual string_type format(uint32_t value,size_t &code_points) const
             {
                 icu::UnicodeString tmp;
-                icu_fmt_->format(value,tmp);
+                icu_fmt_->format(static_cast<int64_t>(value),tmp);
                 code_points=tmp.countChar32();
-                return std(tmp);
+                return cvt_.std(tmp);
             }
 
             virtual bool parse(string_type &str,double &value) const 
@@ -140,21 +162,25 @@ namespace locale {
             }
  
         private:
+            
             string_type do_format(double value,size_t &codepoints) const 
             {
                 UDate date = value * 1000.0; /// UDate is time_t in miliseconds
                 icu::UnicodeString tmp;
-                icu_fmt_->format(value,tmp);
-                code_points=tmp.countChar32();
-                return std(tmp);
+                icu_fmt_->format(date,tmp);
+                codepoints=tmp.countChar32();
+                return cvt_.std(tmp);
             }
+
             icu_std_converter<CharType> cvt_;
             std::auto_ptr<icu::DateFormat> icu_fmt_;
         };
         
-        template<CharType>
-        std::auto_ptr<formatter<CharType> > generate(std::ios_base &ios)
+        template<typename CharType>
+        std::auto_ptr<formatter<CharType> > generate_formatter(std::ios_base &ios)
         {
+            using namespace boost::locale::flags;
+
             std::auto_ptr<formatter<CharType> > fmt;
             ios_info &info=ios_prop<ios_info>::get(ios);
             uint64_t disp = info.flags() &  flags::display_flags_mask;
@@ -162,18 +188,19 @@ namespace locale {
 
             if(disp == posix)
                 return fmt;
-            
-            icu::Locale const &locale = std::use_facet<icu_locale>(ios.getloc());
-            std::string encoding;
+           
+            boost::locale::info const &locale_info = std::use_facet<boost::locale::info>(ios.getloc());
+            icu::Locale const &locale = locale_info.impl()->locale;
+            std::string encoding = locale_info.impl()->encoding;
 
             UErrorCode err=U_ZERO_ERROR;
             
             switch(disp) {
             case number:
                 {
-                    std::ios_base::fmtflags how = 
-                        (ios.flags() & std::ios_base::floatfield) == std::ios_base::scientific;
+                    std::ios_base::fmtflags how = (ios.flags() & std::ios_base::floatfield);
                     std::auto_ptr<icu::NumberFormat> nf;
+
                     if(how == std::ios_base::scientific)
                         nf.reset(icu::NumberFormat::createScientificInstance(locale,err));
                     else
@@ -208,26 +235,32 @@ namespace locale {
                     // otherwise we can get this ISO formatter from standard C++ money facet
                     //
                     nf.reset(icu::NumberFormat::createCurrencyInstance(locale,err));
+
                     if(U_FAILURE(err))
                         return fmt;
+
                     err=U_ZERO_ERROR;
                     icu::DecimalFormat *df;
+
                     if(curr == currency_default || curr == currency_national){
-                        if((df=dynamic_cast<icu::DecimalFormat>(nf.get()))!=0) {
+
+                        if((df=dynamic_cast<icu::DecimalFormat *>(nf.get()))!=0) {
                             icu::UnicodeString tmp =
-                                df->getDecimalFormatSymbols()->getSymbol(icu::DecimalFormatSymbols::lIntlCurrencySymbol);
-                            nf->setCurrecny(tmp.getBuffer(),err);
+                                df->getDecimalFormatSymbols()->getSymbol(icu::DecimalFormatSymbols::kIntlCurrencySymbol);
+
+                            nf->setCurrency(tmp.getBuffer(),err);
+
                             if(U_FAILURE(err))
                                 return fmt;
                         }
                         else if(std::has_facet<std::moneypunct<CharType,true> >(ios.getloc())) {
                             std::basic_string<CharType> tmp = 
-                                std::use_facet<std::moneypunct<CharType,true> >(ios.getloc()).cur_symbol();
+                                std::use_facet<std::moneypunct<CharType,true> >(ios.getloc()).curr_symbol();
                             if(tmp.size()!=3)
                                 return fmt;
                             UChar iso[3];
                             std::copy(tmp.begin(),tmp.end(),iso);
-                            nf->setCurrecny(tmp.getBuffer(),err);
+                            nf->setCurrency(iso,err);
                             if(U_FAILURE(err))
                                 return fmt;
                         }
@@ -289,20 +322,78 @@ namespace locale {
                         df.reset(icu::DateFormat::createDateTimeInstance(dstyle,tstyle,locale));
                     if(!df.get())
                         return fmt;
-                    if(!info.time_zone().empty())
-                        df->adoptTimeZone(icu::TimeZone::createTimeZone(info.time_zone().c_str()));
+                    if(!info.timezone().empty())
+                        df->adoptTimeZone(icu::TimeZone::createTimeZone(info.timezone().c_str()));
                         
                     fmt.reset(new date_format<CharType>(df,encoding));
                 }
+                break;
             }
 
-            fmt(new number_format<CharType>(nf,encodimg))
             return fmt;
+        }
+
+        template<typename Char>
+        formatter<Char> const *get_cached_formatter(std::ios_base &ios)
+        {
+            return ios_prop<ios_info>::get(ios).formatter<Char>(ios);
         }
 
 
     } // impl
 
+    template<>
+    std::auto_ptr<formatter<char> > formatter<char>::create(std::ios_base &ios)
+    {
+        return impl::generate_formatter<char>(ios);
+    }
+
+    template<>
+    formatter<char> const *formatter<char>::get(std::ios_base &ios)
+    {
+        return impl::get_cached_formatter<char>(ios);
+    }
+    #ifndef BOOST_NO_STD_WSTRING
+    template<>
+    std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios)
+    {
+        return impl::generate_formatter<wchar_t>(ios);
+    }
+
+    template<>
+    formatter<wchar_t> const *formatter<wchar_t>::get(std::ios_base &ios)
+    {
+        return impl::get_cached_formatter<wchar_t>(ios);
+    }
+    #endif
+
+    #ifdef BOOST_HAS_CHAR16_T
+    template<>
+    std::auto_ptr<formatter<char16_t> > formatter<char16_t>::create(std::ios_base &ios)
+    {
+        return impl::generate_formatter<char16_t>(ios);
+    }
+
+    template<>
+    formatter<char16_t> const *formatter<char16_t>::get(std::ios_base &ios)
+    {
+        return impl::get_cached_formatter<char16_t>(ios);
+    }
+    #endif
+
+    #ifdef BOOST_HAS_CHAR32_T
+    template<>
+    std::auto_ptr<formatter<char32_t> > formatter<char32_t>::create(std::ios_base &ios)
+    {
+        return impl::generate_formatter<char32_t>(ios);
+    }
+
+    template<>
+    formatter<char32_t> const *formatter<char32_t>::get(std::ios_base &ios)
+    {
+        return impl::get_cached_formatter<char32_t>(ios);
+    }
+    #endif
 
 } // locale
 } // boost
