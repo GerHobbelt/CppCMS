@@ -43,25 +43,30 @@ namespace boost {
             virtual string_type format(uint32_t value,size_t &code_points) const = 0;
 
             ///
-            /// Parse the string and return true of sucess and store the value in \a value
+            /// Parse the string and return number of used characters. If returns 0
+            /// then parsing failed.
             ///
-            virtual bool parse(string_type &str,double &value) const = 0;
+            virtual size_t parse(string_type const &str,double &value) const = 0;
             ///
-            /// Parse the string and return true of sucess and store the value in \a value
+            /// Parse the string and return number of used characters. If returns 0
+            /// then parsing failed.
             ///
-            virtual bool parse(string_type &str,int64_t &value) const = 0;
+            virtual size_t parse(string_type const &str,int64_t &value) const = 0;
             ///
-            /// Parse the string and return true of sucess and store the value in \a value
+            /// Parse the string and return number of used characters. If returns 0
+            /// then parsing failed.
             ///
-            virtual bool parse(string_type &str,uint64_t &value) const = 0;
+            virtual size_t parse(string_type const &str,uint64_t &value) const = 0;
             ///
-            /// Parse the string and return true of sucess and store the value in \a value
+            /// Parse the string and return number of used characters. If returns 0
+            /// then parsing failed.
             ///
-            virtual bool parse(string_type &str,int32_t &value) const = 0;
+            virtual size_t parse(string_type const &str,int32_t &value) const = 0;
             ///
-            /// Parse the string and return true of sucess and store the value in \a value
+            /// Parse the string and return number of used characters. If returns 0
+            /// then parsing failed.
             ///
-            virtual bool parse(string_type &str,uint32_t &value) const = 0;
+            virtual size_t parse(string_type const &str,uint32_t &value) const = 0;
 
             ///
             /// Get formatter for current state of ios_base -- flags and locale,

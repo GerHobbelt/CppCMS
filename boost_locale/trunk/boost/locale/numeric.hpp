@@ -34,7 +34,24 @@ namespace boost {
         namespace details {
             template<typename V,int n=std::numeric_limits<V>::digits,bool integer=std::numeric_limits<V>::is_integer>
             struct cast_traits;
+            
+            template<typename v>
+            struct cast_traits<v,7,true> {
+                typedef int32_t cast_type;
+            };
+            template<typename v>
+            struct cast_traits<v,8,true> {
+                typedef int32_t cast_type;
+            };
 
+            template<typename v>
+            struct cast_traits<v,15,true> {
+                typedef int32_t cast_type;
+            };
+            template<typename v>
+            struct cast_traits<v,16,true> {
+                typedef int32_t cast_type;
+            };
             template<typename v>
             struct cast_traits<v,31,true> {
                 typedef int32_t cast_type;
@@ -55,6 +72,7 @@ namespace boost {
             struct cast_traits<V,u,false> {
                 typedef double cast_type;
             };
+
         }
 
         template<typename CharType>
@@ -72,29 +90,29 @@ namespace boost {
         protected: 
             
 
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, double val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, double val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long double val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long double val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
             
             #ifndef BOOST_NO_LONG_LONG 
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long long val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long long val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
-            iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long long val) const
+            virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long long val) const
             {
                 return do_real_put(out,ios,fill,val);
             }
@@ -123,9 +141,11 @@ namespace boost {
                     
                     std::ios_base::fmtflags flags = ios.flags() & std::ios_base::adjustfield;
                     
-                    if(flags == std::ios_base::internal)
-                        on_left = n/2;
-                    else if(flags == std::ios_base::right)
+                    //
+                    // We do not really know internal point, so we assume that it does not
+                    // exists. So according to standard field should be right aligned
+                    //
+                    if(flags == std::ios_base::internal || flags == std::ios_base::right)
                         on_left = n;
                     on_right = n - on_left;
                 }
@@ -145,50 +165,138 @@ namespace boost {
         };  /// num_format
        
        
-       /* 
-        template<typname CharType>
-        class num_parse : public std::num_get<CharType>,
+        template<typename CharType>
+        class num_parse : public std::num_get<CharType>, protected num_base
         {
         protected: 
-            typedef typename std::num_get::iter_type iter_type;
+            typedef typename std::num_get<CharType>::iter_type iter_type;
             typedef std::basic_string<CharType> string_type;
             typedef CharType char_type;
             typedef formatter<CharType> formatter_type;
-            typedef value_format<CharType> facet_type;
+            typedef std::basic_istream<CharType> stream_type;
 
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned short &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned int &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned long &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,float &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,double &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long double &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            #ifndef BOOST_NO_LONG_LONG 
+            virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long long &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned long long &val) const
+            {
+                return do_real_get(in,end,ios,err,val);
+            }
+
+            #endif
+ 
         private:
             
 
+            //
+            // This is not really efficient solusion, but it works
+            //
             template<typename ValueType>
             iter_type do_real_get(iter_type in,iter_type end,std::ios_base &ios,std::ios_base::iostate &err,ValueType &val) const
             {
-                if(use_parent<ValueType>(ios))
-                    return std::num_get<CharType>::do_get(in,end,ios,ios,err,val);
+                std::cerr<<"GET!"<<std::endl;
+                formatter_type const *formatter = 0;
+                stream_type *stream_ptr = dynamic_cast<stream_type *>(&ios);
 
-                typedef typename traits<ValueType>::subst_type subst_type;
+                if(!stream_ptr || use_parent<ValueType>(ios) || (formatter = formatter_type::get(ios)) == 0) {
+                    std::cerr<<"Use Parent"<<std::endl;
+                    return std::num_get<CharType>::do_get(in,end,ios,err,val);
+                }
 
-                subst_type value;
+                typedef typename details::cast_traits<ValueType>::cast_type cast_type;
+                string_type tmp;
+                tmp.reserve(64);
 
-                string_type str=read_string(in,end,ios);
-                if(in==end)
-                    err |= std::ios_base::eofbit;
+                // just a hard limit
+                std::ctype<CharType> const &type=std::use_facet<std::ctype<CharType> >(ios.getloc());
+            
+                while(in!=end && type.is(std::ctype_base::space | std::ctype_base::cntrl, *in) )
+                    ++in;
 
-                facet_type const &fct = std::use_facet<facet_type>(ios.getloc());
-                formatter_type const &formatter = fct.get_formatter(ios);
-                if(!formatter->parse(str,value) || !traits<ValueType>::validate(value))
+                while(tmp.size() < 4096 && in!=end && *in!='\n') {
+                    tmp += *in++;
+                }
+
+                cast_type value;
+                size_t parsed_chars;
+
+                if((parsed_chars = formatter->parse(tmp,value))==0 || !valid<ValueType>(value)) {
                     err |= std::ios_base::failbit;
-                else 
+                }
+                else {
                     val=static_cast<ValueType>(value);
+                }
+
+                std::cerr<<"Parsing ["<<tmp<<"] parsed part=["<<tmp.substr(0,parsed_chars)<<"]"<<std::endl;
+                for(size_t n=tmp.size();n>parsed_chars;n--) {
+                    stream_ptr->putback(tmp[n-1]);
+                }
+
+                in = iter_type(*stream_ptr);
+
+                if(in==end)
+                    err |=std::ios_base::eofbit;
                 return in;
             }
+
+            template<typename ValueType,typename CastedType>
+            bool valid(CastedType v) const
+            {
+                typedef std::numeric_limits<ValueType> value_limits;
+                typedef std::numeric_limits<CastedType> casted_limits;
+                if(v > value_limits::max() || v < value_limits::min()) {
+                    return false;
+                }       
+                if(value_limits::is_integer == casted_limits::is_integer) {
+                    return true;
+                }
+                if(value_limits::is_integer) { // and casted is not
+                    if(static_cast<CastedType>(static_cast<ValueType>(v))!=v)
+                        return false;
+                }
+                return true;
+            }
             
-        public:
-            template<ValueType>
-            struct traits;
         };
 
-        template<sizeoe>
-        stru*/
 
 
     }

@@ -22,6 +22,7 @@ namespace impl {
         icu_std_converter(std::string charset);         
         icu::UnicodeString icu(char_type const *begin,char_type const *end) const;
         string_type std(icu::UnicodeString const &str) const;
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const;
     };
 
     template<typename CharType>
@@ -51,10 +52,18 @@ namespace impl {
             max_len_=cvt.max_char_size();
         }
 
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
+        {
+            size_t code_points = str.countChar32(0,n);
+            uconv cvt(charset_);
+            return cvt.cut(code_points,begin,end);
+        }
+
         struct uconv : public boost::noncopyable {
         public:
             uconv(std::string const &charset) 
             {
+                utf8_ = ucnv_compareNames(charset.c_str(),"UTF8");
                 UErrorCode err=U_ZERO_ERROR;
                 cvt_ = ucnv_open(charset.c_str(),&err);
                 if(!cvt_)
@@ -78,13 +87,36 @@ namespace impl {
                 return res;
             }
 
+            size_t cut(size_t n,char_type const *begin,char_type const *end)
+            {
+                if(utf8_) {
+                    size_t res = 0;
+                    while( n > 0) {
+                        UChar32 uc;
+                        U8_NEXT_UNSAFE(begin,res,uc);
+                        n--;
+                    }
+                    return res;
+                }
+
+                char_type const *saved;
+                while(n > 0 && begin < end) {
+                    UErrorCode err=U_ZERO_ERROR;
+                    ucnv_getNextUChar(cvt_,&begin,end,&err);
+                    if(U_FAILURE(err))
+                        return 0;
+                    n--;
+                }
+                return begin - saved;
+            }
+
             ~uconv()
             {
                 ucnv_close(cvt_);
             }
                 
         private:
-            
+            bool utf8_; 
             UConverter *cvt_;
         };
 
@@ -113,6 +145,10 @@ namespace impl {
         {
             char_type const *ptr=reinterpret_cast<char_type const *>(str.getBuffer());
             return string_type(ptr,str.length());
+        }
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n)
+        {
+            return n;
         }
         
         icu_std_converter(std::string charset) {}
@@ -155,6 +191,11 @@ namespace impl {
             tmp.resize(len);
 
             return tmp;
+        }
+        
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n)
+        {
+            return str.countChar32(0,n);
         }
 
         icu_std_converter(std::string charset) {}

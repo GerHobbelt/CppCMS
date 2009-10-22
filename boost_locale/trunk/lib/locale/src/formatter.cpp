@@ -71,26 +71,41 @@ namespace locale {
                 return cvt_.std(tmp);
             }
 
-            virtual bool parse(string_type &str,double &value) const 
+            virtual size_t parse(string_type const &str,double &value) const 
             {
-                return false;
+                return do_parse(str,value);
             }
 
-            virtual bool parse(string_type &str,int64_t &value) const 
+            virtual size_t parse(string_type const &str,int64_t &value) const 
             {
-                return false;
+                return do_parse(str,value);
             }
-            virtual bool parse(string_type &str,uint64_t &value) const
+            virtual size_t parse(string_type const &str,uint32_t &value) const
             {
-                return false;
+                int64_t v;
+                size_t cut = do_parse(str,v);
+                if(cut==0)
+                    return 0;
+                if(v < 0 || v > std::numeric_limits<uint32_t>::max())
+                    return 0;
+                value=static_cast<uint32_t>(v);
+                return cut;
             }
-            virtual bool parse(string_type &str,int32_t &value) const
+            virtual size_t parse(string_type const &str,int32_t &value) const
             {
-                return false;
+                return do_parse(str,value);
             }
-            virtual bool parse(string_type &str,uint32_t &value) const
+
+            virtual size_t parse(string_type const &str,uint64_t &value) const
             {
-                return false;
+                double v;
+                size_t cut = do_parse(str,v);
+                if(cut==0)
+                    return 0;
+                if(v < 0 || v > std::numeric_limits<uint64_t>::max() || static_cast<uint64_t>(v) != v)
+                    return 0;
+                value=static_cast<uint64_t>(v);
+                return cut;
             }
 
             number_format(std::auto_ptr<icu::NumberFormat> fmt,std::string codepage) :
@@ -100,6 +115,54 @@ namespace locale {
             }
  
         private:
+            
+            bool get_value(double &v,icu::Formattable &fmt) const
+            {
+                UErrorCode err=U_ZERO_ERROR;
+                v=fmt.getDouble(err);
+                if(U_FAILURE(err))
+                    return false;
+                return true;
+            }
+
+            bool get_value(int64_t &v,icu::Formattable &fmt) const
+            {
+                UErrorCode err=U_ZERO_ERROR;
+                v=fmt.getInt64(err);
+                if(U_FAILURE(err))
+                    return false;
+                return true;
+            }
+
+            bool get_value(int32_t &v,icu::Formattable &fmt) const
+            {
+                UErrorCode err=U_ZERO_ERROR;
+                v=fmt.getLong(err);
+                if(U_FAILURE(err))
+                    return false;
+                return true;
+            }
+
+            template<typename ValueType>
+            size_t do_parse(string_type const &str,ValueType &v) const
+            {
+                icu::Formattable val;
+                icu::ParsePosition pp;
+                icu::UnicodeString tmp = cvt_.icu(str.data(),str.data()+str.size());
+
+                icu_fmt_->parse(tmp,val,pp);
+
+                ValueType tmp_v;
+
+                if(pp.getIndex() == 0 || !get_value(tmp_v,val))
+                    return 0;
+                size_t cut = cvt_.cut(tmp,str.data(),str.data()+str.size(),pp.getIndex());
+                if(cut==0)
+                    return 0;
+                v=tmp_v;
+                return cut;
+            }
+
             icu_std_converter<CharType> cvt_;
             std::auto_ptr<icu::NumberFormat> icu_fmt_;
         };
@@ -133,26 +196,25 @@ namespace locale {
                 return do_format(value,code_points);
             }
 
-            virtual bool parse(string_type &str,double &value) const 
+            virtual size_t parse(string_type const &str,double &value) const 
             {
-                return false;
+                return do_parse(str,value);
             }
-
-            virtual bool parse(string_type &str,int64_t &value) const 
+            virtual size_t parse(string_type const &str,int64_t &value) const 
             {
-                return false;
+                return do_parse(str,value);
             }
-            virtual bool parse(string_type &str,uint64_t &value) const
+            virtual size_t parse(string_type const &str,uint64_t &value) const
             {
-                return false;
+                return do_parse(str,value);
             }
-            virtual bool parse(string_type &str,int32_t &value) const
+            virtual size_t parse(string_type const &str,int32_t &value) const
             {
-                return false;
+                return do_parse(str,value);
             }
-            virtual bool parse(string_type &str,uint32_t &value) const
+            virtual size_t parse(string_type const &str,uint32_t &value) const
             {
-                return false;
+                return do_parse(str,value);
             }
 
             date_format(std::auto_ptr<icu::DateFormat> fmt,std::string codepage) :
@@ -162,6 +224,27 @@ namespace locale {
             }
  
         private:
+
+            template<typename ValueType>
+            size_t do_parse(string_type const &str,ValueType &value) const
+            {
+                icu::ParsePosition pp;
+                icu::UnicodeString tmp = cvt_.icu(str.data(),str.data() + str.size());
+
+                UDate udate = icu_fmt_->parse(tmp,pp);
+                if(pp.getIndex() == 0)
+                    return 0;
+                double date = udate / 1000.0;
+                typedef std::numeric_limits<ValueType> limits_type;
+                if(date > limits_type::max() || date < limits_type::min())
+                    return 0;
+                size_t cut = cvt_.cut(tmp,str.data(),str.data()+str.size(),pp.getIndex());
+                if(cut==0)
+                    return 0;
+                value=static_cast<ValueType>(date);
+                return cut;
+
+            }
             
             string_type do_format(double value,size_t &codepoints) const 
             {
@@ -223,9 +306,9 @@ namespace locale {
                     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
                     // ICU 4.2 has special ISO currency style
                     if(curr == currency_default || curr == currency_national)
-                        nf.reset(icu::NumberFormat::createInstance(locale,kIsoCurrencyStyle,err));
+                        nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kIsoCurrencyStyle,err));
                     else
-                        nf.reset(icu::NumberFormat::createInstance(locale,kCurrencyStyle,err))
+                        nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kCurrencyStyle,err));
                     if(U_FAILURE(err))
                         return fmt;
 

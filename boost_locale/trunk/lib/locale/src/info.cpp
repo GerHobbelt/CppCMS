@@ -57,6 +57,10 @@ namespace boost {
                 utf8_=false;
         }
 
+        std::string info::encoding() const
+        {
+            return impl_->encoding;
+        }
         std::string info::language() const
         {
             return impl_->locale.getLanguage();
