@@ -179,7 +179,6 @@ namespace boost {
                 {
                     if( !valid_
                         || ios_flags_ != ios.flags()
-                        || width_ != ios.width() 
                         || precision_ != ios.precision())
                     {
                         formatter_.reset();
@@ -195,7 +194,6 @@ namespace boost {
 
                         formatter_  = boost::locale::formatter<CharType>::create(ios);
 
-                        width_      = ios.width();
                         precision_  = ios.precision();
                         ios_flags_  = ios.flags();
                         valid_      = true;
@@ -211,7 +209,6 @@ namespace boost {
 
 
             private:
-                std::streamsize width_;
                 std::streamsize precision_;
                 std::ios_base::fmtflags ios_flags_;
                 uint64_t flags_;

@@ -125,7 +125,7 @@ namespace boost {
                     
                     if(flags == std::ios_base::internal)
                         on_left = n/2;
-                    else if(flags == std::ios_base::left)
+                    else if(flags == std::ios_base::right)
                         on_left = n;
                     on_right = n - on_left;
                 }

@@ -1,10 +1,9 @@
 #include <boost/locale/info.hpp>
-#include <boost/regex.hpp>
-
 #include <unicode/locid.h>
 #include <unicode/ucnv.h>
 
 #include "info_impl.hpp"
+
 namespace boost {
     namespace locale {
         
@@ -24,10 +23,14 @@ namespace boost {
             }
             else {
                 impl_->locale = icu::Locale::createCanonical(posix_id.c_str());
-                static boost::regex r("^([a-zA-Z]+)([_-]([a-zA-Z])+)?(\\.([a-zA-Z0-9_\\-]+))?(\\@(.*))?$");
-                boost::cmatch m;
-                if(boost::regex_match(posix_id.c_str(),m,r))
-                    impl_->encoding = m[5];
+                size_t n = posix_id.find('.');
+                if(n!=std::string::npos) {
+                    size_t e = posix_id.find('@',n);
+                    if(e == std::string::npos)
+                        impl_->encoding = posix_id.substr(n+1);
+                    else
+                        impl_->encoding = posix_id.substr(n+1,e-n-1);
+                }
                 else
                     impl_->encoding = ucnv_getDefaultName();
             }
