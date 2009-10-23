@@ -12,6 +12,8 @@
 #include <unicode/datefmt.h>
 #include <unicode/decimfmt.h>
 
+#include <limits>
+
 namespace boost {
 namespace locale {
     namespace impl {

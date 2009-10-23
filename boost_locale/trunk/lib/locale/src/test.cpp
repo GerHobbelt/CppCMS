@@ -11,7 +11,7 @@ int main()
 {
 	using namespace boost::locale;
 	using namespace std;
-	std::locale base("C");
+	std::locale base("");
 	std::locale::global(base);
 	std::locale base1(base,new info(getenv("LC_ALL")));
 	std::locale base2(base1,new num_format<char>());
@@ -26,7 +26,7 @@ int main()
 	out<<std::scientific<<1234.56e-10<<std::endl;
 	out<<as::currency<<104.12<<" ";
 	out<<as::currency_iso<<104.12<<endl;
-	out<<as::spellout<<104<<" "<<1234.56<<std::endl;
+	out<<as::spellout<<104<<"   "<<1234.56<<std::endl;
 	out<<as::ordinal<<104<<endl;
 	out<<as::date<<now<<endl;
 	out<<as::datetime<<as::date_full<<as::time_full << std::time(0) << endl;
@@ -38,6 +38,9 @@ int main()
 	double v_1234_56e_10 = 0,v_1234_56 = 0,v_104_12 = 0;
 
 	
+	out.unsetf(std::ios_base::scientific);
+	out >> as::date_default >> as::time_default;
+
 	out>> as::number >> v_104 >> v_1234;
 
 	std::cout<<"104 = "<<104<<" 1234 = "<<v_1234<<endl;

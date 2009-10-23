@@ -63,7 +63,7 @@ namespace impl {
         public:
             uconv(std::string const &charset) 
             {
-                utf8_ = ucnv_compareNames(charset.c_str(),"UTF8");
+                utf8_ = ucnv_compareNames(charset.c_str(),"UTF8") == 0;
                 UErrorCode err=U_ZERO_ERROR;
                 cvt_ = ucnv_open(charset.c_str(),&err);
                 if(!cvt_)
@@ -99,7 +99,7 @@ namespace impl {
                     return res;
                 }
 
-                char_type const *saved;
+                char_type const *saved = begin;
                 while(n > 0 && begin < end) {
                     UErrorCode err=U_ZERO_ERROR;
                     ucnv_getNextUChar(cvt_,&begin,end,&err);
@@ -146,7 +146,7 @@ namespace impl {
             char_type const *ptr=reinterpret_cast<char_type const *>(str.getBuffer());
             return string_type(ptr,str.length());
         }
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n)
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
         {
             return n;
         }
@@ -193,7 +193,7 @@ namespace impl {
             return tmp;
         }
         
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n)
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
         {
             return str.countChar32(0,n);
         }
