@@ -50,18 +50,23 @@ namespace boost {
 
             typedef enum {
                 datetime_pattern,
-                separator_pattern,
                 time_zone_id,
             } pattern_type;
+
+            typedef enum {
+                domain_id
+            } value_type;
 
             
         } // flags
 
+
         uint64_t ext_flags(std::ios_base &);
         uint64_t ext_flags(std::ios_base &,flags::display_flags_type mask);
         void ext_setf(std::ios_base &,flags::display_flags_type flags,flags::display_flags_type mask);
-
-
+        
+        int ext_value(std::ios_base &,flags::value_type id);
+        void ext_value(std::ios_base &,flags::value_type id,int value);
        
         template<typename CharType>
         void ext_pattern(std::ios_base &,flags::pattern_type pat,std::basic_string<CharType> const &);
@@ -178,53 +183,6 @@ namespace boost {
                 fmt.ftime=format;
                 return fmt;
             }
-
-            namespace details {
-                template<typename CharType>
-                struct add_separator {
-
-                    std::basic_string<CharType> sep;
-
-                    void apply(std::ios &ios) const
-                    {
-                        std::basic_ostream<CharType> pat=ext_pattern<CharType>(ios,flags::separator_pattern);
-                        if(!pat.empty())
-                            pat.append(ios.widen('\n'));
-                        pat+=sep;
-                        ext_pattern(ios,flags::separator_pattern,pat);
-                    }
-
-                };
-
-                template<typename CharType>
-                std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,add_separator<CharType> const &fmt)
-                {
-                    fmt.apply(out);
-                    return out;
-                }
-                
-                template<typename CharType>
-                std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,add_separator<CharType> const &fmt)
-                {
-                    fmt.apply(in);
-                    return in;
-                }
-
-            } // details 
-
-            template<typename CharType>
-            details::add_separator<CharType> separate(std::basic_string<CharType> const &sep)
-            {
-                return details::add_separator<CharType>(sep); 
-            }
-
-            template<typename CharType>
-            std::basic_ios<CharType> &noseparators(std::basic_ios<CharType> &ios)
-            {
-                ext_pattern(ios,flags::separator_pattern,std::basic_string<CharType>());
-                return ios;
-            }
-
 
             namespace details {
                 struct set_timezone {

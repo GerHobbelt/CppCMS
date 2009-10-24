@@ -162,19 +162,6 @@ namespace boost {
                     return timezone_;
                 }
                 
-                template<typename Char>
-                void separator(std::basic_string<Char> const &str)
-                {
-                    separator_=str;
-                    valid_ = false;
-                }
-
-                template<typename Char>
-                std::basic_string<Char> separator() const
-                {
-                    return separator_.get<Char>();
-                }
-                
                 bool valid(std::ios_base &ios)
                 {
                     if( !valid_

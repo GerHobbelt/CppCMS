@@ -20,9 +20,6 @@ namespace boost {
                 case flags::datetime_pattern:
                     info(ios).datetime(pattern);
                     break;
-                case flags::separator_pattern:
-                    info(ios).separator(pattern);
-                    break;
                 default:
                     throw std::bad_cast();
                 }
@@ -34,8 +31,6 @@ namespace boost {
                 switch(pattern_id) {
                 case flags::datetime_pattern:
                     return info(ios).datetime<Char>();
-                case flags::separator_pattern:
-                    return info(ios).separator<Char>();
                 default:
                     throw std::bad_cast();
                 }
