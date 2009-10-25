@@ -2,7 +2,7 @@ namespace boost {
     namespace locale {
         namespace impl {
 
-            uint32_t pj_winberger_hash_function(char const *ptr)
+            inline uint32_t pj_winberger_hash_function(char const *ptr)
             {
                 uint32_t value=0;
                 for(;*ptr!=0;ptr++) {

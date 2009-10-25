@@ -28,6 +28,112 @@ namespace boost {
         }
 
         namespace impl {
+            class mo_file {
+            public:
+                typedef std::pair<char const *,char const *> pair_type;
+                
+                mo_file(std::string file_name) :
+                    native_byteorder_(true),
+                    size_(0)
+                {
+                    std::ifstream file(file_name.c_str(),std::ios::binary);
+                    if(!file)
+                        throw std::runtime_error("No such file");
+                    // Check file format
+                    uint32_t magic=0;
+                    file.get(reinterpret_cast<char *>(&magic),sizeof(magic));
+                    if(magic == 0x950412de)
+                        native_byteorder_=true;
+                    else if(magic == 0xde120495)
+                        native_byteorder_=false;
+                    else
+                        throw std::runtime_error("Invalid file format");
+
+                    // load image of file to memory
+                    file.seekg(0, std::ios::end);
+                    int len=file.tellg();
+                    file.seekg(0, std::ios::beg);
+                    data_.resize(len,0);
+                    file.read(&data_.front(),len);
+                    if(file.gcount()!=len)
+                        throw std::runtime_error("Failed to read file");
+
+                    // Read all format sizes
+                    size_=get(8);
+                    keys_offset_=get(12);
+                    translations_offset_=get(16);
+                    hash_offset_=get(20);
+                    hash_size_=get(24);
+                }
+
+                pair_type find(char const *key_in) const
+                {
+                    uint32_t hkey = pj_winberger_hash_function(key_in);
+                    uint32_t orig=hkey;
+                    uint32_t incr = 1 + hkey % (hash_size_-2);
+                    do {
+                        uint32_t idx = get(hash_offset_ + 4*hkey);
+                        /// Not found
+                        if(idx == 0)
+                            return pair_type(0,0);
+                        /// If equal values return translation
+                        if(strcmp(key(idx-1),key_in)==0)
+                            return value(idx-1);
+                        /// Rehash
+                        hkey=(hkey + incr) % hash_size_;
+                    } while(hkey!=orig)
+                    return pair_type(0,0);                    
+                }
+                char const *key(int id) const
+                {
+                    uint32_t off = get(keys_offset_ + id*8 + 4);
+                    return &data[off];
+                }
+
+                pair_type value(int id) const
+                {
+                    uint32_t len = get(translations_offset_+id*8);
+                    uint32_t off = get(translations_offset_+id*8+4);
+                    return pair_type(&data[off],&data[off]+len);
+                }
+                size_t size() const
+                {
+                    return size_;
+                }
+                bool empty()
+                {
+                    return size_==0;
+                }
+            private:
+                uint32_t get(unsigned offset) const
+                {
+                    uint32_t tmp;
+                    if(offset >= data.size() - 4)
+                        throw std::runtime_error("Bad file format");
+                    memcpy(&tmp,&data[offset],4);
+                    convert(tmp);
+                    return tmp;
+                }
+
+                void convert(uint32_t &v)
+                {
+                    if(native_byteorder_)
+                        return;
+                    v =   ((v & 0xFF) << 24)
+                        | ((v & 0xFF00) << 8)
+                        | ((v & 0xFF0000) >> 8)
+                        | ((v & 0xFF000000) >> 24);
+                }
+
+                uint32_t keys_offset_;
+                uint32_t translations_offset_;
+                uint32_t hash_size_;
+                uint32_t hash_offset_;
+
+                std::vector<char> data_;
+                bool native_byteorder_;
+                size_t size_;
+            };
 
             template<typename CharType>
             class mo_message : public message_format<CharType> {
@@ -108,9 +214,12 @@ namespace boost {
                         std::string domain=p->first;
                         int id=p->second;
 
+
+                        //
+                        // List of fallbacks: en_US@euro, en@euro, en_US, en. 
+                        //
                         static const unsigned paths_no = 4;
 
-                        /// List of fallbacks
                         std::string paths[paths_no] = {
                             std::string(inf.language()) + "_" + inf.country() + "@" + inf.variant(),
                             std::string(inf.language()) + "@" + inf.variant(),
@@ -143,21 +252,26 @@ namespace boost {
                     return form;
                 }
 
-                bool load_file(std::string file_name,std::string encoding,catalog_type &catalog)
+                bool load_file(std::string file_name,std::string encoding,int id)
                 {
-                    std::ifstream file(file_name.c_str(),std::ifstream::binary);
-                    if(!file)
-                        return false;
-                    mo_file mo(file);
-                    if(mo.empty())
-                        return false;
-                    cstd::string mo_encoding = extract(mo.key(0),"charset=");
+                    try {
+                        boost::shared_ptr<mo_file> mo(new mo_file(file_name));
 
-                    converter cvt(encoding,mo_encoding);
-                    
-                    for(unsigned i=0;i<mo.size();i++) {
-                        std::pair<char const *,char const *> tmp= mo.value[i];
-                        catalog[mo.key(i)]=cvt(tmp.first,tmp.second);
+                        std::string mo_encoding = extract(mo->key(0),"charset=");
+                        if(sizeof(CharType) == 1 && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0) {
+                            direct_catalogs_[id]=mo;
+                        }
+                        converter cvt(encoding,mo_encoding);
+                        
+                        for(unsigned i=0;i<mo.size();i++) {
+                            std::pair<char const *,char const *> tmp= mo->value[i];
+                            catalogs_[id][mo.key(i)]=cvt(tmp.first,tmp.second);
+                        }
+
+                    }
+                    catch(std::exception const &err)
+                    {
+                        return false;
                     }
 
                 }
@@ -173,31 +287,6 @@ namespace boost {
                     return meta.substr(pos,end_pos - pos);
                 }
 
-                class mo_file {
-                public:
-                    typedef std::pair<char const *,char const *> pair_type;
-                    
-                    mo_file(std::ifsteam &file)
-                    
-                    char const *key(int id)
-                    {
-                    }
-                    pair_type value(int id)
-                    {
-                    }
-                    size_t size()
-                    {
-                        return size_;
-                    }
-                    bool empty()
-                    {
-                        return size==0;
-                    }
-
-
-                private:
-                    size_t size_;
-                };
 
                 class converter {
                 public:
@@ -241,6 +330,7 @@ namespace boost {
                 domains_map_type domains_;
 
                 std::vector<std::string> search_paths_;
+                std::vactor<boost::shared_ptr<mo_file> > mo_catalogs_;
                 
             };
         } /// impl
