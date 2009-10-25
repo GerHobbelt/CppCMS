@@ -1,7 +1,7 @@
 #ifndef BOOST_LOCALE_FORMATTING_HPP_INCLUDED
 #define BOOST_LOCALE_FORMATTING_HPP_INCLUDED
 
-#include <boost/config.hpp>
+#include <boost/locale/config.hpp>
 #include <boost/cstdint.hpp>
 #include <ostream>
 #include <istream>
@@ -61,12 +61,12 @@ namespace boost {
         } // flags
 
 
-        uint64_t ext_flags(std::ios_base &);
-        uint64_t ext_flags(std::ios_base &,flags::display_flags_type mask);
-        void ext_setf(std::ios_base &,flags::display_flags_type flags,flags::display_flags_type mask);
+        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &);
+        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &,flags::display_flags_type mask);
+        BOOST_LOCALE_DECL void ext_setf(std::ios_base &,flags::display_flags_type flags,flags::display_flags_type mask);
         
-        int ext_value(std::ios_base &,flags::value_type id);
-        void ext_value(std::ios_base &,flags::value_type id,int value);
+        BOOST_LOCALE_DECL int ext_value(std::ios_base &,flags::value_type id);
+        BOOST_LOCALE_DECL void ext_value(std::ios_base &,flags::value_type id,int value);
        
         template<typename CharType>
         void ext_pattern(std::ios_base &,flags::pattern_type pat,std::basic_string<CharType> const &);
@@ -77,35 +77,35 @@ namespace boost {
         /// Specializations
 
         template<>
-        void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::string const &pattern);
+        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::string const &pattern);
         
         template<>
-        std::string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+        BOOST_LOCALE_DECL std::string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
 
         #ifndef BOOST_NO_STD_WSTRING
         
         template<>
-        void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::wstring const &pattern);
+        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::wstring const &pattern);
 
         template<>
-        std::wstring ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+        BOOST_LOCALE_DECL std::wstring ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
 
         #endif // BOOST_NO_STD_WSTRING
 
         #ifdef BOOST_HAS_CHAR16_T
         template<>
-        void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u16string const &pattern);
+        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u16string const &pattern);
 
         template<>
-        std::u16string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+        BOOST_LOCALE_DECL std::u16string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
         #endif // char16_t, u16string
 
         #ifdef BOOST_HAS_CHAR32_T
         template<>
-        void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u32string const &pattern);
+        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u32string const &pattern);
 
         template<>
-        std::u32string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+        BOOST_LOCALE_DECL std::u32string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
         #endif // char32_t, u32string
 
 

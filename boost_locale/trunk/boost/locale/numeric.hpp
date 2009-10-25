@@ -232,12 +232,10 @@ namespace boost {
             template<typename ValueType>
             iter_type do_real_get(iter_type in,iter_type end,std::ios_base &ios,std::ios_base::iostate &err,ValueType &val) const
             {
-                std::cerr<<L"GET!"<<std::endl;
                 formatter_type const *formatter = 0;
                 stream_type *stream_ptr = dynamic_cast<stream_type *>(&ios);
 
                 if(!stream_ptr || use_parent<ValueType>(ios) || (formatter = formatter_type::get(ios)) == 0) {
-                    std::cerr<<L"Use Parent"<<std::endl;
                     return std::num_get<CharType>::do_get(in,end,ios,err,val);
                 }
 
@@ -265,7 +263,6 @@ namespace boost {
                     val=static_cast<ValueType>(value);
                 }
 
-                std::cerr<<"Parsing ["<<tmp<<"] parsed part=["<<tmp.substr(0,parsed_chars)<<"]"<<std::endl;
                 for(size_t n=tmp.size();n>parsed_chars;n--) {
                     stream_ptr->putback(tmp[n-1]);
                 }

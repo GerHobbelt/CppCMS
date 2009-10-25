@@ -1,7 +1,7 @@
 #ifndef BOOST_LOCALE_CONVERTER_HPP_INCLUDED
 #define BOOST_LOCALE_CONVERTER_HPP_INCLUDED
 
-#include <boost/config.hpp>
+#include <boost/locale/config.hpp>
 #include <locale>
 
 namespace boost {
@@ -122,20 +122,20 @@ namespace boost {
         };
 
         template<>
-        converter<char> *converter<char>::create(info const &inf);
+        BOOST_LOCALE_DECL converter<char> *converter<char>::create(info const &inf);
         #ifndef BOOST_NO_STD_WSTRING
         template<>
-        converter<wchar_t> *converter<wchar_t>::create(info const &inf);
+        BOOST_LOCALE_DECL converter<wchar_t> *converter<wchar_t>::create(info const &inf);
         #endif
         
         #ifdef BOOST_HAS_CHAR16_T
         template<>
-        converter<char16_t> *converter<char16_t>::create(info const &inf);
+        BOOST_LOCALE_DECL converter<char16_t> *converter<char16_t>::create(info const &inf);
         #endif
         
         #ifdef BOOST_HAS_CHAR32_T
         template<>
-        converter<char32_t> *converter<char32_t>::create(info const &inf);
+        BOOST_LOCALE_DECL converter<char32_t> *converter<char32_t>::create(info const &inf);
         #endif
 
     }

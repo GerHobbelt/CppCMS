@@ -1,35 +1,73 @@
 #ifndef BOOST_LOCALE_MESSAGE_HPP_INCLUDED
 #define BOOST_LOCALE_MESSAGE_HPP_INCLUDED
 
+#include <boost/locale/config.hpp>
 #include <locale>
+#include <string>
+#include <set>
+#include <memory>
 
 namespace boost {
     namespace locale {
-        
-        struct message_format_base {
+
+        template<typename CharType>
+        class message_format;
+       
+        class BOOST_LOCALE_DECL messages_loader {
         public:
+
             typedef enum {
-                gnu_mo              = 1 << 0,
-                gnu_po              = 1 << 1,
-                xliff               = 1 << 2,
-                search_system_path  = 1 << 8,
-                search_wd           = 1 << 9,
+                char_facet      = 1 << 0,
+                wchar_t_facet   = 1 << 1,
+                char16_t_facet  = 1 << 2,
+                char32_t_facet  = 1 << 3,
+                all_facets      = char_facet | wchar_t_facet | char16_t_facet | char32_t_facet,
+            } facet_type;
 
-                default_flags       = gnu_mo | search_system_path
-            } catalog_flags;
+            messages_loader();
+            ~messages_loader();
+            
+            void domain(std::string def);
+            void add_domain(std::string domain);
+            void add_path(std::string path);
+
+            std::locale load(std::locale const &base,facet_type facets = all_facets);
+        
+        private:
+
+            template<typename CharType>
+            message_format<CharType> *generate(std::locale const &loc);
+            
+
+            messages_loader(const &);
+            void operator=(messages_loader const &);
+            
+            struct data {};
+            std::set<std::string> domains_;
+            std::string default_domain_;
+            std::vector<std::string> paths_;
+
+            std::auto_ptr<data> d; // Reserved opaque pointer
+            
         };
-
+        
         template<typename CharType>
         class message_format : public std::locale::facet
         {
         public:
+
             typedef CharType char_type;
             typedef std::basic_string<CharType> string_type;
 
             static std::locale::id id;
 
-            virtual char_type const *get(int domain_id,char const *id,string_type &buffer) const = 0;
-            virtual char_type const *get(int domain_id,char const *single_id.string_type &buffer,int n) const = 0;
+            message_format(size_t refs = 0) : 
+                std::locale::facet(refs)
+            {
+            }
+
+            virtual char_type const *get(int domain_id,char const *id) const = 0;
+            virtual char_type const *get(int domain_id,char const *single_id,int n) const = 0;
             virtual int domain(std::string const &domain) const = 0;
 
         protected:
@@ -183,17 +221,15 @@ namespace boost {
                     messages<CharType> const &msg = std::use_facet<messages<CharType> >(loc);
                     
                     if(!plural_) {
-                        translated = msg.get(domain_id,id,buffer);
+                        translated = msg.get(domain_id,id);
                     }
                     else {
-                        translated = msg.get(domain_id,id,buffer,n_);
+                        translated = msg.get(domain_id,id,n_);
                     }
                 }
 
                 if(!translated) {
                     char const *msg = plural ? ( n_ == 1 ? cut_comment(id) : plural) : cut_comment(id);
-
-                    /// FIXME -- need convert codepage from UTF-8 instead
 
                     std::ctype<CharType> const &ct = std::use_facet<std::ctype<CharType> >(loc);
                     while(*msg)
@@ -239,11 +275,11 @@ namespace boost {
         }
 
 
-        inline message _(char const *msg)
+        inline message translate(char const *msg)
         {
             return message(msg);
         }
-        inline message _(char const *single,char const *plural,int n)
+        inline message translate(char const *single,char const *plural,int n)
         {
             return message(single,plural,n);
         }

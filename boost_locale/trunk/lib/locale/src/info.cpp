@@ -1,3 +1,4 @@
+#define BOOST_LOCALE_SOURCE
 #include <boost/locale/info.hpp>
 #include <unicode/locid.h>
 #include <unicode/ucnv.h>

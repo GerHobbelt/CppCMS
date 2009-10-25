@@ -4,13 +4,14 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <boost/locale/config.hpp>
 
 namespace boost {
     namespace locale {
 
         class info_impl;
 
-        class info : public std::locale::facet
+        class BOOST_LOCALE_DECL info : public std::locale::facet
         {
         public:
             static std::locale::id id;
