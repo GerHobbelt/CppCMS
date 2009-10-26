@@ -49,7 +49,7 @@ namespace locale {
         /// Create a binary string that can be compared to other, usefull for collation of multiple
         /// strings
         ///
-        std::string transform(level_type level,char_type const *b,char_type const *e) const
+        string_type transform(level_type level,char_type const *b,char_type const *e) const
         {
             return do_transform(level,b,e);
         }
@@ -67,7 +67,7 @@ namespace locale {
         {
             return do_compare(level,s.data(),s.data()+s.size());
         }
-        std::string transform(level_type level,std::string const &s) const
+        string_type transform(level_type level,string_type const &s) const
         {
             return do_transform(level,s.data(),s.data()+s.size());
         }
@@ -88,7 +88,7 @@ namespace locale {
         {
             return do_compare(primary,b1,e1,b2,e2);
         }
-        virtual std::string do_transform(char_type const *b,char_type const *e) const
+        virtual string_type do_transform(char_type const *b,char_type const *e) const
         {
             return do_transform(primary,b,e);
         }
@@ -97,28 +97,30 @@ namespace locale {
             return do_hash(primary,b,e);
         }
 
-        virtual int do_compare(level_type level,string_type const &l,string_type const &r) const = 0;
-        virtual std::string do_transform(level_type level,char_type const *b,char_type const *e) const = 0;
+        virtual int do_compare( level_type level,
+                                char_type const *b1,char_type const *e1,
+                                char_type const *b2,char_type const *e2) const = 0;
+        virtual string_type do_transform(level_type level,char_type const *b,char_type const *e) const = 0;
         virtual long do_hash(level_type level,char_type const *b,char_type const *e) const = 0;
 
 
     };
 
     template<>
-    BOOST_LOCALE_DECL collator<char> *collator<char>::create(info const &inf);
+    BOOST_LOCALE_DECL collate<char> *collate<char>::create(info const &inf);
     #ifndef BOOST_NO_STD_WSTRING
     template<>
-    BOOST_LOCALE_DECL collator<wchar_t> *collator<wchar_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collate<wchar_t> *collate<wchar_t>::create(info const &inf);
     #endif
     
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    BOOST_LOCALE_DECL collator<char16_t> *collator<char16_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collate<char16_t> *collate<char16_t>::create(info const &inf);
     #endif
     
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collate<char32_t> *collate<char32_t>::create(info const &inf);
     #endif
 
 }

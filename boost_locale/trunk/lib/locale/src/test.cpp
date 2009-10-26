@@ -3,6 +3,7 @@
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/numeric.hpp>
 #include <boost/locale/info.hpp>
+#include <boost/locale/message.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
@@ -16,6 +17,12 @@ int main()
 	std::locale base1(base,new info(getenv("LC_ALL")));
 	std::locale base2(base1,new num_format<char>());
 	std::locale base3(base2,new num_parse<char>());
+
+	messages_loader loader();
+	loader.add_path(".");
+	loader.domain("test");
+
+	base3=loader.load(base3);
 	
 	stringstream out;
 	out.imbue(base3);
@@ -30,6 +37,10 @@ int main()
 	out<<as::ordinal<<104<<endl;
 	out<<as::date<<now<<endl;
 	out<<as::datetime<<as::date_full<<as::time_full << std::time(0) << endl;
+
+	out<<translate("Hello World")<<endl;
+	for(unsigned i=0;i<15;i++) {
+	}
 	
 	
 

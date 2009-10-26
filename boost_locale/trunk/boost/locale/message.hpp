@@ -4,8 +4,10 @@
 #include <boost/locale/config.hpp>
 #include <locale>
 #include <string>
+#include <vector>
 #include <set>
 #include <memory>
+#include <boost/locale/formatting.hpp>
 
 namespace boost {
     namespace locale {
@@ -37,12 +39,11 @@ namespace boost {
 
             template<typename CharType>
             message_format<CharType> *generate(std::locale const &loc);
-            
 
-            messages_loader(const &);
+            messages_loader(messages_loader const &);
             void operator=(messages_loader const &);
             
-            struct data {};
+            struct data;
             std::set<std::string> domains_;
             std::string default_domain_;
             std::vector<std::string> paths_;
@@ -78,7 +79,7 @@ namespace boost {
         };
 
         template<typename CharType>
-        static std::locale::id messages::id;
+        std::locale::id message_format<CharType>::id;
         
 
         ///
@@ -153,7 +154,7 @@ namespace boost {
             std::basic_string<CharType> str() const
             {
                 std::locale loc;
-                return str(loc,0);
+                return str<CharType>(loc,0);
             }
             
             ///
@@ -162,7 +163,7 @@ namespace boost {
             template<typename CharType>
             std::basic_string<CharType> str(std::locale const &locale) const
             {
-                return str(locale,0);
+                return str<CharType>(locale,0);
             }
            
             ///
@@ -172,17 +173,17 @@ namespace boost {
             std::basic_string<CharType> str(std::locale const &locale,std::string domain_id) const
             {
                 int id=0;
-                if(std::has_facet<messages<CharType> >(locale))
-                    id=std::use_facet<messages<CharType> >(locale).domain(domain_id);
-                return str(locale,id);
+                if(std::has_facet<message_format<CharType> >(locale))
+                    id=std::use_facet<message_format<CharType> >(locale).domain(domain_id);
+                return str<CharType>(locale,id);
             }
 
             
             ///
-            /// Translate message to string using locale \a locale and message domain index  \ a id
+            /// Translate message to string using locale \a loc and message domain index  \ a id
             /// 
             template<typename CharType>
-            std::basic_string<CharType> str(std::locale const &locale,int id) const
+            std::basic_string<CharType> str(std::locale const &loc,int id) const
             {
                 std::basic_string<CharType> buffer;                
                 CharType const *ptr = write(loc,id,buffer);
@@ -210,17 +211,17 @@ namespace boost {
         private:
             
             template<typename CharType>
-            CharType const *write(std::locale const &loc,int id,std::basic_string<CharType> &buffer) const
+            CharType const *write(std::locale const &loc,int domain_id,std::basic_string<CharType> &buffer) const
             {
                 CharType const *translated = 0;
 
                 char const *id = c_id_ ? c_id_ : id_.c_str();
                 char const *plural = c_plural_ ? c_plural_ : (plural_.empty() ? 0 : plural_.c_str());
                 
-                if(std::has_facet<messages<CharType> >(loc)) {
-                    messages<CharType> const &msg = std::use_facet<messages<CharType> >(loc);
+                if(std::has_facet<message_format<CharType> >(loc)) {
+                    message_format<CharType> const &msg = std::use_facet<message_format<CharType> >(loc);
                     
-                    if(!plural_) {
+                    if(!plural) {
                         translated = msg.get(domain_id,id);
                     }
                     else {
