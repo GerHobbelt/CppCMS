@@ -80,7 +80,7 @@ namespace boost {
                 }
                 static int get_id()
                 {
-                    static const int id = std::ios_base::xalloc();
+                    static int id = std::ios_base::xalloc();
                     return id;
                 }
             };

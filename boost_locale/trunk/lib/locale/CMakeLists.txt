@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 2.6)
+
+find_library(ICU_UC icuuc)
+find_library(ICU_DATA icudata)
+find_library(ICU_I18N icui18n)
+
+if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
+	message(FATAL " Failed to find icu")
+endif()
+
+add_definitions(-DBOOST_LOCALE_DYN_LINK)
+include_directories(../..)
+
+add_library(boost_locale SHARED 
+	src/converter.cpp
+	src/formatter.cpp 
+	src/formatting.cpp 
+	src/info.cpp 
+	src/message.cpp 
+	src/mo_lambda.cpp)
+
+add_executable(test src/test.cpp)
+
+target_link_libraries(boost_locale ${ICU_UC})
+target_link_libraries(boost_locale ${ICU_DATA})
+target_link_libraries(boost_locale ${ICU_I18N})
+
+target_link_libraries(test boost_locale)
+

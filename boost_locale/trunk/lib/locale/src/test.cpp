@@ -10,18 +10,26 @@
 
 int main()
 {
+	try {
 	using namespace boost::locale;
 	using namespace std;
-	std::locale base("");
+	std::locale base;
+	try {
+		base=std::locale("");
+	}
+	catch(std::exception const &e)
+	{}
 	std::locale::global(base);
 	std::locale base1(base,new info(getenv("LC_ALL")));
 	std::locale base2(base1,new num_format<char>());
 	std::locale base3(base2,new num_parse<char>());
 
-	messages_loader loader();
-	loader.add_path(".");
-	loader.domain("test");
+	messages_loader loader;
+//	loader.add_path(".");
+//	loader.domain("test");
 
+        std::cerr<<&std::use_facet<info>(base3)<<std::endl;
+	std::cerr<<message_format<char>::id._M_id()<<std::endl;
 	base3=loader.load(base3);
 	
 	stringstream out;
@@ -38,10 +46,9 @@ int main()
 	out<<as::date<<now<<endl;
 	out<<as::datetime<<as::date_full<<as::time_full << std::time(0) << endl;
 
-	out<<translate("Hello World")<<endl;
-	for(unsigned i=0;i<15;i++) {
-	}
-	
+	std::cout<<out.str()<<std::flush;
+	out<<translate("#A message#Hello World")<<endl;
+	out<<translate("##Hello World")<<endl;
 	
 
 	int v_104 = 0,v_1234 = 0;
@@ -82,5 +89,9 @@ int main()
 	cout << now_a <<"="<< now <<endl;
 
 	std::cout<<out.str();
+	}
+	catch(std::exception const &e) {
+	     std::cerr<<e.what()<<std::endl;
+	}
 	
 }

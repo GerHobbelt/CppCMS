@@ -3,17 +3,41 @@
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
 #include <boost/shared_ptr.hpp>
+#if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
+#else
+#include <map>
+#endif
 
 
 #include "uconv.hpp"
 #include "mo_hash.hpp"
 #include "mo_lambda.hpp"
 
+#include <iostream>
 #include <fstream>
 
 namespace boost {
     namespace locale {
+
+        template<>
+        std::locale::id base_message_format<char>::id;
+
+        #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        std::locale::id base_message_format<wchar_t>::id;
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR16_T
+        template<>
+        std::locale::id base_message_format<char16_t>::id;
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR32_T
+        template<>
+        std::locale::id base_message_format<char32_t>::id;
+        #endif
+
         namespace impl {
             class mo_file {
             public:
@@ -23,6 +47,7 @@ namespace boost {
                     native_byteorder_(true),
                     size_(0)
                 {
+                    load_file(file_name);
                     // Read all format sizes
                     size_=get(8);
                     keys_offset_=get(12);
@@ -152,7 +177,11 @@ namespace boost {
             class mo_message : public message_format<CharType> {
 
                 typedef std::basic_string<CharType> string_type;
+                #if BOOST_VERSION >= 103600
                 typedef boost::unordered_map<std::string,string_type> catalog_type;
+                #else
+                typedef std::map<std::string,string_type> catalog_type;
+                #endif
                 typedef std::vector<catalog_type> catalogs_set_type;
                 typedef std::map<std::string,int> domains_map_type;
             public:
@@ -202,7 +231,8 @@ namespace boost {
 
                 void add_domain(std::string domain)
                 {
-                    if(domains_.find(domain)==domains_.end())
+                    std::cerr<<"Add\n";
+                    if(domains_.find(domain)!=domains_.end())
                         return;
 
                     catalogs_.resize(catalogs_.size() + 1);
@@ -232,6 +262,7 @@ namespace boost {
                 {
                     info const &inf = std::use_facet<info>(loc);
                     std::string encoding = inf.encoding();
+
                     for(domains_map_type::iterator p=domains_.begin(),e=domains_.end();p!=e;++p) {
                         std::string domain=p->first;
                         int id=p->second;
@@ -259,6 +290,10 @@ namespace boost {
                     }
                 }
 
+                ~mo_message()
+                {
+                }
+
             private:
 
                 bool load_file(std::string file_name,std::string encoding,int id)
@@ -271,7 +306,8 @@ namespace boost {
                         if(mo_encoding.empty())
                             throw std::runtime_error("Invalid mo-format, encoding is not specified");
                         if(!plural.empty()) {
-                            plural_forms_[id] = lambda::compile(plural.c_str());
+                            std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
+                            plural_forms_[id] = ptr;
                         }
                         if( sizeof(CharType) == 1
                             && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
@@ -369,10 +405,11 @@ namespace boost {
             for(p=domains_.begin();p!=domains_.end();++p) {
                 ptr->add_domain(*p);
             }
-            ptr->set_default_domain(default_domain_);
+            if(!default_domain_.empty())
+                ptr->set_default_domain(default_domain_);
             ptr->load(loc);
-            return ptr.release();
-            
+            std::cerr<<impl::mo_message<CharType>::id._M_id()<<std::endl;
+            return ptr.release();            
         }
         
 
@@ -425,6 +462,7 @@ namespace boost {
             #endif
             return res;
         }
+
     }
 }
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

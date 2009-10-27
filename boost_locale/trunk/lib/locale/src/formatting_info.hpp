@@ -3,6 +3,7 @@
 
 
 #include <boost/config.hpp>
+#include <boost/locale/formatting.hpp>
 #include <boost/locale/formatter.hpp>
 #include <boost/cstdint.hpp>
 #include <string>
@@ -103,10 +104,12 @@ namespace boost {
                 {
                     valid_=false;
                     flags_ = 0;
+                    domain_id_=0;
                 }
                 
                 /// never copy formatter
                 ios_info(ios_info const &other) :
+                    domain_id_(other.domain_id_),
                     flags_(other.flags_),
                     datetime_(other.datetime_),
                     separator_(other.separator_),
@@ -119,6 +122,7 @@ namespace boost {
                 ios_info const &operator=(ios_info const &other)
                 {
                     if(this!=&other) {
+                        domain_id_ = other.domain_id_;
                         flags_=other.flags_;
                         datetime_=other.datetime_;
                         separator_=other.separator_;
@@ -126,6 +130,27 @@ namespace boost {
                         valid_=false;
                     }
                     return *this;
+                }
+
+                int value(flags::value_type id) const
+                {
+                    switch(id) {
+                    case flags::domain_id:
+                        return domain_id_;
+                    default:
+                        return 0;
+                    }
+                }
+
+                void value(flags::value_type id,int value)
+                {
+                    switch(id) {
+                    case flags::domain_id:
+                        domain_id_=value;
+                        break;
+                    default:
+                        ;
+                    }
                 }
 
                 uint64_t flags() const
@@ -196,6 +221,7 @@ namespace boost {
 
 
             private:
+                int domain_id_;
                 std::streamsize precision_;
                 std::ios_base::fmtflags ios_flags_;
                 uint64_t flags_;

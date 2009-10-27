@@ -27,7 +27,7 @@ namespace locale {
                     /// make sure xalloc called
                     ios_prop_info_type::global_init();
                 }
-            };
+            } init;
         }
 
         template<typename CharType>
@@ -277,6 +277,7 @@ namespace locale {
             boost::locale::info const &locale_info = std::use_facet<boost::locale::info>(ios.getloc());
             icu::Locale const &locale = locale_info.impl()->locale;
             std::string encoding = locale_info.impl()->encoding;
+
 
             UErrorCode err=U_ZERO_ERROR;
             

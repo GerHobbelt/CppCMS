@@ -51,19 +51,30 @@ namespace boost {
             std::auto_ptr<data> d; // Reserved opaque pointer
             
         };
+
+        ///
+        /// This class is big ugly hook for DLL in order to make sure that both program and DLL
+        /// refer to same locale::id when it uses some atomic static members.
+        ///
+        /// Further we specialize it for char, wchar_t, char16_t and char32_t in order to make them work.
+        ///
+        template<typename CharType>
+        struct base_message_format: public std::locale::facet
+        {
+        };
+
+       
         
         template<typename CharType>
-        class message_format : public std::locale::facet
+        class message_format : public base_message_format<CharType>
         {
         public:
 
             typedef CharType char_type;
             typedef std::basic_string<CharType> string_type;
 
-            static std::locale::id id;
-
             message_format(size_t refs = 0) : 
-                std::locale::facet(refs)
+                base_message_format<CharType>(refs)
             {
             }
 
@@ -78,9 +89,6 @@ namespace boost {
 
         };
 
-        template<typename CharType>
-        std::locale::id message_format<CharType>::id;
-        
 
         ///
         /// This class represents a message that can be converted to specific locale message
@@ -200,7 +208,7 @@ namespace boost {
             /// stream
             ///
             template<typename CharType>
-            void write(std::basic_ostream<CharType> &out)
+            void write(std::basic_ostream<CharType> &out) const
             {
                 std::locale const &loc = out.getloc();
                 int id = ext_value(out,flags::domain_id);
@@ -234,20 +242,21 @@ namespace boost {
 
                     std::ctype<CharType> const &ct = std::use_facet<std::ctype<CharType> >(loc);
                     while(*msg)
-                        buffer.append(ct.widen(*msg++));
+                        buffer+=ct.widen(*msg++);
 
                     translated = buffer.c_str();
                 }
                 return translated;
             }
 
-            char const *cut_comment(char const *id)
+            char const *cut_comment(char const *id) const
             {
                 static const char key = '#';
                 if(*id == key) {
                     if(id[1] == key)
                         return id+1;
                     char c;
+                    id++;
                     while((c=*id)!=0 && c!=key)
                         id++;
                     if(*id==key)
@@ -284,7 +293,72 @@ namespace boost {
         {
             return message(single,plural,n);
         }
-    }
+
+
+        ///
+        /// Specialization for char
+        ///
+
+        template<>
+        struct BOOST_LOCALE_DECL base_message_format<char> : public std::locale::facet 
+        {
+            base_message_format(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+        
+        #ifndef BOOST_NO_STD_WSTRING
+        
+        ///
+        /// Specialization for char
+        ///
+
+        template<>
+        struct BOOST_LOCALE_DECL base_message_format<wchar_t> : public std::locale::facet 
+        {
+            base_message_format(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        #endif
+
+        #ifdef BOOST_HAS_CHAR16_T
+        ///
+        /// Specialization for char16_t
+        ///
+
+        template<>
+        struct BOOST_LOCALE_DECL base_message_format<char16_t> : public std::locale::facet 
+        {
+            base_message_format(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        #endif
+
+        #ifdef BOOST_HAS_CHAR32_T
+        ///
+        /// Specialization for char32_t
+        ///
+
+        template<>
+        struct BOOST_LOCALE_DECL base_message_format<char32_t> : public std::locale::facet 
+        {
+            base_message_format(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        #endif
+        
+        
+     }
 }
 
 
