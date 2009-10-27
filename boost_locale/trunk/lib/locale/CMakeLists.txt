@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 find_library(ICU_UC icuuc)
-find_library(ICU_DATA icudata)
-find_library(ICU_I18N icui18n)
+find_library(ICU_DATA icudata NAMES icudt)
+find_library(ICU_I18N icui18n NAMES icuin)
 
 if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 	message(FATAL " Failed to find icu")
