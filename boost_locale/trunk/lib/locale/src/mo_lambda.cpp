@@ -1,5 +1,7 @@
 #include "mo_lambda.hpp"
 #include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
 
 namespace boost {
 namespace locale {
@@ -284,7 +286,6 @@ namespace lambda {
                 if((op2=hexpr()).get()==0)                          \
                     return plural_ptr();                            \
                 op1=bin_factory(o,op1,op2);                         \
-                assert(op1.get());                                  \
             }                                                       \
             return op1;                                             \
         }

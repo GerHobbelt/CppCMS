@@ -17,24 +17,22 @@
 #include <iostream>
 #include <fstream>
 
+#include <string.h>
+
 namespace boost {
     namespace locale {
 
-        template<>
         std::locale::id base_message_format<char>::id;
 
         #ifndef BOOST_NO_STD_WSTRING
-        template<>
         std::locale::id base_message_format<wchar_t>::id;
         #endif
         
         #ifdef BOOST_HAS_CHAR16_T
-        template<>
         std::locale::id base_message_format<char16_t>::id;
         #endif
         
         #ifdef BOOST_HAS_CHAR32_T
-        template<>
         std::locale::id base_message_format<char32_t>::id;
         #endif
 
