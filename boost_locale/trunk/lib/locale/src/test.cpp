@@ -4,6 +4,7 @@
 #include <boost/locale/numeric.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/collator.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
@@ -20,20 +21,23 @@ int main()
 	catch(std::exception const &e)
 	{}
 	std::locale::global(base);
-	std::locale base1(base,new info(getenv("LC_ALL")));
-	std::locale base2(base1,new num_format<char>());
-	std::locale base3(base2,new num_parse<char>());
+	base = std::locale(base,new info(getenv("LC_ALL")));
+	base = std::locale(base,new num_format<char>());
+	base = std::locale(base,new num_parse<char>());
+	base = std::locale(base,collator<char>::create(std::use_facet<info>(base)));
+
 
 	messages_loader loader;
-//	loader.add_path(".");
-//	loader.domain("test");
+	loader.add_path(".");
+	loader.domain("test");
 
-        std::cerr<<&std::use_facet<info>(base3)<<std::endl;
-	std::cerr<<message_format<char>::id._M_id()<<std::endl;
-	base3=loader.load(base3);
+	std::cout << std::use_facet<collator<char> >(base).compare(collator_base::primary,"hello","Hello") << std::endl;
+	std::cout << std::use_facet<collator<char> >(base).compare(collator_base::tertiary,"hello","Hello") << std::endl;
+
+	base=loader.load(base);
 	
 	stringstream out;
-	out.imbue(base3);
+	out.imbue(base);
 
 	time_t now=std::time(0);
 

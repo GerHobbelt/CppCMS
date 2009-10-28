@@ -1,5 +1,5 @@
-#ifndef BOOST_LOCALE_COLLATE_HPP_INCLUDED
-#define BOOST_LOCALE_COLLATE_HPP_INCLUDED
+#ifndef BOOST_LOCALE_COLLATOR_HPP_INCLUDED
+#define BOOST_LOCALE_COLLATOR_HPP_INCLUDED
 
 #include <locale>
 #include <boost/locale/config.hpp>
@@ -9,7 +9,7 @@ namespace locale {
 
     class info;
 
-    class collate_base {
+    class collator_base {
     public:
         ///
         /// Unicode collation level types
@@ -27,9 +27,9 @@ namespace locale {
     /// allowing usage of std::locale class for direct string comparison
     ///
     template<typename CharType>
-    class collate : 
+    class collator : 
         public std::collate<CharType>,
-        public collate_base
+        public collator_base
     {
     public:
         typedef CharType char_type;
@@ -72,14 +72,14 @@ namespace locale {
             return do_transform(level,s.data(),s.data()+s.size());
         }
 
-        static collate<CharType> *create(info const &inf);
+        static collator<CharType> *create(info const &inf);
         
     protected:
 
-        collate(size_t refs = 0) : std::collate<CharType>(refs) 
+        collator(size_t refs = 0) : std::collate<CharType>(refs) 
         {
         }
-        virtual ~collate()
+        virtual ~collator()
         {
         }
         
@@ -107,20 +107,20 @@ namespace locale {
     };
 
     template<>
-    BOOST_LOCALE_DECL collate<char> *collate<char>::create(info const &inf);
+    BOOST_LOCALE_DECL collator<char> *collator<char>::create(info const &inf);
     #ifndef BOOST_NO_STD_WSTRING
     template<>
-    BOOST_LOCALE_DECL collate<wchar_t> *collate<wchar_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collator<wchar_t> *collator<wchar_t>::create(info const &inf);
     #endif
     
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    BOOST_LOCALE_DECL collate<char16_t> *collate<char16_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collator<char16_t> *collator<char16_t>::create(info const &inf);
     #endif
     
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    BOOST_LOCALE_DECL collate<char32_t> *collate<char32_t>::create(info const &inf);
+    BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf);
     #endif
 
 }

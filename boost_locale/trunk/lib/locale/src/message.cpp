@@ -14,7 +14,6 @@
 #include "mo_hash.hpp"
 #include "mo_lambda.hpp"
 
-#include <iostream>
 #include <fstream>
 
 #include <string.h>
@@ -229,7 +228,6 @@ namespace boost {
 
                 void add_domain(std::string domain)
                 {
-                    std::cerr<<"Add\n";
                     if(domains_.find(domain)!=domains_.end())
                         return;
 
@@ -406,7 +404,6 @@ namespace boost {
             if(!default_domain_.empty())
                 ptr->set_default_domain(default_domain_);
             ptr->load(loc);
-            std::cerr<<impl::mo_message<CharType>::id._M_id()<<std::endl;
             return ptr.release();            
         }
         
