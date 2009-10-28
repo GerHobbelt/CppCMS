@@ -307,52 +307,27 @@ namespace locale {
                     std::auto_ptr<icu::NumberFormat> nf;
                     
                     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
+                    //
                     // ICU 4.2 has special ISO currency style
+                    //
+
                     if(curr == currency_default || curr == currency_national)
                         nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kIsoCurrencyStyle,err));
                     else
                         nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kCurrencyStyle,err));
-                    if(U_FAILURE(err))
-                        return fmt;
 
                     #else
                     //
-                    // We can get currency for DecimalFormatSymbols (if number format is instance of DecimalFormat
-                    // otherwise we can get this ISO formatter from standard C++ money facet
+                    // Before 4.2 we have no way to create ISO Currency 
                     //
+                    
                     nf.reset(icu::NumberFormat::createCurrencyInstance(locale,err));
+
+                    #endif
 
                     if(U_FAILURE(err))
                         return fmt;
 
-                    err=U_ZERO_ERROR;
-                    icu::DecimalFormat *df;
-
-                    if(curr == currency_iso){
-                        if((df=dynamic_cast<icu::DecimalFormat *>(nf.get()))!=0) {
-                            icu::UnicodeString tmp =
-                                df->getDecimalFormatSymbols()->getSymbol(icu::DecimalFormatSymbols::kIntlCurrencySymbol);
-
-                            nf->setCurrency(tmp.getBuffer(),err);
-
-                            if(U_FAILURE(err))
-                                return fmt;
-                        }
-                        else if(std::has_facet<std::moneypunct<CharType,true> >(ios.getloc())) {
-                            std::basic_string<CharType> tmp = 
-                                std::use_facet<std::moneypunct<CharType,true> >(ios.getloc()).curr_symbol();
-                            if(tmp.size()!=3)
-                                return fmt;
-                            UChar iso[3];
-                            std::copy(tmp.begin(),tmp.end(),iso);
-                            nf->setCurrency(iso,err);
-                            if(U_FAILURE(err))
-                                return fmt;
-                        }
-                        else 
-                            return fmt;
-                    }
-                    #endif
                     fmt.reset(new number_format<CharType>(nf,encoding));
                 }
                 break;

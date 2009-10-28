@@ -7,7 +7,17 @@
 namespace boost {
     namespace locale {
 
-        class converter_base {
+        struct normalization {
+            typedef enum {
+                norm_default = 0,
+                norm_nfd,
+                norm_nfc,
+                norm_nfkd,
+                norm_nfkc
+            } normalization_type;
+        };
+
+        class converter_base : public normalization {
         public:
 
             typedef enum {
@@ -18,13 +28,6 @@ namespace boost {
                 title_case
             } conversion_type;
 
-            typedef enum {
-                norm_default = 0,
-                norm_nfd,
-                norm_nfc,
-                norm_nfkd,
-                norm_nfkc
-            } normalization_type;
 
         };
 
@@ -137,6 +140,42 @@ namespace boost {
         template<>
         BOOST_LOCALE_DECL converter<char32_t> *converter<char32_t>::create(info const &inf);
         #endif
+
+        ///
+        /// Free function to_upper
+        ///
+
+        template<typename CharType>
+        std::basic_string<CharType> to_upper(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
+        {
+            return std::use_facet<converter<CharType> >(loc).to_upper(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> to_lower(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
+        {
+            return std::use_facet<converter<CharType> >(loc).to_lower(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> to_title(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
+        {
+            return std::use_facet<converter<CharType> >(loc).to_title(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> fold_case(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
+        {
+            return std::use_facet<converter<CharType> >(loc).fold_case(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> normalize(  std::basic_string<CharType> const &str,
+                                                normalization::normalization_type nt=normalization::norm_default,
+                                                std::locale const &loc=std::locale())
+        {
+            return std::use_facet<converter<CharType> >(loc).normalize(str,nt);
+        }
 
     }
 

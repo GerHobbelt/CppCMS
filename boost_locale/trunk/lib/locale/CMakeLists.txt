@@ -16,6 +16,7 @@ add_library(boost_locale SHARED
 	src/formatter.cpp 
 	src/formatting.cpp 
 	src/info.cpp 
+	src/format.cpp 
 	src/message.cpp 
 	src/mo_lambda.cpp)
 
