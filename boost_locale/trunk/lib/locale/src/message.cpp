@@ -15,6 +15,7 @@
 #include "mo_lambda.hpp"
 
 #include <fstream>
+#include <iostream>
 
 #include <string.h>
 
@@ -49,17 +50,20 @@ namespace boost {
                     size_=get(8);
                     keys_offset_=get(12);
                     translations_offset_=get(16);
-                    hash_offset_=get(20);
-                    hash_size_=get(24);
+                    hash_size_=get(20);
+                    hash_offset_=get(24);
                 }
-               
+
                 pair_type find(char const *key_in) const
                 {
                     if(hash_size_==0)
                         return pair_type(0,0);
                     uint32_t hkey = pj_winberger_hash_function(key_in);
-                    uint32_t orig=hkey;
                     uint32_t incr = 1 + hkey % (hash_size_-2);
+                    hkey %= hash_size_;
+                    uint32_t orig=hkey;
+                    
+                    
                     do {
                         uint32_t idx = get(hash_offset_ + 4*hkey);
                         /// Not found
@@ -76,14 +80,15 @@ namespace boost {
                 
                 char const *key(int id) const
                 {
+                    uint32_t len = get(keys_offset_ + id*8);
                     uint32_t off = get(keys_offset_ + id*8 + 4);
                     return data_ + off;
                 }
 
                 pair_type value(int id) const
                 {
-                    uint32_t len = get(translations_offset_+id*8);
-                    uint32_t off = get(translations_offset_+id*8+4);
+                    uint32_t len = get(translations_offset_ + id*8);
+                    uint32_t off = get(translations_offset_ + id*8 + 4);
                     return pair_type(&data_[off],&data_[off]+len);
                 }
 
@@ -113,13 +118,15 @@ namespace boost {
                     //
                     
                     uint32_t magic=0;
-                    file.get(reinterpret_cast<char *>(&magic),sizeof(magic));
+                    file.read(reinterpret_cast<char *>(&magic),sizeof(magic));
+                    
                     if(magic == 0x950412de)
                         native_byteorder_ = true;
                     else if(magic == 0xde120495)
                         native_byteorder_ = false;
                     else
                         throw std::runtime_error("Invalid file format");
+                    
 
                     // load image of file to memory
                     file.seekg(0, std::ios::end);
@@ -141,8 +148,9 @@ namespace boost {
                 uint32_t get(unsigned offset) const
                 {
                     uint32_t tmp;
-                    if(offset >= file_size_ - 4)
+                    if(offset > file_size_ - 4) {
                         throw std::runtime_error("Bad file format");
+                    }
                     memcpy(&tmp,data_ + offset,4);
                     convert(tmp);
                     return tmp;
@@ -297,10 +305,11 @@ namespace boost {
                     try {
                         std::auto_ptr<mo_file> mo(new mo_file(file_name));
 
-                        std::string plural = extract(mo->key(0),"plural=");
-                        std::string mo_encoding = extract(mo->key(0),"charset=");
+                        std::string plural = extract(mo->value(0).first,"plural=");
+                        std::string mo_encoding = extract(mo->value(0).first,"charset=");
                         if(mo_encoding.empty())
                             throw std::runtime_error("Invalid mo-format, encoding is not specified");
+                        std::cerr<<"Plural = ["<<plural<<"]"<<std::endl;
                         if(!plural.empty()) {
                             std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
                             plural_forms_[id] = ptr;
@@ -313,7 +322,6 @@ namespace boost {
                         }
                         else {
                             converter cvt(encoding,mo_encoding);
-                            
                             for(unsigned i=0;i<mo->size();i++) {
                                 mo_file::pair_type tmp = mo->value(i);
                                 catalogs_[id][mo->key(i)]=cvt(tmp.first,tmp.second);

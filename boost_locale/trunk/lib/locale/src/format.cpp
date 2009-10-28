@@ -1,12 +1,18 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/format.hpp>
+#include <limits>
+#include "formatting_info.hpp"
+
+#include <iostream>
 
 namespace boost {
     namespace locale {
         namespace details {
             struct format_parser::data {
                 unsigned position;
-                std::ios_base saved;
+                std::streamsize precision;
+                std::ios_base::fmtflags flags;
+                impl::ios_info info;
             };
 
             format_parser::format_parser(std::ios_base &ios) : 
@@ -14,7 +20,8 @@ namespace boost {
                 d(new data)
             {
                 d->position=std::numeric_limits<unsigned>::max();
-                d->saved.copyfmt(ios);
+                d->precision=ios.precision();
+                d->info=impl::ios_prop<impl::ios_info>::get(ios);
             }
 
             format_parser::~format_parser()
@@ -23,7 +30,13 @@ namespace boost {
 
             void format_parser::restore()
             {
-                ios_.copyfmt(d->saved);
+                impl::ios_prop<impl::ios_info>::set(d->info,ios_);
+                ios_.width(0);
+            }
+
+            unsigned format_parser::get_posision()
+            {
+                return d->position;
             }
 
             void format_parser::set_flags(std::string const &format)
@@ -31,7 +44,7 @@ namespace boost {
                 size_t end = 0;
                 for(size_t begin = 0;begin < format.size();begin = ( end  == std::string::npos ? end : end+1)) {
                         end=format.find(',',begin);
-                        set_one_flag(format.substr(begin,end-begin-1));
+                        set_one_flag(format.substr(begin,end-begin));
                 }                
             }
             void format_parser::set_one_flag(std::string const &flag)
@@ -46,13 +59,13 @@ namespace boost {
             {
                 if(key.empty())
                     return;
-
-                for(unsigned i=0;i<key.size();i++) {
+                unsigned i;
+                for(i=0;i<key.size();i++) {
                     if(key[i] < '0' || '9'< key[i])
                         break;
                 }
                 if(i==key.size()) {
-                    d->position=atoi(key.c_str());
+                    d->position=atoi(key.c_str()) - 1;
                     return;
                 }
 
@@ -60,11 +73,11 @@ namespace boost {
                     as::number(ios_);
 
                     if(value=="hex")
-                        ios_.setf(ios::base::hex,std::ios_base::basefield);
-                    else if(value=="oct") {
-                        ios_.setf(ios::base::oct,std::ios_base::basefield);
+                        ios_.setf(std::ios_base::hex,std::ios_base::basefield);
+                    else if(value=="oct")
+                        ios_.setf(std::ios_base::oct,std::ios_base::basefield);
                     else if(value=="sci" || value=="scientific")
-                        ios_.setf(ios::base::scientific,std::ios_base::floatfield);
+                        ios_.setf(std::ios_base::scientific,std::ios_base::floatfield);
                 }
                 else if(key=="cur" || key=="currency") {
                     as::currency(ios_);
@@ -123,14 +136,14 @@ namespace boost {
                 else if(key=="ord" || key=="ordinal") {
                     as::ordinal(ios_);
                 }
-                else if(key=="left" || ley=="<")
-                    ios_.setf(ios::base::left,std::ios_base::adjustfield);
-                else if(key=="right" || ley==">")
-                    ios_.setf(ios::base::right,std::ios_base::adjustfield);
+                else if(key=="left" || key=="<")
+                    ios_.setf(std::ios_base::left,std::ios_base::adjustfield);
+                else if(key=="right" || key==">")
+                    ios_.setf(std::ios_base::right,std::ios_base::adjustfield);
                 else if(key=="gmt")
                     as::gmt(ios_);
                 else if(key=="local")
-                    as::locale_time(ios_);
+                    as::local_time(ios_);
                 else if(key=="timezone" || key=="tz")
                     ext_pattern(ios_,flags::time_zone_id,value);
                 else if(key=="w" || key=="width")

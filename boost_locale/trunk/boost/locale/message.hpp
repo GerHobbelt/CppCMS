@@ -110,7 +110,7 @@ namespace boost {
             /// Create a simple message from 0 terminated string. The string should exist
             /// until message is destroyed. Generally useful with static constant strings
             /// 
-            message(char const *id) :
+            explicit message(char const *id) :
                 n_(0),
                 c_id_(id),
                 c_plural_(0)
@@ -123,7 +123,7 @@ namespace boost {
             ///
             /// \a n is the number, \a single and \a plural are single and plural forms of message
             /// 
-            message(char const *single,char const *plural,int n) :
+            explicit message(char const *single,char const *plural,int n) :
                 n_(n),
                 c_id_(single),
                 c_plural_(plural)
@@ -133,7 +133,7 @@ namespace boost {
             ///
             /// Create a simple message from string.
             ///
-            message(std::string const &id) :
+            explicit message(std::string const &id) :
                 n_(0),
                 c_id_(0),
                 c_plural_(0),
@@ -146,7 +146,7 @@ namespace boost {
             ///
             /// \a n is the number, \a single and \a plural are single and plural forms of message
             /// 
-            message(std::string const &single,std::string const &plural,int number) :
+            explicit message(std::string const &single,std::string const &plural,int number) :
                 n_(number),
                 c_id_(0),
                 c_plural_(0),
