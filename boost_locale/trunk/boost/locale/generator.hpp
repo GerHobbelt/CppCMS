@@ -1,5 +1,7 @@
-#ifndef BOOST_LOCALE_CATEGORIES_HPP
-#define BOOST_LOCALE_CATEGORIES_HPP
+#ifndef BOOST_LOCALE_GENERATOR_HPP
+#define BOOST_LOCALE_GENERATOR_HPP
+
+#include <boost/locale/config.hpp>
 
 namespace boost {
     namespace locale {
@@ -22,12 +24,11 @@ namespace boost {
             all_categories  = 0xFFFFFFFFu
         } locale_category_type;
 
-        class factory {
+        class BOOST_LOCALE_DECL generator {
         public:
 
-            factory();
-            ~factory();
-
+            generator();
+            ~generator();
 
             void categories(locale_category_type cats);
             locale_category_type categories() const;
@@ -45,6 +46,10 @@ namespace boost {
             void add_messages_path(std::string const &path);
             void clear_paths();
 
+            void clear();
+
+            std::locale generate(std::string const &id);
+            std::locale generate(std::string const &id,std::string const &encoding);
 
             std::locale generate(std::locale const &base,std::string const &id);
             std::locale generate(std::locale const &base,std::string const &id,std::string const &encoding);
@@ -54,10 +59,11 @@ namespace boost {
 
         private:
 
-            factory(factory const &);
-            void operator=(factory const &);
+            generator(factory const &);
+            void operator=(generator const &);
 
-            std::auto_ptr<factory_impl> impl_;
+            struct data;
+            std::auto_ptr<data> d;
         };
 
     }
