@@ -1,0 +1,45 @@
+# Boost.Locale
+
+## Introduction
+
+Boost.Locale is a library that brings high quality localization facilities in C++ way.
+It uses `std::locale`, and `std::locale` facets in order to provide localization in transparent and
+C++ aware way to user.
+
+C++ has quite good base for localization via existing C++ locale facets: `std::num_put`, `std::ctype`, `std::collate` etc.. But
+they are very limited and sometimes buggy by design. The support of localization varies between different operating systems
+and incompatible between them.
+
+On the other hand, there is great, well debugged, high quality, widely used ICU library that gives all of the goodies but,
+it has very old API that mimics Java behavior, it is completely ignores STL and provides useful API only
+for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-16, or limited national character sets
+like Latin1.
+
+
+Boost.Locale provides the natural glue between C++ locales framework, iostreams and powerful ICU library in following areas:
+
+- Correct case conversion, case folding and normalization
+- Collation including support of 4 Unicode collation levels.
+- Date and time formatting and parsing including support of timezones and calendars other then Gregorian.
+- Number formatting, spelling and parsing
+- Monetary formatting and parsing
+- Powerful message formatting including support plural forms, using GNU catalogs.
+- Character, work, sentence and line-break boundary analysis.
+- Support of 8-bit character sets like Latin1 and UTF-8 encoded text.
+- Support of `char`, `wchar_t` and C++0x `char16_t`, `char32_t` strings and streams.
+
+## Tutorial
+
+### Locale Model
+
+The major "container" of all localization information in C++ is class `std::locale`. It is designed to hold
+all general information about specific culture and can be easily extended with additional resources providing 
+information about specific culture: facets. Facets are classes derived from `std::locale::facet` that hold
+required resources.
+
+For example `std::collate` facet provides information about string comparison.
+
+Other information, that can be also called formatting flags can be kept withing `std::ios_base` object and
+can be changed using iostream manipulators.
+
+
