@@ -9,7 +9,6 @@ if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 endif(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 
 add_definitions(-DBOOST_LOCALE_DYN_LINK)
-add_definitions(-DBOOST_HAS_DECLSPEC)
 
 include_directories(../..)
 
