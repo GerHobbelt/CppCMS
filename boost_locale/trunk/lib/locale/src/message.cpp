@@ -80,7 +80,6 @@ namespace boost {
                 
                 char const *key(int id) const
                 {
-                    uint32_t len = get(keys_offset_ + id*8);
                     uint32_t off = get(keys_offset_ + id*8 + 4);
                     return data_ + off;
                 }
@@ -305,11 +304,10 @@ namespace boost {
                     try {
                         std::auto_ptr<mo_file> mo(new mo_file(file_name));
 
-                        std::string plural = extract(mo->value(0).first,"plural=");
-                        std::string mo_encoding = extract(mo->value(0).first,"charset=");
+                        std::string plural = extract(mo->value(0).first,"plural=","\r\n;");
+                        std::string mo_encoding = extract(mo->value(0).first,"charset="," \r\n;");
                         if(mo_encoding.empty())
                             throw std::runtime_error("Invalid mo-format, encoding is not specified");
-                        std::cerr<<"Plural = ["<<plural<<"]"<<std::endl;
                         if(!plural.empty()) {
                             std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
                             plural_forms_[id] = ptr;
@@ -339,13 +337,12 @@ namespace boost {
 
                 }
 
-                static std::string extract(std::string meta,std::string key)
+                static std::string extract(std::string const &meta,std::string const &key,char const *separator)
                 {
                     size_t pos=meta.find(key);
                     if(pos == std::string::npos)
                         return "";
                     pos+=key.size(); /// size of charset=
-                    static const std::string separator="\t\r\n ;";
                     size_t end_pos = meta.find_first_of(separator,pos);
                     return meta.substr(pos,end_pos - pos);
                 }

@@ -60,19 +60,19 @@ namespace boost {
 
         std::string info::encoding() const
         {
-            return impl_->encoding;
+            return impl()->encoding;
         }
         std::string info::language() const
         {
-            return impl_->locale.getLanguage();
+            return impl()->locale.getLanguage();
         }
         std::string info::country() const
         {
-            return impl_->locale.getCountry();
+            return impl()->locale.getCountry();
         }
         std::string info::variant() const
         {
-            return impl_->locale.getVariant();
+            return impl()->locale.getVariant();
         }
     }
 }

@@ -304,13 +304,14 @@ namespace locale {
                 break;
             case currency:
                 {
-                    uint64_t curr = info.flags() & currency_flags_mask;
                     std::auto_ptr<icu::NumberFormat> nf;
                     
                     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
                     //
                     // ICU 4.2 has special ISO currency style
                     //
+                    
+                    uint64_t curr = info.flags() & currency_flags_mask;
 
                     if(curr == currency_default || curr == currency_national)
                         nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kIsoCurrencyStyle,err));

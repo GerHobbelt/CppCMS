@@ -160,7 +160,7 @@ namespace boost {
                 char_type obrk=out.widen('{');
                 char_type cbrk=out.widen('}');
                 size_t pos = 0;
-                while(pos<=format.size()) {
+                while(pos<format.size()) {
                     if(format[pos]!=obrk) {
                         out<<format[pos];
                         pos++;
@@ -237,7 +237,7 @@ namespace boost {
 
 
 
-            static const int base_params_ = 8;
+            static unsigned const base_params_ = 8;
             
             message message_;
             string_type format_;

@@ -2,6 +2,7 @@
 #include <boost/locale/format.hpp>
 #include <limits>
 #include "formatting_info.hpp"
+#include <stdlib.h>
 
 #include <iostream>
 
