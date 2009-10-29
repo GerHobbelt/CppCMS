@@ -32,10 +32,20 @@ namespace boost {
         };
 
         class info;
+        ///
+        /// This class is big ugly hook for DLL in order to make sure that both program and DLL
+        /// refer to same locale::id when it uses some atomic static members.
+        ///
+        /// Further we specialize it for char, wchar_t, char16_t and char32_t in order to make them work.
+        ///
+        template<typename CharType>
+        struct base_converter_facet : public std::locale::facet
+        {
+        };
 
         template<typename CharType>
         class converter : 
-            public std::locale::facet,
+            public base_converter_facet<CharType>,
             public converter_base
         {
         public:
@@ -43,9 +53,6 @@ namespace boost {
             typedef std::basic_string<CharType> string_type;
             typedef CharType char_type;
 
-            static std::locale::id id;
-
-       
             string_type to_upper(string_type const &str) const
             {
                 return convert(upper_case,str);
@@ -112,7 +119,7 @@ namespace boost {
             
         protected:
             
-            converter(size_t refs=0) : std::locale::facet(refs)
+            converter(size_t refs=0) : base_converter_facet<CharType>(refs)
             {
             }
 
@@ -125,20 +132,58 @@ namespace boost {
         };
 
         template<>
+        struct BOOST_LOCALE_DECL base_converter_facet<char> : public std::locale::facet 
+        {
+            base_converter_facet(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        template<>
         BOOST_LOCALE_DECL converter<char> *converter<char>::create(info const &inf);
+        
         #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        struct BOOST_LOCALE_DECL base_converter_facet<wchar_t> : public std::locale::facet 
+        {
+            base_converter_facet(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
         template<>
         BOOST_LOCALE_DECL converter<wchar_t> *converter<wchar_t>::create(info const &inf);
         #endif
         
         #ifdef BOOST_HAS_CHAR16_T
         template<>
+        struct BOOST_LOCALE_DECL base_converter_facet<char16_t> : public std::locale::facet 
+        {
+            base_converter_facet(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        template<>
         BOOST_LOCALE_DECL converter<char16_t> *converter<char16_t>::create(info const &inf);
         #endif
         
         #ifdef BOOST_HAS_CHAR32_T
         template<>
+        struct BOOST_LOCALE_DECL base_converter_facet<char32_t> : public std::locale::facet 
+        {
+            base_converter_facet(size_t refs = 0) : std::locale::facet(refs)
+            {
+            }
+            static std::locale::id id;
+        };
+
+        template<>
         BOOST_LOCALE_DECL converter<char32_t> *converter<char32_t>::create(info const &inf);
+
         #endif
 
         ///

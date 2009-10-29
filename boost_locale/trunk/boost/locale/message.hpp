@@ -12,46 +12,7 @@
 namespace boost {
     namespace locale {
 
-        template<typename CharType>
-        class message_format;
-       
-        class BOOST_LOCALE_DECL messages_loader {
-        public:
-
-            typedef enum {
-                char_facet      = 1 << 0,
-                wchar_t_facet   = 1 << 1,
-                char16_t_facet  = 1 << 2,
-                char32_t_facet  = 1 << 3,
-                all_facets      = char_facet | wchar_t_facet | char16_t_facet | char32_t_facet,
-            } facet_type;
-
-            messages_loader();
-            ~messages_loader();
-            
-            void domain(std::string def);
-            void add_domain(std::string domain);
-            void add_path(std::string path);
-
-            std::locale load(std::locale const &base,facet_type facets = all_facets);
-        
-        private:
-
-            template<typename CharType>
-            message_format<CharType> *generate(std::locale const &loc);
-
-            messages_loader(messages_loader const &);
-            void operator=(messages_loader const &);
-            
-            struct data;
-            std::set<std::string> domains_;
-            std::string default_domain_;
-            std::vector<std::string> paths_;
-
-            std::auto_ptr<data> d; // Reserved opaque pointer
-            
-        };
-
+        class info;
         ///
         /// This class is big ugly hook for DLL in order to make sure that both program and DLL
         /// refer to same locale::id when it uses some atomic static members.
@@ -81,6 +42,8 @@ namespace boost {
             virtual char_type const *get(int domain_id,char const *id) const = 0;
             virtual char_type const *get(int domain_id,char const *single_id,int n) const = 0;
             virtual int domain(std::string const &domain) const = 0;
+
+            static message_format<CharType> *create(info const &,std::vector<std::string> const &paths,std::vector<std::string> const &domains);
 
         protected:
             virtual ~message_format()
@@ -153,6 +116,16 @@ namespace boost {
                 id_(single),
                 plural_(plural)
             {
+            }
+
+            ///
+            /// Message class can be explicitly converter to string class
+            ///
+
+            template<typename CharType>
+            operator std::basic_string<CharType> () const
+            {
+                return str<CharType>();
             }
 
             ///
@@ -293,8 +266,16 @@ namespace boost {
         {
             return message(single,plural,n);
         }
-
-
+        
+        inline message translate(std::string const &msg)
+        {
+            return message(msg);
+        }
+        inline message translate(std::string const &single,std::string const &plural,int n)
+        {
+            return message(single,plural,n);
+        }
+        
         ///
         /// Specialization for char
         ///
@@ -308,6 +289,10 @@ namespace boost {
             static std::locale::id id;
         };
         
+        template<>
+        BOOST_LOCALE_DECL message_format<char> *message_format<char>::create(   info const &,
+                                                                                std::vector<std::string> const &domains,
+                                                                                std::vector<std::string> const &paths);
         #ifndef BOOST_NO_STD_WSTRING
         
         ///
@@ -322,6 +307,10 @@ namespace boost {
             }
             static std::locale::id id;
         };
+        template<>
+        BOOST_LOCALE_DECL message_format<wchar_t> *message_format<wchar_t>::create( info const &,
+                                                                                    std::vector<std::string> const &domains,
+                                                                                    std::vector<std::string> const &paths);
 
         #endif
 
@@ -338,6 +327,10 @@ namespace boost {
             }
             static std::locale::id id;
         };
+        template<>
+        BOOST_LOCALE_DECL message_format<char16_t> *message_format<char16_t>::create(   info const &,
+                                                                                        std::vector<std::string> const &domains,
+                                                                                        std::vector<std::string> const &paths);
 
         #endif
 
@@ -354,6 +347,11 @@ namespace boost {
             }
             static std::locale::id id;
         };
+        
+        template<>
+        BOOST_LOCALE_DECL message_format<char32_t> *message_format<char32_t>::create(   info const &,
+                                                                                        std::vector<std::string> const &domains,
+                                                                                        std::vector<std::string> const &paths);
 
         #endif
         

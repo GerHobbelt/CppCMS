@@ -108,12 +108,15 @@ namespace boost {
             return create_converter<char>(inf);
         }
 
+        BOOST_LOCALE_DECL std::locale::id base_converter_facet<char>::id;
+
         #ifndef BOOST_NO_STD_WSTRING
         template<>
         BOOST_LOCALE_DECL converter<wchar_t> *converter<wchar_t>::create(info const &inf)
         {
             return create_converter<wchar_t>(inf);
         }
+        BOOST_LOCALE_DECL std::locale::id base_converter_facet<wchar_t>::id;
         #endif
         
         #ifdef BOOST_HAS_CHAR16_T
@@ -122,6 +125,7 @@ namespace boost {
         {
             return create_converter<char16_t>(inf);
         }
+        BOOST_LOCALE_DECL std::locale::id base_converter_facet<char16_t>::id;
         #endif
         
         #ifdef BOOST_HAS_CHAR32_T
@@ -130,6 +134,7 @@ namespace boost {
         {
             return create_converter<char32_t>(inf);
         }
+        BOOST_LOCALE_DECL std::locale::id base_converter_facet<char32_t>::id;
         #endif
 
 

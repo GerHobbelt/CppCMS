@@ -5,10 +5,12 @@
 #include <boost/locale/numeric.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/converter.hpp>
 #include <boost/locale/collator.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
+#include <map>
 
 int main()
 {
@@ -22,20 +24,37 @@ int main()
 	catch(std::exception const &e)
 	{}
 	std::locale::global(base);
+	std::vector<std::string> paths,domains;
+	paths.push_back(".");
+	paths.push_back("../src");
+	domains.push_back("test");
+
 	base = std::locale(base,new info(getenv("LC_ALL")));
+	info const &inf = std::use_facet<info>(base);
 	base = std::locale(base,new num_format<char>());
 	base = std::locale(base,new num_parse<char>());
-	base = std::locale(base,collator<char>::create(std::use_facet<info>(base)));
+	base = std::locale(base,collator<char>::create(inf));
+	base = std::locale(base,converter<char>::create(inf));
+	base = std::locale(base,message_format<char>::create(inf,domains,paths));
 
 
-	messages_loader loader;
-	loader.add_path(".");
-	loader.domain("test");
+	typedef comparator<char,collator_base::primary> comp_type;
 
-	std::cout << std::use_facet<collator<char> >(base).compare(collator_base::primary,"hello","Hello") << std::endl;
-	std::cout << std::use_facet<collator<char> >(base).compare(collator_base::tertiary,"hello","Hello") << std::endl;
+	typedef std::map<std::string,std::string,comp_type> phones_map_type;
+	comp_type cp(base);
+	phones_map_type phones(cp);
 
-	base=loader.load(base);
+	phones["facade"]="Yes";
+	phones["Façade"]="Now";
+
+	for(phones_map_type::const_iterator p=phones.begin();p!=phones.end();++p)
+		std::cerr<<p->first<<":"<<p->second<<std::endl;
+
+
+	std::cout << comparator<char>(base)("hello","Hello") << std::endl;
+	std::cout << comparator<char,collator_base::tertiary>(base)("hello","Hello") << std::endl;
+
+	std::cout << to_upper<char>("ְАртем",base) << std::endl;
 	
 	stringstream msg,out;
 	out.imbue(base);

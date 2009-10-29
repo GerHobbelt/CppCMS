@@ -123,6 +123,26 @@ namespace locale {
     BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf);
     #endif
 
+    ///
+    /// This class can be used in STL algorithms and containers for comparison of strings
+    /// with different level then primary
+    ///
+    template<typename CharType,collator_base::level_type level = collator_base::primary>
+    struct comparator
+    {
+    public:
+        comparator(std::locale const &l=std::locale()) : locale_(l)
+        {
+        }
+        bool operator()(std::basic_string<CharType> const &left,std::basic_string<CharType> const &right) const
+        {
+            return std::use_facet<collator<CharType> >(locale_).compare(level,left,right) < 0;
+        }
+    private:
+        std::locale locale_;
+    };
+
+
 }
 } // boost::locale
 #endif

@@ -22,19 +22,6 @@
 namespace boost {
     namespace locale {
 
-        std::locale::id base_message_format<char>::id;
-
-        #ifndef BOOST_NO_STD_WSTRING
-        std::locale::id base_message_format<wchar_t>::id;
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR16_T
-        std::locale::id base_message_format<char16_t>::id;
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR32_T
-        std::locale::id base_message_format<char32_t>::id;
-        #endif
 
         namespace impl {
             class mo_file {
@@ -228,47 +215,17 @@ namespace boost {
                     return p->second;
                 }
 
-                void add_path(std::string path)
+                mo_message(info const &inf,std::vector<std::string> const &domains,std::vector<std::string> const &search_paths)
                 {
-                    search_paths_.push_back(path);
-                }
-
-                void add_domain(std::string domain)
-                {
-                    if(domains_.find(domain)!=domains_.end())
-                        return;
-
-                    catalogs_.resize(catalogs_.size() + 1);
-                    plural_forms_.resize(plural_forms_.size() + 1);
-                    mo_catalogs_.resize(mo_catalogs_.size() + 1);
-
-                    domains_[domain]=catalogs_.size() - 1;
-                }
-
-                void set_default_domain(std::string domain)
-                {
-                   add_domain(domain); 
-                   domains_map_type::iterator p;
-                   for(p=domains_.begin();p!=domains_.end();++p) {
-                       if(p->second==0)
-                           break;
-                   }
-                   
-                   std::string swap_domain = p->first;
-                   int id=domains_[domain];
-                   domains_[swap_domain]=id;
-                   domains_[domain]=0;
-
-                }
-
-                void load(std::locale const &loc)
-                {
-                    info const &inf = std::use_facet<info>(loc);
                     std::string encoding = inf.encoding();
 
-                    for(domains_map_type::iterator p=domains_.begin(),e=domains_.end();p!=e;++p) {
-                        std::string domain=p->first;
-                        int id=p->second;
+                    catalogs_.resize(domains.size());
+                    mo_catalogs_.resize(domains.size());
+                    plural_forms_.resize(domains.size());
+                    
+                    for(unsigned id=0;id<domains.size();id++) {
+                        std::string domain=domains[id];
+                        domains_[domain]=id;
                         //
                         // List of fallbacks: en_US@euro, en@euro, en_US, en. 
                         //
@@ -280,20 +237,19 @@ namespace boost {
                             std::string(inf.language()) + "_" + inf.country(),
                             std::string(inf.language()),
                         };
-                        
-                        for(unsigned j=0;j<paths_no;j++) {
-                            for(unsigned i=0;i<search_paths_.size();i++) {
+                       
+                        bool found=false; 
+                        for(unsigned j=0;!found && j<paths_no;j++) {
+                            for(unsigned i=0;!found && i<search_paths.size();i++) {
+                                std::string full_path = search_paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
                                 
-                                std::string full_path = search_paths_[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
-
-                                if(load_file(full_path,encoding,id))
-                                    break;
+                                found = load_file(full_path,encoding,id);
                             }
                         }
                     }
                 }
 
-                ~mo_message()
+                virtual ~mo_message()
                 {
                 }
 
@@ -386,82 +342,64 @@ namespace boost {
                 }
 
                 catalogs_set_type catalogs_;
+                std::vector<boost::shared_ptr<mo_file> > mo_catalogs_;
                 std::vector<boost::shared_ptr<lambda::plural> > plural_forms_;
                 domains_map_type domains_;
 
-                std::vector<std::string> search_paths_;
-                std::vector<boost::shared_ptr<mo_file> > mo_catalogs_;
                 
             };
         } /// impl
 
-
-        template<typename CharType>
-        message_format<CharType> *messages_loader::generate(std::locale const &loc)
-        {
-            std::auto_ptr<impl::mo_message<CharType> > ptr(new impl::mo_message<CharType>());
-            for(unsigned i=0;i<paths_.size();i++)
-                ptr->add_path(paths_[i]);
-            std::set<std::string>::const_iterator p;
-            for(p=domains_.begin();p!=domains_.end();++p) {
-                ptr->add_domain(*p);
-            }
-            if(!default_domain_.empty())
-                ptr->set_default_domain(default_domain_);
-            ptr->load(loc);
-            return ptr.release();            
-        }
         
-
         //
-        // Message Loader
-        // 
-        struct messages_loader::data {}; // nothing
+        // facet IDs and specializations
+        //
 
-        messages_loader::messages_loader()
-        {
-        }
-        messages_loader::~messages_loader()
-        {
-        }
+        std::locale::id base_message_format<char>::id;
 
-        void messages_loader::add_domain(std::string dm)
+        template<>
+        message_format<char> *message_format<char>::create( info const &inf,
+                                                            std::vector<std::string> const &domains,
+                                                            std::vector<std::string> const &paths)
         {
-            if(domains_.empty()) {
-                default_domain_ = dm;
-            }
-            domains_.insert(dm);
+            return new impl::mo_message<char>(inf,domains,paths);
         }
 
-        void messages_loader::add_path(std::string path)
-        {
-            paths_.push_back(path);
-        }
-        void messages_loader::domain(std::string dm)
-        {
-            add_domain(dm);
-            default_domain_ = dm;
-        }
+        #ifndef BOOST_NO_STD_WSTRING
+        std::locale::id base_message_format<wchar_t>::id;
         
-        std::locale messages_loader::load(std::locale const &base,facet_type facets)
+        template<>
+        message_format<wchar_t> *message_format<wchar_t>::create(   info const &inf,
+                                                                    std::vector<std::string> const &domains,
+                                                                    std::vector<std::string> const &paths)
         {
-            std::locale res = base;
-            if(facets & char_facet)
-                res=std::locale(res,generate<char>(base));
-            #ifndef BOOST_NO_STD_WSTRING
-            if(facets & wchar_t_facet) 
-                res=std::locale(res,generate<wchar_t>(base));
-            #endif
-            #ifdef BOOST_HAS_CHAR16_T
-            if(facets & char16_t_facet) 
-                res=std::locale(res,generate<char16_t>(base));
-            #endif
-            #ifdef BOOST_HAS_CHAR32_T
-            if(facets & char32_t_facet) 
-                res=std::locale(res,generate<char32_t>(base));
-            #endif
-            return res;
+            return new impl::mo_message<wchar_t>(inf,domains,paths);
         }
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR16_T
+        std::locale::id base_message_format<char16_t>::id;
+
+        template<>
+        message_format<char16_t> *message_format<char16_t>::create( info const &inf,
+                                                                    std::vector<std::string> const &domains,
+                                                                    std::vector<std::string> const &paths)
+        {
+            return new impl::mo_message<char16_t>(inf,domains,paths);
+        }
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR32_T
+        std::locale::id base_message_format<char32_t>::id;
+
+        template<>
+        message_format<char32_t> *message_format<char32_t>::create( info const &inf,
+                                                                    std::vector<std::string> const &domains,
+                                                                    std::vector<std::string> const &paths)
+        {
+            return new impl::mo_message<char32_t>(inf,domains,paths);
+        }
+        #endif
 
     }
 }
