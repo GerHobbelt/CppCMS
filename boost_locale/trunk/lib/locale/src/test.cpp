@@ -37,17 +37,19 @@ int main()
 
 	base=loader.load(base);
 	
-	stringstream out;
+	stringstream msg,out;
 	out.imbue(base);
+	msg.imbue(base);
 
 	time_t now=std::time(0);
 	
-	out<<translate("#A message#Hello World")<<endl;
-	out<<translate("##Hello World")<<endl;
+	msg<<translate("#A message#Hello World")<<endl;
+	msg<<translate("##Hello World")<<endl;
 	for(int i=0;i<15;i++) {
-		out<<format(translate("Passed one day since {2,date=m}","Passed {1,spell} days since {2,date=m}",i)) % i % now<<endl;
-		out<<format(translate("So it would cost you about {1,currency,w=10,>} per {2,ord} day")) % -i % i<<endl;
+		msg<<format(translate("Passed one day since {2,date=m}","Passed {1,spell} days since {2,date=m}",i)) % i % now<<endl;
+		msg<<format(translate("So it would cost you about {1,currency,w=10,>} per {2,ord} day")) % -i % i<<endl;
 	}
+	std::cout<<msg.str()<<std::flush;
 
 	out<<as::number<<104<<" "<<1234<<" ";
 	out<<std::scientific<<1234.56e-10<<std::endl;
@@ -57,9 +59,6 @@ int main()
 	out<<as::ordinal<<104<<endl;
 	out<<as::date<<now<<endl;
 	out<<as::datetime<<as::date_full<<as::time_full << std::time(0) << endl;
-
-	std::cout<<out.str()<<std::flush;
-	
 
 	int v_104 = 0,v_1234 = 0;
 	time_t now_a = 0;

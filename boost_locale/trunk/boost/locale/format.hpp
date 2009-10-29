@@ -120,6 +120,7 @@ namespace boost {
             basic_format &operator % (Formattible const &object)
             {
                 add(formattible_type(object));
+				return *this;
             }
 
             string_type str(std::locale const &loc = std::locale()) const

@@ -254,9 +254,14 @@ namespace lambda {
         int pos;
         int next_tocken;
         int int_value;
+		// MSVC does not have isblank
+		bool is_blank(char c)
+		{
+			return c==' ' || c=='\r' || c=='\n' || c=='\t';
+		}
         void step() 
         {
-            while(text[pos] && isblank(text[pos])) pos++;
+            while(text[pos] && is_blank(text[pos])) pos++;
             char const *ptr=text+pos;
             char *tmp_ptr;
             if(strncmp(ptr,"<<",2)==0) { pos+=2; next_tocken=SHL; }

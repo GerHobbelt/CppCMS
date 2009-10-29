@@ -1,3 +1,4 @@
+#define BOOST_LOCALE_SOURCE
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/formatter.hpp>
 #include <boost/locale/info.hpp>
