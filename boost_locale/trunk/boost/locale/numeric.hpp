@@ -6,6 +6,7 @@
 #include <ios>
 #include <limits>
 #include <boost/locale/formatter.hpp>
+#include <boost/locale/formatting.hpp>
 #include <algorithm>
 
 namespace boost {

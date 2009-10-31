@@ -13,6 +13,7 @@ add_definitions(-DBOOST_LOCALE_DYN_LINK)
 include_directories(../..)
 
 add_library(boost_locale SHARED 
+	src/generator.cpp
 	src/collator.cpp
 	src/converter.cpp
 	src/formatter.cpp 

@@ -7,6 +7,7 @@
 #include <boost/locale/message.hpp>
 #include <boost/locale/converter.hpp>
 #include <boost/locale/collator.hpp>
+#include <boost/locale/generator.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
@@ -17,32 +18,25 @@ int main()
 	try {
 	using namespace boost::locale;
 	using namespace std;
-	std::locale base;
+	
 	try {
-		base=std::locale("");
+		std::locale::global(std::locale(""));
 	}
 	catch(std::exception const &e)
 	{}
-	std::locale::global(base);
-	std::vector<std::string> paths,domains;
-	paths.push_back(".");
-	paths.push_back("../src");
-	domains.push_back("test");
 
-	base = std::locale(base,new info(getenv("LC_ALL")));
-	info const &inf = std::use_facet<info>(base);
-	base = std::locale(base,new num_format<char>());
-	base = std::locale(base,new num_parse<char>());
-	base = std::locale(base,collator<char>::create(inf));
-	base = std::locale(base,converter<char>::create(inf));
-	base = std::locale(base,message_format<char>::create(inf,domains,paths));
+	generator gen;
 
+	gen.set_default_messages_domain("test");
+	gen.add_messages_path(".");
+	gen.add_messages_path("../src");
 
+	std::locale::global(gen.generate(""));
+	
 	typedef comparator<char,collator_base::primary> comp_type;
 
 	typedef std::map<std::string,std::string,comp_type> phones_map_type;
-	comp_type cp(base);
-	phones_map_type phones(cp);
+	phones_map_type phones;
 
 	phones["facade"]="Yes";
 	phones["Façade"]="Now";
@@ -51,14 +45,9 @@ int main()
 		std::cerr<<p->first<<":"<<p->second<<std::endl;
 
 
-	std::cout << comparator<char>(base)("hello","Hello") << std::endl;
-	std::cout << comparator<char,collator_base::tertiary>(base)("hello","Hello") << std::endl;
-
-	std::cout << to_upper<char>("ְАртем",base) << std::endl;
+	std::cout << to_upper<char>("ְАртем") << std::endl;
 	
 	stringstream msg,out;
-	out.imbue(base);
-	msg.imbue(base);
 
 	time_t now=std::time(0);
 	

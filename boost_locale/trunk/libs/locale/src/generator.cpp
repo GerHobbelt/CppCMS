@@ -1,17 +1,39 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/generator.hpp>
+#include <boost/locale/numeric.hpp>
+#include <boost/locale/collator.hpp>
+#include <boost/locale/converter.hpp>
+#include <boost/locale/info.hpp>
+#include <boost/locale/message.hpp>
 namespace boost {
     namespace locale {
-        sitruct generator::data {
+        struct generator::data {
             data() {
                 cats = all_categories;
-                chars = all_categories;
+                chars = all_characters;
             }
-            std::map<std::string,std::locale> cached;
+
+            typedef std::pair<std::string,std::string> locale_id_type;
+
+            struct keycomp { 
+                bool operator()(locale_id_type const &left,locale_id_type const &right) const
+                {
+                    if(left.first == right.first)
+                        return left.second < right.second;
+                    return left.first < right.first;
+                }
+            };
+            
+            typedef std::map<locale_id_type,std::locale,keycomp> cached_type;
+            cached_type cached;
 
             std::string encoding;
             locale_category_type cats;
-            charrector_facet_type chars;
+            character_facet_type chars;
+
+            std::vector<std::string> paths;
+            std::set<std::string> domains;
+            std::string default_domain;
         };
 
         generator::generator() :
@@ -24,45 +46,168 @@ namespace boost {
 
         locale_category_type generator::categories() const
         {
+            return d->cats;
+        }
+        void generator::categories(locale_category_type t)
+        {
+            d->cats=t;
         }
 
-        std::locale generator::generate(std::string const &id)
+        void generator::octet_encoding(std::string const &enc)
+        {
+            d->encoding=enc;
+        }
+        std::string generator::octet_encoding() const
+        {
+            return d->encoding;
+        }
+        
+        void generator::characters(character_facet_type t)
+        {
+            d->chars=t;
+        }
+        
+        character_facet_type generator::characters() const
+        {
+            return d->chars;
+        }
+
+        void generator::add_messages_domain(std::string const &domain)
+        {
+            if(d->default_domain.empty())
+                d->default_domain=domain;
+            d->domains.insert(domain);
+        }
+        void generator::set_default_messages_domain(std::string const &domain)
+        {
+            add_messages_domain(domain);
+            d->default_domain=domain;
+        }
+        void generator::clear_domains()
+        {
+            d->default_domain.clear();
+            d->domains.clear();
+        }
+        void generator::add_messages_path(std::string const &path)
+        {
+            d->paths.push_back(path);
+        }
+        void generator::clear_paths()
+        {
+            d->paths.clear();
+        }
+        void generator::clear_cache()
+        {
+            d->cached.empty();
+        }
+
+        std::locale generator::generate(std::string const &id) const
         {
             std::locale base;
-            info *tmp = d->encoding.empty() ? new info(id) : new(info,d->encoding);
+            info *tmp = d->encoding.empty() ? new info(id) : new info(id,d->encoding);
             std::locale result=std::locale(base,tmp);
             return complete_generation(result);
         }
 
-        std::locale generator::generate(std::locale const &base,std::string const &id)
+        std::locale generator::generate(std::locale const &base,std::string const &id) const
         {
-            info *tmp = d->encoding.empty() ? new info(id) : new(info,d->encoding);
+            info *tmp = d->encoding.empty() ? new info(id) : new info(id,d->encoding);
             std::locale result=std::locale(base,tmp);
             return complete_generation(result);
         }
 
-        std::locale generator::generate(std::string const &id,std::string const &encoding)
+        std::locale generator::generate(std::string const &id,std::string const &encoding) const
         {
             std::locale base;
             std::locale result=std::locale(base,new info(id,encoding));
             return complete_generation(result);
         }
-        std::locale generator::generate(std::locale const &base,std::string const &id,std::string const &encoding)
+        std::locale generator::generate(std::locale const &base,std::string const &id,std::string const &encoding) const
         {
             std::locale result=std::locale(base,new info(id,encoding));
             return complete_generation(result);
+        }
+        void generator::preload(std::string const &id) 
+        {
+            d->cached[data::locale_id_type(id,"")]=generate(id);
+        }
+        void generator::preload(std::string const &id,std::string const &encoding)
+        {
+            d->cached[data::locale_id_type(id,encoding)]=generate(id,encoding);
+        }
+        void generator::preload(std::locale const &base,std::string const &id)
+        {
+            d->cached[data::locale_id_type(id,"")]=generate(base,id);
+        }
+        void generator::preload(std::locale const &base,std::string const &id,std::string const &encoding)
+        {
+            d->cached[data::locale_id_type(id,encoding)]=generate(base,id,encoding);
         }
 
         template<typename CharType>
-        std::locale generate_for(std::locale const &source)
+        std::locale generator::generate_for(std::locale const &source) const
         {
             std::locale result=source;
             info const &inf=std::use_facet<info>(source);
-                
+            if(d->cats & collation_facet)
+                result=std::locale(result,collator<CharType>::create(inf));
+            if(d->cats & formatting_facet) {
+                result=std::locale(result,new num_format<CharType>());
+                result=std::locale(result,new num_parse<CharType>());
+            }
+            if(d->cats & message_facet) {
+                if(!d->default_domain.empty() && !d->paths.empty()) {
+                    std::vector<std::string> domains;
+                    domains.push_back(d->default_domain);
+                    for(std::set<std::string>::const_iterator p=d->domains.begin(),e=d->domains.end();p!=e;++p) {
+                        if(*p!=d->default_domain) {
+                            domains.push_back(*p);
+                        }
+                    }
+                    result=std::locale(result,message_format<CharType>::create(inf,domains,d->paths));
+                }
+            }
+            if(d->cats & conversion_facet) {
+                result=std::locale(result,converter<CharType>::create(inf));
+            }
+            return result;
         }
 
-        std::locale complete_generation(std::locale const &source)
+        std::locale generator::complete_generation(std::locale const &source) const
         {
+            std::locale result=source;
+            if(d->chars & char_facet)
+                result=generate_for<char>(result);
+            #ifndef BOOST_NO_STD_WSTRING
+            if(d->chars & wchar_t_facet)
+                result=generate_for<wchar_t>(result);
+            #endif
+            #ifdef BOOST_HAS_CHAR16_T
+            if(d->chars & char16_t_facet)
+                result=generate_for<char16_t>(result);
+            #endif
+            #ifdef BOOST_HAS_CHAR32_T
+            if(d->chars & char32_t_facet)
+                result=generate_for<char32_t>(result);
+            #endif
+            
+            return result;
+        }
+        std::locale generator::get(std::string const &id) const
+        {
+            data::cached_type::const_iterator p=d->cached.find(data::locale_id_type(id,""));            
+            if(p==d->cached.end())
+                return generate(id);
+            else
+                return p->second;
+        }
+        std::locale generator::get(std::string const &id,std::string const &encoding) const
+        {
+            data::cached_type::const_iterator p=d->cached.find(data::locale_id_type(id,encoding));
+            if(p==d->cached.end())
+                return generate(id,encoding);
+            else
+                return p->second;
         }
     }
 }
