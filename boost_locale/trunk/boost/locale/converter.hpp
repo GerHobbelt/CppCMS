@@ -78,33 +78,33 @@ namespace boost {
                 return convet(normalization,str,norm);
             }
 
-            string_type to_upper(char const *begin, char const *end) const
+            string_type to_upper(char_type const *begin, char_type const *end) const
             {
                 return convert(upper_case,begin,end);
             }
             
-            string_type to_lower(char const *begin, char const *end) const
+            string_type to_lower(char_type const *begin, char_type const *end) const
             {
                 return convert(lower_case,begin,end);
             }
 
-            string_type to_title(char const *begin, char const *end) const
+            string_type to_title(char_type const *begin, char_type const *end) const
             {
                 return convert(title_case,begin,end);
             }
 
-            string_type fold_case(char const *begin, char const *end) const
+            string_type fold_case(char_type const *begin, char_type const *end) const
             {
                 return convert(case_folding,begin,end);
             }
 
-            string_type normalize(char const *begin, char const *end,normalization_type norm=norm_default) const
+            string_type normalize(char_type const *begin, char_type const *end,normalization_type norm=norm_default) const
             {
                 return convert(normalization,begin,end,norm);
             }
             
             
-            string_type convert(conversion_type how,std::string const &str,int flags = 0) const
+            string_type convert(conversion_type how,string_type const &str,int flags = 0) const
             {
                 return do_convert(how,str.data(),str.data()+str.size(),flags);
             }
@@ -195,11 +195,27 @@ namespace boost {
         {
             return std::use_facet<converter<CharType> >(loc).to_upper(str);
         }
+
+        template<typename CharType>
+        std::basic_string<CharType> to_upper(CharType const *begin,std::locale const &loc=std::locale())
+        {
+            CharType const *end=begin;
+            while(*end) end++;
+            return std::use_facet<converter<CharType> >(loc).to_upper(begin,end);
+        }
         
         template<typename CharType>
         std::basic_string<CharType> to_lower(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
             return std::use_facet<converter<CharType> >(loc).to_lower(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> to_lower(CharType const *begin,std::locale const &loc=std::locale())
+        {
+            CharType const *end=begin;
+            while(*end) end++;
+            return std::use_facet<converter<CharType> >(loc).to_lower(begin,end);
         }
         
         template<typename CharType>
@@ -209,9 +225,25 @@ namespace boost {
         }
         
         template<typename CharType>
+        std::basic_string<CharType> to_title(CharType const *begin,std::locale const &loc=std::locale())
+        {
+            CharType const *end=begin;
+            while(*end) end++;
+            return std::use_facet<converter<CharType> >(loc).to_title(begin,end);
+        }
+        
+        template<typename CharType>
         std::basic_string<CharType> fold_case(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
             return std::use_facet<converter<CharType> >(loc).fold_case(str);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> fold_case(CharType const *begin,std::locale const &loc=std::locale())
+        {
+            CharType const *end=begin;
+            while(*end) end++;
+            return std::use_facet<converter<CharType> >(loc).fold_case(begin,end);
         }
         
         template<typename CharType>
@@ -220,6 +252,16 @@ namespace boost {
                                                 std::locale const &loc=std::locale())
         {
             return std::use_facet<converter<CharType> >(loc).normalize(str,nt);
+        }
+        
+        template<typename CharType>
+        std::basic_string<CharType> normalize(  CharType const *begin,
+                                                normalization::normalization_type nt=normalization::norm_default,
+                                                std::locale const &loc=std::locale())
+        {
+            CharType const *end=begin;
+            while(*end) end++;
+            return std::use_facet<converter<CharType> >(loc).normalize(begin,end,nt);
         }
 
     }

@@ -22,7 +22,7 @@ namespace impl {
         icu_std_converter(std::string charset);         
         icu::UnicodeString icu(char_type const *begin,char_type const *end) const;
         string_type std(icu::UnicodeString const &str) const;
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const;
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n,size_t from_u=0,size_t from_c=0) const;
     };
 
     template<typename CharType>
@@ -52,11 +52,12 @@ namespace impl {
             max_len_=cvt.max_char_size();
         }
 
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,
+                        size_t n,size_t from_u=0,size_t from_char=0) const
         {
-            size_t code_points = str.countChar32(0,n);
+            size_t code_points = str.countChar32(from_u,n);
             uconv cvt(charset_);
-            return cvt.cut(code_points,begin,end);
+            return cvt.cut(code_points,begin+from_char,end);
         }
 
         struct uconv : public boost::noncopyable {
@@ -146,7 +147,8 @@ namespace impl {
             char_type const *ptr=reinterpret_cast<char_type const *>(str.getBuffer());
             return string_type(ptr,str.length());
         }
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n,
+                        size_t from_u=0,size_t from_c=0) const
         {
             return n;
         }
@@ -193,9 +195,10 @@ namespace impl {
             return tmp;
         }
         
-        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n) const
+        size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n,
+                size_t from_u=0,size_t from_c=0) const
         {
-            return str.countChar32(0,n);
+            return str.countChar32(from_u,n);
         }
 
         icu_std_converter(std::string charset) {}

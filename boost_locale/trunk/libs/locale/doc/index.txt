@@ -24,7 +24,7 @@ Boost.Locale provides the natural glue between C++ locales framework, iostreams 
 - Number formatting, spelling and parsing
 - Monetary formatting and parsing
 - Powerful message formatting including support plural forms, using GNU catalogs.
-- Character, work, sentence and line-break boundary analysis.
+- Character, word, sentence and line-break boundary analysis.
 - Support of 8-bit character sets like Latin1 and UTF-8 encoded text.
 - Support of `char`, `wchar_t` and C++0x `char16_t`, `char32_t` strings and streams.
 
@@ -41,5 +41,4 @@ For example `std::collate` facet provides information about string comparison.
 
 Other information, that can be also called formatting flags can be kept withing `std::ios_base` object and
 can be changed using iostream manipulators.
-
 
