@@ -332,7 +332,6 @@ namespace boost {
                 std::codecvt_base::result r=std::codecvt_base::ok;
                 while(to < to_end && from < from_end)
                 {
-                    uint32_t ch=*from;
                     uint32_t len=cvt.from_unicode(*from,to,to_end);
                     if(len==details::converter::illegal) {
                         r=std::codecvt_base::error;
