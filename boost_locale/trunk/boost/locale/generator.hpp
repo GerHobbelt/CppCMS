@@ -21,6 +21,7 @@ namespace boost {
             formatting_facet= 1 << 1,
             message_facet   = 1 << 2,
             conversion_facet= 1 << 3,
+            codepage_facet=   1 << 4,
             
             all_categories  = 0xFFFFFFFFu
         } locale_category_type;
@@ -31,11 +32,11 @@ namespace boost {
             generator();
             ~generator();
 
-            void categories(locale_category_type cats);
-            locale_category_type categories() const;
+            void categories(unsigned cats);
+            unsigned categories() const;
             
-            void characters(character_facet_type chars);
-            character_facet_type characters() const;
+            void characters(unsigned chars);
+            unsigned characters() const;
 
             void octet_encoding(std::string const &encoding);
             std::string octet_encoding() const;

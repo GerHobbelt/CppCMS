@@ -5,6 +5,7 @@
 #include <boost/locale/converter.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/codepage.hpp>
 namespace boost {
     namespace locale {
         struct generator::data {
@@ -28,8 +29,8 @@ namespace boost {
             cached_type cached;
 
             std::string encoding;
-            locale_category_type cats;
-            character_facet_type chars;
+            unsigned cats;
+            unsigned chars;
 
             std::vector<std::string> paths;
             std::set<std::string> domains;
@@ -44,11 +45,11 @@ namespace boost {
         {
         }
 
-        locale_category_type generator::categories() const
+        unsigned generator::categories() const
         {
             return d->cats;
         }
-        void generator::categories(locale_category_type t)
+        void generator::categories(unsigned t)
         {
             d->cats=t;
         }
@@ -62,12 +63,12 @@ namespace boost {
             return d->encoding;
         }
         
-        void generator::characters(character_facet_type t)
+        void generator::characters(unsigned t)
         {
             d->chars=t;
         }
         
-        character_facet_type generator::characters() const
+        unsigned generator::characters() const
         {
             return d->chars;
         }
@@ -143,7 +144,7 @@ namespace boost {
         {
             d->cached[data::locale_id_type(id,encoding)]=generate(base,id,encoding);
         }
-
+        
         template<typename CharType>
         std::locale generator::generate_for(std::locale const &source) const
         {
@@ -170,9 +171,12 @@ namespace boost {
             if(d->cats & conversion_facet) {
                 result=std::locale(result,converter<CharType>::create(inf));
             }
+            if(d->cats & codepage_facet) {
+                result=std::locale(result,code_converter<CharType>::create(inf));
+            }
             return result;
         }
-
+        
         std::locale generator::complete_generation(std::locale const &source) const
         {
             std::locale result=source;

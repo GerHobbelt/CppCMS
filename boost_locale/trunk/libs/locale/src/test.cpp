@@ -8,9 +8,11 @@
 #include <boost/locale/converter.hpp>
 #include <boost/locale/collator.hpp>
 #include <boost/locale/generator.hpp>
+#include <boost/locale/codepage.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
+#include <fstream>
 #include <map>
 
 int main()
@@ -23,15 +25,20 @@ int main()
 		std::locale::global(std::locale(""));
 	}
 	catch(std::exception const &e)
-	{}
+	{
+	}
 
 	generator gen;
 
+	//gen.categories(gen.categories() ^ codepage_facet); 
 	gen.set_default_messages_domain("test");
 	gen.add_messages_path(".");
 	gen.add_messages_path("../src");
 
 	std::locale::global(gen.generate(""));
+
+	std::wofstream fout("test.txt");
+	fout<<L"שלום עולם!"<<endl;
 	
 	typedef comparator<char,collator_base::primary> comp_type;
 
@@ -45,7 +52,7 @@ int main()
 		std::cerr<<p->first<<":"<<p->second<<std::endl;
 
 
-	std::cout << to_upper<char>("ְАртем") << std::endl;
+	std::cout << to_upper<char>("Артем") << std::endl;
 	
 	stringstream msg,out;
 
