@@ -3,6 +3,7 @@
 
 #include <boost/locale/config.hpp>
 #include <boost/locale/info.hpp>
+#include <boost/cstdint.hpp>
 
 namespace boost {
     namespace locale {
@@ -183,7 +184,7 @@ namespace boost {
                         return ((seq0 & 0x1F) << 6) | (seq1 & 0x3F);
                     case 3:
                         return ((seq0 & 0x0F) << 12) | ((seq1 & 0x3F) << 6) | (seq2 & 0x3F)  ;
-                    case 4:
+					default: // can be only 4
                         return ((seq0 & 0x07) << 18) | ((seq1 & 0x3F) << 12) | ((seq2 & 0x3F) << 6) | (seq3 & 0x3F) ;
                     }
                 }
@@ -353,6 +354,18 @@ namespace boost {
                 return r;
             }
 
+			//
+			// Can't handle full UTF-16, only UCS-2
+			// because:
+			//   1. codecvt facet must be able to work on single
+			//      internal character ie if  do_in(s,from,from_end,x,y,z,t) returns ok
+			//      then do_in(s,from,from+1) should return ok according to the standard papars
+			//   2. I have absolutly NO information about mbstat_t -- I can't even know if its 0 
+			//      or it is somehow initialized. So I can't store any state information
+			//      about suragate pairs... So it works only for UCS-2
+			//
+			
+			
             //
             // Implementation for UTF-16
             //
@@ -379,19 +392,12 @@ namespace boost {
                         r=std::codecvt_base::partial;
                         break;
                     }
-                    if(ch <= 0xFFFF) 
+                    if(ch <= 0xFFFF) {
                         *to++=ch;
-                    else {
-                        if(to+1<to_end) {
-                            ch-=0x10000;
-                            *to++=0xD800 | (ch>>10);
-                            *to++=0xDC00 | (ch & 0x3FF);
-                        }
-                        else {
-                            from=save_from;
-                            r=std::codecvt_base::partial;
-                            break;
-                        }
+					}
+                    else { /// can't handle surrogates
+						r=std::codecvt_base::error;
+                        break;
                     }
                 }
                 from_next=from;
@@ -419,29 +425,11 @@ namespace boost {
                 std::codecvt_base::result r=std::codecvt_base::ok;
                 while(to < to_end && from < from_end)
                 {
-                    uint16_t const *from_save=from;
-                    uint16_t w1=*from;
-                    uint32_t ch;
-                    if(0xD800 <= w1 && w1<=0xDFFF) {
-                        if(from+1==from_end) {
-                            r=std::codecvt_base::partial;
-                            break;
-                        }
-                        else {
-                            uint16_t w2=from[1];
-                            if(w2 < 0xDC00 || 0xDFFF < w2) {
-                                r=std::codecvt_base::error;
-                                break;
-                            }
-                            else {
-                                ch = (uint32_t(w1 & 0x3FF) << 10) | (w2 & 0x3FF) | 0x100000;
-                                from+=2;
-                            }
-                        }
-                    }
-                    else {
-                        ch=w1;
-                        from++;
+                    uint32_t ch=*from;
+                    if(0xD800 <= ch && ch<=0xDFFF) {
+                        r=std::codecvt_base::error;
+						// Can't handle surragates
+                        break;
                     }
                             
                     uint32_t len=cvt.from_unicode(ch,to,to_end);
@@ -450,11 +438,11 @@ namespace boost {
                         break;
                     }
                     if(len==details::converter::incomplete) {
-                        from=from_save;
                         r=std::codecvt_base::partial;
                         break;
                     }
                     to+=len;
+					from++;
                 }
                 from_next=from;
                 to_next=to;
@@ -471,14 +459,16 @@ namespace boost {
         };
         
         template<>
-        inline std::codecvt<char,char,mbstate_t> *code_converter<char>::create(info const &inf)
-        {
-            return new std::codecvt<char,char,mbstate_t>();
-        }
-        
-
-    }
-}
+        class code_converter<char>
+		{
+		public:
+			static std::codecvt<char,char,mbstate_t> *create(info const &inf)
+			{
+				return new std::codecvt<char,char,mbstate_t>();
+			}
+        };
+    } // locale
+} // boost
 
 
 #endif
