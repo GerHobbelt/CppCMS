@@ -279,6 +279,9 @@ namespace boost {
 
         private:
 
+            //
+            // Implementation for UTF-32
+            //
             std::codecvt_base::result
             do_real_in( std::mbstate_t &state,
                         char const *from,
@@ -312,7 +315,9 @@ namespace boost {
                 return r;
             }
 
-            // Specialize of UTF-32
+            //
+            // Implementation for UTF-32
+            //
             std::codecvt_base::result
             do_real_out(std::mbstate_t &state,
                         uint32_t const *from,
@@ -347,10 +352,124 @@ namespace boost {
                     return std::codecvt_base::partial;
                 return r;
             }
+
+            //
+            // Implementation for UTF-16
+            //
+            std::codecvt_base::result
+            do_real_in( std::mbstate_t &state,
+                        char const *from,
+                        char const *from_end,
+                        char const *&from_next,
+                        uint16_t *to,
+                        uint16_t *to_end,
+                        uint16_t *to_next) const
+            {
+                details::converter cvt(encoding_);
+                std::codecvt_base::result r=std::codecvt_base::ok;
+                while(to < to_end && from < from_end)
+                {
+                    char const *save_from=from;
+                    uint32_t ch=cvt.to_unicode(from,from_end);
+                    if(ch==details::converter::illegal) {
+                        r=std::codecvt_base::error;
+                        break;
+                    }
+                    if(ch==details::converter::incomplete) {
+                        r=std::codecvt_base::partial;
+                        break;
+                    }
+                    if(ch <= 0xFFFF) 
+                        *to++=ch;
+                    else {
+                        if(to+1<to_end) {
+                            ch-=0x10000;
+                            *to++=0xD800 | (ch>>10);
+                            *to++=0xDC00 | (ch & 0x3FF);
+                        }
+                        else {
+                            from=save_from;
+                            r=std::codecvt_base::partial;
+                            break;
+                        }
+                    }
+                }
+                from_next=from;
+                to_next=to;
+                if(r!=std::codecvt_base::ok)
+                    return r;
+                if(from!=from_end)
+                    return std::codecvt_base::partial;
+                return r;
+            }
+
+            //
+            // Implementation for UTF-16
+            //
+            std::codecvt_base::result
+            do_real_out(std::mbstate_t &state,
+                        uint16_t const *from,
+                        uint16_t const *from_end,
+                        uint16_t const *&from_next,
+                        char *to,
+                        char *to_end,
+                        char *&to_next) const
+            {
+                details::converter cvt(encoding_);
+                std::codecvt_base::result r=std::codecvt_base::ok;
+                while(to < to_end && from < from_end)
+                {
+                    uint16_t const *from_save=from;
+                    uint16_t w1=*from;
+                    uint32_t ch;
+                    if(0xD800 <= w1 && w1<=0xDFFF) {
+                        if(from+1==from_end) {
+                            r=std::codecvt_base::partial;
+                            break;
+                        }
+                        else {
+                            uint16_t w2=from[1];
+                            if(w2 < 0xDC00 || 0xDFFF < w2) {
+                                r=std::codecvt_base::error;
+                                break;
+                            }
+                            else {
+                                ch = (uint32_t(w1 & 0x3FF) << 10) | (w2 & 0x3FF) | 0x100000;
+                                from+=2;
+                            }
+                        }
+                    }
+                    else {
+                        ch=w1;
+                        from++;
+                    }
+                            
+                    uint32_t len=cvt.from_unicode(ch,to,to_end);
+                    if(len==details::converter::illegal) {
+                        r=std::codecvt_base::error;
+                        break;
+                    }
+                    if(len==details::converter::incomplete) {
+                        from=from_save;
+                        r=std::codecvt_base::partial;
+                        break;
+                    }
+                    to+=len;
+                }
+                from_next=from;
+                to_next=to;
+                if(r!=std::codecvt_base::ok)
+                    return r;
+                if(from!=from_end)
+                    return std::codecvt_base::partial;
+                return r;
+            }
+            
             int max_len_;
             std::string encoding_;
 
         };
+        
         template<>
         inline std::codecvt<char,char,mbstate_t> *code_converter<char>::create(info const &inf)
         {
