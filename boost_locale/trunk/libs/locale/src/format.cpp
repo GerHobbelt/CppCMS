@@ -1,5 +1,7 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/format.hpp>
+#include <boost/locale/generator.hpp>
+#include <boost/locale/info.hpp>
 #include <limits>
 #include "formatting_info.hpp"
 #include <stdlib.h>
@@ -14,6 +16,8 @@ namespace boost {
                 std::streamsize precision;
                 std::ios_base::fmtflags flags;
                 impl::ios_info info;
+                std::locale saved_locale;
+                bool restore_locale;
             };
 
             format_parser::format_parser(std::ios_base &ios) : 
@@ -23,6 +27,8 @@ namespace boost {
                 d->position=std::numeric_limits<unsigned>::max();
                 d->precision=ios.precision();
                 d->info=impl::ios_prop<impl::ios_info>::get(ios);
+                d->saved_locale = ios.getloc();
+                d->restore_locale=false;
             }
 
             format_parser::~format_parser()
@@ -33,6 +39,8 @@ namespace boost {
             {
                 impl::ios_prop<impl::ios_info>::set(d->info,ios_);
                 ios_.width(0);
+                if(d->restore_locale)
+                    ios_.imbue(d->saved_locale);
             }
 
             unsigned format_parser::get_posision()
@@ -135,6 +143,18 @@ namespace boost {
                     ios_.width(atoi(value.c_str()));
                 else if(key=="p" || key=="precision")
                     ios_.precision(atoi(value.c_str()));
+                else if(key=="locale") {
+                    if(!d->restore_locale) {
+                        d->saved_locale=ios_.getloc();
+                        d->restore_locale=true;
+                    }
+
+                    std::string encoding=std::use_facet<info>(d->saved_locale).encoding();
+                    generator gen;
+                    gen.categories(formatting_facet);
+                    gen.octet_encoding(encoding);
+                    ios_.imbue(gen.get(value));
+                }
 
             }
         }
