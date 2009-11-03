@@ -184,6 +184,14 @@ namespace boost {
                 return fmt;
             }
 
+            template<typename CharType>
+            details::add_ftime<CharType> ftime(CharType const *format)
+            {
+                details::add_ftime<CharType> fmt;
+                fmt.ftime=format;
+                return fmt;
+            }
+
             namespace details {
                 struct set_timezone {
                     std::string id;

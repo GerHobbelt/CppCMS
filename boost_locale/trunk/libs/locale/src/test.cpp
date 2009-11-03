@@ -111,6 +111,10 @@ int main()
 
 	std::cout<<out.str();
 
+	out.str("");
+	out<<as::ftime("[ '%Y-%m-%d %H:%M:%S' ]") << now;
+	std::cout<<out.str();
+
 
 	}
 	catch(std::exception const &e) {

@@ -127,19 +127,22 @@ namespace locale {
     /// This class can be used in STL algorithms and containers for comparison of strings
     /// with different level then primary
     ///
-    template<typename CharType,collator_base::level_type level = collator_base::primary>
+    template<typename CharType,collator_base::level_type default_level = collator_base::primary>
     struct comparator
     {
     public:
-        comparator(std::locale const &l=std::locale()) : locale_(l)
+        comparator(std::locale const &l=std::locale(),collator_base::level_type level=default_level) : 
+            locale_(l),
+            level_(level)
         {
         }
         bool operator()(std::basic_string<CharType> const &left,std::basic_string<CharType> const &right) const
         {
-            return std::use_facet<collator<CharType> >(locale_).compare(level,left,right) < 0;
+            return std::use_facet<collator<CharType> >(locale_).compare(level_,left,right) < 0;
         }
     private:
         std::locale locale_;
+        collator_base::level_type level_;
     };
 
 

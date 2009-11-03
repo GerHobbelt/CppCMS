@@ -159,15 +159,15 @@ namespace boost {
                 }
                 void flags(uint64_t f)
                 {
+                    valid_ = valid_ ? flags_ == f : false;
                     flags_=f;
-                    valid_ = false;
                 }
 
                 template<typename Char>
                 void datetime(std::basic_string<Char> const &str)
                 {
+                    valid_ = valid_ ? datetime_.get<Char>() == str : false;
                     datetime_=str;
-                    valid_ = false;
                 }
 
                 template<typename Char>
@@ -178,6 +178,7 @@ namespace boost {
                 
                 void timezone(std::string const &str)
                 {
+                    valid_ = valid_ ? timezone_ == str : false;
                     timezone_=str;
                     valid_ = false;
                 }

@@ -3,8 +3,10 @@
 
 #include <boost/locale/config.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/formatting.hpp>
 
 #include <sstream>
+#include <iostream>
 
 namespace boost {
     namespace locale {
@@ -77,13 +79,21 @@ namespace boost {
             public:
                 format_parser(std::ios_base &ios);
                 ~format_parser();
+                
                 unsigned get_posision();
-                void set_flags(std::string const &format);
-                void restore();
-            private:
-                void set_one_flag(std::string const &flag);
+                
                 void set_one_flag(std::string const &key,std::string const &value);
 
+                template<typename CharType>
+                void set_flag_with_str(std::string const &key,std::basic_string<CharType> const &value)
+                {
+                    if(key=="ftime" || key=="strftime") {
+                        as::strftime(ios_);
+                        ext_pattern(ios_,flags::datetime_pattern,value);
+                    }
+                }
+                void restore();
+            private:
                 format_parser(format_parser const &);
                 void operator=(format_parser const &);
 
@@ -155,61 +165,104 @@ namespace boost {
                 return tmp;
             }
 
-            void format_output(stream_type &out,string_type const &format) const
+            void format_output(stream_type &out,string_type const &sformat) const
             {
                 char_type obrk=out.widen('{');
                 char_type cbrk=out.widen('}');
+                char_type eq=out.widen('=');
+                char_type comma=out.widen(',');
+                char_type quote=out.widen('\'');
+
                 size_t pos = 0;
-                while(pos<format.size()) {
-                    if(format[pos]!=obrk) {
+                size_t size=sformat.size();
+                CharType const *format=sformat.c_str();
+                while(format[pos]!=0) {
+                    if(format[pos] != obrk) {
                         out<<format[pos];
                         pos++;
                         continue;
                     }
-                    else if(pos+1 < format.size() && format[pos+1]==obrk) {
+
+                    if(pos+1 < size && format[pos+1]==obrk) {
                         out << obrk;
                         pos+=2;
+                        continue;
                     }
-                    else {
-                        pos++;
-                        size_t begin=pos;
-                        size_t end = format.find(cbrk,begin);
-                        if(end!=std::string::npos) {
-                            pos=end+1;
-                            format_signle(out,format.substr(begin,end-begin));
+                    pos++;
+                   
+                    
+                    details::format_parser fmt(out);
+
+                    while(pos < size) { 
+                        char_type c;
+                        std::string key;
+                        std::string svalue;
+                        string_type value;
+                        bool use_svalue = true;
+                        for(;format[pos];pos++) {
+                            char_type c=format[pos];
+                            if(c==comma || c==eq || c==cbrk)
+                                break;
+                            else
+                                key+=out.narrow(c,'?');
                         }
-                        else {
-                            pos=end;
+
+                        if(format[pos]==eq) {
+                            pos++;
+                            if(format[pos]==quote) {
+                                pos++;
+                                use_svalue = false;
+                                while(format[pos]) {
+                                    if(format[pos]==quote) {
+                                        if(format[pos+1]==quote) {
+                                            value+=quote;
+                                            pos+=2;
+                                        }
+                                        else {
+                                            pos++;
+                                            break;
+                                        }
+                                    }
+                                    else {
+                                        value+=format[pos];
+                                        pos++;
+                                    }
+                                }
+                            }
+                            else {
+                                char_type c;
+                                while((c=format[pos])!=0 && c!=comma && c!=cbrk) {
+                                    svalue+=out.narrow(c,'?');
+                                    pos++;
+                                }
+                            }
                         }
+
+                        if(use_svalue)
+                            fmt.set_one_flag(key,svalue);
+                        else 
+                            fmt.set_flag_with_str(key,value);
                         
+                        if(format[pos]==',') {
+                            pos++;
+                            continue;
+                        }
+                        else if(format[pos]=='}')  {
+                            unsigned position = fmt.get_posision();
+                            out << get(position);
+                            fmt.restore();
+                            pos++;
+                            break;
+                        }
+                        else {                        
+                            fmt.restore();
+                            break;
+                        }
                     }
                 }
             }
 
-            std::string narrow(string_type const &str,stream_type &out) const
-            {
-                std::string tmp;
-                tmp.reserve(str.size());
-                for(unsigned i=0;i<str.size();i++)
-                    tmp+=out.narrow(str[i],' ');
-                return tmp;
-            }
-
-            void format_signle(stream_type &out,string_type const &format) const
-            {
-                details::format_parser fmt(out);
-                
-                fmt.set_flags(narrow(format,out));
-
-                unsigned position = fmt.get_posision();
-
-                out << get(position);
-
-                fmt.restore();
-
-            }
-
-       
+      
             //
             // Non-copyable 
             //

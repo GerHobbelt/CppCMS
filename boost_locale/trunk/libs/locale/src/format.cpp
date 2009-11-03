@@ -40,22 +40,6 @@ namespace boost {
                 return d->position;
             }
 
-            void format_parser::set_flags(std::string const &format)
-            {
-                size_t end = 0;
-                for(size_t begin = 0;begin < format.size();begin = ( end  == std::string::npos ? end : end+1)) {
-                        end=format.find(',',begin);
-                        set_one_flag(format.substr(begin,end-begin));
-                }                
-            }
-            void format_parser::set_one_flag(std::string const &flag)
-            {
-                size_t pos=flag.find('=');
-                if(pos==std::string::npos)
-                    set_one_flag(flag,"");
-                else
-                    set_one_flag(flag.substr(0,pos),flag.substr(pos+1));
-            }
             void format_parser::set_one_flag(std::string const &key,std::string const &value)
             {
                 if(key.empty())

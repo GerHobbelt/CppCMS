@@ -11,6 +11,7 @@
 #include <unicode/numfmt.h>
 #include <unicode/rbnf.h>
 #include <unicode/datefmt.h>
+#include <unicode/smpdtfmt.h>
 #include <unicode/decimfmt.h>
 
 #include <limits>
@@ -261,6 +262,133 @@ namespace locale {
             icu_std_converter<CharType> cvt_;
             std::auto_ptr<icu::DateFormat> icu_fmt_;
         };
+
+        icu::UnicodeString strftime_to_icu_full(icu::DateFormat *dfin,char const *alt)
+        {
+            std::auto_ptr<icu::DateFormat> df(dfin);
+            icu::SimpleDateFormat *sdf=dynamic_cast<icu::SimpleDateFormat *>(df.get());
+            icu::UnicodeString tmp;
+            if(sdf) {
+                sdf->toPattern(tmp);
+            }
+            else {
+                tmp=alt;
+            }
+            return tmp;
+
+        }
+
+        icu::UnicodeString strftime_to_icu_symbol(char c,icu::Locale const &locale)
+        {
+            switch(c) {
+            case 'a': // Abbr Weekday
+                return "EE";
+            case 'A': // Full Weekday
+                return "EEEE";
+            case 'b': // Abbr Month
+                return "MMM";
+            case 'B': // Full Month
+                return "MMMM";
+            case 'c': // DateTile Full
+                return strftime_to_icu_full(
+                    icu::DateFormat::createDateTimeInstance(icu::DateFormat::kFull,icu::DateFormat::kFull,locale),
+                    "YYYY-MM-dd HH:mm:ss"
+                );
+            // not supported by ICU ;(
+            //  case 'C': // Century -> 1980 -> 19
+            //  retur
+            case 'd': // Day of Month [01,31]
+                return "dd";
+            case 'D': // %m/%d/%y
+                return "MM/dd/YY";
+            case 'e': // Day of Month [1,31]
+                return "d";
+            case 'h': // == b
+                return "MMM";
+            case 'H': // 24 clock hour 00,23
+                return "HH";
+            case 'I': // 12 clock hour 01,12
+                return "hh";
+            case 'j': // day of year 001,366
+                return "D";
+            case 'm': // month as [01,12]
+                return "MM";
+            case 'M': // minute [00,59]
+                return "mm";
+            case 'n': // \n
+                return "\n";
+            case 'p': // am-pm
+                return "a";
+            case 'r': // time with AM/PM %I:%M:%S %p
+                return "HH:mm:ss a";
+            case 'R': // %H:%M
+                return "HH:mm";
+            case 'S': // second [00,61]
+                return "ss";
+            case 't': // \t
+                return "\t";
+            case 'T': // %H:%M:%S
+                return "HH:mm:ss";
+/*          case 'u': // weekday 1,7 1=Monday
+            case 'U': // week number of year [00,53] Sunday first
+            case 'V': // week number of year [01,53] Moday first
+            case 'w': // weekday 0,7 0=Sunday
+            case 'W': // week number of year [00,53] Moday first, */
+            case 'x': // Date
+                return strftime_to_icu_full(
+                    icu::DateFormat::createDateInstance(icu::DateFormat::kMedium,locale),
+                    "YYYY-MM-dd"
+                );
+            case 'X': // Time
+                return strftime_to_icu_full(
+                    icu::DateFormat::createTimeInstance(icu::DateFormat::kMedium,locale),
+                    "HH:mm:ss"
+                );
+            case 'y': // Year [00-99]
+                return "YY";
+            case 'Y': // Year 1998
+                return "YYYY";
+            case 'Z': // timezone
+                return "VVVV";
+            case '%': // %
+                return "%";
+            default:
+                return "";
+            }
+        }
+
+        icu::UnicodeString strftime_to_icu(icu::UnicodeString const &ftime,icu::Locale const &locale)
+        {
+            unsigned len=ftime.length();
+            icu::UnicodeString result;
+            for(unsigned i=0;i<len;i++) {
+                UChar c=ftime[i];
+                if(c=='%') {
+                    i++;
+                    c=ftime[i];
+                    if(c=='E' || c=='O') {
+                        i++;
+                        c=ftime[i];
+                    }
+                    result+=strftime_to_icu_symbol(c,locale);
+                }
+                else if(('a'<=c && c<='z') || ('A'<=c && c<='Z')) {
+                    result+="'";
+                    while(('a'<=c && c<='z') || ('A'<=c && c<='Z')) {
+                        result+=c;
+                        i++;
+                        c=ftime[i];
+                    }
+                    result+="'";
+                }
+                else if(c=='\'') {
+                    result+="''";
+                }
+                else
+                    result+=c;
+            }
+            return result;
+        }
         
         template<typename CharType>
         std::auto_ptr<formatter<CharType> > generate_formatter(std::ios_base &ios)
@@ -360,10 +488,12 @@ namespace locale {
             case date:
             case time:
             case datetime:
+            case strftime:
                 {
                     using namespace flags;
                     icu::DateFormat::EStyle dstyle = icu::DateFormat::kDefault,tstyle = icu::DateFormat::kDefault;
                     std::auto_ptr<icu::DateFormat> df;
+                    
                     switch(info.flags() & time_flags_mask) {
                     case time_short:    tstyle=icu::DateFormat::kShort; break;
                     case time_medium:   tstyle=icu::DateFormat::kMedium; break;
@@ -376,13 +506,22 @@ namespace locale {
                     case date_long:     dstyle=icu::DateFormat::kLong; break;
                     case date_full:     dstyle=icu::DateFormat::kFull; break;
                     }
+                    
                     if(disp==date)
                         df.reset(icu::DateFormat::createDateInstance(dstyle,locale));
                     else if(disp==time)
                         df.reset(icu::DateFormat::createTimeInstance(tstyle,locale));
-                    else // datetime
+                    else if(disp==datetime)
                         df.reset(icu::DateFormat::createDateTimeInstance(dstyle,tstyle,locale));
+                    else {// strftime
+                        icu_std_converter<CharType> cvt_(encoding);
+                        std::basic_string<CharType> const &f=info.datetime<CharType>();
+                        icu::UnicodeString fmt = strftime_to_icu(cvt_.icu(f.data(),f.data()+f.size()),locale);
+                        df.reset(new icu::SimpleDateFormat(fmt,locale,err));
+                    }
                     if(!df.get())
+                        return fmt;
+                    if(U_FAILURE(err))
                         return fmt;
                     if(!info.timezone().empty())
                         df->adoptTimeZone(icu::TimeZone::createTimeZone(info.timezone().c_str()));

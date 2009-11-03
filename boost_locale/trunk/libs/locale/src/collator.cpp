@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <vector>
+#include <limits>
 
 #include "info_impl.hpp"
 #include "uconv.hpp"
@@ -57,7 +58,18 @@ namespace boost {
                     }
                     else 
                         tmp.resize(len);
-                    return std::basic_string<CharType>(tmp.begin(),tmp.end()); 
+
+                    if( std::numeric_limits<CharType>::min() == std::numeric_limits<char>::min() // Both unsigned or same
+                        || (std::numeric_limits<CharType>::min() < 0 && std::numeric_limits<char>::min()) < 0) // both signed
+                    {
+                        return std::basic_string<CharType>(tmp.begin(),tmp.end());
+                    }
+                    else {
+                        std::basic_string<CharType> out(tmp.size(),0);
+                        for(unsigned i=0;i<tmp.size();i++)
+                            out[i]=tmp[i]+128;
+                        return out;
+                    }
                 }
                 
                 long do_hash(level_type level,CharType const *b,CharType const *e) const
