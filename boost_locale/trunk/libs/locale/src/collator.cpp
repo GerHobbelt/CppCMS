@@ -60,7 +60,7 @@ namespace boost {
                         tmp.resize(len);
 
                     if( std::numeric_limits<CharType>::min() == std::numeric_limits<char>::min() // Both unsigned or same
-                        || (std::numeric_limits<CharType>::min() < 0 && std::numeric_limits<char>::min()) < 0) // both signed
+                        || (std::numeric_limits<CharType>::min() < 0 && std::numeric_limits<char>::min() < 0)) // both signed
                     {
                         return std::basic_string<CharType>(tmp.begin(),tmp.end());
                     }
