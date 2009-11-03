@@ -194,7 +194,6 @@ namespace boost {
                     details::format_parser fmt(out);
 
                     while(pos < size) { 
-                        char_type c;
                         std::string key;
                         std::string svalue;
                         string_type value;

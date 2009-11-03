@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <ostream>
+#include <memory>
 
 namespace boost {
     namespace locale {
