@@ -5,7 +5,7 @@
 #include <ctime>
 
 
-
+#ifndef BOOST_NO_SWPRINTF    
 int main()
 {
     using namespace boost::locale;
@@ -35,5 +35,11 @@ int main()
     wcout<<L"behavoir to BMP or ASCII only"<<endl;
    
 }
+#else
+int main()
+{
+    std::cout<<"This platform does not support wcout"<<std::endl;
+}
+#endif
 
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

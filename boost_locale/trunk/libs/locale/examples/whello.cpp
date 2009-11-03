@@ -3,10 +3,12 @@
 
 #include <ctime>
 
+#ifndef BOOST_NO_SWPRINTF    
 int main()
 {
     using namespace boost::locale;
     using namespace std;
+    
     generator gen;
     locale::global(locale(""));
     locale loc=gen(""); 
@@ -31,5 +33,12 @@ int main()
     wcout<<L"This is fold case "<<fold_case(L"Hello World!")<<endl;
    
 }
+#else
+int main()
+{
+    std::cout<<"This platform does not support wcout"<<std::endl;
+}
+#endif
+
 
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

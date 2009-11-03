@@ -37,9 +37,6 @@ int main()
 
 	std::locale::global(gen.generate(""));
 
-	std::wofstream fout("test.txt");
-	fout<<L"שלום עולם!"<<endl;
-	
 	typedef comparator<char,collator_base::primary> comp_type;
 
 	typedef std::map<std::string,std::string,comp_type> phones_map_type;
