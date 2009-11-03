@@ -14,6 +14,7 @@ include_directories(../..)
 
 add_library(boost_locale SHARED 
 	src/generator.cpp
+	src/timezone.cpp
 	src/collator.cpp
 	src/codepage.cpp
 	src/converter.cpp
