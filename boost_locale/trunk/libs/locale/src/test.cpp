@@ -9,6 +9,7 @@
 #include <boost/locale/collator.hpp>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/codepage.hpp>
+#include <boost/locale/boundary.hpp>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
@@ -115,6 +116,13 @@ int main()
 	out<<as::ftime("[ '%Y-%m-%d %H:%M:%S' ]") << now;
 	std::cout<<out.str();
 
+	std::cout<<std::endl;
+	std::string text="123 Hello World, שָלוֹם Hello-World, Windows7, ウィキペディアはオープンコンテントの百科事典です。基本方針に賛同していただけるなら、誰でも記事を編集したり新しく作成したりできます。";
+	boundary::index_type index = boundary::map(boundary::word,text);
+	for(unsigned i=0;i<index.size()-1;i++) {
+		std::cout<<"["<<text.substr(index[i].offset,index[i+1].offset-index[i].offset)<<"]"<<endl;
+		std::cout<<index[i].next<<std::endl;
+	}
 
 	}
 	catch(std::exception const &e) {

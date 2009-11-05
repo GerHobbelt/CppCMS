@@ -2,7 +2,10 @@
 #define BOOST_LOCALE_BOUNDARY_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
+#include <boost/cstdint.hpp>
 
+#include <locale>
+#include <vector>
 
 namespace boost {
     namespace locale {
@@ -63,14 +66,36 @@ namespace boost {
             static index_type map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc);
             
             template<typename CharType>
-            static index_type map(boundary_type t,std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
+            static index_type map(
+                            boundary_type t,
+                            std::basic_string<CharType> const &str,
+                            std::locale const &loc=std::locale())
             {
                 return map(t,str.data(),str.data()+str.size(),loc);
             }
         };
         
         template<>
-        BOOST_LOCALE_DECL boundary::index_type boundary::map(boundary::boundary_type t,char const *begin,char const *end,std::locale const &loc);
+        BOOST_LOCALE_DECL boundary::index_type 
+        boundary::map(boundary::boundary_type t,char const *begin,char const *end,std::locale const &loc);
+
+        #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        BOOST_LOCALE_DECL boundary::index_type 
+        boundary::map(boundary::boundary_type t,wchar_t const *begin,wchar_t const *end,std::locale const &loc);
+        #endif
+
+        #ifdef BOOST_HAS_CHAR16_T
+        template<>
+        BOOST_LOCALE_DECL boundary::index_type 
+        boundary::map(boundary::boundary_type t,char16_t const *begin,char16_t const *end,std::locale const &loc);
+        #endif
+
+        #ifdef BOOST_HAS_CHAR32_T
+        template<>
+        BOOST_LOCALE_DECL boundary::index_type 
+        boundary::map(boundary::boundary_type t,char32_t const *begin,char32_t const *end,std::locale const &loc);
+        #endif
 
     }
 }
