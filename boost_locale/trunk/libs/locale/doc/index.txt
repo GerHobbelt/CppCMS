@@ -1,3 +1,8 @@
+<!--
+ vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=mkd
+-->
+
+
 # Boost.Locale
 
 ## Introduction
@@ -30,16 +35,209 @@ Boost.Locale provides the natural glue between C++ locales framework, iostreams 
 
 ## Tutorial
 
-### Locale Model
+
+### Locale Generation
 
 The major "container" of all localization information in C++ is class `std::locale`. It is designed to hold
 all general information about specific culture and can be easily extended with additional resources providing 
 information about specific culture: facets. Facets are classes derived from `std::locale::facet` that hold
 required resources.
 
-For example `std::collate` facet provides information about string comparison.
+Each locale is defined by specific locale identifier that contains mandatory part Language and optional pars Country, Variant, and keywords,
+also when we use narrow strings (a.k.a. `std::string`) we need to specify encoding we use. 
 
-Other information, that can be also called formatting flags can be kept withing `std::ios_base` object and
-can be changed using iostream manipulators.
+First we generate our locale with all required facets and then we can use it. Class `boost::locale::generator` provides us such tool.
+The simplest way to use generator is to create a locale and set it as global one:
 
-### Hello World
+    #include <boost/locale.hpp>
+    
+    using namespace boost::locale;
+    int main()
+    {
+        generator gen;
+        // Create locale generator 
+        std::locale::global(gen(""));
+        // Set system default global locale
+    }
+
+Of course we can specify locale manually, using default system encoding:
+
+    std::locale loc = gen("en_US"); 
+    // Use English, United States locale
+
+Or specify both locale and encoding independently or using POSIX locale specifier:
+
+    std::locale loc = gen("ja_JP","UTF-8"); 
+    // Separation of locale and encoding
+    std::locale loc = gen("ja_JP.UTF-8");
+    // POSIX locale name with encoding
+
+When you generate more then one locale, you may specify the default encoding used
+for `std::string` by calling `octet_encoding` member function of `generator`. For example:
+
+    generator gen;
+    gen.octet_encoding("UTF-8");
+
+    std::locale en=gen("en_US");
+    std::locale ja=gen("ja_JP");
+
+**Note:** Even if your application uses wide strings anywhere it is recommended to specify
+8-bit encoding that would be used for all wide stream IO operations like `wcout` or `wfstream`.
+
+**Tip:** Prefer using UTF-8 Unicode encoding over 8-bit encodings like ISO-8859-X ones.
+
+By default the locale generated for all supported categories and character types. However, if your
+application uses strictly 8-bit encodings, uses only wide character encodings only or it uses
+only specific parts of the localization tools  you can limit facet generation to specific categories
+and character types, by calling `categories` and `characters` member functions of `generator` class.
+
+For example:
+
+    generator gen;
+    gen.characters(wchar_t_facet);
+    gen.categories(collation_facet | formatting_facet);
+    std::locale::global(gen("de_DE.UTF-8"));
+
+
+### Collation 
+
+Boost.Locale provides `collator` class derived from `std::collate` that extends it with support of comparison levels:
+primary -- the default one, secondary, tertiary and quaternary levels. They can be approximately defined as:
+
+1. Primary -- ignore accents and characters case compare base characters only. For example "facade" and "Façade" are same.
+2. Secondary -- ignore characters case but consider accents "facade" and "façade" are different but "Façade" and "façade" are same.
+3. Tertiary -- do not ignore case and accents: "Façade" and "façade" are different
+4. Quaternary -- the word are identical in terms of Unicode representation
+
+There are two ways of using `collator` facet: direct by calling its member functions `compare`, `transform` and `hash` or indirect by
+using `comparator` template class in STL collation and algorithms.
+
+For example:
+
+    wstring a=L"Façade", b=L"facade";
+    bool eq = 0 == use_facet<collator<wchar_t> >(loc).compare(collator_base::secondary,a,b);
+    wcout << a <<L" and "<<b<<L" are " << (eq ? L"identical" : L"different")<<endl;
+
+`std::locale` is designed to be useful as comparison class in STL collection and algorithms.
+In order to get similar functionality with addition of comparison levels you  use comparator class.
+
+    std::map<std::string,std::string,comparator<char,collator_base::secondary> > strings;
+    // Now strings uses default system locale for string comparison
+
+You can also set specific locale or level when creating and using `comparator` class:
+
+    comparator<char> comp(some_locale,some_level);
+    std::map<std::string,std::string,comparator<char> > strings(comp);
+
+
+## Design Rationale 
+
+### Why is it needed?
+
+Why do we need localization library, standard C++ facets (should) provide most of required functionality:
+
+- Case conversion is done using `std::ctype` facet
+- Collation is supported by `std::collate` and has nice integration with `std::locale`
+- There are `std::num_put`, `std::num_get`, `std::money_put`, `std::money_get`, `std::time_put` and `std::time_get` for numbers,
+    time and currency formatting and parsing.
+- There are `std::messages` class that supports localized message formatting.
+
+
+So why do we need such library if we have all the functionality withing standard library?
+
+Almost each(!) facet has some flaws in their design:
+
+-  `srd::collate` supports only one level of collation, not allowing to choose whether case, accents sensitive or insensitive comparison.
+
+-  `std::ctype` that is responsible for case conversion assumes that conversion can be done on per-character base. This is
+    probably correct for many languages but it isn't correct for many languages.
+    
+    1. Case conversion may change string length. For example German word "grüßen" should be converted to "GRÜSSEN" in upper
+    case: the letter "ß" should be converted to "SS", but `toupper` function works on single character base.
+    2. Case conversion is context sensitive. For example Greek word "ὈΔΥΣΣΕΎΣ" should be converted to "ὀδυσσεύς" where Greek letter
+    "Σ" is converted to "σ" or to "ς", according to position in the word.
+    3. Case conversion assumes that one character is a single code point, which is incorrect for most popular "UTF-8" encoding under
+    Linux and "UTF-16" encoding under Windows. Where each code-point is represented up to 4 `char`'s in UTF-8 and up to two `wchar_t`'s under
+    Windows platform. This makes `std::ctype` totally useless with UTF-8 encodings.
+
+-   `std::numpunct` and `std::moneypunct` do not specify digits code point for digits representation at all. 
+    Thus it is impossible to format number using digits used under Arabic locales, for example:
+    the number "103" is expected to be displayed as "١٠٣" under `ar_EG` locale.
+    
+    `std::numpunct` and `std::moneypunct` assume that thousands separator can be represented using a single character. It is quite untrue
+    for UTF-8 encoding where only Unicode 0-0x7F range can be represented as single character. As a result, localized numbers can't be
+    represented correctly under locales that use Unicode "EN SPACE" character for thousands separator, like Russian locale.
+    
+    This actually cause a real bug under GCC where formatting numbers under Russian locale creates invalid UTF-8 sequences, even thou it
+    is rather GCC bug then real standard flaw.
+
+
+-   `std::time_put` and `std::time_get` have several flows:
+    
+    1. It assumes that the required calendar is Gregorian calendar, by using `std::tm` for time representation, ignoring the fact that in many countries
+    dates may be displayed using different calendars.
+    2. It always uses global time zone not-allowing specification of time zone for formatting -- actually standard `std::tm` does not include
+    timezone field.
+    3. `std::time_get` is not symmetric with `std::time_put` now allowing parsing dates and times created with `std::time_put`. This issue is addressed
+    in C++0x and some STL implementation like Apache standard C++ library.
+
+-   `std::messages` does not provide support of plural forms making impossible to localize correctly such simple strings like: 
+    "There are X files in directory".
+
+Also many features are not really supported by `std::locale` at all: timezones mentioned above, text boundary analysis, numbers spelling and many
+others. So it is clear that standard C++ locales are very problematic for real-world applications internationalization and localization.
+
+
+### Why to use ICU wrapper instead of ICU?
+
+ICU is very good localization library but it has several serious flaws:
+
+- It is absolutely unfriendly to C++ developer. It ignores most of popular C++ idioms: STL, RTTI, exceptions etc. Instead
+it mostly mimics Java API.
+- It provides support of only one kind of strings: UTF-16 strings, when some users may want to use other Unicode encodings.
+For example for XML, HTML processing UTF-8 is much more convenient and UTF-32 easier to use. Also there is no support of 
+"narrow" encoding that are still very popular like ISO-8859 encodings family that are useful and applicable for use.
+
+For example: Boost.Locale provides direct integration with IO streams allowing more natural way of data formatting. For example:
+
+    cout << "You have "<<as::currency << 134.45 << " at your account at "<<as::datetime << std::time(0) << endl;
+
+### Why the ICU API is not exposed to user?
+
+It is true, all ICU API is hidden behind opaque pointer and user have no access to it. This is done for several reasons:
+
+- At some point, better localization tools may be accepted by future upcoming C++ standards and thus, they may not use ICU directly.
+- At some point, there should be a possibility to switch underlying localization engine to other, for example use native operating
+system API or use some other toolkits like GLib or Qt that provide similar functionality.
+- Not all localization is done withing ICU. For example, message formatting uses GNU Gettext message catalogs. In future more functionality
+may be taken from ICU and reimplemented directly in the Boost.Locale library.
+
+### Why to use GNU Gettext catalogs for message formatting?
+
+There are many available localization formats, most popular so far are: OASIS XLIFF, GNU gettext po/mo files, POSIX catalogs, Qt ts/tm files, Java properties, Windows resources. However, the last three are popular each one in its specific area, POSIX catalogs are too simple and limited so there are two quite reasonable options:
+
+1. Standard localization format OASIS XLIFF.
+2. GNU Gettext binary catalogs.
+
+The first one generally seems like more correct localization solution but... It requires XML parsing for loading documents, it is very complicated
+format and even ICU requires preliminary compilation of it into ICU resource bundles.
+
+On the other hand:
+
+- GNU Gettext binary catalogs have very simple, robust and yet very useful file format.
+- It is so far the most popular and de-facto standard localization format (at least in Open Source world.)
+- It has very simple and very powerful support of plural forms.
+- It uses original English text as key making the process of internationalization much easier. Because at lease 
+one basic translation is always available.
+- There are many tools for editing and managing gettext catalogs like: Poedit, kbabel etc.
+
+So, even thou GNU Gettext mo catalogs format is not officially approved file format:
+
+- It is de-facto standard and most popular one.
+- It implementation is much easier and does not requires XML parsing and validation
+
+
+**Note:** Boost.Locale does not use any of GNU Gettext code, it just
+reimplements tool for reading and using mo-files, getting rid of current biggest GNU Gettext flaw -- thread safety
+when using multiple locales.
+
