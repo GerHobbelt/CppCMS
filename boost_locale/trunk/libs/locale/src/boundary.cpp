@@ -26,7 +26,11 @@ boundary::index_type map_direct(boundary::boundary_type t,icu::BreakIterator *it
         indx.push_back(boundary::break_info(pos));
         if(rbbi && (t==boundary::word || t==boundary::line))
         {
-            int32_t buf[16]={0};
+			//
+			// There is a collapse for MSVC: int32_t defined by both boost::cstdint and icu...
+			// So need to pick one ;(
+			//
+            ::int32_t buf[16]={0};
             UErrorCode err=U_ZERO_ERROR;
             int n = rbbi->getRuleStatusVec(buf,16,err);
             if(n > 16)
