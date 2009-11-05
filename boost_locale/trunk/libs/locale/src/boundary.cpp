@@ -123,7 +123,6 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
         icu::UnicodeString str=cvt.icu(begin,end);
         bi->setText(str);
         boundary::index_type indirect = map_direct(t,bi.get(),str.length());
-        unsigned pos = 0;
         indx=indirect;
         for(unsigned i=1;i<indirect.size();i++) {
             unsigned offset_inderect=indirect[i-1].offset;
