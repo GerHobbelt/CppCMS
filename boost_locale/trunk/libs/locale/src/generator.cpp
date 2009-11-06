@@ -2,7 +2,6 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/numeric.hpp>
 #include <boost/locale/collator.hpp>
-#include <boost/locale/converter.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
 #include <boost/locale/codepage.hpp>
@@ -167,9 +166,6 @@ namespace boost {
                     }
                     result=std::locale(result,message_format<CharType>::create(inf,domains,d->paths));
                 }
-            }
-            if(d->cats & conversion_facet) {
-                result=std::locale(result,converter<CharType>::create(inf));
             }
             if(d->cats & codepage_facet) {
                 result=std::locale(result,code_converter<CharType>::create(inf));

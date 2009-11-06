@@ -129,6 +129,24 @@ You can also set specific locale or level when creating and using `comparator` c
     comparator<char> comp(some_locale,some_level);
     std::map<std::string,std::string,comparator<char> > strings(comp);
 
+### Conversions
+
+There is a set of function that perform basic string conversion operations: upper, lower and title case conversions, case folding
+and Unicode normalization. The functions are called `to_upper`, `to_lower`, `to_title`, `fold_case` and `normalize`.
+
+You may notice that there are existing functions `to_upper` and `to_lower` under in Boost.StringAlgo library, what is the difference?
+The difference is that these function operate over entire string instead of performing incorrect character-by-character conversions.
+
+For example:
+
+    std::wstring gruben = L"grüßen";
+    std::wcout << boost::algorithm::to_upper_copy(gruben) << " " << boost::locale::to_upper(gruben) << std::endl;
+
+Would give in output:
+
+> GRÜßEN GRÜSSEN
+
+Where a letter "ß" was not converted correctly to double-S.
 
 ## Design Rationale 
 

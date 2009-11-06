@@ -18,7 +18,7 @@ add_library(boost_locale SHARED
 	src/timezone.cpp
 	src/collator.cpp
 	src/codepage.cpp
-	src/converter.cpp
+	src/conversion.cpp
 	src/formatter.cpp 
 	src/formatting.cpp 
 	src/info.cpp 

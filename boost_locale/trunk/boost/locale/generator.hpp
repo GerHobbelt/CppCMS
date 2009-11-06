@@ -20,8 +20,7 @@ namespace boost {
             collation_facet = 1 << 0,
             formatting_facet= 1 << 1,
             message_facet   = 1 << 2,
-            conversion_facet= 1 << 3,
-            codepage_facet=   1 << 4,
+            codepage_facet=   1 << 3,
             
             all_categories  = 0xFFFFFFFFu
         } locale_category_type;

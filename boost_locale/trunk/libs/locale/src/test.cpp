@@ -5,7 +5,7 @@
 #include <boost/locale/numeric.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
-#include <boost/locale/converter.hpp>
+#include <boost/locale/conversion.hpp>
 #include <boost/locale/collator.hpp>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/codepage.hpp>
