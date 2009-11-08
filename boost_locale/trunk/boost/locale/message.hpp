@@ -14,6 +14,8 @@ namespace boost {
 
         class info;
         ///
+        /// \brief Hook class for DLL
+        ///
         /// This class is big ugly hook for DLL in order to make sure that both program and DLL
         /// refer to same locale::id when it uses some atomic static members.
         ///
@@ -306,10 +308,6 @@ namespace boost {
             return message(single,plural,n);
         }
         
-        ///
-        /// Specialization for char
-        ///
-
         template<>
         struct BOOST_LOCALE_DECL base_message_format<char> : public std::locale::facet 
         {
@@ -325,10 +323,6 @@ namespace boost {
                                                                                 std::vector<std::string> const &paths);
         #ifndef BOOST_NO_STD_WSTRING
         
-        ///
-        /// Specialization for char
-        ///
-
         template<>
         struct BOOST_LOCALE_DECL base_message_format<wchar_t> : public std::locale::facet 
         {
@@ -345,9 +339,6 @@ namespace boost {
         #endif
 
         #ifdef BOOST_HAS_CHAR16_T
-        ///
-        /// Specialization for char16_t
-        ///
 
         template<>
         struct BOOST_LOCALE_DECL base_message_format<char16_t> : public std::locale::facet 
@@ -365,9 +356,6 @@ namespace boost {
         #endif
 
         #ifdef BOOST_HAS_CHAR32_T
-        ///
-        /// Specialization for char32_t
-        ///
 
         template<>
         struct BOOST_LOCALE_DECL base_message_format<char32_t> : public std::locale::facet 
