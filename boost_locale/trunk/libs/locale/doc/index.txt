@@ -8,13 +8,13 @@ Boost.Locale is a library that brings high quality localization facilities in C+
 It uses `std::locale`, and `std::locale` facets in order to provide localization in transparent and
 C++ aware way to user.
 
-C++ has quite good base for localization via existing C++ locale facets: `std::num_put`, `std::ctype`, `std::collate` etc.. But
+C++ has quite a good base for localization via existing C++ locale facets: `std::num_put`, `std::ctype`, `std::collate` etc.. But
 they are very limited and sometimes buggy by design. The support of localization varies between different operating systems
 and incompatible between them.
 
 On the other hand, there is great, well debugged, high quality, widely used ICU library that gives all of the goodies but,
-it has very old API that mimics Java behavior, it is completely ignores STL and provides useful API only
-for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-16, or limited national character sets
+it has very old API that mimics Java behavior, it completely ignores STL and provides useful API only
+for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-32, or limited national character sets
 like Latin1.
 
 
@@ -37,11 +37,11 @@ Boost.Locale provides the natural glue between C++ locales framework, iostreams 
 
 The major "container" of all localization information in C++ is class `std::locale`. It is designed to hold
 all general information about specific culture and can be easily extended with additional resources providing 
-information about specific culture: facets. Facets are classes derived from `std::locale::facet` that hold
+information about specific area: facets. Facets are classes derived from `std::locale::facet` that hold
 required resources.
 
-Each locale is defined by specific locale identifier that contains mandatory part Language and optional pars Country, Variant, and keywords,
-also when we use narrow strings (a.k.a. `std::string`) we need to specify encoding we use. 
+Each locale is defined by specific locale identifier that contains a mandatory part---Language and optional pars Country, Variant, and keywords,
+when we use narrow strings (a.k.a. `std::string`) we need to specify encoding we use as well. 
 
 First we generate our locale with all required facets and then we can use it. Class `boost::locale::generator` provides us such tool.
 The simplest way to use generator is to create a locale and set it as global one:
@@ -62,7 +62,8 @@ Of course we can specify locale manually, using default system encoding:
     std::locale loc = gen("en_US"); 
     // Use English, United States locale
 
-Or specify both locale and encoding independently or using POSIX locale specifier:
+Or specify both locale and encoding independently or using POSIX locale specifier that includes both locale 
+information and encoding:
 
     std::locale loc = gen("ja_JP","UTF-8"); 
     // Separation of locale and encoding
@@ -101,13 +102,13 @@ For example:
 Boost.Locale provides `collator` class derived from `std::collate` that extends it with support of comparison levels:
 primary -- the default one, secondary, tertiary and quaternary levels. They can be approximately defined as:
 
-1. Primary -- ignore accents and characters case compare base characters only. For example "facade" and "Façade" are same.
+1. Primary -- ignore accents and characters' case compare base characters only. For example "facade" and "Façade" are same.
 2. Secondary -- ignore characters case but consider accents "facade" and "façade" are different but "Façade" and "façade" are same.
 3. Tertiary -- do not ignore case and accents: "Façade" and "façade" are different
-4. Quaternary -- the word are identical in terms of Unicode representation
+4. Quaternary -- the words are identical in terms of Unicode representation
 
 There are two ways of using `collator` facet: direct by calling its member functions `compare`, `transform` and `hash` or indirect by
-using `comparator` template class in STL collation and algorithms.
+using `comparator` template class in STL algorithms.
 
 For example:
 
@@ -153,7 +154,7 @@ Where a letter "ß" was not converted correctly to double-S in first case becaus
     8-bit encoding.
 -   All functions can work with STL string, NUL terminated string, and a range defined by two pointers. They always
     return a newly created STL string.
--   Length of string may be changed, see example above.
+-   Length of string may be changed, see an example above.
 
 ## Numbers, Time and Currency formatting and parsing
 
@@ -198,9 +199,9 @@ These are manipulators for currency formatting:
 -   `as::currency` -- set format to currency mode.
 -   `as::currency_iso` -- change currency format to international like "USD" instead of "$". This flag is supported when using ICU 4.2 and above.
 -   `as::currency_national` -- change currency format to national like "$".
--   `as::currency_default` -- return to default currency format to default (national)
+-   `as::currency_default` -- return to default currency format (national)
 
-Note `as::currency_XYZ` manipulators do not affect on general formatting only on the format of currency, it is necessary to use both manipulators
+Note `as::currency_XYZ` manipulators do not affect on general formatting, but only on the format of currency, it is necessary to use both manipulators
 in order to use non-default format.
 
 ### Date and Time formatting
@@ -232,11 +233,11 @@ These manipulators, when used together with `as::date`, `as::time`, `as::datetim
 The default format is medium.
 
 
-By default, the date and time is shown in local time, this behavior may be changed using following manipulators:
+By default, the date and time is shown in local time zone, this behavior may be changed using following manipulators:
 
--   `as::gmt` -- display date and time in GML.
--   `as::local_time` -- display in local time format.
--   `as::time_zone` -- parametrized format that sets time-zone ID for date-time formatting and parsing. It receives as parameter a string
+-   `as::gmt` -- display date and time in GMT.
+-   `as::local_time` -- display in local time format (default).
+-   `as::time_zone` -- parametrized manipulator that sets time-zone ID for date-time formatting and parsing. It receives as parameter a string
     that represents time zone id or `boost::locale::time_zone` class.
 
 For example:
@@ -306,7 +307,7 @@ invalid.
     number of parsed characters of `CharType` is returned.
 
 
-Generally direct using of `formatter` class is preferred when performance is critical.
+Generally direct using of `formatter` class is preferred when the performance is critical.
 
 
 ## Messages Formatting
@@ -355,7 +356,7 @@ The model is following:
         ...
     
     When application starts. It loads required dictionaries, and when `translate` function is called and the message is written
-    to output stream dictionary lookup is performed and localized message is written out.
+    to an output stream dictionary lookup is performed and localized message is written out.
 
 
 ### Loading dictionaries
@@ -415,7 +416,7 @@ These are basic translation functions
 
 
 These functions return special Proxy object of type `message`. It holds all required information for string formatting.
-When this object is written to output `iostream` it performs dictionary lookup of the id using locale imbued in `iostream`.
+When this object is written to an output `iostream` it performs dictionary lookup of the id using locale imbued in `iostream`.
 If the message is found in the dictionary is written to the output stream, otherwise the original string is written to the stream.
 
 **Notes:**
@@ -466,7 +467,7 @@ Let's try to solve a simple problem, display a message to user:
 
 This quite simple task becomes quite complicated when we deal with language other then English. Many languages have more
 then two plural forms. For example, in Hebrew there are special forms for single, double, plural, and plural above 10.
-They can't be distinguished by simple rule `n` is 1 or not.
+They can't be distinguished by simple rule "`n` is 1 or not".
 
 The correct solution is:
 
@@ -677,13 +678,13 @@ For example: cut at most 100 characters of text at word boundary:
 
 ## Localized Text Formatting
 
-The `iostream` manipulators are very useful but when we create a messages to the user, sometime we need something
+The `iostream` manipulators are very useful but when we create a messages to the user, sometimes we need something
 like old-good `printf` or `boost::format`.
 
 Unfortunately `boost::format` has several limitations in context of localization:
 
 1.  It renders all parameters using global locale rather then target `ostream` locale.
-2.  It does know nothing about new Boost.Locale manipulators.
+2.  It knows nothing about new Boost.Locale manipulators.
 3.  `printf` like syntax is very limited for formatting of complex localized data, not allowing
     formatting of dates, time or currency
 
@@ -741,7 +742,7 @@ Following format key-value pairs are supported:
 -   `width` or `w` -- set field width (requires parameter).
 -   `precision` or `p` -- set precision (requires parameter).
 -   `locale` -- with parameter -- switch locale for current operation. This command generates locale
-    with formatting facets only allowing to make more fine grained control of messages. For example:
+    with formatting facets giving more fine grained control of formatting. For example:
 
         cout << format("This article was published at {1,date=l} (Gregorian) {1,locale=he_IL@calendar=hebrew,date=l} (Hebrew)") % date;
 
@@ -762,7 +763,7 @@ There is one significant difference between `boost::format` and `boost::locale::
 only when it is written to `ostream` or when `str()` member function is called. It only saves a references to the objects that
 can be written to a stream.
 
-This is generally not a problem when all operation is done in one statement as:
+This is generally not a problem when all operations are done in one statement as:
 
     cout << format("Adding {1} to {2}, we get {3}") % a % b % (a+b);
 
@@ -883,16 +884,17 @@ So why do we need such library if we have all the functionality withing standard
 
 Almost each(!) facet has some flaws in their design:
 
--  `srd::collate` supports only one level of collation, not allowing to choose whether case, accents sensitive or insensitive comparison.
+-  `std::collate` supports only one level of collation, not allowing to choose whether case, accents sensitive or insensitive comparison
+    should be performed.
 
 -  `std::ctype` that is responsible for case conversion assumes that conversion can be done on per-character base. This is
-    probably correct for many languages but it isn't correct for many languages.
+    probably correct for many languages but it isn't correct in general case.
     
     1. Case conversion may change string length. For example German word "grüßen" should be converted to "GRÜSSEN" in upper
     case: the letter "ß" should be converted to "SS", but `toupper` function works on single character base.
     2. Case conversion is context sensitive. For example Greek word "ὈΔΥΣΣΕΎΣ" should be converted to "ὀδυσσεύς" where Greek letter
     "Σ" is converted to "σ" or to "ς", according to position in the word.
-    3. Case conversion assumes that one character is a single code point, which is incorrect for most popular "UTF-8" encoding under
+    3. Case conversion can not assume that one character is a single code point, which is incorrect for most popular "UTF-8" encoding under
     Linux and "UTF-16" encoding under Windows. Where each code-point is represented up to 4 `char`'s in UTF-8 and up to two `wchar_t`'s under
     Windows platform. This makes `std::ctype` totally useless with UTF-8 encodings.
 
@@ -921,7 +923,7 @@ Almost each(!) facet has some flaws in their design:
     "There are X files in directory".
 
 Also many features are not really supported by `std::locale` at all: timezones mentioned above, text boundary analysis, numbers spelling and many
-others. So it is clear that standard C++ locales are very problematic for real-world applications internationalization and localization.
+others. So it is clear that standard C++ locales are very problematic for real-world applications of internationalization and localization.
 
 
 **Why to use ICU wrapper instead of ICU?**
@@ -940,7 +942,7 @@ For example: Boost.Locale provides direct integration with `iostream` allowing m
 
 **Why the ICU API is not exposed to user?**
 
-It is true, all ICU API is hidden behind opaque pointer and user have no access to it. This is done for several reasons:
+It is true, all ICU API is hidden behind opaque pointers and user have no access to it. This is done for several reasons:
 
 - At some point, better localization tools may be accepted by future upcoming C++ standards and thus, they may not use ICU directly.
 - At some point, there should be a possibility to switch underlying localization engine to other, for example use native operating
@@ -963,7 +965,7 @@ On the other hand:
 - GNU Gettext binary catalogs have very simple, robust and yet very useful file format.
 - It is so far the most popular and de-facto standard localization format (at least in Open Source world.)
 - It has very simple and very powerful support of plural forms.
-- It uses original English text as key making the process of internationalization much easier. Because at lease 
+- It uses original English text as key making the process of internationalization much easier. Because at least
 one basic translation is always available.
 - There are many tools for editing and managing gettext catalogs like: Poedit, kbabel etc.
 
@@ -977,7 +979,7 @@ So, even thou GNU Gettext mo catalogs format is not officially approved file for
 reimplements tool for reading and using mo-files, getting rid of current biggest GNU Gettext flaw -- thread safety
 when using multiple locales.
 
-**Why a plain number is used for representation of date-time instead of Boost.DateTime date of Boost.DateTime POSIX time?**
+**Why a plain number is used for representation of date-time instead of Boost.DateTime date of Boost.DateTime ptime?**
 
 There are several reasons:
 
@@ -992,7 +994,7 @@ There are several reasons:
         
     -   `ptime` already defines and `operator<<` and `operator>>` for time formatting and parsing.
     
-    -   The existing facets for `ptime` formatting and parsing where not designed the way user can override their behavior.
+    -   The existing facets for `ptime` formatting and parsing were not designed the way user can override their behavior.
         The major formatting and parsing functions are not virtual. It makes impossible reimplementing formatting and
         parsing functions of `ptime` unless developers of Boost.DateTime library would decide to change them.
         
