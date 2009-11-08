@@ -43,8 +43,9 @@ namespace boost {
 
                 pair_type find(char const *key_in) const
                 {
+                    pair_type null_pair((char const *)0,(char const *)0);
                     if(hash_size_==0)
-                        return pair_type(0,0);
+                        return null_pair;
                     uint32_t hkey = pj_winberger_hash_function(key_in);
                     uint32_t incr = 1 + hkey % (hash_size_-2);
                     hkey %= hash_size_;
@@ -55,14 +56,14 @@ namespace boost {
                         uint32_t idx = get(hash_offset_ + 4*hkey);
                         /// Not found
                         if(idx == 0)
-                            return pair_type(0,0);
+                            return pair_type((char const *)0,(char const *)0);
                         /// If equal values return translation
                         if(strcmp(key(idx-1),key_in)==0)
                             return value(idx-1);
                         /// Rehash
                         hkey=(hkey + incr) % hash_size_;
                     } while(hkey!=orig);
-                    return pair_type(0,0);
+                    return null_pair;
                 }
                 
                 char const *key(int id) const
@@ -325,8 +326,9 @@ namespace boost {
 
                 pair_type get_string(int domain_id,char const *id) const
                 {
+                    pair_type null_pair((CharType const *)0,(CharType const *)0);
                     if(domain_id < 0 || size_t(domain_id) >= catalogs_.size())
-                        return pair_type(0,0);
+                        return null_pair;
                     if(mo_catalogs_[domain_id]) {
                         mo_file::pair_type p=mo_catalogs_[domain_id]->find(id);
                         return pair_type(reinterpret_cast<CharType const *>(p.first),
@@ -336,7 +338,7 @@ namespace boost {
                         catalog_type const &cat = catalogs_[domain_id];
                         typename catalog_type::const_iterator p = cat.find(id);
                         if(p==cat.end())
-                            return pair_type(0,0);
+                            return null_pair;
                         return pair_type(p->second.data(),p->second.data()+p->second.size());
                     }
                 }

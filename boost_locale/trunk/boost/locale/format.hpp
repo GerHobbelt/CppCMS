@@ -339,7 +339,7 @@ namespace boost {
         #endif
 
         #ifdef BOOST_HAS_CHAR32_T
-        typedef basic_format<char32_t> u16format;
+        typedef basic_format<char32_t> u32format;
         #endif
 
     }

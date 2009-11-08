@@ -8,6 +8,13 @@ if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 	message(FATAL " Failed to find icu")
 endif(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 
+#####
+# For C++0x
+#add_definitions(-DBOOST_HAS_CHAR16_T)
+#add_definitions(-DBOOST_HAS_CHAR32_T)
+####
+
+
 add_definitions(-DBOOST_LOCALE_DYN_LINK)
 
 include_directories(../..)
@@ -34,6 +41,11 @@ add_executable(wboundary examples/wboundary.cpp)
 add_executable(conversions examples/conversions.cpp)
 add_executable(wconversions examples/wconversions.cpp)
 add_executable(collate examples/collate.cpp)
+
+###
+# For C++0x
+#set_target_properties(boost_locale test hello wboundary boundary conversions whello wconversions PROPERTIES COMPILE_FLAGS "-std=c++0x")
+###
 
 target_link_libraries(boost_locale ${ICU_UC})
 target_link_libraries(boost_locale ${ICU_DATA})

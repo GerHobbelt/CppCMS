@@ -130,7 +130,7 @@ namespace boost{
         
         #ifdef BOOST_HAS_CHAR16_T
         template<>
-        BOOST_LOCALE_DECL std::basic_ostream<u16char_t> &operator<<(std::basic_ostream<u16char_t> &out,time_zone const &tz)
+        BOOST_LOCALE_DECL std::basic_ostream<char16_t> &operator<<(std::basic_ostream<char16_t> &out,time_zone const &tz)
         {
             write_string(out,tz.impl()->name(out.getloc()));
             return out;
@@ -139,7 +139,7 @@ namespace boost{
     
         #ifdef BOOST_HAS_CHAR32_T
         template<>
-        BOOST_LOCALE_DECL std::basic_ostream<u32char_t> &operator<<(std::basic_ostream<u32char_t> &out,time_zone const &tz)
+        BOOST_LOCALE_DECL std::basic_ostream<char32_t> &operator<<(std::basic_ostream<char32_t> &out,time_zone const &tz)
         {
             write_string(out,tz.impl()->name(out.getloc()));
             return out;
