@@ -11,6 +11,11 @@ namespace boost {
 
         class info_impl;
 
+        ///
+        /// \brief a facet that holds general information about locale
+        ///
+        /// This facet should be always created in order to make all Boost.Locale functions work
+        ///
         class BOOST_LOCALE_DECL info : public std::locale::facet
         {
         public:

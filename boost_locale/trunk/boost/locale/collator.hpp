@@ -9,6 +9,10 @@ namespace locale {
 
     class info;
 
+    ///
+    /// \brief a base class that included collation level flags
+    ///
+
     class collator_base {
     public:
         ///
@@ -37,7 +41,7 @@ namespace locale {
         
 
         ///
-        /// Compare two strings according using a collation level \a level
+        /// Compare two strings in rage [b1,e1), [b2,e2) according using a collation level \a level
         ///
         int compare(level_type level,
                     char_type const *b1,char_type const *e1,
@@ -47,31 +51,49 @@ namespace locale {
         }
         ///
         /// Create a binary string that can be compared to other, usefull for collation of multiple
-        /// strings
+        /// strings for text in range [b,e)
         ///
         string_type transform(level_type level,char_type const *b,char_type const *e) const
         {
             return do_transform(level,b,e);
         }
 
+        ///
+        /// Calculate a hash that can be used for collation sensitive string comparison of a text in range [b,e)
+        ///
         long hash(level_type level,char_type const *b,char_type const *e) const
         {
             return do_hash(level,b,e);
         }
 
+        ///
+        /// Compare two strings \a l and \a r using collation level \a level
+        ///
         int compare(level_type level,string_type const &l,string_type const &r) const
         {
             return do_compare(level,l.data(),l.data()+l.size(),r.data(),r.data()+r.size());
         }
+
+        ///
+        /// Calculate a hash that can be used for collation sensitive string comparison of a string \a s
+        ///
+
         long hash(level_type level,string_type const &s) const
         {
             return do_compare(level,s.data(),s.data()+s.size());
         }
+        ///
+        /// Create a binary string that can be compared to other, usefull for collation of multiple
+        /// strings for string  \a s
+        ///
         string_type transform(level_type level,string_type const &s) const
         {
             return do_transform(level,s.data(),s.data()+s.size());
         }
 
+        ///
+        /// A static member used for creation of collator instances, generally called by a generator class.
+        /// 
         static collator<CharType> *create(info const &inf);
         
     protected:
@@ -131,11 +153,18 @@ namespace locale {
     struct comparator
     {
     public:
+        ///
+        /// Create a comparator class for locale \a l and with collation leval \a level
+        ///
         comparator(std::locale const &l=std::locale(),collator_base::level_type level=default_level) : 
             locale_(l),
             level_(level)
         {
         }
+
+        ///
+        /// Compare two strings -- equivalent to return left < right according to collation rules
+        ///
         bool operator()(std::basic_string<CharType> const &left,std::basic_string<CharType> const &right) const
         {
             return std::use_facet<collator<CharType> >(locale_).compare(level_,left,right) < 0;

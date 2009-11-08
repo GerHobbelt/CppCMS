@@ -209,6 +209,11 @@ namespace boost {
             };
         } // details
 
+
+        ///
+        /// \brief this class reimplements standard C++ codecvt facet. It is rarely used directly however it can be
+        /// useful for code page conversions
+        ///
         template<typename CharType>
         class code_converter : public std::codecvt<CharType,char,mbstate_t> 
         {

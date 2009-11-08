@@ -25,7 +25,12 @@ namespace boost {
         };
 
        
-        
+       
+        ///
+        /// \brief A facet used for message formatting
+        ///
+        /// This class is usually used via translate function
+        /// 
         template<typename CharType>
         class message_format : public base_message_format<CharType>
         {
@@ -159,6 +164,19 @@ namespace boost {
                 return str<CharType>(locale,id);
             }
 
+            ///
+            /// Translate message to string using defailt locale message domain  \ a domain_id
+            /// 
+            template<typename CharType>
+            std::basic_string<CharType> str(std::string domain_id) const
+            {
+                int id=0;
+                std::locale locale;
+                if(std::has_facet<message_format<CharType> >(locale))
+                    id=std::use_facet<message_format<CharType> >(locale).domain(domain_id);
+                return str<CharType>(locale,id);
+            }
+
             
             ///
             /// Translate message to string using locale \a loc and message domain index  \ a id
@@ -258,19 +276,31 @@ namespace boost {
         }
 
 
+        ///
+        /// Translate a message, \a msg is not copied 
+        ///
         inline message translate(char const *msg)
         {
             return message(msg);
         }
+        ///
+        /// Translate a plural message from, \a single and \a plural are not copied 
+        ///
         inline message translate(char const *single,char const *plural,int n)
         {
             return message(single,plural,n);
         }
         
+        ///
+        /// Translate a message, \a msg is copied 
+        ///
         inline message translate(std::string const &msg)
         {
             return message(msg);
         }
+        ///
+        /// Translate a plural message from, \a single and \a plural are copied 
+        ///
         inline message translate(std::string const &single,std::string const &plural,int n)
         {
             return message(single,plural,n);
@@ -354,10 +384,33 @@ namespace boost {
                                                                                         std::vector<std::string> const &paths);
 
         #endif
-        
-        
-     }
-}
+
+        namespace as {
+            namespace details {
+                struct set_domain {
+                    std::string domain_id;
+                };
+                template<typename CharType>
+                std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out, set_domain const &dom)
+                {
+                    int id = std::use_facet<message_format>(out.getloc()).domain(dom.domain_id);
+                    ext_value(out,flags::domain_id,id);
+                    return out;
+                }
+            } // details
+
+            ///
+            /// Manipulator for switching domain in ostream,
+            ///
+            inline details::set_domain domain(std::string const &id)
+            {
+                details::set_domain tmp;
+                tmp.domain_id = id;
+                return tmp;
+            }
+        } // as
+    } // locale 
+} // boost
 
 
 #endif

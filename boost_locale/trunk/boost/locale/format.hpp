@@ -104,6 +104,9 @@ namespace boost {
 
         }
 
+        ///
+        /// \brief a printf line class that allows typesafe and locale aware message formatting
+        ///
         template<typename CharType>
         class basic_format {
         public:
@@ -113,12 +116,19 @@ namespace boost {
             typedef std::basic_ostream<CharType> stream_type;
 
 
+            ///
+            /// Create a format class for \a format_string
+            ///
             basic_format(string_type format_string) : 
                 format_(format_string),
                 translate_(false),
                 parameters_count_(0)
             {
             }
+            ///
+            /// Create a format class using message \a trans. The message if translated first according
+            /// to the rules of target locale and then interpreted as format string
+            ///
             basic_format(message const &trans) : 
                 message_(trans),
                 translate_(true),
@@ -126,6 +136,9 @@ namespace boost {
             {
             }
 
+            ///
+            /// Add new parameter to format list
+            ///
             template<typename Formattible>
             basic_format &operator % (Formattible const &object)
             {
@@ -133,6 +146,9 @@ namespace boost {
 				return *this;
             }
 
+            ///
+            /// Format a string using a locale \a loc
+            ///
             string_type str(std::locale const &loc = std::locale()) const
             {
                 std::basic_ostringstream<CharType> buffer;
@@ -141,7 +157,10 @@ namespace boost {
                 return buffer.str();
             }
 
-            void write(stream_type &out,bool save_format = true) const
+            ///
+            /// write a formatted string to output stream \a out using out's locale
+            ///
+            void write(stream_type &out) const
             {
                 string_type format;
                 if(translate_)

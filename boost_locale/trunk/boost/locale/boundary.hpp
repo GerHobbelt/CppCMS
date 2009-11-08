@@ -9,27 +9,47 @@
 
 namespace boost {
     namespace locale {
+       
+        ///
+        /// \brief This structure hold all the types required for boundary analysis
+        ///
         
         struct boundary {
+            ///
+            /// \brief The enum that describes possible break types
+            ///
             typedef enum {
-                character,
-                word,
-                sentence,
-                line
+                character,  ///< Find character boundaries
+                word,       ///< Find word boundaries
+                sentence,   ///< Find sentence boundaries
+                line        ///< Find a positions suitable for line breaks
             } boundary_type;
 
+            ///
+            /// Flags used with word boundary analysis -- the type of word found
+            ///
             typedef enum {
-                number  = 1 << 0,
-                letter  = 1 << 1,
-                kana    = 1 << 2,
-                ideo    = 1 << 3,
+                number  = 1 << 0,   ///< Word that appear to be a number
+                letter  = 1 << 1,   ///< Word that contains letters
+                kana    = 1 << 2,   ///< Word that contains kana characters
+                ideo    = 1 << 3,   ///< Word that contains ideographic characters
             } word_type;
+            ///
+            /// Flags that describe a type of line break
+            ///
             typedef enum {
-                soft    = 1 << 0,
-                hard    = 1 << 1,
+                soft    = 1 << 0,   ///< Optional line break
+                hard    = 1 << 1,   ///< Mandatory line break
             } break_type;
             
+            ///
+            /// \ brief a structure that describes break position
+            /// 
             struct break_info {
+
+                ///
+                /// Default constructor -- all fields are zero
+                /// 
                 break_info() : 
                     offset(0),
                     next(0),
@@ -38,7 +58,9 @@ namespace boost {
                     reserved(0)
                 {
                 }
-                
+                ///
+                /// Create a break info with offset \a v
+                ///
                 break_info(unsigned v) :
                     offset(v),
                     next(0),
@@ -48,23 +70,37 @@ namespace boost {
                 {
                 }
 
-                uint32_t offset;
-                uint32_t next       : 10;
-                uint32_t prev       : 10;
-                uint32_t brk        : 10;
+                uint32_t offset;            ///< Offset from the beginning of the text where break occurs
+                uint32_t next       : 10;   ///< The flag describing a word following the break position
+                uint32_t prev       : 10;   ///< The flag describing a word preceding the break position
+                uint32_t brk        : 10;   ///< The flag describing a type of line break
                 uint32_t reserved   : 2;
-                
+               
+                ///
+                /// Comparison operator allowing usage of break_info in STL algorithms
+                /// 
                 bool operator<(break_info const &other) const
                 {
                     return offset < other.offset;
                 }
             };
-            
+           
+            ///
+            /// The index of all found boundaries. Note: for a string with length \a len, 0 and len are always considered
+            /// boundaries
+            /// 
             typedef std::vector<break_info> index_type;
 
             template<typename CharType>
-            static index_type map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc);
+
+            ///
+            /// Find boundary positions of type \a t for text in range [begin,end) using locale \a loc
+            ///
+            static index_type map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc=std::locale());
             
+            ///
+            /// Find boundary positions of type \a t for string \a str using locale \a loc
+            ///
             template<typename CharType>
             static index_type map(
                             boundary_type t,

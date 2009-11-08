@@ -9,6 +9,10 @@
 namespace boost {
     namespace locale {
 
+        ///
+        /// \brief Special base polymorphic class that used as character type independent base for all formatter classes
+        ///
+
         class base_formatter {
         public:
             virtual ~base_formatter()
@@ -16,6 +20,9 @@ namespace boost {
             }
         };
 
+        ///
+        /// \brief A class that used for formatting of numbers, currency and dates/times
+        ///
         template<typename CharType>
         class formatter : public base_formatter {
         public:
@@ -23,23 +30,23 @@ namespace boost {
             typedef std::basic_string<CharType> string_type;
 
             ///
-            /// Format the value and return number of unicode code points
+            /// Format the value and return number of Unicode code points
             ///
             virtual string_type format(double value,size_t &code_points) const = 0;
             ///
-            /// Format the value and return number of unicode code points
+            /// Format the value and return number of Unicode code points
             ///
             virtual string_type format(int64_t value,size_t &code_points) const = 0;
             ///
-            /// Format the value and return number of unicode code points
+            /// Format the value and return number of Unicode code points
             ///
             virtual string_type format(uint64_t value,size_t &code_points) const = 0;
             ///
-            /// Format the value and return number of unicode code points
+            /// Format the value and return number of Unicode code points
             ///
             virtual string_type format(int32_t value,size_t &code_points) const = 0;
             ///
-            /// Format the value and return number of unicode code points
+            /// Format the value and return number of Unicode code points
             ///
             virtual string_type format(uint32_t value,size_t &code_points) const = 0;
 
