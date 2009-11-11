@@ -99,7 +99,7 @@ namespace boost {
         template<typename CharType>
         std::basic_string<CharType> to_upper(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
-            return impl::convert(impl::upper_case,str.data(),str().data()+str.size(),0,&loc);
+            return impl::convert(impl::upper_case,str.data(),str.data()+str.size(),0,&loc);
         }
         
         ///
@@ -132,7 +132,7 @@ namespace boost {
         template<typename CharType>
         std::basic_string<CharType> to_lower(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
-            return impl::convert(impl::lower_case,str.data(),str().data()+str.size(),0,&loc);
+            return impl::convert(impl::lower_case,str.data(),str.data()+str.size(),0,&loc);
         }
         
         ///
@@ -164,7 +164,7 @@ namespace boost {
         template<typename CharType>
         std::basic_string<CharType> to_title(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
-            return impl::convert(impl::title_case,str.data(),str().data()+str.size(),0,&loc);
+            return impl::convert(impl::title_case,str.data(),str.data()+str.size(),0,&loc);
         }
         
         ///
@@ -197,7 +197,7 @@ namespace boost {
         template<typename CharType>
         std::basic_string<CharType> fold_case(std::basic_string<CharType> const &str,std::locale const &loc=std::locale())
         {
-            return impl::convert(impl::case_folding,str.data(),str().data()+str.size(),0,&loc);
+            return impl::convert(impl::case_folding,str.data(),str.data()+str.size(),0,&loc);
         }
         
         ///
