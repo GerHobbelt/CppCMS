@@ -287,7 +287,7 @@ namespace boost {
             {
                 typedef std::numeric_limits<ValueType> value_limits;
                 typedef std::numeric_limits<CastedType> casted_limits;
-                if(v > value_limits::max() || v < value_limits::min()) {
+                if(v > (value_limits::max)() || v < (value_limits::min)()) {
                     return false;
                 }       
                 if(value_limits::is_integer == casted_limits::is_integer) {
