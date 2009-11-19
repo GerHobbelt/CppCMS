@@ -63,7 +63,7 @@ endif(NOT DISABLE_SHARED)
 
 
 if(NOT DISABLE_STATIC)
-	add_library(boost_locale-static ${BOOST_LOCALE_SRC})
+	add_library(boost_locale-static STATIC ${BOOST_LOCALE_SRC})
 	target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
 endif(NOT DISABLE_STATIC)
 
