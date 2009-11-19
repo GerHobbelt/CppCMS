@@ -4,22 +4,30 @@ find_library(ICU_UC icuuc)
 find_library(ICU_DATA icudata NAMES icudt)
 find_library(ICU_I18N icui18n NAMES icuin)
 
+if(WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND NOT DISABLE_SHARED)
+	include(CheckCXXSourceCompiles)
+	check_cxx_source_compiles(
+		"#if __GNUC__ < 4
+		#error
+		#endif
+		int main() {return 0;}"
+		GCC_IS_GCC4)
+	if(NOT GCC_IS_GCC4)
+		message("GCC version is below gcc4, thus disabling shared library")
+		set(DISABLE_SHARED 1)
+	endif(NOT GCC_IS_GCC4)
+endif(WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND NOT DISABLE_SHARED)
+
+
+	
+
 if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 	message(FATAL " Failed to find icu")
 endif(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
 
-#####
-# For C++0x
-#add_definitions(-DBOOST_HAS_CHAR16_T)
-#add_definitions(-DBOOST_HAS_CHAR32_T)
-####
-
-
-add_definitions(-DBOOST_LOCALE_DYN_LINK)
-
 include_directories(../..)
 
-add_library(boost_locale SHARED 
+set(BOOST_LOCALE_SRC 
 	src/generator.cpp
 	src/boundary.cpp
 	src/timezone.cpp
@@ -33,30 +41,58 @@ add_library(boost_locale SHARED
 	src/message.cpp 
 	src/mo_lambda.cpp)
 
-add_executable(test src/test.cpp)
-add_executable(hello examples/hello.cpp)
-add_executable(whello examples/whello.cpp)
-add_executable(boundary examples/boundary.cpp)
-add_executable(wboundary examples/wboundary.cpp)
-add_executable(conversions examples/conversions.cpp)
-add_executable(wconversions examples/wconversions.cpp)
-add_executable(collate examples/collate.cpp)
+if(DISABLE_SHARED AND DISABLE_STATIC)
+	message(FATAL " Can't build with both DISABLE_SHARED AND DISABLE_STATIC")
+endif(DISABLE_SHARED AND DISABLE_STATIC)
 
-###
-# For C++0x
-#set_target_properties(boost_locale test hello wboundary boundary conversions whello wconversions PROPERTIES COMPILE_FLAGS "-std=c++0x")
-###
+if(DISABLE_SHARED)
+	set(BOOST_LOCALE_LIBS boost_locale-static)
+	set(BOOST_LOCALE_LIB boost_locale-static)
+elseif(DISABLE_STATIC)
+	set(BOOST_LOCALE_LIBS boost_locale)
+	set(BOOST_LOCALE_LIB boost_locale)
+else(DISABLE_STATIC)
+	set(BOOST_LOCALE_LIBS boost_locale; boost_locale-static)
+	set(BOOST_LOCALE_LIB boost_locale)
+endif(DISABLE_SHARED)
 
-target_link_libraries(boost_locale ${ICU_UC})
-target_link_libraries(boost_locale ${ICU_DATA})
-target_link_libraries(boost_locale ${ICU_I18N})
+if(NOT DISABLE_SHARED)
+	add_library(boost_locale SHARED ${BOOST_LOCALE_SRC})
+	target_link_libraries(boost_locale ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+endif(NOT DISABLE_SHARED)
 
-target_link_libraries(test boost_locale)
-target_link_libraries(hello boost_locale)
-target_link_libraries(wboundary boost_locale)
-target_link_libraries(boundary boost_locale)
-target_link_libraries(conversions boost_locale)
-target_link_libraries(whello boost_locale)
-target_link_libraries(wconversions boost_locale)
-target_link_libraries(collate boost_locale)
+
+if(NOT DISABLE_STATIC)
+	add_library(boost_locale-static ${BOOST_LOCALE_SRC})
+	target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+endif(NOT DISABLE_STATIC)
+
+set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale")
+
+
+set(LOCALE_TESTS test)
+set(LOCALE_EXAMPLES 	hello
+			whello
+			boundary
+			wboundary
+			conversions
+			wconversions
+			collate)
+
+foreach(TEST_TAR ${LOCALE_TESTS})
+	add_executable(${TEST_TAR} src/${TEST_TAR}.cpp)
+	target_link_libraries(${TEST_TAR} ${BOOST_LOCALE_LIB})
+endforeach(TEST_TAR)
+
+foreach(EX_TAR ${LOCALE_EXAMPLES})
+	add_executable(${EX_TAR} examples/${EX_TAR}.cpp)
+	target_link_libraries(${EX_TAR} ${BOOST_LOCALE_LIB})
+endforeach(EX_TAR)
+
+if(NOT DISABLE_SHARED)
+	set_target_properties(boost_locale ${LOCALE_TESTS} ${LOCALE_EXAMPLES}
+			PROPERTIES COMPILE_DEFINITIONS BOOST_LOCALE_DYN_LINK)
+endif(NOT DISABLE_SHARED)
+
 
