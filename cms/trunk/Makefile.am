@@ -19,12 +19,16 @@ build_static:
 		/usr/lib/libdbixx.a /usr/lib/libcppcms.a /usr/lib/libcppcmstranstext.a \
 		-lfcgi++ -lcgicc -lboost_iostreams -lboost_regex -lboost_signals -lboost_system -ldbi -lcurl -lmm -lsqlite3 -lgcrypt -lrt -o cppblog
 
-all: locale/he/LC_MESSAGES/cppblog.mo
+all: locale/he/LC_MESSAGES/cppblog.mo locale/zh/LC_MESSAGES/cppblog.mo
 
 locale/he/LC_MESSAGES/cppblog.mo: locale/he/LC_MESSAGES/cppblog.po
 	msgfmt locale/he/LC_MESSAGES/cppblog.po -o locale/he/LC_MESSAGES/cppblog.mo
 
+locale/zh/LC_MESSAGES/cppblog.mo: locale/zh/LC_MESSAGES/cppblog.po
+	msgfmt locale/zh/LC_MESSAGES/cppblog.po -o locale/zh/LC_MESSAGES/cppblog.mo
+
 update-pot:
 	msgcat templates/messages-os.pot templates/messages.pot >messages.pot
 	msgmerge -U locale/he/LC_MESSAGES/cppblog.po messages.pot
+	msgmerge -U locale/zh/LC_MESSAGES/cppblog.po messages.pot
 

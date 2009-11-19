@@ -897,6 +897,7 @@ void Blog::add_comment(string &postid)
 	string redirect=str(boost::format(fmt.post) % post_id) +
 		str(boost::format("#comment_%d") % comment_id);
 	set_header(new HTTPRedirectHeader(redirect));
+	add_header("Status: 302 Found");
 }
 void Blog::count_comments(int id)
 {
@@ -1044,12 +1045,14 @@ void Blog::login()
 		throw Error(Error::AUTH);
 	}
 	set_header(new HTTPRedirectHeader(fmt.admin));
+	add_header("Status: 302 Found");
 	set_login_cookies(tmp_username,tmp_password,365);
 }
 
 void Blog::logout()
 {
 	set_header(new HTTPRedirectHeader(app.config.sval("blog.script_path")));
+	add_header("Status: 302 Found");
 	set_login_cookies("","",-1);
 }
 
@@ -1200,6 +1203,7 @@ void Blog::update_comment(string sid)
 		}
 	}
 	set_header(new HTTPRedirectHeader(fmt.admin));
+	add_header("Status: 302 Found");
 }
 
 void Blog::edit_comment(string sid)
@@ -1321,6 +1325,7 @@ void Blog::get_post(string sid,string ptype)
 	}
 	if(type==SAVE || type==DELETE ){
 		set_header(new HTTPRedirectHeader(fmt.admin));
+		add_header("Status: 302 Found");
 	}
 	else if(type==PREVIEW || type==UNPUBLISH) {
 		edit_post(str(boost::format("%1%") % id),ptype);
@@ -1333,6 +1338,7 @@ void Blog::get_post(string sid,string ptype)
 			redirect=str(boost::format(fmt.page)%id);
 
 		set_header(new HTTPRedirectHeader(redirect));
+		add_header("Status: 302 Found");
 	}
 }
 
@@ -1494,6 +1500,7 @@ void Blog::del_comment(string sid)
 	int id=atoi(sid.c_str());
 	del_single_comment(id);
 	set_header(new HTTPRedirectHeader(env->getReferrer()));
+	add_header("Status: 302 Found");
 }
 
 
