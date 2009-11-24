@@ -43,7 +43,7 @@ int main()
 	gen.add_messages_path(".");
 	gen.add_messages_path("../src");
 
-	std::locale::global(gen.generate(""));
+	std::locale::global(gen.generate("ja_JP.UTF-8"));
 
 	typedef comparator<char,collator_base::primary> comp_type;
 
@@ -124,12 +124,26 @@ int main()
 	std::cout<<out.str();
 
 	std::cout<<std::endl;
-	std::string text="123 Hello World, שָלוֹם Hello-World, Windows7, ウィキペディアはオープンコンテントの百科事典です。基本方針に賛同していただけるなら、誰でも記事を編集したり新しく作成したりできます。";
-	boundary::index_type index = boundary::map(boundary::word,text);
-	for(unsigned i=0;i<index.size()-1;i++) {
+	std::string text="10 Hello Windows7 平仮名ひらがなヒラガナ";
+	//std::string text="123 Hello World, שָלוֹם Hello-World, Windows7, ウィキペディアはオープンコンテントの百科事典です。基本方針に賛同していただけるなら、誰でも記事を編集したり新しく作成したりできます。";
+	
+
+	char ccccc = text[0];
+	boundary::mapping<std::string::iterator> indx(boundary::word,text.begin(),text.end());
+
+	boundary::break_iterator<std::string::iterator> p(indx),end,cur;
+
+	while(p!=end) {
+		cur=p++;
+		if(p!=end) {
+			std::cout<<"["<<std::string(*cur,*p)<<"]"<<std::endl;
+		}
+	}
+
+/*	for(unsigned i=0;i<index.size()-1;i++) {
 		std::cout<<"["<<text.substr(index[i].offset,index[i+1].offset-index[i].offset)<<"]"<<endl;
 		std::cout<<index[i].next<<std::endl;
-	}
+	}*/
 
 	}
 	catch(std::exception const &e) {

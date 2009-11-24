@@ -21,20 +21,23 @@
 
 namespace boost {
 namespace locale {
+namespace boundary {
 namespace impl {
 
-boundary::index_type map_direct(boundary::boundary_type t,icu::BreakIterator *it,int reserve)
+using namespace boost::locale::impl;
+
+index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
 {
-    boundary::index_type indx;
+    index_type indx;
     indx.reserve(reserve);
     icu::RuleBasedBreakIterator *rbbi=dynamic_cast<icu::RuleBasedBreakIterator *>(it);
     
-    indx.push_back(boundary::break_info());
+    indx.push_back(break_info());
     it->first();
     int pos=0;
     while((pos=it->next())!=icu::BreakIterator::DONE) {
-        indx.push_back(boundary::break_info(pos));
-        if(rbbi && (t==boundary::word || t==boundary::line))
+        indx.push_back(break_info(pos));
+        if(rbbi && (t==word || t==line))
         {
 			//
 			// There is a collapse for MSVC: int32_t defined by both boost::cstdint and icu...
@@ -46,48 +49,48 @@ boundary::index_type map_direct(boundary::boundary_type t,icu::BreakIterator *it
             if(n > 16)
                 n=16;
             for(int i=0;i<n;i++) {
-                if(t==boundary::word) {
+                if(t==word) {
                     if(UBRK_WORD_NUMBER<=buf[i] && buf[i]<UBRK_WORD_NUMBER_LIMIT)
-                        indx.back().prev |= boundary::number;
+                        indx.back().prev |= number;
                     else if(UBRK_WORD_LETTER<=buf[i] && buf[i]<UBRK_WORD_LETTER_LIMIT)
-                        indx.back().prev |= boundary::letter;
+                        indx.back().prev |= letter;
                     else if(UBRK_WORD_KANA<=buf[i] && buf[i]<UBRK_WORD_KANA_LIMIT)
-                        indx.back().prev |= boundary::kana;
+                        indx.back().prev |= kana;
                     else if(UBRK_WORD_IDEO<=buf[i] && buf[i]<UBRK_WORD_IDEO_LIMIT)
-                        indx.back().prev |= boundary::ideo;
+                        indx.back().prev |= ideo;
                 }
                 else {
                     if(UBRK_LINE_SOFT<=buf[i] && buf[i]<UBRK_LINE_SOFT_LIMIT)
-                        indx.back().brk |= boundary::soft;
+                        indx.back().brk |= soft;
                     else if(UBRK_LINE_HARD<=buf[i] && buf[i]<UBRK_LINE_HARD_LIMIT)
-                        indx.back().brk |= boundary::hard;
+                        indx.back().brk |= hard;
                 }
             }
         }
     }
-    if(rbbi && t==boundary::word) {
+    if(rbbi && t==word) {
         for(unsigned i=0;i<indx.size()-1;i++)
             indx[i].next=indx[i+1].prev;
     }
     return indx;
 }
 
-std::auto_ptr<icu::BreakIterator> get_iterator(boundary::boundary_type t,std::locale const &l)
+std::auto_ptr<icu::BreakIterator> get_iterator(boundary_type t,std::locale const &l)
 {
     icu::Locale const &loc=std::use_facet<info>(l).impl()->locale;
     UErrorCode err=U_ZERO_ERROR;
     std::auto_ptr<icu::BreakIterator> bi;
     switch(t) {
-    case boundary::character:
+    case character:
         bi.reset(icu::BreakIterator::createCharacterInstance(loc,err));
         break;
-    case boundary::word:
+    case word:
         bi.reset(icu::BreakIterator::createWordInstance(loc,err));
         break;
-    case boundary::sentence:
+    case sentence:
         bi.reset(icu::BreakIterator::createSentenceInstance(loc,err));
         break;
-    case boundary::line:
+    case line:
         bi.reset(icu::BreakIterator::createLineInstance(loc,err));
         break;
     default:
@@ -101,9 +104,9 @@ std::auto_ptr<icu::BreakIterator> get_iterator(boundary::boundary_type t,std::lo
 
 
 template<typename CharType>
-boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc)
+index_type do_map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc)
 {
-    boundary::index_type indx;
+    index_type indx;
     info const &inf=std::use_facet<info>(loc);
     std::auto_ptr<icu::BreakIterator> bi(get_iterator(t,loc));
    
@@ -123,7 +126,7 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
             if(!ut) throw std::runtime_error("Failed to create UText");
             bi->setText(ut,err);
             check_and_throw_icu_error(err);
-            boundary::index_type res=map_direct(t,bi.get(),end-begin);
+            index_type res=map_direct(t,bi.get(),end-begin);
             indx.swap(res);
         }
         catch(...) {
@@ -139,7 +142,7 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
         impl::icu_std_converter<CharType> cvt(inf.encoding());
         icu::UnicodeString str=cvt.icu(begin,end);
         bi->setText(str);
-        boundary::index_type indirect = map_direct(t,bi.get(),str.length());
+        index_type indirect = map_direct(t,bi.get(),str.length());
         indx=indirect;
         for(unsigned i=1;i<indirect.size();i++) {
             unsigned offset_inderect=indirect[i-1].offset;
@@ -155,16 +158,16 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
 
 
 template<>
-BOOST_LOCALE_DECL boundary::index_type 
-boundary::map(boundary::boundary_type t,char const *begin,char const *end,std::locale const &loc)
+BOOST_LOCALE_DECL index_type 
+map(boundary_type t,char const *begin,char const *end,std::locale const &loc)
 {
     return impl::do_map(t,begin,end,loc);
 }
 
 #ifndef BOOST_NO_STD_WSTRING
 template<>
-BOOST_LOCALE_DECL boundary::index_type 
-boundary::map(boundary::boundary_type t,wchar_t const *begin,wchar_t const *end,std::locale const &loc)
+BOOST_LOCALE_DECL index_type 
+map(boundary_type t,wchar_t const *begin,wchar_t const *end,std::locale const &loc)
 {
     return impl::do_map(t,begin,end,loc);
 }
@@ -172,8 +175,8 @@ boundary::map(boundary::boundary_type t,wchar_t const *begin,wchar_t const *end,
 
 #ifdef BOOST_HAS_CHAR16_T
 template<>
-BOOST_LOCALE_DECL boundary::index_type 
-boundary::map(boundary::boundary_type t,char16_t const *begin,char16_t const *end,std::locale const &loc)
+BOOST_LOCALE_DECL index_type 
+map(boundary_type t,char16_t const *begin,char16_t const *end,std::locale const &loc)
 {
     return impl::do_map(t,begin,end,loc);
 }
@@ -181,13 +184,14 @@ boundary::map(boundary::boundary_type t,char16_t const *begin,char16_t const *en
 
 #ifdef BOOST_HAS_CHAR32_T
 template<>
-BOOST_LOCALE_DECL boundary::index_type 
-boundary::map(boundary::boundary_type t,char32_t const *begin,char32_t const *end,std::locale const &loc)
+BOOST_LOCALE_DECL index_type 
+map(boundary_type t,char32_t const *begin,char32_t const *end,std::locale const &loc)
 {
     return impl::do_map(t,begin,end,loc);
 }
 #endif
 
+} // boundary
 } // locale
 } // boost
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
