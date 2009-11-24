@@ -70,7 +70,11 @@ namespace locale {
             virtual string_type format(int32_t value,size_t &code_points) const
             {
                 icu::UnicodeString tmp;
+                #ifdef __SUNPRO_CC 
+                icu_fmt_->format(static_cast<int>(value),tmp);
+                #else
                 icu_fmt_->format(value,tmp);
+                #endif
                 code_points=tmp.countChar32();
                 return cvt_.std(tmp);
             }

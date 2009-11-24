@@ -58,7 +58,7 @@ namespace boost {
 
             typedef enum {
                 datetime_pattern,
-                time_zone_id,
+                time_zone_id
             } pattern_type;
 
             typedef enum {

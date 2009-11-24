@@ -254,7 +254,8 @@ namespace boost {
                 // just a hard limit
                 std::ctype<CharType> const &type=std::use_facet<std::ctype<CharType> >(ios.getloc());
             
-                while(in!=end && type.is(std::ctype_base::space | std::ctype_base::cntrl, *in) )
+                // SunCC does not like space | cntrl
+                while(in!=end && (type.is(std::ctype_base::space,*in) || type.is(std::ctype_base::cntrl,*in)) )
                     ++in;
 
                 while(tmp.size() < 4096 && in!=end && *in!='\n') {

@@ -190,8 +190,12 @@ namespace impl {
             tmp.resize(str.length());
             UChar32 *ptr=reinterpret_cast<UChar32 *>(&tmp[0]);
 
+            #ifdef __SUNPRO_CC
+            int len=0;
+            #else
             int32_t len=0;
-            
+            #endif
+
             UErrorCode code=U_ZERO_ERROR;
             u_strToUTF32(ptr,tmp.size(),&len,str.getBuffer(),str.length(),&code);
 

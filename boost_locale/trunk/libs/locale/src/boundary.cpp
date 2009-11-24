@@ -8,7 +8,10 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/boundary.hpp>
 #include <boost/locale/info.hpp>
+#include <unicode/uversion.h>
+#if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 306
 #include <unicode/utext.h>
+#endif
 #include <unicode/brkiter.h>
 #include <unicode/rbbi.h>
 
@@ -104,6 +107,7 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
     info const &inf=std::use_facet<info>(loc);
     std::auto_ptr<icu::BreakIterator> bi(get_iterator(t,loc));
    
+    #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 306
     UErrorCode err=U_ZERO_ERROR;
     if(sizeof(CharType) == 2 || (sizeof(CharType)==1 && inf.utf8()))
     {
@@ -129,7 +133,9 @@ boundary::index_type do_map(boundary::boundary_type t,CharType const *begin,Char
         }
         if(ut) utext_close(ut);
     }
-    else {
+    else 
+#endif
+    {
         impl::icu_std_converter<CharType> cvt(inf.encoding());
         icu::UnicodeString str=cvt.icu(begin,end);
         bi->setText(str);

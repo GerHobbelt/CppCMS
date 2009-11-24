@@ -57,6 +57,9 @@ namespace boost {
             virtual char_type const *get(int domain_id,char const *single_id,int n) const = 0;
             virtual int domain(std::string const &domain) const = 0;
 
+#if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+            std::locale::id& __get_id (void) const { return id; }
+#endif
             static message_format<CharType> *create(info const &,std::vector<std::string> const &paths,std::vector<std::string> const &domains);
 
         protected:

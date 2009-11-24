@@ -39,14 +39,14 @@ namespace boost {
                 number  = 1 << 0,   ///< Word that appear to be a number
                 letter  = 1 << 1,   ///< Word that contains letters
                 kana    = 1 << 2,   ///< Word that contains kana characters
-                ideo    = 1 << 3,   ///< Word that contains ideographic characters
+                ideo    = 1 << 3    ///< Word that contains ideographic characters
             } word_type;
             ///
             /// Flags that describe a type of line break
             ///
             typedef enum {
                 soft    = 1 << 0,   ///< Optional line break
-                hard    = 1 << 1,   ///< Mandatory line break
+                hard    = 1 << 1    ///< Mandatory line break
             } break_type;
             
             ///
