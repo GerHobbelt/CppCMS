@@ -128,7 +128,6 @@ int main()
 	//std::string text="123 Hello World, שָלוֹם Hello-World, Windows7, ウィキペディアはオープンコンテントの百科事典です。基本方針に賛同していただけるなら、誰でも記事を編集したり新しく作成したりできます。";
 	
 
-	char ccccc = text[0];
 	boundary::mapping<std::string::iterator> indx(boundary::word,text.begin(),text.end());
 
 	boundary::break_iterator<std::string::iterator> p(indx),end,cur;
@@ -139,6 +138,11 @@ int main()
 			std::cout<<"["<<std::string(*cur,*p)<<"]"<<std::endl;
 		}
 	}
+
+	boundary::tocken_iterator<std::string::iterator> words(indx,boundary::letter | boundary::kana | boundary::ideo),wend;
+	while(words!=wend)
+		std::cout <<"["<<*words++<<"]";
+	std::cout<<std::endl;
 
 /*	for(unsigned i=0;i<index.size()-1;i++) {
 		std::cout<<"["<<text.substr(index[i].offset,index[i+1].offset-index[i].offset)<<"]"<<endl;
