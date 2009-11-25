@@ -139,7 +139,7 @@ int main()
 		}
 	}
 
-	boundary::tocken_iterator<std::string::iterator> words(indx,boundary::letter | boundary::kana | boundary::ideo),wend;
+	boundary::token_iterator<std::string::iterator> words(indx,boundary::letter | boundary::kana | boundary::ideo),wend;
 	while(words!=wend)
 		std::cout <<"["<<*words++<<"]";
 	std::cout<<std::endl;

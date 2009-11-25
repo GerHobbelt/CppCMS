@@ -171,11 +171,24 @@ namespace boost {
 
             } // details 
 
+            ///
+            /// \brief Class the holds boundary mapping of the text that can be used with iterators
+            ///
+            /// When the object is created in creates index and provides access to it with iterators.
+            /// it is used mostly together with break_iterator and token_iterator
+            ///
+            /// This class stores iterators to the original text, so you should be careful with iterators
+            /// invalidation. The text, iterators pointing to should not change
+            ///
 
             template<typename IteratorType>
             class mapping {
             public:
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+
+                ///
+                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
+                ///
                 mapping(boundary_type type,IteratorType begin,IteratorType end,std::locale const &loc = std::locale())
                 {
                     index_type idx=details::mapping_traits<IteratorType>::map(type,begin,end,loc);
@@ -184,18 +197,31 @@ namespace boost {
                     end_ = end;
                 }
 
+                ///
+                /// Get \a begin iterator used when object was created
+                ///
                 IteratorType begin() const
                 {
                     return begin_;
                 }
+                ///
+                /// Get \a end iterator used when object was created
+                ///
                 IteratorType end() const
                 {
                     return end_;
                 }
+
+                ///
+                /// Return a const reference to index holding boundaries of the original text
+                ///
                 index_type const &map() const
                 {
                     return index_;
                 }
+                ///
+                /// Return a reference to index holding boundaries of the original text
+                ///
                 index_type &map()
                 {
                     return index_;
@@ -206,11 +232,21 @@ namespace boost {
                 index_type index_;
             };
 
+            ///
+            /// \brief break_iterator is bidirectional iterator that returns text boundary positions
+            ///
+            /// This iterator is used when boundary points are more interesting then text chunks themselves.
+            ///
             template<typename IteratorType>
             class break_iterator : public std::iterator<std::bidirectional_iterator_tag,IteratorType> {
             public:
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 
+                ///
+                /// Create iterator instance that can be used for determination of end of text range.
+                ///
+                /// Note: this iterator instance can't be decremented, it is rather used for boundary condition tests
+                ///
                 break_iterator() : 
                     map_(0),
                     offset_(0),
@@ -239,11 +275,45 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// Set break iterator to new position \a p. 
+                ///
+                /// \a p should be in range of [\a begin, \a end] of the original text.
+                ///
+                /// If \a p points to actual boundary point, break iterator would point to this point, otherwise,
+                /// it would point to the proceeding boundary point.
+                ///
+                /// Note: break iterator should be created and mapping should be assigned to it.
+                ///
+                /// \code 
+                ///    break_iterator<char const *>  begin(map),end;
+                ///    begin=some_point_in_text; // Ok
+                ///    end=some_point_in_text; // Wrong!
+                /// \endcode
+                ///
                 break_iterator const &operator=(IteratorType p)
                 {
                     at_most(p);
                     return *this;
                 }
+
+                ///
+                /// Create a break iterator pointing to the beginning of the range.
+                ///
+                /// \a map -- is the mapping used with iterator. Should be valid all the time iterator is used.
+                ///
+                /// \a mask -- mask of flags for which boundary points are counted. If \a mask is 0, all boundary
+                /// points are used, otherwise, only points giving break_info::brk & mask !=0 are used, others are skipped.
+                ///
+                /// For example.
+                ///
+                /// \code
+                ///   boundary::mapping<char *> a_map(boundary::line,begin,end);
+                ///   boundart::break_iteraotr<char *> p(a_map,boundary::soft),e;
+                //// \endcode
+                /// 
+                /// Would create an iterator p that would iterate only over soft line break points.
+                ///
                 break_iterator(mapping<IteratorType> const &map,unsigned mask = 0) :
                     map_(&map),
                     offset_(0),
@@ -251,17 +321,30 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// Compare two iterators, note. Empty iterator and iterator that points to the end
+                /// of the range are considered even semantically they are not same.
+                ///
                 bool operator==(break_iterator<IteratorType> const &other) const
                 {
                     return  (map_ == other.map_ && offset_==offset_)
                             || (at_end() && other.at_end());
                 }
 
+                ///
+                /// Opposite of ==
+                ///
                 bool operator!=(break_iterator<IteratorType> const &other) const
                 {
                     return !(*this==other);
                 }
 
+                ///
+                /// Return the underlying iterator to the boundary point. Note: mapping \a begin and \a end 
+                /// are valid points.
+                ///
+                /// Do not use this operator one empty iterators
+                ///
                 IteratorType operator*() const
                 {
                     return map_->begin() + map_->map()[offset_].offset;
@@ -330,26 +413,33 @@ namespace boost {
                 unsigned mask_;
             };
 
+            ///
+            /// \brief token iterator is an iterator that returns text chunks between boundary positions
+            ///
+            /// It is similar to break iterator, but it rather "points" to string then iterator. It is used when we are more
+            /// interested in text chunks themselves then boundary points.
+            ///
+            
             template<typename IteratorType,typename ValueType = std::basic_string<typename std::iterator_traits<IteratorType>::value_type> >
-            class tocken_iterator : public std::iterator<std::bidirectional_iterator_tag,ValueType> {
+            class token_iterator : public std::iterator<std::bidirectional_iterator_tag,ValueType> {
             public:
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                                 
-                tocken_iterator() : 
+                token_iterator() : 
                     map_(0),
                     offset_(0),
                     mask_(0)
                 {
                 }
 
-                tocken_iterator(tocken_iterator<IteratorType,ValueType> const &other):
+                token_iterator(token_iterator<IteratorType,ValueType> const &other):
                     map_(other.map_),
                     offset_(other.offset_),
                     mask_(other.mask_)
                 {
                 }
                 
-                tocken_iterator const &operator=(tocken_iterator<IteratorType,ValueType> const &other)
+                token_iterator const &operator=(token_iterator<IteratorType,ValueType> const &other)
                 {
                     if(this!=&other) {
                         map_ = other.map_;
@@ -359,16 +449,16 @@ namespace boost {
                     return *this;
                 }
 
-                ~tocken_iterator()
+                ~token_iterator()
                 {
                 }
 
-                tocken_iterator const &operator=(IteratorType p)
+                token_iterator const &operator=(IteratorType p)
                 {
                     at_most(p);
                     return *this;
                 }
-                tocken_iterator(mapping<IteratorType> const &map,unsigned mask = 0) :
+                token_iterator(mapping<IteratorType> const &map,unsigned mask = 0) :
                     map_(&map),
                     offset_(0),
                     mask_(mask)
@@ -377,13 +467,13 @@ namespace boost {
                         next();
                 }
 
-                bool operator==(tocken_iterator<IteratorType,ValueType> const &other) const
+                bool operator==(token_iterator<IteratorType,ValueType> const &other) const
                 {
                     return  (map_ == other.map_ && offset_==offset_)
                             || (at_end() && other.at_end());
                 }
 
-                bool operator!=(tocken_iterator<IteratorType,ValueType> const &other) const
+                bool operator!=(token_iterator<IteratorType,ValueType> const &other) const
                 {
                     return !(*this==other);
                 }
@@ -395,28 +485,28 @@ namespace boost {
                     return ValueType(ob,oe);
                 }
                 
-                tocken_iterator &operator++() 
+                token_iterator &operator++() 
                 {
                     next();
                     return *this;
                 }
                 
-                tocken_iterator &operator--() 
+                token_iterator &operator--() 
                 {
                     prev();
                     return *this;
                 }
                 
-                tocken_iterator operator++(int unused) 
+                token_iterator operator++(int unused) 
                 {
-                    tocken_iterator<IteratorType,ValueType> tmp(*this);
+                    token_iterator<IteratorType,ValueType> tmp(*this);
                     next();
                     return tmp;
                 }
 
-                tocken_iterator operator--(int unused) 
+                token_iterator operator--(int unused) 
                 {
-                    tocken_iterator<IteratorType,ValueType> tmp(*this);
+                    token_iterator<IteratorType,ValueType> tmp(*this);
                     prev();
                     return tmp;
                 }
