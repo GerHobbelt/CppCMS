@@ -154,14 +154,12 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,std:
     return indx;
 } // do_map
 
-} // impl
-
 
 template<>
 BOOST_LOCALE_DECL index_type 
 map(boundary_type t,char const *begin,char const *end,std::locale const &loc)
 {
-    return impl::do_map(t,begin,end,loc);
+    return do_map(t,begin,end,loc);
 }
 
 #ifndef BOOST_NO_STD_WSTRING
@@ -169,7 +167,7 @@ template<>
 BOOST_LOCALE_DECL index_type 
 map(boundary_type t,wchar_t const *begin,wchar_t const *end,std::locale const &loc)
 {
-    return impl::do_map(t,begin,end,loc);
+    return do_map(t,begin,end,loc);
 }
 #endif
 
@@ -178,7 +176,7 @@ template<>
 BOOST_LOCALE_DECL index_type 
 map(boundary_type t,char16_t const *begin,char16_t const *end,std::locale const &loc)
 {
-    return impl::do_map(t,begin,end,loc);
+    return do_map(t,begin,end,loc);
 }
 #endif
 
@@ -187,10 +185,10 @@ template<>
 BOOST_LOCALE_DECL index_type 
 map(boundary_type t,char32_t const *begin,char32_t const *end,std::locale const &loc)
 {
-    return impl::do_map(t,begin,end,loc);
+    return do_map(t,begin,end,loc);
 }
 #endif
-
+} // impl
 } // boundary
 } // locale
 } // boost

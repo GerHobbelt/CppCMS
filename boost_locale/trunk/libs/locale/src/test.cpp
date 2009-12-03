@@ -127,10 +127,9 @@ int main()
 	std::string text="10 Hello Windows7 平仮名ひらがなヒラガナ";
 	//std::string text="123 Hello World, שָלוֹם Hello-World, Windows7, ウィキペディアはオープンコンテントの百科事典です。基本方針に賛同していただけるなら、誰でも記事を編集したり新しく作成したりできます。";
 	
+	boundary::mapping<boundary::break_iterator<std::string::iterator> > indx(boundary::word,text.begin(),text.end());
 
-	boundary::mapping<std::string::iterator> indx(boundary::word,text.begin(),text.end());
-
-	boundary::break_iterator<std::string::iterator> p(indx),end,cur;
+	boundary::break_iterator<std::string::iterator> p = indx.begin(),end=indx.end(),cur;
 
 	while(p!=end) {
 		cur=p++;
@@ -139,9 +138,14 @@ int main()
 		}
 	}
 
-	boundary::token_iterator<std::string::iterator> words(indx,boundary::letter | boundary::kana | boundary::ideo),wend;
-	while(words!=wend)
-		std::cout <<"["<<*words++<<"]";
+	boundary::mapping<boundary::token_iterator<std::string::iterator> > indx2;
+	indx2.swap(indx);
+	indx2.mask(boundary::letter | boundary::kana | boundary::ideo);
+
+
+	boundary::token_iterator<std::string::iterator> words,e;
+	for(words=indx2.begin(),e=indx2.end();words!=e;++words)
+		std::cout <<"["<<*words<<"]";
 	std::cout<<std::endl;
 
 /*	for(unsigned i=0;i<index.size()-1;i++) {

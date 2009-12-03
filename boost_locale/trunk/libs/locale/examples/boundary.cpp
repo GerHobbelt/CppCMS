@@ -37,40 +37,44 @@ int main(int argc,char **argv)
 
     cout<<text<<endl;
 
-    boundary::index_type index=boundary::map(boundary::word,text);
+    typedef boundary::token_iterator<std::string::iterator> iter_type;
+    typedef boundary::mapping<iter_type>  mapping_type;
+    mapping_type index(boundary::word,text.begin(),text.end());
+    iter_type p,e;
 
-    for(unsigned i=0;i<index.size()-1;i++) {
-        cout<<"Part ["<<string(text.begin()+index[i].offset,text.begin()+index[i+1].offset)<<"] has ";
-        assert(index[i].next == index[i+1].prev);
-        if(index[i].next & boundary::number)
+    for(p=index.begin(),e=index.end();p!=e;++p) {
+        cout<<"Part ["<<*p<<"] has ";
+        if(p.flag() & boundary::number)
             cout<<"number ";
-        if(index[i].next & boundary::letter)
+        if(p.flag() & boundary::letter)
             cout<<"letter ";
-        if(index[i].next & boundary::kana)
+        if(p.flag() & boundary::kana)
             cout<<"kana characters ";
-        if(index[i].next & boundary::ideo)
+        if(p.flag() & boundary::ideo)
             cout<<"ideographic characters ";
         cout<<endl;
     }
 
-    index=boundary::map(boundary::character,text);
-    
-    for(unsigned i=0;i<index.size()-1;i++) {
-        cout<<"|" << string(text.begin()+index[i].offset,text.begin()+index[i+1].offset) ;
+    index.map(boundary::character,text.begin(),text.end());
+
+    for(p=index.begin(),e=index.end();p!=e;++p) {
+        cout<<"|" <<*p ;
     }
     cout<<"|\n\n";
 
-    index=boundary::map(boundary::sentence,text);
-    for(unsigned i=0;i<index.size()-1;i++) {
-        cout<<"|" << string(text.begin()+index[i].offset,text.begin()+index[i+1].offset) ;
+    index.map(boundary::line,text.begin(),text.end());
+
+    for(p=index.begin(),e=index.end();p!=e;++p) {
+        cout<<"|" <<*p ;
     }
     cout<<"|\n\n";
-    index=boundary::map(boundary::line,text);
-    for(unsigned i=0;i<index.size()-1;i++) {
-        cout<<"|" << string(text.begin()+index[i].offset,text.begin()+index[i+1].offset) ;
+
+    index.map(boundary::sentence,text.begin(),text.end());
+
+    for(p=index.begin(),e=index.end();p!=e;++p) {
+        cout<<"|" <<*p ;
     }
     cout<<"|\n\n";
-    
     
 }
 
