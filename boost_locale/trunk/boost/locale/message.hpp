@@ -391,7 +391,7 @@ namespace boost {
                 template<typename CharType>
                 std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out, set_domain const &dom)
                 {
-                    int id = std::use_facet<message_format>(out.getloc()).domain(dom.domain_id);
+                    int id = std::use_facet<message_format<CharType> >(out.getloc()).domain(dom.domain_id);
                     ext_value(out,flags::domain_id,id);
                     return out;
                 }
