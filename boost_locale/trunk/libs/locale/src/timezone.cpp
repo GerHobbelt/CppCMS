@@ -16,7 +16,7 @@
 
 namespace boost{
     namespace locale {
-        class time_zone_impl : public noncopyable {
+        class time_zone_impl : public boost::noncopyable {
         public:
             time_zone_impl(icu::TimeZone *ptr) : tz_(ptr) 
             {
