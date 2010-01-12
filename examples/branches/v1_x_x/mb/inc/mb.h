@@ -23,8 +23,8 @@ public:
 	dbixx::session sql;
 	apps::forums forums;
 	apps::thread thread;
-	mb(cppcms::worker_thread &w);
-	void ini(data::master &);
+	mb(cppcms::service &w);
+	void ini(::data::master &);
 };
 
 

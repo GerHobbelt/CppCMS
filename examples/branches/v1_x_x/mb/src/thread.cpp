@@ -2,31 +2,29 @@
 #include "thread_data.h"
 #include "mb.h"
 #include <cppcms/util.h>
-#include <cgicc/HTTPRedirectHeader.h>
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/session_interface.h>
+#include <boost/lexical_cast.hpp>
 
 using boost::lexical_cast;
 
 namespace data {
 
-reply_form::reply_form(application &a) :
-	author("author",a.gettext("Author")),
-	comment("comment",a.gettext("Comment")),
-	send("send",a.gettext("Send"))
+reply_form::reply_form()
 {
-	*this & author & comment & send;
-	author.set_limits(1,64);
-	comment.set_limits(1,256);
-	comment.rows=15;
-	comment.cols=40;
+	using cppcms::locale::translate;
+	author.message(translate("Author"));
+	comment.message(translate("Comment"));
+	send.message(translate("Send"));
+	*this + author + comment + send;
+	author.limits(1,64);
+	comment.limits(1,256);
 }
 
-reply::reply(application &a) : form(a)
-{
-}
 
 string thread_shared::text2html(string const &s)
 {
-	string tmp=cppcms::escape(s);
+	string tmp=cppcms::util::escape(s);
 	string res;
 	res.reserve(tmp.size());
 	for(unsigned i=0;i<tmp.size();i++) {
@@ -43,29 +41,26 @@ string thread_shared::text2html(string const &s)
 
 namespace apps {
 
-thread::thread(mb &b) : application(b.worker) , board(b) 
+thread::thread(mb &b) : application(b.service()) , board(b) 
 {
-	url.add("^/flat/(\\d+)/?$",
-		boost::bind(&thread::flat,this,_1));
-	url.add("^/tree/(\\d+)/?$",
-		boost::bind(&thread::tree,this,_1));
-	url.add("^/comment/(\\d+)?$",
-		boost::bind(&thread::reply,this,_1));
+	board.dispatcher().assign("^/flat/(\\d+)/?$",&thread::flat,this,1);
+	board.dispatcher().assign("^/tree/(\\d+)/?$",&thread::tree,this,1);
+	board.dispatcher().assign("^/comment/(\\d+)/?$",&thread::reply,this,1);
 }
 
 string thread::flat_url(int id)
 {
-	return env->getScriptName()+"/flat/"+lexical_cast<string>(id);
+	return request().script_name()+"/flat/"+lexical_cast<string>(id);
 }
 
 string thread::tree_url(int id)
 {
-	return env->getScriptName()+"/tree/"+lexical_cast<string>(id);
+	return request().script_name()+"/tree/"+lexical_cast<string>(id);
 }
 
 string thread::user_url(int id)
 {
-	if(!session.is_set("view") || session["view"]=="tree") {
+	if(!session().is_set("view") || session()["view"]=="tree") {
 		return tree_url(id);
 	}
 	return flat_url(id);
@@ -73,12 +68,12 @@ string thread::user_url(int id)
 
 string thread::reply_url(int message_id)
 {
-	string tmp=env->getScriptName();
+	string tmp=request().script_name();
 	tmp+="/comment/";
 	tmp+=lexical_cast<string>(message_id);
 	return tmp;
 }
-int thread::ini(string sid,data::base_thread &c)
+int thread::ini(string sid,::data::base_thread &c)
 {
 	int id=lexical_cast<int>(sid);
 	board.sql<<"SELECT title FROM threads WHERE id=?",id;
@@ -95,7 +90,7 @@ int thread::ini(string sid,data::base_thread &c)
 
 void thread::flat(string sid)
 {
-	data::flat_thread c;
+	::data::flat_thread c;
 	int id=ini(sid,c);
 	board.sql<<
 		"SELECT id,author,content "
@@ -112,7 +107,7 @@ void thread::flat(string sid)
 		r>>msg_id>>c.messages[i].author>>c.messages[i].content;
 		c.messages[i].reply_url=reply_url(msg_id);
 	}
-	session["view"]="flat";
+	session()["view"]="flat";
 	render("flat_thread",c);
 }
 
@@ -140,7 +135,7 @@ void make_tree(data::tree_t &messages,map<int,map<int,data::msg> > &data,int sta
 
 void thread::tree(string sid)
 {
-	data::tree_thread c;
+	::data::tree_thread c;
 	int id=ini(sid,c);
 	board.sql<<
 		"SELECT reply_to,id,author,content "
@@ -155,14 +150,14 @@ void thread::tree(string sid)
 		int msg_id,rpl_id;
 		string author,comment;
 		r>>rpl_id>>msg_id;
-		data::msg &message=all[rpl_id][msg_id];
+		::data::msg &message=all[rpl_id][msg_id];
 		r>>message.author>>message.content;
 		message.reply_url=reply_url(msg_id);
 	}
 	
 	make_tree(c.messages,all,0);
 
-	session["view"]="tree";
+	session()["view"]="tree";
 	render("tree_thread",c);
 }
 
@@ -171,10 +166,10 @@ void thread::reply(string smid)
 	int mid;
 	mid=lexical_cast<int>(smid);
 
-	data::reply c(*this);
+	::data::reply c;
 
-	if(env->getRequestMethod()=="POST") {
-		c.form.load(*cgi);
+	if(request().request_method()=="POST") {
+		c.form.load(context());
 		if(c.form.validate()) {
 			dbixx::transaction tr(board.sql);
 			dbixx::row r;
@@ -186,21 +181,20 @@ void thread::reply(string smid)
 			board.sql<<
 				"INSERT INTO messages(reply_to,thread_id,author,content) "
 				"VALUES(?,?,?,?) ",
-				mid,tid,c.form.author.get(),c.form.comment.get();
+				mid,tid,c.form.author.value(),c.form.comment.value();
 			board.sql.exec();
 			tr.commit();
 
-			session["author"]=c.form.author.get();
+			session()["author"]=c.form.author.value();
 
-			add_header("Status: 302 Found");
-			set_header(new cgicc::HTTPRedirectHeader(user_url(tid)));
+			response().set_redirect_header(user_url(tid));
 			return;
 		}
 	}
 
 	board.ini(c);
-	if(session.is_set("author")) {
-		c.form.author.set(session["author"]);
+	if(session().is_set("author")) {
+		c.form.author.value(session()["author"]);
 	}
 	dbixx::row r;
 	board.sql<<

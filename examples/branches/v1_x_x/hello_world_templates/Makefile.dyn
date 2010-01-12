@@ -1,13 +1,19 @@
+# For Cygwin (static only build)
+#LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32
+# For other dynamic library builds
+
+LIBS=-lcppcms
+
 all: clean hello-tmpl.fcgi view.so
 
 view.cpp: first.tmpl
 	cppcms_tmpl_cc first.tmpl -o view.cpp
 
 view.so: data.h view.cpp
-	g++ -shared -fPIC view.cpp -o view.so -lcppcms
+	g++ -shared -fPIC view.cpp -o view.so ${LIBS}
 
 hello-tmpl.fcgi: hello-tmpl.cpp data.h
-	g++ -Wall -export-dynamic hello-tmpl.cpp -o hello-tmpl.fcgi -lcppcms
+	g++ -Wall -export-dynamic hello-tmpl.cpp -o hello-tmpl.fcgi ${LIBS}
 
 clean:
 	rm -f *.fcgi *.exe view.cpp *.so

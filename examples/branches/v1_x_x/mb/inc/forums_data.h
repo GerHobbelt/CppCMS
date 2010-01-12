@@ -12,18 +12,17 @@ struct new_topic_form : public cppcms::form {
 	widgets::text author;
 	widgets::textarea comment;
 	widgets::submit submit;
-	new_topic_form(cppcms::application &app);
+	new_topic_form();
 };
 
 struct forums : public master {
 	struct topic {
-		string title;
-		string url;
+		std::string title;
+		std::string url;
 	};
-	vector<topic> topics;
-	string next_page,prev_page;
+	std::vector<topic> topics;
+	std::string next_page,prev_page;
 	new_topic_form form;
-	forums(cppcms::application &a) : form(a) {};
 };
 
 };

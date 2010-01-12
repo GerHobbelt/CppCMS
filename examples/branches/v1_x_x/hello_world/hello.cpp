@@ -1,34 +1,39 @@
 #include <cppcms/application.h>
+#include <cppcms/applications_pool.h>
+#include <cppcms/service.h>
+#include <cppcms/http_response.h>
+#include <cppcms/url_dispatcher.h>
 #include <iostream>
-using namespace std;
-using namespace cppcms;
 
-class my_hello_world : public application {
+class my_hello_world : public cppcms::application {
 public:
-    my_hello_world(worker_thread &worker) :
-        application(worker) 
+    my_hello_world(cppcms::service &srv) :
+        cppcms::application(srv) 
     {
-    };
-    virtual void main();
+        dispatcher().assign(".*",&my_hello_world::main,this);
+    }
+    void main();
 };
 
 void my_hello_world::main()
 {
-    cout<<"<html>\n"
-          "<body>\n"
-          "  <h1>Hello World</h1>\n"
-          "</body>\n"
-          "</html>\n";
+    response().out()<<
+        "<html>\n"
+        "<body>\n"
+        "  <h1>Hello World</h1>\n"
+        "</body>\n"
+        "</html>\n";
 }
 
 int main(int argc,char ** argv)
 {
     try {
-        manager app(argc,argv);
-        app.set_worker(new application_factory<my_hello_world>());
-        app.execute();
+        cppcms::service srv(argc,argv);
+        srv.applications_pool().mount(cppcms::applications_factory<my_hello_world>());
+        srv.run();
     }
     catch(std::exception const &e) {
-        cerr<<e.what()<<endl;
+        std::cerr<<e.what()<<std::endl;
     }
 }
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

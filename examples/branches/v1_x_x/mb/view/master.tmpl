@@ -1,6 +1,6 @@
 <% c++ #include "data.h" %>
-<% namespace vary %>
-<% class master uses data::master %>
+<% skin %>
+<% view master uses data::master %>
 
 <% template title() %><% gt "Wellcome to Message Board"  %><% end template %>
 
@@ -36,6 +36,6 @@
 <% template links() %>
 <p><a href="<% main_page %>"><% gt "Home" %></a></p>
 <% end %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>
 

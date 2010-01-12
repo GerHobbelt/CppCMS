@@ -15,7 +15,7 @@ class thread : public cppcms::application {
 	void tree(string id);
 	void reply(string);
 	string reply_url(int msg_id);
-	int ini(string sid,data::base_thread &);
+	int ini(std::string sid,::data::base_thread &);
 public:
 	thread(mb &);
 	string flat_url(int id);

@@ -1,6 +1,6 @@
-<% namespace vary %>
+<% skin %>
 
-<% class base_thread uses data::base_thread  extends master %>
+<% view base_thread uses data::base_thread  extends master %>
 
 <% template msg_header(data::msg &m) %>
 	<% m.author %>, <a href="<% m.reply_url %>"><% gt "reply" %></a>
@@ -25,10 +25,10 @@
 	</p>
 <% end %>
 
-<% end class %>
+<% end view %>
 
 
-<% class flat_thread uses data::flat_thread  extends base_thread %>
+<% view flat_thread uses data::flat_thread  extends base_thread %>
 
 <% template body() %>
 	<% foreach message in messages %>
@@ -40,10 +40,10 @@
 	<% end %>
 <% end template %>
 
-<% end class %>
+<% end view %>
 
 
-<% class tree_thread uses data::tree_thread  extends base_thread %>
+<% view tree_thread uses data::tree_thread  extends base_thread %>
 
 <% template display(data::tree_t &tree) %>
 	<% foreach message in tree %>
@@ -67,10 +67,10 @@
 	<% end %>
 <% end template %>
 
-<% end class %>
+<% end view %>
 
 
-<% class reply uses data::reply extends master %>
+<% view reply uses data::reply extends master %>
 
 <% template title() %><% gt "Comment to thread: %1%" using title %><% end %>
 
@@ -93,7 +93,7 @@
 	</form>
 <% end template %>
 
-<% end class %>
+<% end view %>
 
-<% end namespace %>
+<% end skin %>
 

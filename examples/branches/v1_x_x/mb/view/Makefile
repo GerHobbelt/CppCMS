@@ -14,7 +14,7 @@ $(DLL): $(TARGET).cpp
 	$(CXX) -MD -MF .deps/$@.deps $(VIEW_CXXFLAGS) $(VIEW_LDFLAGS) -o $@ $< $(VIEW_LIBS)
 
 $(TARGET).cpp: $(TEMPLATES)
-	$(CTMPL) -o $@ -d $(GETTEXT_DOMAIN) -n $(NAMESPACE) $(TEMPLATES)
+	$(CTMPL) -o $@ -s $(GETTEXT_DOMAIN) -n $(NAMESPACE) $(TEMPLATES)
 
 clean:
 	rm -fr *.cpp $(DLL) .deps

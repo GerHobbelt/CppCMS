@@ -5,11 +5,12 @@
 
 namespace data {
 using namespace cppcms;
+using namespace std;
 struct reply_form : public form {
 	widgets::text author;
 	widgets::textarea comment;
 	widgets::submit send;
-	reply_form(cppcms::application &a);
+	reply_form();
 };
 
 
@@ -46,7 +47,7 @@ typedef tree_thread::tree_msg::tree_t tree_t;
 struct reply : public thread_shared , public msg {
 	reply_form form;
 	string back;
-	reply(cppcms::application &a);
+	reply();
 };
 
 } // data

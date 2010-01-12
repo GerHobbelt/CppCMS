@@ -1,7 +1,15 @@
-all: hello.fcgi
+# For Cygwin (static only build)
+# LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32
+# For other dynamic library builds
 
-hello.fcgi: hello.cpp
-	$(CXX) -O2 -Wall -g hello.cpp -o hello.fcgi -lcppcms
+
+# LIBS=-lcppcms
+
+
+all: hello
+
+hello: hello.cpp
+	$(CXX) -O2 -Wall -g hello.cpp -o hello ${LIBS}
 
 clean:
-	rm -fr hello.fcgi hello.fcgi.exe cppcms_rundir
+	rm -fr hello hello.exe cppcms_rundir
