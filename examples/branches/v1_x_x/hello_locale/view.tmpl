@@ -1,0 +1,20 @@
+<% c++ #include "data.h" %>
+<% namespace view %>
+<% class message uses data::message %>
+<% template render() %>
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+    </head>
+    <% if rtl %>
+    <body dir="rtl">
+    <% else %>
+    <body>
+    <% end %>
+    <h1><% gt "We want to say" %></h1>
+    <p><% message %></p>
+  </body>
+<html>
+<% end template %>
+<% end class %>
+<% end namespace %>
