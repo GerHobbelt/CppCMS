@@ -47,7 +47,6 @@ typedef tree_thread::tree_msg::tree_t tree_t;
 struct reply : public thread_shared , public msg {
 	reply_form form;
 	string back;
-	reply();
 };
 
 } // data

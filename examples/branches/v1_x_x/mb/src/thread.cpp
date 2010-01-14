@@ -15,7 +15,7 @@ reply_form::reply_form()
 	using cppcms::locale::translate;
 	author.message(translate("Author"));
 	comment.message(translate("Comment"));
-	send.message(translate("Send"));
+	send.value(translate("Send"));
 	*this + author + comment + send;
 	author.limits(1,64);
 	comment.limits(1,256);

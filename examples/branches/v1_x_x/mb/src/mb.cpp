@@ -11,8 +11,13 @@ mb::mb(cppcms::service &w) :
 	cppcms::application(w),
 	forums(*this),
 	thread(*this)
-{
-//	dbixx_load(sql);
+{	
+	add(forums);
+	add(thread);
+	sql.driver("sqlite3");
+	sql.param("sqlite3_dbdir","./");
+	sql.param("dbname","mb.db");
+	sql.connect();
 }
 
 void mb::ini(::data::master &c)

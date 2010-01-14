@@ -19,7 +19,6 @@ public:
 
 class mb : public cppcms::application {
 public:
-	virtual void main();
 	dbixx::session sql;
 	apps::forums forums;
 	apps::thread thread;

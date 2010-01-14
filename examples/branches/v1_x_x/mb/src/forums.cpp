@@ -15,7 +15,7 @@ new_topic_form::new_topic_form()
 	title.message(translate("Title"));
 	author.message(translate("Author"));
 	comment.message(translate("Comment"));
-	submit.message(translate("Create"));
+	submit.value(translate("Create"));
 	*this + title + author + comment + submit;
 	title.non_empty();
 	author.limits(1,64);

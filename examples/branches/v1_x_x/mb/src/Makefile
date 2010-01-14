@@ -1,6 +1,6 @@
 LDFLAGS=-export-dynamic
 SRC=forums.cpp mb.cpp thread.cpp main.cpp
-OBJ=$(patsubst %.cpp,%.o,$(SRC))
+OBJ=$(patsubst %.cpp,%.o,$(SRC)) ../view/simple.o
 DEPS=$(patsubst %.o,.deps/%.o.dep,$(OBJ))
 
 TARGET=../mb$(EXEC_EXT)
