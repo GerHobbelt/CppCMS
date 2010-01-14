@@ -11,6 +11,7 @@
 #include <boost/locale/config.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/cstdint.hpp>
+#include <stdexcept>
 
 namespace boost {
     namespace locale {
@@ -478,6 +479,133 @@ namespace boost {
 				return new std::codecvt<char,char,mbstate_t>();
 			}
         };
+
+
+        namespace conv {
+
+            class conversion_error : public std::runtime_error {
+            public:
+                conversion_error() : std::runtime_error("Conversion failed") {}
+            };
+
+            typedef enum {
+                stop            = 0, ///!< Stop conversion on first illegal/unconvertable character
+                skip            = 1, ///!< Skip illegal/unconvertable characters
+                stop_and_throw  = 2, ///!< Throw a error 
+            } method_type;
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::string const &charset,method_type how=stop);
+
+            template<typename CharType>
+            std::string from_utf(CharType const *begin,CharType const *end,std::string const &charset,method_type how=stop);
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::locale const &loc,method_type how=stop)
+            {
+                return to_utf<CharType>(begin,end,std::use_facet<info>(loc).encoding(),how);
+            }
+
+            template<typename CharType>
+            std::string from_utf(CharType const *begin,CharType const *end,std::locale const &loc,method_type how=stop)
+            {
+                return from_utf(begin,end,std::use_facet<info>(loc).encoding(),how);
+            }
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(std::string const &text,std::string const &charset,method_type how=stop)
+            {
+                return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),charset,how);
+            }
+
+            template<typename CharType>
+            std::string from_utf(std::basic_string<CharType> const &text,std::string const &charset,method_type how=stop)
+            {
+                return from_utf(text.c_str(),text.c_str()+text.size(),charset,how);
+            }
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(char const *text,std::string const &charset,method_type how=stop)
+            {
+                char const *text_end = text;
+                while(*text_end) 
+                    text_end++;
+                return to_utf<CharType>(text,text_end,charset,how);
+            }
+
+            template<typename CharType>
+            std::string from_utf(CharType const *text,std::string const &charset,method_type how=stop)
+            {
+                CharType const *text_end = text;
+                while(*text_end) 
+                    text_end++;
+                return from_utf(text,text_end,charset,how);
+            }
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(std::string const &text,std::locale const &loc,method_type how=stop)
+            {
+                return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),loc,how);
+            }
+
+            template<typename CharType>
+            std::string from_utf(std::basic_string<CharType> const &text,std::locale const &loc,method_type how=stop)
+            {
+                return from_utf(text.c_str(),text.c_str()+text.size(),loc,how);
+            }
+
+            template<typename CharType>
+            std::basic_string<CharType> to_utf(char const *text,std::locale const &loc,method_type how=stop)
+            {
+                char const *text_end = text;
+                while(*text_end) 
+                    text_end++;
+                return to_utf<CharType>(text,text_end,loc,how);
+            }
+
+            template<typename CharType>
+            std::string from_utf(CharType const *text,std::locale const &loc,method_type how=stop)
+            {
+                CharType const *text_end = text;
+                while(*text_end) 
+                    text_end++;
+                return from_utf(text,text_end,loc,how);
+            }
+
+            template<>
+            BOOST_LOCALE_DECL std::basic_string<char> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
+
+            template<>
+            BOOST_LOCALE_DECL std::string from_utf(char const *begin,char const *end,std::string const &charset,method_type how);
+
+            #ifndef BOOST_NO_STD_WSTRING
+            template<>
+            BOOST_LOCALE_DECL std::basic_string<wchar_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
+
+            template<>
+            BOOST_LOCALE_DELC std::string from_utf(wchar_t const *begin,wchar_t const *end,std::string const &charset,method_type how);
+            #endif
+
+            #ifdef BOOST_HAS_CHAR16_T
+            template<>
+            BOOST_LOCALE_DECL std::basic_string<char16_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
+
+            template<>
+            BOOST_LOCALE_DELC std::string from_utf(char16_t const *begin,char16_t const *end,std::string const &charset,method_type how);
+            #endif
+
+            #ifdef BOOST_HAS_CHAR32_T
+            template<>
+            BOOST_LOCALE_DECL std::basic_string<char32_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
+
+            template<>
+            BOOST_LOCALE_DELC std::string from_utf(char32_t const *begin,char32_t const *end,std::string const &charset,method_type how);
+            #endif
+
+
+        } // conv
+
+
     } // locale
 } // boost
 
