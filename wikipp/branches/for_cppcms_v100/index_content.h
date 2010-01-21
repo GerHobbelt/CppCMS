@@ -1,9 +1,9 @@
-#ifndef INDEX_DATA_H
-#define INDEX_DATA_H
+#ifndef INDEX_CONTENT_H
+#define INDEX_CONTENT_H
 
-#include "master_data.h"
+#include "master_content.h"
 
-namespace data {
+namespace content {
 
 struct toc : public master {
 	struct element {
@@ -24,12 +24,12 @@ struct recent_changes : public master {
 		string url;
 		string diff_url;
 	};
-	vector<element> data;
+	vector<element> content;
 	string next;
 };
 
 
-} // namespace data
+} // namespace content
 
 
 #endif

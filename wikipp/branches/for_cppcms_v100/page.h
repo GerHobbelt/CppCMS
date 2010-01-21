@@ -2,12 +2,11 @@
 #define PAGE_H
 
 #include "master.h"
-#include <cppcms/url.h>
 #include <string>
 using namespace cppcms;
 using namespace std;
 
-namespace data { 
+namespace content { 
 	class page;
 	class edit_page;
 	class page_form;
@@ -16,13 +15,13 @@ namespace data {
 namespace apps {
 
 class page : public master {
-	void save(int id,data::page_form &);
-	bool load(data::page_form &);
-	bool edit_on_post(data::edit_page &);
-	bool load_history(int,data::page_form &);
+	void save(int id,content::page_form &);
+	bool load(content::page_form &);
+	bool edit_on_post(content::edit_page &);
+	bool load_history(int,content::page_form &);
 protected:
 	string slug;
-	void ini(data::page &);
+	void ini(content::page &);
 	void display(string slug);
 	void history(string slug,string page);
 	void display_ver(string slug,string sid);

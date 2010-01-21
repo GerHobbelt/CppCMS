@@ -1,9 +1,9 @@
-#ifndef USERS_DATA_H
-#define USERS_DATA_H
+#ifndef USERS_CONTENT_H
+#define USERS_CONTENT_H
 
-#include "master_data.h"
+#include "master_content.h"
 
-namespace data {
+namespace content {
 
 struct login_form : public form {
 	wiki *w;
@@ -37,6 +37,6 @@ struct login : public master {
 	login(wiki *w) : form(w){};
 };
 
-} // namespace data
+} // namespace content
 
 #endif

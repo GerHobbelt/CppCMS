@@ -1,9 +1,9 @@
-#ifndef OPTIONS_DATA_H
-#define OPTIONS_DATA_H
+#ifndef OPTIONS_CONTENT_H
+#define OPTIONS_CONTENT_H
 
-#include "master_data.h"
+#include "master_content.h"
 
-namespace data {
+namespace content {
 
 struct options_form : form {
 	wiki *w;
@@ -23,7 +23,7 @@ struct edit_options:  public master {
 };
 
 
-} // namespace data
+} // namespace content
 
 #endif
 

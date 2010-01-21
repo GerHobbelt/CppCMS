@@ -1,9 +1,9 @@
-#ifndef PAGE_DATA_H
-#define PAGE_DATA_H
+#ifndef PAGE_CONTENT_H
+#define PAGE_CONTENT_H
 
-#include "master_data.h"
+#include "master_content.h"
 
-namespace data {
+namespace content {
 
 typedef list<std::pair<int,string> > diff_t;
 
@@ -61,8 +61,8 @@ struct history : public master {
 struct diff: public master {
 	string edit_v1,edit_v2;
 	int v1,v2;
-	diff_t content_diff_data;
-	diff_t sidebar_diff_data;
+	diff_t content_diff_content;
+	diff_t sidebar_diff_content;
 	string title,title_1,title_2;
 	bool title_diff,content_diff,sidebar_diff,no_versions,no_diff;
 	diff() : 
@@ -74,6 +74,6 @@ struct diff: public master {
 };
 
 
-} // namespace data
+} // namespace content
 
 #endif

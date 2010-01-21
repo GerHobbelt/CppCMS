@@ -1,10 +1,8 @@
 #ifndef WIKI_H
 #define WIKI_H
-#include <cppcms/worker_thread.h>
-#include <cppcms/manager.h>
+#include <cppcms/application.h>
 #include <dbixx/dbixx.h>
 #include <boost/format.hpp>
-#include <cppcms/archive.h>
 
 #include "page.h"
 #include "users.h"
@@ -12,23 +10,21 @@
 #include "options.h"
 
 
-using namespace cppcms;
 
 namespace apps {
 
-class wiki : public application {
+class wiki : public cppcms::application {
 	friend class apps::page;
 	friend class apps::options;
 	friend class apps::users;
 	friend class apps::index;
 	friend class apps::master;
 
-	string script;
+	std::string script;
 public:
 	// Data 
 	dbixx::session sql;
-	url_parser url_next;
-	string locale;
+	std::string locale;
 
 	// Applications 
 
@@ -37,11 +33,12 @@ public:
 	apps::users users;
 	apps::index index;
 
-	string root(string locale="");
+	std::string root(string locale="");
 	bool set_locale(string);
 	void run(string lang,string url);
 	virtual void on_404();
-	wiki(worker_thread &w);
+	virtual void main(std::string url);
+	wiki(cppcms::service &s);
 };
 
 }

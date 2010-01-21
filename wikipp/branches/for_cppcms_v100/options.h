@@ -1,27 +1,25 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
-#include <cppcms/archive.h>
 #include "master.h"
-
+#include <cppcms/json.h>
 
 namespace apps {
 class wiki;
 using namespace cppcms;
 
-struct global_options : public serializable {
+struct global_options {
 	int users_only_edit;
 	string contact;
-	virtual void load(archive &a);
-	virtual void save(archive &a) const;
 };
 
-struct locale_options : public serializable {
+struct locale_options {
 	string title;
 	string about;
 	string copyright;
-	virtual void load(archive &a);
-	virtual void save(archive &a) const;
 };
+
+
+
 
 class options : public master {
 	bool loaded;
@@ -38,5 +36,44 @@ public:
 };
 
 } // apps;
+namespace cppcms { namespace json {
+
+template<>					
+struct traits<apps::global_options> {				
+	static apps::global_options get(value const &v)		
+	{					
+		apps::global_options tmp;
+		tmp.users_only_edit = v.get<bool>("users_only_edit");
+		tmp.contact = v.get<std::string>("contact");
+		return tmp;
+	}					
+	static void set(value &v,apps::global_options const &in)
+	{					
+		v = object();
+		v["users_only_edit"]=bool(in.users_only_edit);
+		v["contact"]=in.contact;
+	}
+};
+
+template<>					
+struct traits<apps::locale_options> {				
+	static apps::locale_options get(value const &v)		
+	{					
+		apps::locale_options tmp;
+		tmp.title = v.get<std::string>("title");
+		tmp.copyright = v.get<std::string>("copyright");
+		tmp.about = v.get<std::string>("about");
+		return tmp;
+	}					
+	static void set(value &v,apps::locale_options const &in)
+	{					
+		v = object();
+		v["title"]=in.title;
+		v["about"]=in.about;
+		v["copyright"]=in.copyright;
+	}
+};
+
+}}//json::cppcms
 
 #endif

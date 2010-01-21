@@ -1,14 +1,14 @@
 #include <cgicc/HTTPRedirectHeader.h>
 #include "users.h"
 #include "wiki.h"
-#include "users_data.h"
+#include "users_content.h"
 #include <sys/time.h>
 #include <time.h>
 
 using cgicc::HTTPRedirectHeader;
 using namespace dbixx;
 
-namespace data {
+namespace content {
 login_form::login_form(wiki *_w) :
 	w(_w),
 	username("username",w->gettext("Username")),
@@ -96,7 +96,7 @@ users::users(wiki &w) :	master(w)
 
 void users::new_user()
 {
-	data::new_user c(&wi);
+	content::new_user c(&wi);
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		transaction tr(sql);
@@ -148,7 +148,7 @@ bool users::user_exists(string u)
 
 void users::login()
 {
-	data::login c(&wi);
+	content::login c(&wi);
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		if(c.form.validate()) {

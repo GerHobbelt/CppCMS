@@ -1,8 +1,8 @@
 #include "options.h"
 #include "wiki.h"
-#include "options_data.h"
+#include "options_content.h"
 
-namespace data {
+namespace content {
 options_form::options_form(wiki *_w):
 	w(_w),
 	users_only("uonly",w->gettext("Users Only")),
@@ -22,7 +22,7 @@ options_form::options_form(wiki *_w):
 	users_only.help=w->gettext("Disable creation of new articles by visitors");
 }
 
-} // namespace data
+} // namespace content
 
 namespace apps {
 
@@ -73,7 +73,7 @@ void options::load()
 	local.about.clear();
 	local.title.clear();
 	local.copyright.clear();
-	if(!cache.fetch_data("global_ops",global)) {
+	if(!cache.fetch_content("global_ops",global)) {
 		result res;
 		sql<<	"SELECT name,value FROM options "
 			"WHERE	lang='global' ",res;
@@ -88,9 +88,9 @@ void options::load()
 		}
 		if(global.contact.empty())
 			global.contact="no@mail";
-		cache.store_data("global_ops",global);
+		cache.store_content("global_ops",global);
 	}
-	if(cache.fetch_data("local_ops:"+locale,local))
+	if(cache.fetch_content("local_ops:"+locale,local))
 		return;
 	result res;
 	sql<<	"SELECT value,name FROM options "
@@ -116,7 +116,7 @@ void options::load()
 				"[CppCMS](http://cppcms.sf.net/) web development framework.\n");
 	if(local.copyright.empty())
 		local.copyright=gettext("&copy; All Rights Reserverd");
-	cache.store_data("local_ops:"+locale,local);
+	cache.store_content("local_ops:"+locale,local);
 	loaded=true;
 }
 
@@ -151,7 +151,7 @@ void options::edit()
 		wi.users.error_forbidden();
 		return;
 	}
-	data::edit_options c(&wi);
+	content::edit_options c(&wi);
 	if(env->getRequestMethod()=="POST") {
 		c.form.load(*cgi);
 		if(c.form.validate()) {

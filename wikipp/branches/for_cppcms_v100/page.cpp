@@ -1,6 +1,6 @@
 #include <cgicc/HTTPRedirectHeader.h>
 #include "page.h"
-#include "page_data.h"
+#include "page_content.h"
 #include "wiki.h"
 #include "diff.h"
 
@@ -8,8 +8,8 @@ using namespace dbixx;
 
 using cgicc::HTTPRedirectHeader;
 
-namespace data { 
-// Page data
+namespace content { 
+// Page content
 page_form::page_form(wiki *_w):
 	w(_w),
 	title("title",w->gettext("Title")),
@@ -44,7 +44,7 @@ bool page_form::validate()
 	return res;
 }
 
-} // namespace data
+} // namespace content
 
 namespace apps {
 
@@ -106,7 +106,7 @@ void page::diff(string slug,string sv1,string sv2)
 	int v1=atoi(sv1.c_str()), v2=atoi(sv2.c_str());
 	this->slug=slug;
 	result rs;
-	data::diff c;
+	content::diff c;
 	c.v1=v1;
 	c.v2=v2;
 	c.edit_v1=edit_version_url(v1);
@@ -145,13 +145,13 @@ void page::diff(string slug,string sv1,string sv2)
 		c.content_diff=true;
 		vector<string> X=split(c1);
 		vector<string> Y=split(c2);
-		diff::diff(X,Y,c.content_diff_data);
+		diff::diff(X,Y,c.content_diff_content);
 	}
 	if(s1!=s2) {
 		c.sidebar_diff=true;
 		vector<string> X=split(s1);
 		vector<string> Y=split(s2);
-		diff::diff(X,Y,c.sidebar_diff_data);
+		diff::diff(X,Y,c.sidebar_diff_content);
 	}
 	if(t1==t2 && c1==c2 && s1==s2) 
 		c.no_diff=true;
@@ -164,7 +164,7 @@ void page::history(string slug,string page)
 	this->slug=slug;
 	unsigned const vers=10;
 	int offset;
-	data::history c;
+	content::history c;
 	master::ini(c);
 	if(page.empty())
 		offset=0;
@@ -218,7 +218,7 @@ void page::display(string slug)
 	string key="article_"+locale+":"+slug;
 	if(cache.fetch_page(key))
 		return;
-	data::page c;
+	content::page c;
 
 	sql<<	"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?",
 		locale,slug;
@@ -235,7 +235,7 @@ void page::display(string slug)
 	cache.store_page(key);
 }
 
-void page::ini(data::page &c)
+void page::ini(content::page &c)
 {
 	master::ini(c);
 	c.edit_link=edit_url();
@@ -245,7 +245,7 @@ void page::ini(data::page &c)
 void page::edit(string slug,string version)
 {
 	this->slug=slug;
-	data::edit_page c(&wi);
+	content::edit_page c(&wi);
 	if(env->getRequestMethod()=="POST") {
 		if(!edit_on_post(c))
 			return;
@@ -271,7 +271,7 @@ void page::edit(string slug,string version)
 	render("edit_page",c);
 }
 
-bool page::load(data::page_form &form)
+bool page::load(content::page_form &form)
 {
 	sql<<	
 		"SELECT title,content,sidebar,users_only "
@@ -299,7 +299,7 @@ void page::redirect(string loc,string slug)
 	add_header("Status: 302 Found");
 }
 
-void page::save(int id,data::page_form &form)
+void page::save(int id,content::page_form &form)
 {
 	time_t now;
 	time(&now);
@@ -337,7 +337,7 @@ void page::save(int id,data::page_form &form)
 }
 
 
-bool page::edit_on_post(data::edit_page &c)
+bool page::edit_on_post(content::edit_page &c)
 {
 	wi.options.load();
 	
@@ -373,7 +373,7 @@ bool page::edit_on_post(data::edit_page &c)
 	return true;
 }
 
-bool page::load_history(int ver,data::page_form &form)
+bool page::load_history(int ver,content::page_form &form)
 {
 	sql<<	"SELECT history.title,history.content,history.sidebar,pages.users_only "
 		"FROM pages "
@@ -394,7 +394,7 @@ bool page::load_history(int ver,data::page_form &form)
 void page::display_ver(string slug,string sid)
 {
 	this->slug=slug;
-	data::page_hist c;
+	content::page_hist c;
 	int id=atoi(sid.c_str());
 	sql<<	"SELECT history.title,history.content,history.sidebar,history.created "
 		"FROM pages "

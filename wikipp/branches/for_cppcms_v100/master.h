@@ -3,7 +3,7 @@
 
 #include <cppcms/application.h>
 
-namespace data { class master; }
+namespace content { class master; }
 namespace dbixx { class session; }
 namespace apps {
 
@@ -16,7 +16,7 @@ protected:
 	std::string &locale;
 public:
 	master(wiki &w);
-	void ini(data::master &);
+	void ini(content::master &);
 };
 
 } // namespace wiki

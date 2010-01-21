@@ -1,9 +1,9 @@
 #include "wiki.h"
 #include "master.h"
-#include "master_data.h"
+#include "master_content.h"
 #include "cxxmarkdown/markdowncxx.h"
 
-namespace data {
+namespace content {
 
 string master::markdown(string s)
 {
@@ -24,7 +24,7 @@ master::master(wiki &_w) :
 {
 }
 
-void master::ini(data::master &c)
+void master::ini(content::master &c)
 {
 	wi.options.load();
 	c.media=app.config.sval("wikipp.media");

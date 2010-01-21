@@ -6,7 +6,7 @@
 
 namespace apps { class wiki; }
 
-namespace data {
+namespace content {
 using namespace std;
 using namespace cppcms;
 using apps::wiki;
