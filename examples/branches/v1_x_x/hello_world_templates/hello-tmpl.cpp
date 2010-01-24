@@ -5,7 +5,7 @@
 #include <cppcms/url_dispatcher.h>
 #include <iostream>
 
-#include "data.h"
+#include "content.h"
 
 class my_hello_world : public cppcms::application {
 public:

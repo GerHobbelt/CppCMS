@@ -3,7 +3,7 @@
 #include <cppcms/application.h>
 #include <string>
 
-namespace data { class base_thread; }
+namespace content { class base_thread; }
 
 namespace apps {
 class mb;
@@ -15,7 +15,7 @@ class thread : public cppcms::application {
 	void tree(string id);
 	void reply(string);
 	string reply_url(int msg_id);
-	int ini(std::string sid,::data::base_thread &);
+	int ini(std::string sid,content::base_thread &);
 public:
 	thread(mb &);
 	string flat_url(int id);

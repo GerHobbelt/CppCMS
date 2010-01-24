@@ -2,7 +2,6 @@
 #include <cppcms/applications_pool.h>
 #include <cppcms/service.h>
 #include <cppcms/http_response.h>
-#include <cppcms/url_dispatcher.h>
 #include <iostream>
 
 class my_hello_world : public cppcms::application {
@@ -10,12 +9,11 @@ public:
     my_hello_world(cppcms::service &srv) :
         cppcms::application(srv) 
     {
-        dispatcher().assign(".*",&my_hello_world::main,this);
     }
-    void main();
+    virtual void main(std::string url);
 };
 
-void my_hello_world::main()
+void my_hello_world::main(std::string /*url*/)
 {
     response().out()<<
         "<html>\n"

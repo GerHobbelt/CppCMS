@@ -1,24 +1,28 @@
 #include <cppcms/application.h>
+#include <cppcms/service.h>
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/applications_pool.h>
 #include <iostream>
-#include "data.h"
+#include "content.h"
 
-using namespace std;
-using namespace cppcms;
 
-class hello: public application {
+class hello: public cppcms::application {
 public:
-    hello(worker_thread &worker) :
-        application(worker) 
+    hello(cppcms::service &srv) :
+        cppcms::application(srv) 
     {
-	    url.add("^/(en|he)/?$",
-	    	boost::bind(&hello::say_hello,this,_1));
-	    use_template("view");
+  	dispatcher().assign("^/(en_US|he_IL)/?$",&hello::say_hello,this,1);
+	dispatcher().assign("^(.*)$",&hello::redirect,this);
     }
-    void say_hello(string lang)
+    void redirect()
     {
-	    set_lang(lang);
-	    data::message c;
-	    c.message=gettext("Hello World");
+	    response().set_redirect_header(request().script_name() + "/en_US");
+    }
+    void say_hello(std::string lang)
+    {
+	    context().locale(lang);
+	    content::message c;
+	    c.message=cppcms::locale::translate("Hello World");
 	    render("message",c);
     }
 };
@@ -26,11 +30,11 @@ public:
 int main(int argc,char ** argv)
 {
     try {
-        manager app(argc,argv);
-        app.set_worker(new application_factory<hello>());
-        app.execute();
+        cppcms::service app(argc,argv);
+        app.applications_pool().mount(cppcms::applications_factory<hello>());
+        app.run();
     }
     catch(std::exception const &e) {
-        cerr<<e.what()<<endl;
+        std::cerr<<e.what()<<std::endl;
     }
 }

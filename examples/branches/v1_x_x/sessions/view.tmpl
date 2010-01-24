@@ -1,6 +1,6 @@
-<% c++ #include "data.h" %>
-<% namespace view %>
-<% class message uses data::message %>
+<% c++ #include "content.h" %>
+<% skin view %>
+<% view message uses content::message %>
 <% template render() %>
 <html>
 <body>
@@ -17,5 +17,5 @@
   </body>
 <html>
 <% end template %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>

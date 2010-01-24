@@ -1,9 +1,9 @@
-#ifndef MASTER_DATA_H
-#define MASTER_DATA_H
+#ifndef MASTER_CONTENT_H
+#define MASTER_CONTENT_H
 
 #include <cppcms/view.h>
 using namespace cppcms;
-namespace data {
+namespace content {
 
 struct master : public cppcms::base_content {
 	std::string main_page;

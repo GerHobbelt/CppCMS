@@ -1,16 +1,16 @@
 <% skin %>
 
-<% view base_thread uses ::data::base_thread  extends master %>
+<% view base_thread uses content::base_thread  extends master %>
 
-<% template msg_header(::data::msg &m) %>
+<% template msg_header(content::msg &m) %>
 	<% m.author %>, <a href="<% m.reply_url %>"><% gt "reply" %></a>
 <% end %>
 
-<% template msg_cnt(::data::msg  &m) %>
+<% template msg_cnt(content::msg  &m) %>
 <p><% m.content | ext text2html %></p>
 <% end %>
 
-<% template msg(::data::msg &m) %>
+<% template msg(content::msg &m) %>
 <dt><% include msg_header(m) %></dt>
 <dd><% include msg_cnt(m) %></dd>
 <% end %>
@@ -28,7 +28,7 @@
 <% end view %>
 
 
-<% view flat_thread uses ::data::flat_thread  extends base_thread %>
+<% view flat_thread uses content::flat_thread  extends base_thread %>
 
 <% template body() %>
 	<% foreach message in messages %>
@@ -43,9 +43,9 @@
 <% end view %>
 
 
-<% view tree_thread uses ::data::tree_thread  extends base_thread %>
+<% view tree_thread uses content::tree_thread  extends base_thread %>
 
-<% template display(::data::tree_t &tree) %>
+<% template display(content::tree_t &tree) %>
 	<% foreach message in tree %>
 		<dl>
 		<% item %>
@@ -70,7 +70,7 @@
 <% end view %>
 
 
-<% view reply uses ::data::reply extends master %>
+<% view reply uses content::reply extends master %>
 
 <% template title() %><% gt "Comment to thread: {1}" using title %><% end %>
 
@@ -88,7 +88,19 @@
 	<% end %>
 	<form action="" method="post" >
 	<table>
-		<% form as_table form %>
+		<% form as_table form.author %>
+		<tr>
+			<th>
+			<% form.comment.message() %>: 
+			<% if form.comment.valid() %>
+				<% form.comment.error_message() %>
+			<% end %>
+			</th>
+			<td>
+			<% form begin form.comment %> rows="24" cols="80" <% form end form.comment %> 
+			</td>
+		</tr>
+		<% form as_table form.send %>
 	</table>
 	</form>
 <% end template %>

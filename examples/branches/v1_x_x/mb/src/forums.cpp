@@ -1,5 +1,5 @@
 #include "forums.h"
-#include "forums_data.h"
+#include "forums_content.h"
 #include "mb.h"
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/session_interface.h>
@@ -7,7 +7,7 @@
 
 using namespace dbixx;
 
-namespace data {
+namespace content {
 
 new_topic_form::new_topic_form() 
 {
@@ -22,7 +22,7 @@ new_topic_form::new_topic_form()
 	comment.limits(1,256);
 }
 
-} // data
+} // content
 
 namespace apps {
 
@@ -46,7 +46,7 @@ string forums::forums_url(int offset)
 void forums::display_forums(string page)
 {
 	const unsigned topics_per_page=10;
-	::data::forums c;
+	content::forums c;
 	board.ini(c);
 	if(request().request_method()=="POST") {
 		c.form.load(context());

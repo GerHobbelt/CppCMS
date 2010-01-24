@@ -1,6 +1,6 @@
 #include <cppcms/application.h>
 #include <iostream>
-#include "data.h"
+#include "content.h"
 
 using namespace std;
 using namespace cppcms;
@@ -16,7 +16,7 @@ public:
     }
     void info()
     {
-	    data::message c;
+	    content::message c;
 	    if(env->getRequestMethod()=="POST") {
 		    c.info.load(*cgi);
 		    if(c.info.validate()) {

@@ -1,5 +1,5 @@
 #include "thread.h"
-#include "thread_data.h"
+#include "thread_content.h"
 #include "mb.h"
 #include <cppcms/util.h>
 #include <cppcms/url_dispatcher.h>
@@ -8,7 +8,7 @@
 
 using boost::lexical_cast;
 
-namespace data {
+namespace content {
 
 reply_form::reply_form()
 {
@@ -37,7 +37,7 @@ string thread_shared::text2html(string const &s)
 }
 
 
-} // namespace data
+} // namespace content
 
 namespace apps {
 
@@ -73,7 +73,7 @@ string thread::reply_url(int message_id)
 	tmp+=lexical_cast<string>(message_id);
 	return tmp;
 }
-int thread::ini(string sid,::data::base_thread &c)
+int thread::ini(string sid,content::base_thread &c)
 {
 	int id=lexical_cast<int>(sid);
 	board.sql<<"SELECT title FROM threads WHERE id=?",id;
@@ -90,7 +90,7 @@ int thread::ini(string sid,::data::base_thread &c)
 
 void thread::flat(string sid)
 {
-	::data::flat_thread c;
+	content::flat_thread c;
 	int id=ini(sid,c);
 	board.sql<<
 		"SELECT id,author,content "
@@ -111,21 +111,21 @@ void thread::flat(string sid)
 	render("flat_thread",c);
 }
 
-typedef map<int,map<int,data::msg> > msg_ord_t;
+typedef map<int,map<int,content::msg> > msg_ord_t;
 
 namespace {
 
-void make_tree(data::tree_t &messages,map<int,map<int,data::msg> > &data,int start)
+void make_tree(content::tree_t &messages,map<int,map<int,content::msg> > &content,int start)
 {
 	std::pair<msg_ord_t::iterator,msg_ord_t::iterator>
-		range=data.equal_range(start);
+		range=content.equal_range(start);
 	for(msg_ord_t::iterator p=range.first;p!=range.second;++p) {
-		for(map<int,data::msg>::iterator p2=p->second.begin(),e=p->second.end();p2!=e;++p2) {
-			data::tree_thread::tree_msg &m=messages[p2->first];
+		for(map<int,content::msg>::iterator p2=p->second.begin(),e=p->second.end();p2!=e;++p2) {
+			content::tree_thread::tree_msg &m=messages[p2->first];
 			m.author=p2->second.author;
 			m.content=p2->second.content;
 			m.reply_url=p2->second.reply_url;
-			make_tree(m.repl,data,p2->first);
+			make_tree(m.repl,content,p2->first);
 		}
 	}
 	
@@ -135,7 +135,7 @@ void make_tree(data::tree_t &messages,map<int,map<int,data::msg> > &data,int sta
 
 void thread::tree(string sid)
 {
-	::data::tree_thread c;
+	content::tree_thread c;
 	int id=ini(sid,c);
 	board.sql<<
 		"SELECT reply_to,id,author,content "
@@ -150,7 +150,7 @@ void thread::tree(string sid)
 		int msg_id,rpl_id;
 		string author,comment;
 		r>>rpl_id>>msg_id;
-		::data::msg &message=all[rpl_id][msg_id];
+		content::msg &message=all[rpl_id][msg_id];
 		r>>message.author>>message.content;
 		message.reply_url=reply_url(msg_id);
 	}
@@ -166,7 +166,7 @@ void thread::reply(string smid)
 	int mid;
 	mid=lexical_cast<int>(smid);
 
-	::data::reply c;
+	content::reply c;
 
 	if(request().request_method()=="POST") {
 		c.form.load(context());

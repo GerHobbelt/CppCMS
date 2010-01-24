@@ -1,11 +1,11 @@
-#ifndef FORUMS_DATA_H
-#define FORUMS_DATA_H
-#include "master_data.h"
+#ifndef FORUMS_CONTENT_H
+#define FORUMS_CONTENT_H
+#include "master_content.h"
 #include <cppcms/form.h>
 
 namespace cppcms { class application; }
 
-namespace data {
+namespace content {
 
 struct new_topic_form : public cppcms::form {
 	widgets::text title;

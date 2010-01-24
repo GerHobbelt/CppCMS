@@ -1,9 +1,8 @@
-# For Cygwin (static only build)
-# LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32
-# For other dynamic library builds
-
-
-# LIBS=-lcppcms
+ifeq ($(host),cygwin)
+   LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32 -liconv
+else
+   LIBS=-lcppcms
+endif
 
 
 all: hello

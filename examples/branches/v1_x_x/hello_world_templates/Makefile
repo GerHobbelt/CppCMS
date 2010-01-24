@@ -1,17 +1,15 @@
-# For Cygwin (static only build)
-
-#LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32
-
-# For other dynamic library builds
-
-LIBS=-lcppcms
+ifeq ($(host),cygwin)
+   LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32 -liconv
+else
+   LIBS=-lcppcms
+endif
 
 all: clean hello-tmpl
 
-hello-tmpl: hello-tmpl.cpp view.cpp data.h
+hello-tmpl: hello-tmpl.cpp view.cpp content.h
 	$(CXX) -Wall hello-tmpl.cpp view.cpp -o hello-tmpl.fcgi ${LIBS}
 
-view.cpp: first.tmpl data.h
+view.cpp: first.tmpl content.h
 	cppcms_tmpl_cc first.tmpl -o view.cpp
 
 clean:

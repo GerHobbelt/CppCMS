@@ -1,29 +1,28 @@
+#include <cppcms/service.h>
 #include <cppcms/application.h>
-#include <boost/lexical_cast.hpp>
+#include <cppcms/applications_pool.h>
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/cache_interface.h>
 #include <iostream>
-#include "data.h"
+#include <sstream>
+#include "content.h"
 
-using namespace std;
-using namespace cppcms;
-
-class hello: public application {
+class hello: public cppcms::application {
 public:
-    hello(worker_thread &worker) :
-        application(worker) 
+    hello(cppcms::service &s) :
+        cppcms::application(s) 
     {
-	    url.add("^/?$",
-	    	boost::bind(&hello::info,this));
-	    use_template("view");
+	    dispatcher().assign("^/?$",&hello::info,this);
     }
     void info()
     {
-	    data::message c;
+	    content::message c;
 	    c.arg=0;
 	    c.fact=1;
-	    if(env->getRequestMethod()=="POST") {
-		    c.info.load(*cgi);
+	    if(request().request_method()=="POST") {
+		    c.info.load(context());
 		    if(c.info.validate()) {
-		        c.arg=c.info.arg.get(); 
+		        c.arg=c.info.arg.value(); 
 			c.info.clear();
 		    }
 		    else { // No cache should be used
@@ -32,8 +31,9 @@ public:
 		    }
 	    }
 
-	    string key="factorial_"+boost::lexical_cast<string>(c.arg);
-	    if(cache.fetch_page(key))
+	    std::ostringstream key;
+	    key << "factorial_" << c.arg;
+	    if(cache().fetch_page(key.str()))
 	    	return;
 	    long long int f=1;
 	    for(int i=1;i<=c.arg;i++) {
@@ -41,18 +41,18 @@ public:
 	    }
 	    c.fact=f;
 	    render("message",c);
-	    cache.store_page(key,3600);
+	    cache().store_page(key.str(),3600);
     }
 };
 
 int main(int argc,char ** argv)
 {
     try {
-        manager app(argc,argv);
-        app.set_worker(new application_factory<hello>());
-        app.execute();
+        cppcms::service app(argc,argv);
+        app.applications_pool().mount(cppcms::applications_factory<hello>());
+        app.run();
     }
     catch(std::exception const &e) {
-        cerr<<e.what()<<endl;
+        std::cerr<<e.what()<<std::endl;
     }
 }

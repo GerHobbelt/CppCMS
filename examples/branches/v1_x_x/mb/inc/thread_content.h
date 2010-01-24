@@ -1,9 +1,9 @@
-#ifndef THREAD_DATA_H
-#define THREAD_DATA_H
-#include "master_data.h"
+#ifndef THREAD_CONTENT_H
+#define THREAD_CONTENT_H
+#include "master_content.h"
 #include <cppcms/form.h>
 
-namespace data {
+namespace content {
 using namespace cppcms;
 using namespace std;
 struct reply_form : public form {
@@ -49,7 +49,7 @@ struct reply : public thread_shared , public msg {
 	string back;
 };
 
-} // data
+} // content
 
 
 #endif

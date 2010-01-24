@@ -1,5 +1,5 @@
-#ifndef DATA_H
-#define DATA_H
+#ifndef CONTENT_H
+#define CONTENT_H
 
 #include <cppcms/application.h>
 #include <cppcms/base_view.h>
@@ -8,7 +8,7 @@
 
 
 
-namespace data  {
+namespace content  {
 using namespace cppcms;
 using namespace std;
 

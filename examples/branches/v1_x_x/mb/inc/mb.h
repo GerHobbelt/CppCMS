@@ -5,7 +5,7 @@
 #include "forums.h"
 #include "thread.h"
 
-namespace data {
+namespace content {
 	class master;
 }
 
@@ -23,7 +23,7 @@ public:
 	apps::forums forums;
 	apps::thread thread;
 	mb(cppcms::service &w);
-	void ini(::data::master &);
+	void ini(content::master &);
 };
 
 

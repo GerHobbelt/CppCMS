@@ -1,5 +1,5 @@
 #include "mb.h"
-#include "master_data.h"
+#include "master_content.h"
 
 #include "forums.h"
 #include "thread.h"
@@ -20,7 +20,7 @@ mb::mb(cppcms::service &w) :
 	sql.connect();
 }
 
-void mb::ini(::data::master &c)
+void mb::ini(content::master &c)
 {
 	c.main_page=request().script_name()+"/";
 	c.media=settings().get<std::string>("mb.media");
