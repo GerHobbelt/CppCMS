@@ -1,30 +1,31 @@
 #include <cppcms/application.h>
+#include <cppcms/applications_pool.h>
+#include <cppcms/service.h>
+#include <cppcms/http_response.h>
+#include <cppcms/url_dispatcher.h>
 #include <iostream>
 #include "content.h"
 
 using namespace std;
-using namespace cppcms;
-
-class hello: public application {
+class hello: public cppcms::application {
 public:
-    hello(worker_thread &worker) :
-        application(worker) 
+    hello(cppcms::service &s) :
+        cppcms::application(s) 
     {
-	    url.add("^/?$",
-	    	boost::bind(&hello::info,this));
-	    use_template("view");
+	    dispatcher().assign("^/?$",&hello::info,this);
     }
+
     void info()
     {
 	    content::message c;
-	    if(env->getRequestMethod()=="POST") {
-		    c.info.load(*cgi);
+	    if(request().request_method()=="POST") {
+		    c.info.load(context());
 		    if(c.info.validate()) {
-			    c.name=c.info.name.get();
-			    c.sex=c.info.sex.get();
-			    c.state=c.info.martial.get();
-			    c.age=c.info.age.get();
-				c.info.clear();
+			c.name=c.info.name.value();
+			c.sex=c.info.sex.selected_id();
+			c.state=c.info.martial.selected_id();
+			c.age=c.info.age.value();
+			c.info.clear();
 		    }
 	    }
 	    render("message",c);
@@ -34,11 +35,13 @@ public:
 int main(int argc,char ** argv)
 {
     try {
-        manager app(argc,argv);
-        app.set_worker(new application_factory<hello>());
-        app.execute();
+        cppcms::service app(argc,argv);
+        app.applications_pool().mount(cppcms::applications_factory<hello>());
+        app.run();
     }
     catch(std::exception const &e) {
         cerr<<e.what()<<endl;
     }
 }
+
+

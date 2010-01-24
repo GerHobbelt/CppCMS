@@ -23,11 +23,11 @@ struct info_form : public cppcms::form {
 		age.message("Your Age");
 		submit.value("Send");
 		*this + name + sex + martial + age + submit;
-		sex.add("Male","m");
-		sex.add("Female","f");
-		martial.add("Single","s");
-		martial.add("Married","m");
-		martial.add("Divorced","d");
+		sex.add("Male","male");
+		sex.add("Female","female");
+		martial.add("Single","single");
+		martial.add("Married","married");
+		martial.add("Divorced","divorced");
 		name.non_empty();
 		age.range(0,120);
 	}
@@ -35,7 +35,7 @@ struct info_form : public cppcms::form {
 	{
 		if(!form::validate()) 
 			return false;
-		if(martial.selected_id()!="s" && age.value()<18) {
+		if(martial.selected_id()!="single" && age.value()<18) {
 			martial.valid(false);
 			return false;
 		}
@@ -44,7 +44,7 @@ struct info_form : public cppcms::form {
 };
 
 struct message : public cppcms::base_content {
-	std::string name,who;
+	std::string name,state,sex;
 	double age;
 	info_form info;
 };
