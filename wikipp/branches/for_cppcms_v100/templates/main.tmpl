@@ -1,7 +1,7 @@
-<% c++ #include "../data.h" %>
+<% c++ #include "../content.h" %>
 <% xhtml %>
-<% namespace view %>
-<% class master uses data::master %>
+<% skin view %>
+<% view master uses content::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
 <% template navigation() %>
 <a href="<% login_link %>"><span id="loginout"></span></a>
@@ -110,5 +110,5 @@
 </body>
 </html>
 <% end template %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>

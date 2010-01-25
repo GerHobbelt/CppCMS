@@ -20,6 +20,12 @@ page_form::page_form(wiki *_w):
 	preview("preview",w->gettext("Preview")),
 	users_only("users_only")
 {
+	title.message(_("Title"));
+	content.message(_("Content"));
+	sidebar.message(_("Sidebar"));
+	save.value(_("Save"));
+	save_cont.value(_("Save and Continue"));
+	preview.value("Preview");
 	*this & title & content & sidebar & save & save_cont & preview & users_only;
 	fields<<title<<content<<sidebar;
 	buttons<<save<<save_cont<<preview<<users_only;

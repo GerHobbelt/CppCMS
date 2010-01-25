@@ -1,25 +1,29 @@
 #include "options.h"
 #include "wiki.h"
 #include "options_content.h"
+#include <cppcms/localization.h>
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/cache_interface.h>
+
+#define _(X) ::cppcms::locale::translate(X)
 
 namespace content {
-options_form::options_form(wiki *_w):
-	w(_w),
-	users_only("uonly",w->gettext("Users Only")),
-	contact_mail("contact",w->gettext("Contact e-mail")),
-	wiki_title("wtitle",w->gettext("Wiki Title")),
-	about("about",w->gettext("About Wiki")),
-	copyright("copy",w->gettext("Copyright String")),
-	submit("submit",w->gettext("Submit"))
+options_form::options_form()
 {
-	*this & users_only & contact_mail & wiki_title & copyright & about & submit;
-	wiki_title.set_nonempty();
-	copyright.set_nonempty();
-	contact_mail.set_nonempty();
-	about.set_nonempty();
-	about.rows=10;
-	about.cols=40;
-	users_only.help=w->gettext("Disable creation of new articles by visitors");
+	users_only.message(_("Users Only"));
+	contact_mail.message(_("Contact e-mail"));
+	wiki_title.message(_("Wiki Title"));
+	about.message(_("About Wiki"));
+	copyright.message(_("Copyright String"));
+	submit.value(_("Submit"));
+	*this + users_only + contact_mail + wiki_title + copyright + about + submit;
+	wiki_title.non_empty();
+	copyright.non_empty();
+	contact_mail.non_empty();
+	about.non_empty();
+	about.rows(10);
+	about.cols(40);
+	users_only.help(_("Disable creation of new articles by visitors"));
 }
 
 } // namespace content
@@ -28,29 +32,10 @@ namespace apps {
 
 using namespace dbixx;
 
-void global_options::load(archive &a) {
-	a>>users_only_edit>>contact;
-}
-void global_options::save(archive &a) const
-{
-	a<<users_only_edit<<contact;
-}
-void locale_options::load(archive &a)
-{
-	a>>title>>about>>copyright;
-}
-void locale_options::save(archive &a) const
-{
-	a<<title<<about<<copyright;
-}
-
-
 options::options(wiki &w):
 	master(w)
 {
-	wi.url_next.add("^/options/?$",
-		boost::bind(&options::edit,this));
-	on_start.connect(boost::bind(&options::reset,this));
+	wi.dispatcher().assign("^/options/?$",&options::edit,this);
 	reset();
 }
 
@@ -73,7 +58,7 @@ void options::load()
 	local.about.clear();
 	local.title.clear();
 	local.copyright.clear();
-	if(!cache.fetch_content("global_ops",global)) {
+	if(cache().fetch_page("global_ops",global)) {
 		result res;
 		sql<<	"SELECT name,value FROM options "
 			"WHERE	lang='global' ",res;

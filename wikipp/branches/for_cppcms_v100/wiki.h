@@ -24,7 +24,7 @@ class wiki : public cppcms::application {
 public:
 	// Data 
 	dbixx::session sql;
-	std::string locale;
+	std::string locale_name;
 
 	// Applications 
 
@@ -33,7 +33,7 @@ public:
 	apps::users users;
 	apps::index index;
 
-	std::string root(string locale="");
+	std::string root(string locale_name="");
 	bool set_locale(string);
 	void run(string lang,string url);
 	virtual void on_404();

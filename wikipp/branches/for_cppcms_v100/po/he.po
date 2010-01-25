@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
-"POT-Creation-Date: 2009-01-15 23:37+0200\n"
+"POT-Creation-Date: 2010-01-25 21:05+0200\n"
 "PO-Revision-Date: 2009-01-15 23:39+0200\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
@@ -28,7 +28,7 @@ msgstr "שם משתמש"
 msgid "Password"
 msgstr "ססמה"
 
-#: users.cpp:16 main.tmpl:65
+#: users.cpp:16
 msgid "Login"
 msgstr "התחברות"
 
@@ -40,7 +40,7 @@ msgstr "אמת"
 msgid "Solve"
 msgstr "פתור"
 
-#: users.cpp:41 options.cpp:13
+#: users.cpp:41 options.cpp:15 options.cpp:22
 msgid "Submit"
 msgstr "שלח"
 
@@ -48,23 +48,23 @@ msgstr "שלח"
 msgid "This user exists"
 msgstr "המשתמש קיים"
 
-#: page.cpp:15
+#: page.cpp:15 page.cpp:23
 msgid "Title"
 msgstr "כותרת"
 
-#: page.cpp:16 page.tmpl:110
+#: page.cpp:16 page.cpp:24
 msgid "Content"
 msgstr "תוכן"
 
-#: page.cpp:17 page.tmpl:114
+#: page.cpp:17 page.cpp:25
 msgid "Sidebar"
 msgstr "סרגל־צד"
 
-#: page.cpp:18
+#: page.cpp:18 page.cpp:26
 msgid "Save"
 msgstr "שמור"
 
-#: page.cpp:19
+#: page.cpp:19 page.cpp:27
 msgid "Save and Continue"
 msgstr "שמור והמשך"
 
@@ -72,47 +72,47 @@ msgstr "שמור והמשך"
 msgid "Preview"
 msgstr "תצוגה מקדימה"
 
-#: page.cpp:26
+#: page.cpp:32
 msgid "Disable editing by visitors"
 msgstr "בטל עריכה למבקרים"
 
-#: page.cpp:27
+#: page.cpp:33
 msgid "Please Login"
 msgstr "אנא התחבר"
 
-#: master.cpp:52
+#: master.cpp:38
 msgid "LANG"
 msgstr "עברית"
 
-#: options.cpp:8
+#: options.cpp:10 options.cpp:17
 msgid "Users Only"
 msgstr "משתמשים בלבד"
 
-#: options.cpp:9
+#: options.cpp:11 options.cpp:18
 msgid "Contact e-mail"
 msgstr "דוא\"ל ליצירת־קשר"
 
-#: options.cpp:10
+#: options.cpp:12 options.cpp:19
 msgid "Wiki Title"
 msgstr "כותרת הויקי"
 
-#: options.cpp:11
+#: options.cpp:13 options.cpp:20
 msgid "About Wiki"
 msgstr "אודות ויקי"
 
-#: options.cpp:12
+#: options.cpp:14 options.cpp:21
 msgid "Copyright String"
 msgstr "זכויות היוצרים"
 
-#: options.cpp:22
+#: options.cpp:30
 msgid "Disable creation of new articles by visitors"
 msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
 
-#: options.cpp:110
+#: options.cpp:99
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
 
-#: options.cpp:113
+#: options.cpp:102
 msgid ""
 "## About\n"
 "\n"
@@ -124,174 +124,133 @@ msgstr ""
 "ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf."
 "net/)\n"
 
-#: options.cpp:118
+#: options.cpp:107
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
-#: main.tmpl:5
-msgid "Wellcome to WikiPP"
-msgstr "ברוכים הבאים ל־ויקי++"
+#~ msgid "Wellcome to WikiPP"
+#~ msgstr "ברוכים הבאים ל־ויקי++"
 
-#: main.tmpl:9
-msgid " Users Area"
-msgstr "אזור משתמשים"
+#~ msgid " Users Area"
+#~ msgstr "אזור משתמשים"
 
-#: main.tmpl:14
-msgid "Navigation"
-msgstr "ניווט"
+#~ msgid "Navigation"
+#~ msgstr "ניווט"
 
-#: main.tmpl:16
-msgid "Index"
-msgstr "אינדקס"
+#~ msgid "Index"
+#~ msgstr "אינדקס"
 
-#: main.tmpl:17
-msgid "Changes"
-msgstr "שינויים"
+#~ msgid "Changes"
+#~ msgstr "שינויים"
 
-#: main.tmpl:20
-msgid "Main Page"
-msgstr "עמוד ראשי"
+#~ msgid "Main Page"
+#~ msgstr "עמוד ראשי"
 
-#: main.tmpl:42
-msgid "LTR"
-msgstr "RTL"
+#~ msgid "LTR"
+#~ msgstr "RTL"
 
-#: main.tmpl:68
-msgid "Logout "
-msgstr "יציאה"
+#~ msgid "Logout "
+#~ msgstr "יציאה"
 
-#: main.tmpl:78
-msgid "Main"
-msgstr "ראשי"
+#~ msgid "Main"
+#~ msgstr "ראשי"
 
-#: main.tmpl:90
-msgid "Valid CSS"
-msgstr "‏css תקני"
+#~ msgid "Valid CSS"
+#~ msgstr "‏css תקני"
 
-#: main.tmpl:91
-msgid "Valid XHTML 1.0"
-msgstr "‏XHTML 1.0 תקני"
+#~ msgid "Valid XHTML 1.0"
+#~ msgstr "‏XHTML 1.0 תקני"
 
-#: main.tmpl:96
-msgid ""
-"Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
-"Designs</a>"
-msgstr ""
-"התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
-"Designs</a>"
+#~ msgid ""
+#~ "Template design based on <a href=\"http://ContentedDesigns.com"
+#~ "\">Contented Designs</a>"
+#~ msgstr ""
+#~ "התבנית מבוססת על עיצוב <a href=\"http://ContentedDesigns.com\">Contented "
+#~ "Designs</a>"
 
-#: main.tmpl:99
-msgid "Contact"
-msgstr "צור קשר"
+#~ msgid "Contact"
+#~ msgstr "צור קשר"
 
-#: page.tmpl:14 page.tmpl:26
-msgid "Edit"
-msgstr "עריכה"
+#~ msgid "Edit"
+#~ msgstr "עריכה"
 
-#: page.tmpl:16 page.tmpl:31
-msgid "History"
-msgstr "היסטוריה"
+#~ msgid "History"
+#~ msgstr "היסטוריה"
 
-#: page.tmpl:26
-msgid "New Article"
-msgstr "מאמר חדש"
+#~ msgid "New Article"
+#~ msgstr "מאמר חדש"
 
-#: page.tmpl:29 hist.tmpl:5
-msgid "Back to page"
-msgstr "חזרה מאמר"
+#~ msgid "Back to page"
+#~ msgstr "חזרה מאמר"
 
-#: page.tmpl:67
-msgid "Edit this version (rollback)"
-msgstr "ערוך גרסה זו (שחזור)"
+#~ msgid "Edit this version (rollback)"
+#~ msgstr "ערוך גרסה זו (שחזור)"
 
-#: page.tmpl:72
-msgid "(version %1%, from %2%)"
-msgstr "(גרסה %1%, ב־%2%)"
+#~ msgid "(version %1%, from %2%)"
+#~ msgstr "(גרסה %1%, ב־%2%)"
 
-#: page.tmpl:77
-msgid "Difference \"%1%\" ver. %2% versus ver. %3%"
-msgstr "השוואה של \"%1%\", גרסה %2%, גרסה %3%"
+#~ msgid "Difference \"%1%\" ver. %2% versus ver. %3%"
+#~ msgstr "השוואה של \"%1%\", גרסה %2%, גרסה %3%"
 
-#: page.tmpl:79 page.tmpl:81
-msgid "Edit version %1%"
-msgstr "ערוך גרסה %1%"
+#~ msgid "Edit version %1%"
+#~ msgstr "ערוך גרסה %1%"
 
-#: page.tmpl:98
-msgid "No such page or version exist"
-msgstr "עמוד או גרסאות כאלה לא קיימים"
+#~ msgid "No such page or version exist"
+#~ msgstr "עמוד או גרסאות כאלה לא קיימים"
 
-#: page.tmpl:100
-msgid "No difference between these versions"
-msgstr "אין הבדל בין הגרסאות"
+#~ msgid "No difference between these versions"
+#~ msgstr "אין הבדל בין הגרסאות"
 
-#: page.tmpl:103
-msgid "Titles"
-msgstr "כותרות"
+#~ msgid "Titles"
+#~ msgstr "כותרות"
 
-#: page.tmpl:105
-msgid "Version %1%"
-msgstr "גרסה %1"
+#~ msgid "Version %1%"
+#~ msgstr "גרסה %1"
 
-#: hist.tmpl:3
-msgid "WikiPP :: History"
-msgstr "ויקי++ :: היסטוריה"
+#~ msgid "WikiPP :: History"
+#~ msgstr "ויקי++ :: היסטוריה"
 
-#: hist.tmpl:14
-msgid "Version %1%, changed at %2%, by %3%"
-msgstr "גרסה %1%, עודכנה ב־%2% ע\"י %3%"
+#~ msgid "Version %1%, changed at %2%, by %3%"
+#~ msgstr "גרסה %1%, עודכנה ב־%2% ע\"י %3%"
 
-#: hist.tmpl:15
-msgid "Show"
-msgstr "הצג"
+#~ msgid "Show"
+#~ msgstr "הצג"
 
-#: hist.tmpl:16
-msgid "Edit (rollback)"
-msgstr "עריכה (שחזור)"
+#~ msgid "Edit (rollback)"
+#~ msgstr "עריכה (שחזור)"
 
-#: hist.tmpl:17 toc.tmpl:38
-msgid "Diff to previous"
-msgstr "השוואה עם גרסה קודמת"
+#~ msgid "Diff to previous"
+#~ msgstr "השוואה עם גרסה קודמת"
 
-#: hist.tmpl:23
-msgid "History is empty"
-msgstr "היסטוריה ריקה"
+#~ msgid "History is empty"
+#~ msgstr "היסטוריה ריקה"
 
-#: hist.tmpl:25
-msgid "Next page"
-msgstr "עמוד הבא"
+#~ msgid "Next page"
+#~ msgstr "עמוד הבא"
 
-#: admin.tmpl:3
-msgid "WikiPP :: Login"
-msgstr "ויקי++ :: כניסה"
+#~ msgid "WikiPP :: Login"
+#~ msgstr "ויקי++ :: כניסה"
 
-#: admin.tmpl:11
-msgid "Register as new user"
-msgstr "הרשם כמשתמש חדש"
+#~ msgid "Register as new user"
+#~ msgstr "הרשם כמשתמש חדש"
 
-#: admin.tmpl:16
-msgid "WikiPP :: Register"
-msgstr "ויקי :: הרשמה"
+#~ msgid "WikiPP :: Register"
+#~ msgstr "ויקי :: הרשמה"
 
-#: admin.tmpl:37
-msgid "WikiPP :: Edit Options"
-msgstr "ויקי :: עריכת הגדרות"
+#~ msgid "WikiPP :: Edit Options"
+#~ msgstr "ויקי :: עריכת הגדרות"
 
-#: toc.tmpl:4
-msgid "Index of Articles"
-msgstr "אינדקס מאמרים"
+#~ msgid "Index of Articles"
+#~ msgstr "אינדקס מאמרים"
 
-#: toc.tmpl:31
-msgid "Recent Changes"
-msgstr "שינויים אחרונים"
+#~ msgid "Recent Changes"
+#~ msgstr "שינויים אחרונים"
 
-#: toc.tmpl:37
-msgid "version %1%, at %2%, by %3%"
-msgstr "גרסה %1%, ב־%2%, ע\"י %3%"
+#~ msgid "version %1%, at %2%, by %3%"
+#~ msgstr "גרסה %1%, ב־%2%, ע\"י %3%"
 
-#: toc.tmpl:43
-msgid "Next Page"
-msgstr "עמוד הבא"
+#~ msgid "Next Page"
+#~ msgstr "עמוד הבא"
 
-#: toc.tmpl:45
-msgid "No more changes"
-msgstr "אין יותר שינויים"
+#~ msgid "No more changes"
+#~ msgstr "אין יותר שינויים"

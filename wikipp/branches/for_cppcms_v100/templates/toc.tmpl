@@ -1,8 +1,8 @@
-<% c++ #include "../data.h" %>
-<% namespace view %>
-<% class toc uses data::toc extends master %>
+<% c++ #include "../content.h" %>
+<% skin view %>
+<% view toc uses content::toc extends master %>
 <% template title() %><% gt "Index of Articles" %><% end %>
-<% template column(data::toc::column_t &col) %>
+<% template column(content::toc::column_t &col) %>
 <% foreach row in col %>
 <td>
 	<dl>
@@ -26,15 +26,15 @@
 </tr>
 </table>
 <% end template %>
-<% end class %>
-<% class recent_changes uses data::recent_changes extends master %>
+<% end view %>
+<% view recent_changes uses content::recent_changes extends master %>
 <% template title() %><% gt "Recent Changes" %><% end %>
 <% template main() %>
-<% foreach c in data %>
+<% foreach c in content %>
 	<ul>
 	<% item %>
 	<li><a href="<% c.url %>"><% c.title %></a> &mdash; 
-		<% gt "version %1%, at %2%, by %3%" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
+		<% gt "version {1}, at {2,date=s}, by {3}" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
 			<a href="<% c.diff_url %>"><% gt "Diff to previous" %></a><% end %>
 
 	</li>
@@ -45,5 +45,5 @@
 <h2><% gt "No more changes" %></h2>
 <% end %>
 <% end template %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>

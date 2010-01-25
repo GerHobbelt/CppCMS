@@ -13,59 +13,37 @@ wiki::wiki(worker_thread &w) :
 	page(*this),
 	options(*this),
 	users(*this),
-	index(*this)
+	index(*this),
+	lang_regex("^/(\\w+)(/.*)?$");
 {
-	dbixx_load(sql);
-	
-	script=app.config.sval("wikipp.script");
-
-	url.add("^/(\\w+)(/.*)$",
-		boost::bind(&wiki::run,this,_1,_2));
-		
-	use_template("view");
-
+//	dbixx_load(sql);
+	script=settings().get<std::string>("wikipp.script");
 }
 
 string wiki::root(string l)
 {
-	if(l.empty()) l=locale;
+	if(l.empty()) l=locale_name;
 	return script+"/"+l;
 }
 
-bool wiki::set_locale(string lang)
+void wiki::main(std::string url)
 {
-	if(lang!="en") {
-		vector<string> const &lst=app.config.slist("locale.lang_list");
-		vector<string>::const_iterator p,e;
-		for(p=lst.begin(),e=lst.end();p!=e;++p) {
-			if(lang==*p) {
-				break;
-			}
+	cppcms::regex_result res;
+	options.reset();
+	if(lang_regex.match(url,res)) {
+		std::string loc = settings().get("wikipp.languages." + res[1],"");
+		if(loc.empty()) {
+			page.redirect();
 		}
-		if(p==e) {
-			return false;
+		else {
+			locale_name = res[1];
+			locale(loc);
+			if(!dispatcher().dispatch(res[2]))
+				page.redirect(locale_name);
 		}
 	}
-	locale=lang;
-	set_lang(lang);
-	return true;
-}
-
-void wiki::on_404()
-{
 	page.redirect();
 }
 
-void wiki::run(string l,string u)
-{
-	if(!set_locale(l)) {
-		on_404();
-		return;
-	}
-	if(url_next.parse(u)<0) {
-		page.redirect(l);
-	}
 
-}
-
-}
+} // apps

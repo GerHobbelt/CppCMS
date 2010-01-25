@@ -1,5 +1,5 @@
-<% namespace view %>
-<% class page uses data::page extends master %>
+<% skin view %>
+<% view page uses content::page extends master %>
 <% template sidebar() %>
 	<% if not empty sidebar %>
 	<hr/>
@@ -21,8 +21,8 @@
 <% template main() %>
 <% content | ext markdown %>
 <% end %>
-<% end class %>
-<% class edit_page uses data::edit_page extends page %>
+<% end view %>
+<% view edit_page uses content::edit_page extends page %>
 <% template title() %><% if new_page %><% gt "New Article" %><% else %><% gt "Edit" %><% if not empty title %>:<% title %><% end %><% end %><% end %>
 <% template navigation() %>
 <% if not empty edit_link %>
@@ -58,8 +58,8 @@
 	-->
 	</script>
 <% end template %>
-<% end class %>
-<% class page_hist uses data::page_hist extends page %>
+<% end view %>
+<% view page_hist uses content::page_hist extends page %>
 <% template title() %>
 <% include page::title() %> 
 <% end template %>
@@ -69,24 +69,24 @@
 	<% include page::navigation() %>
 <% end template %>
 <% template main() %>
-<div class="published"><% gt "(version %1%, from %2%)" using version, date %></div>
+<div view="published"><% gt "(version {1}, from {2,date=s})" using version, date %></div>
 <% include page::main() %>
 <% end template %>
-<% end class %>
-<% class diff uses data::diff extends master %>
-<% template title() %><% gt "Difference \"%1%\" ver. %2% versus ver. %3%" using title,v1,v2 %><% end template %>
+<% end view %>
+<% view diff uses content::diff extends master %>
+<% template title() %><% gt "Difference \"{1}\" ver. {2} versus ver. {3}" using title,v1,v2 %><% end template %>
 <% template navigation() %>
-	<a href="<% edit_v1 %>"><% gt "Edit version %1%" using v1 %></a>
+	<a href="<% edit_v1 %>"><% gt "Edit version {1}" using v1 %></a>
 	&nbsp;/&nbsp;
-	<a href="<% edit_v2 %>"><% gt "Edit version %1%" using v2 %></a>
+	<a href="<% edit_v2 %>"><% gt "Edit version {1}" using v2 %></a>
 	&nbsp;/&nbsp;
 	<% include master::navigation() %>
 <% end template %>
-<% template show_diff(data::diff_t &data) %>
+<% template show_diff(content::diff_t &content) %>
 <table style="width:100%" >
-	<% foreach r in data %>
+	<% foreach r in content %>
 	<% item %>
-	<tr class="<% if (r.first<0) %>d_del<% elif (r.first>0) %>d_add<% else %>d_no<% end %>" >
+	<tr view="<% if (r.first<0) %>d_del<% elif (r.first>0) %>d_add<% else %>d_no<% end %>" >
 		<td><code><% r.second %></code></td>
 	</tr>
 	<% end %>
@@ -102,20 +102,20 @@
 	<% if title_diff %>
 	<h2><% gt "Titles" %>:</h2>
 	<table style="width:100%">
-	<tr><th><% gt "Version %1%" using v1 %></th><th><% gt "Version %1%" using v2 %></th>
+	<tr><th><% gt "Version {1}" using v1 %></th><th><% gt "Version {1}" using v2 %></th>
 	<tr><td><% title_1 %></td><td><% title_2 %></td></tr>
 	</table>
 	<% end %>
 	<% if content_diff %>
 		<h2><% gt "Content" %>:</h2>
-		<% include show_diff(content_diff_data) %>
+		<% include show_diff(content_diff_content) %>
 	<% end %>
 	<% if sidebar_diff %>
 		<h2><% gt "Sidebar" %>:</h2>
-		<% include show_diff(sidebar_diff_data) %>
+		<% include show_diff(sidebar_diff_content) %>
 	<% end %>
 	</table>
 <% end %>
 <% end template %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>

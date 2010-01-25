@@ -1,5 +1,5 @@
-<% namespace view %>
-<% class history uses data::history extends master %>
+<% skin view %>
+<% view history uses content::history extends master %>
 <% template title() %><% gt "WikiPP :: History" %> :: <% title %><% end %>
 <% template navigation() %>
 <a href="<% page_link %>"><% gt "Back to page" %></a>
@@ -11,7 +11,7 @@
 	<ul>
 	<% item %>
 	<li>
-		<% gt "Version %1%, changed at %2%, by %3%" using row.version, row.update, row.author %>,
+		<% gt "Version {1,num}, changed at {2,date=s}, by {3}" using row.version, row.update, row.author %>,
 		<a href="<% row.show_url %>"><% gt "Show" %></a>,
 		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a><% if not empty row.diff_url %>, 
 			<a href="<% row.diff_url %>"><% gt "Diff to previous" %></a>
@@ -24,5 +24,5 @@
 <% end %>
 <% if not empty page %><p><a href="<% page %>"><% gt "Next page" %></a></p><% end %>
 <% end template %>
-<% end class %>
-<% end namespace %>
+<% end view %>
+<% end skin %>

@@ -31,7 +31,7 @@ string index::changes_url(int p)
 
 void index::changes(string page_no)
 {
-	string key=locale+"_changes_"+page_no;
+	string key=locale_name+"_changes_"+page_no;
 	if(cache().fetch_page(key))
 		return;
 	int p;
@@ -72,7 +72,7 @@ void index::changes(string page_no)
 
 void index::display_index()
 {
-	string key=locale+"_toc_index";
+	string key=locale_name+"_toc_index";
 	if(cache().fetch_page(key))
 		return;
 	content::toc c;
@@ -80,7 +80,7 @@ void index::display_index()
 	result res;
 	sql<<	"SELECT slug,title FROM pages "
 		"WHERE lang=? "
-		"ORDER BY title ASC",locale,res;
+		"ORDER BY title ASC",locale_name,res;
 	unsigned items=res.rows();
 	unsigned items_left=items/3;
 	unsigned items_mid=items*2/3;
@@ -110,7 +110,7 @@ void index::display_index()
 			}
 			content::toc::element e;
 			e.title=t;
-			e.url=wi.page.page_url(locale,slug);
+			e.url=wi.page.page_url(locale_name,slug);
 			v->push_back(e);
 		}
 	}

@@ -1,14 +1,13 @@
-#include <cppcms/manager.h>
+#include <cppcms/service.h>
+#include <cppcms/applications_pool.h>
 #include "wiki.h"
 
-using namespace cppcms;
-
-int main(int argc,char ** argv)
+int main(int argc,char **argv)
 {
 	try {
-		manager app(argc,argv);
-		app.set_worker(new application_factory<apps::wiki>());
-		app.execute();
+		cppcms::service app(argc,argv);
+		app.applications_pool().mount(cppcms::applications_factory<apps::wiki>());
+		app.run();
 	}
 	catch(std::exception const &e) {
 		cerr<<e.what()<<endl;

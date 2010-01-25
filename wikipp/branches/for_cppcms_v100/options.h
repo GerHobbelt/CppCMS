@@ -6,6 +6,7 @@
 namespace apps {
 class wiki;
 using namespace cppcms;
+using namespace std;
 
 struct global_options {
 	int users_only_edit;

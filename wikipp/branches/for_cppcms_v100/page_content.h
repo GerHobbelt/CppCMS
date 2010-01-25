@@ -16,8 +16,8 @@ struct page_form : public form {
 	widgets::submit save_cont;
 	widgets::submit preview;
 	widgets::checkbox users_only;
-	widgetset fields;
-	widgetset buttons;
+	form fields;
+	form buttons;
 	page_form(wiki *w);
 	bool virtual validate();
 };

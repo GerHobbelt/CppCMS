@@ -1,6 +1,6 @@
 #ifndef MASTER_DATA_H
 #define MASTER_DATA_H
-#include <cppcms/base_view.h>
+#include <cppcms/view.h>
 #include <cppcms/form.h>
 #include <string>
 
