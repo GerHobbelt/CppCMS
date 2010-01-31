@@ -180,8 +180,8 @@ namespace boost {
                                 b!=e
                           )
                         {
-                            char const *begin = &*b;
-                            char const *end = begin + (e-b);
+                            char_type const *begin = &*b;
+                            char_type const *end = begin + (e-b);
                             impl::index_type tmp=impl::map(t,begin,end,l);
                             result.swap(tmp);
                         }
