@@ -16,6 +16,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <typeinfo>
 
 namespace boost {
     namespace locale {
