@@ -93,7 +93,8 @@ namespace boost {
                         icu::Collator::PRIMARY,
                         icu::Collator::SECONDARY,
                         icu::Collator::TERTIARY,
-                        icu::Collator::QUATERNARY
+                        icu::Collator::QUATERNARY,
+                        icu::Collator::IDENTICAL
                     };
                     
                     for(int i=0;i<level_count;i++) {
@@ -110,7 +111,7 @@ namespace boost {
                 }
 
             private:
-                static const int level_count = 4;
+                static const int level_count = 5;
                 icu_std_converter<CharType>  cvt_;
                 boost::shared_ptr<icu::Collator> collates_[level_count];
             };

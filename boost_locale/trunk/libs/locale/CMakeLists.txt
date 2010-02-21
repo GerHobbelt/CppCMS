@@ -71,7 +71,7 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale")
 
 
-set(LOCALE_TESTS test)
+set(LOCALE_TESTS test_collate)
 set(LOCALE_EXAMPLES 	hello
 			whello
 			boundary
@@ -81,7 +81,7 @@ set(LOCALE_EXAMPLES 	hello
 			collate)
 
 foreach(TEST_TAR ${LOCALE_TESTS})
-	add_executable(${TEST_TAR} src/${TEST_TAR}.cpp)
+	add_executable(${TEST_TAR} test/${TEST_TAR}.cpp)
 	target_link_libraries(${TEST_TAR} ${BOOST_LOCALE_LIB})
 endforeach(TEST_TAR)
 

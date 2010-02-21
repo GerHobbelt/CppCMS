@@ -26,10 +26,11 @@ namespace locale {
         /// Unicode collation level types
         ///
         typedef enum {
-            primary     = 0,
-            secondary   = 1,
-            tertiary    = 2,
-            quaternary  = 3
+            primary     = 0, ///!< 1st collation level: base letters
+            secondary   = 1, ///!< 2nd collation level: letters and accents
+            tertiary    = 2, ///!< 3rd collation level: letters, accents and case
+            quaternary  = 3, ///!< 4th collation level: letters, accents, case and punctuation
+            identical   = 4  ///!< identical collation level: include code-point comparison
         } level_type;
     };
     
@@ -87,7 +88,7 @@ namespace locale {
 
         long hash(level_type level,string_type const &s) const
         {
-            return do_compare(level,s.data(),s.data()+s.size());
+            return do_hash(level,s.data(),s.data()+s.size());
         }
         ///
         /// Create a binary string that can be compared to other, usefull for collation of multiple
