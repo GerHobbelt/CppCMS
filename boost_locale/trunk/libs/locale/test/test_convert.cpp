@@ -17,13 +17,13 @@ void test_norm(std::string orig,std::string normal,boost::locale::norm_type type
 {
 	test_normc<char>(orig,normal,type);
 	#ifndef BOOST_NO_STD_WSTRING
-	test_normc<wchar_t>(to<wchar_t>(orig),to<wchar_t)(normal),type);
+	test_normc<wchar_t>(to<wchar_t>(orig),to<wchar_t>(normal),type);
 	#endif
 	#ifdef BOOST_HAS_CHAR16_T
-	test_normc<char16_t>(to<char16_t>(orig),to<char16_t)(normal),type);
+	test_normc<char16_t>(to<char16_t>(orig),to<char16_t>(normal),type);
 	#endif
 	#ifdef BOOST_HAS_CHAR32_T
-	test_normc<char32_t>(to<char32_t>(orig),to<char32_t)(normal),type);
+	test_normc<char32_t>(to<char32_t>(orig),to<char32_t>(normal),type);
 	#endif
 }
 

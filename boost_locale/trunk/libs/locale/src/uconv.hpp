@@ -19,6 +19,11 @@ namespace boost {
 namespace locale {
 namespace impl {
 
+    typedef enum {
+        cvt_skip,
+        cvt_stop
+    } cpcvt_type;
+
        
     template<typename CharType,int char_size = sizeof(CharType) >
     class icu_std_converter {
@@ -26,7 +31,7 @@ namespace impl {
         typedef CharType char_type;
         typedef std::basic_string<char_type> string_type;
 
-        icu_std_converter(std::string charset);         
+        icu_std_converter(std::string charset,cpcvt_type cv=cvt_skip);         
         icu::UnicodeString icu(char_type const *begin,char_type const *end) const;
         string_type std(icu::UnicodeString const &str) const;
         size_t cut(icu::UnicodeString const &str,char_type const *begin,char_type const *end,size_t n,size_t from_u=0,size_t from_c=0) const;
@@ -43,19 +48,24 @@ namespace impl {
         {
             char const *begin=reinterpret_cast<char const *>(vb);
             char const *end=reinterpret_cast<char const *>(ve);
-            icu::UnicodeString tmp(begin,end-begin,charset_.c_str());
+            uconv cvt(charset_,cvt_type_);
+            UErrorCode err=U_ZERO_ERROR;
+            icu::UnicodeString tmp(begin,end-begin,cvt.cvt(),err);
+            check_and_throw_icu_error(err);
             return tmp;
         }
         
         string_type std(icu::UnicodeString const &str) const
         {
-            uconv cvt(charset_);
+            uconv cvt(charset_,cvt_type_);
             return cvt.go(str.getBuffer(),str.length(),max_len_);
         }
 
-        icu_std_converter(std::string charset) : charset_(charset)
+        icu_std_converter(std::string charset,cpcvt_type cvt_type = cvt_skip) : 
+            charset_(charset),
+            cvt_type_(cvt_type)
         {
-            uconv cvt(charset_);
+            uconv cvt(charset_,cvt_type);
             max_len_=cvt.max_char_size();
         }
 
@@ -63,19 +73,38 @@ namespace impl {
                         size_t n,size_t from_u=0,size_t from_char=0) const
         {
             size_t code_points = str.countChar32(from_u,n);
-            uconv cvt(charset_);
+            uconv cvt(charset_,cvt_type_);
             return cvt.cut(code_points,begin+from_char,end);
         }
 
         struct uconv : public boost::noncopyable {
         public:
-            uconv(std::string const &charset) 
+            uconv(std::string const &charset,cpcvt_type cvt_type=cvt_skip) 
             {
-                utf8_ = ucnv_compareNames(charset.c_str(),"UTF8") == 0;
                 UErrorCode err=U_ZERO_ERROR;
                 cvt_ = ucnv_open(charset.c_str(),&err);
                 if(!cvt_)
                     throw_icu_error(err);
+                
+                try {
+                    if(cvt_type==cvt_skip) {
+                        ucnv_setFromUCallBack(cvt_,UCNV_FROM_U_CALLBACK_SKIP,0,0,0,&err);
+                        check_and_throw_icu_error(err);
+                
+                        err=U_ZERO_ERROR;
+                        ucnv_setToUCallBack(cvt_,UCNV_TO_U_CALLBACK_SKIP,0,0,0,&err);
+                        check_and_throw_icu_error(err);
+                    }
+                    else {
+                        ucnv_setFromUCallBack(cvt_,UCNV_FROM_U_CALLBACK_STOP,0,0,0,&err);
+                        check_and_throw_icu_error(err);
+                
+                        err=U_ZERO_ERROR;
+                        ucnv_setToUCallBack(cvt_,UCNV_TO_U_CALLBACK_STOP,0,0,0,&err);
+                        check_and_throw_icu_error(err);
+                    }
+                }
+                catch(...) { ucnv_close(cvt_) ; throw; }
             }
 
             int max_char_size()
@@ -97,16 +126,6 @@ namespace impl {
 
             size_t cut(size_t n,char_type const *begin,char_type const *end)
             {
-                if(utf8_) {
-                    size_t res = 0;
-                    while( n > 0) {
-                        UChar32 uc;
-                        U8_NEXT_UNSAFE(begin,res,uc);
-                        n--;
-                    }
-                    return res;
-                }
-
                 char_type const *saved = begin;
                 while(n > 0 && begin < end) {
                     UErrorCode err=U_ZERO_ERROR;
@@ -118,19 +137,21 @@ namespace impl {
                 return begin - saved;
             }
 
+            UConverter *cvt() { return cvt_; }
+
             ~uconv()
             {
                 ucnv_close(cvt_);
             }
                 
         private:
-            bool utf8_; 
             UConverter *cvt_;
         };
 
     private:
         int max_len_;
         std::string charset_;
+        cpcvt_type cvt_type_;
     };
    
     template<typename CharType>

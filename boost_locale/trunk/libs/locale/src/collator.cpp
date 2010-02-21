@@ -55,28 +55,18 @@ namespace boost {
                 std::basic_string<CharType> do_transform(level_type level,CharType const *b,CharType const *e) const
                 {
                     icu::UnicodeString str=cvt_.icu(b,e);
-                    std::vector<char> tmp;
+                    std::vector<uint8_t> tmp;
                     tmp.resize(str.length());
                     boost::shared_ptr<icu::Collator> collate=collates_[limit(level)];
-                    int len = collate->getSortKey(str,reinterpret_cast<uint8_t *>(&tmp[0]),tmp.size());
+                    int len = collate->getSortKey(str,&tmp[0],tmp.size());
                     if(len > int(tmp.size())) {
                         tmp.resize(len);
-                        collate->getSortKey(str,reinterpret_cast<uint8_t *>(&tmp[0]),tmp.size());
+                        collate->getSortKey(str,&tmp[0],tmp.size());
                     }
                     else 
                         tmp.resize(len);
 
-                    if( std::numeric_limits<CharType>::min() == std::numeric_limits<char>::min() // Both unsigned or same
-                        || (std::numeric_limits<CharType>::min() < 0 && std::numeric_limits<char>::min() < 0)) // both signed
-                    {
-                        return std::basic_string<CharType>(tmp.begin(),tmp.end());
-                    }
-                    else {
-                        std::basic_string<CharType> out(tmp.size(),0);
-                        for(unsigned i=0;i<tmp.size();i++)
-                            out[i]=tmp[i]+128;
-                        return out;
-                    }
+                    return std::basic_string<CharType>(tmp.begin(),tmp.end());
                 }
                 
                 long do_hash(level_type level,CharType const *b,CharType const *e) const

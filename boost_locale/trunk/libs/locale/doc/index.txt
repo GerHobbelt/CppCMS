@@ -1006,3 +1006,73 @@ There are several reasons:
         date or both date and time.
 
 Thus, at this point, `ptime` is not supported for formatting localized date and time.
+
+# Appendix
+
+## Glossary
+
+-   **Basic Multilingual Plane (BMP)** -- a part of _Universal Character Set_ with code points in range of U-0000--U-FFFF. Most daily
+    used UCS characters lay in this plane including all Western, Cyrillic, Hebrew, Thai, Arabic and CJK encodings. However there are many
+    characters that lay outside of BMP and their support absolutely required for correct support of East Asian languages.
+-   **Code Point** -- a unique number that represents a "character" in Universal Character Set. Code points lay in range of 0-0x10FFFF. Usually
+    displayed as U+XXXX or U+XXXXXX where X ins hexadecimal digit.
+-   **Collation** -- a definition of sorting order of text, usually alphabetical. It differs for various languages and countries even for same
+    characters.
+-   **Encoding** -- a representation of character set. Some encodings are capable of representing full UCS like UTF-8 and some represent
+    only its subset -- ISO-8859-8 represents only small subset of about 250 characters of UCS.
+    
+    Non-Unicode encodings are still very popular, for example Latin-1 (Or ISO-8859-1) encoding covers most of characters for representation
+    of Western European languages and significantly simplifies processing of text for application designed to handle such languages only.
+    
+    In Boost.Locale you should provide an octets (`std::sting`) encoding as a part of Locale code name, for example `en_US.UTF-8` or `he_IL.cp1255`.
+    
+    `UTF-8` is recommended one.
+-   **Facet** -- or `std::locale::facet` -- a base class that every object that describes specific locale is derived from it. Facets can be
+    added to locale to provide additional culture information.
+-   **Formatting** -- representation of various value according to locale preferences. For example number 1234.5 (C) should be displayed as
+    1,234.5 in US locale and 1.234,5 in Russian locale. Date November 1st, 2005 would be represented as 11/01/2005 in United states, and
+    01.11.2005 in Russia. This is important part of localization, allowing to represent various values correctly.
+    
+    For example: does "You have to bring 134,230 kg of rise at 04/01/2010" means "134 tons of rise in 1 in April" or "134 kg 230 g of rise at 
+    January 4th". That is quite different.
+-   **Gettext** -- GNU localization library used for message formatting. Today it is de-facto standard localization library in Open Source
+    world. Boost.Locale message formatting is totally build on Gettext message catalogs.
+-   **Locale** -- a set of parameters that define specific preferences for users in different cultures. It is generally defined by language,
+    country, variants, encoding and provide information like: collation order, date-time formatting, message, formatting, number formatting
+    and many others. `std::locale` class is used in `C++` for representation of _Locale_ information.
+-   **Message Formatting** -- representation of UI in the users language. Generally process of translation of UI strings is done 
+    using some dictionary provided by program's translator.
+-   **Message Domain** -- in _gettext_ therms the keyword that represents message catalog. Usually this is an application name. When _gettext_
+    and Boost.Locale search for specific message catalog it search in the specified path for file named after domain.
+-   **Normalization** -- Unicode normalization is a process of converting strings to standard form suitable for text processing and comparison.
+    For example, character "ü" can be represented using single code point or a combination of character "u" and diaeresis "¨". Normalization
+    is important part of Unicode text processing.
+    
+    Normalization is not locale dependent but, because it is important part of Unicode processing it is included in Boost.Locale library.
+-   **UCS-2** -- fixed width Unicode encoding which is capable of representing code points in _Basic Multilingual Plane (BMP)_ only.
+    It is legacy encoding and not recommended for use.
+-   **Unicode** -- industry standard that defines representation and manipulation of text suitable for most languages and countries. 
+    It should not be mixed with _Universal Character Set_, it is much wider standard that also defines algorithms like bidirectional
+    display order, Arabic shaping, etc..
+-   **Universal Character Set (UCS)** -- international standard that defines a set of characters for many scripts and their _code points_.
+-   **UTF-8** -- variable width Unicode transformation format. Each UCS code point is represented as a sequence of 1 to 4 octets,
+    that can be easily distinguished. It includes ASCII as subset. It is most popular Unicode encoding for web applications, data transfer
+    and storage, it is de-facto standard encoding for most POSIX operation systems.
+-   **UTF-16** -- variable width Unicode transformation format. Each UCS code point is represented as sequence of one or two 16-bit words.
+    It is very popular encoding for various platforms Win32 API, Java, C#, Python, etc. However, it is frequently misinterpreted with _UCS-2_
+    fixed width limited encoding which is suitable for representation of characters in _Basic Multilingual Plane (BMP)_ only.
+    
+    This encoding is used for `std::wstring` under Win32 platform, where `sizeof(wchar_t)==2`.
+-   **UTF-32/UCS-4** - fixed width Unicode transformation format, where each code point is represented as single 32-bit word. It has
+    advantage of simplicity of code points representation but quite wasteful in terms of memory usage. It is used for `std::wstring` encoding
+    for most POSIX platforms where `sizeof(wchar_t)==4`.
+
+
+## Introduction to standard STL localization 
+
+STL provides a wide range of localization facilities built-in. It is good to know and understand how to 
+use them before starting with Boost.Locale library.
+
+### Locale
+
+Locale is represented with `std::locale` class.
