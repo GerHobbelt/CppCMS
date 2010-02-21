@@ -175,7 +175,7 @@ namespace boost {
                 }
             }
             if(d->cats & codepage_facet) {
-                result=std::locale(result,code_converter<CharType>::create(inf));
+                result=std::locale(result,create_codecvt<CharType>(inf));
             }
             return result;
         }

@@ -181,7 +181,7 @@ namespace impl {
             return n;
         }
         
-        icu_std_converter(std::string charset) {}
+        icu_std_converter(std::string charset,cpcvt_type unused=cvt_skip) {}
 
     };
     
@@ -233,7 +233,7 @@ namespace impl {
             return str.countChar32(from_u,n);
         }
 
-        icu_std_converter(std::string charset) {}
+        icu_std_converter(std::string charset,cpcvt_type unused=cvt_skip) {}
 
     };
 } /// impl

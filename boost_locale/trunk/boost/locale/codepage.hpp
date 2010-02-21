@@ -15,322 +15,29 @@
 
 namespace boost {
     namespace locale {
-        namespace details {
-            class BOOST_LOCALE_DECL converter {
-            public:
 
-                static const uint32_t illegal=0xFFFFFFFF;
-                static const uint32_t incomplete=0xFFFFFFFE;
-                
-                // encoding
-                converter(std::string const &encoding);
-                ~converter();
-
-                int max_len();
-
-                uint32_t to_unicode(char const *&begin,char const *end);
-                uint32_t from_unicode(uint32_t u,char *begin,char const *end);
-            private:
-
-                //
-                // Non Copyable
-                //
-                converter(converter const &);
-                void operator=(converter const &);
-
-                uint32_t from_charset(char const *&begin,char const *end);
-                uint32_t to_charset(uint32_t u,char *begin,char const *end);
-
-                uint32_t to_utf8(uint32_t u,char *begin,char const *end);
-                uint32_t from_utf8(char const *&begin,char const *end);
-
-                // Private data members
-                bool is_utf8_;
-                int max_len_;
-                struct data;
-                std::auto_ptr<data> d;
-            };
-
-            template<typename CharType,int n=sizeof(CharType)>
-            struct uchar_traits;
-
-            template<typename CharType>
-            struct uchar_traits<CharType,2> {
-                typedef uint16_t uint_type;
-            };
-            template<typename CharType>
-            struct uchar_traits<CharType,4> {
-                typedef uint32_t uint_type;
-            };
-
-        } // details
-
-        
-        ///
-        /// \brief this class reimplements standard C++ codecvt facet. It is rarely used directly however it can be
-        /// useful for code page conversions
-        ///
         template<typename CharType>
-        class code_converter : public std::codecvt<CharType,char,mbstate_t> 
-        {
-        public:
-            static std::codecvt<CharType,char,mbstate_t> *create(info const &inf)
-            {
-                return new code_converter<CharType>(inf);
-            }
-        protected:
-            typedef CharType uchar;
-            code_converter(info const &inf,size_t refs=0) : 
-                std::codecvt<CharType,char,mbstate_t>(refs),
-                encoding_(inf.encoding())
-            {
-                details::converter cvt(encoding_);
-                max_len_ = cvt.max_len(); 
-            }
-            virtual std::codecvt_base::result do_unshift(std::mbstate_t &s,char *from,char *to,char *&next) const
-            {
-                next=from;
-                return std::codecvt_base::ok;
-            }
-            virtual int do_encoding() const throw()
-            {
-                // Always assume variable length
-                return 0;
-            }
-            virtual int do_max_length() const throw()
-            {
-                return max_len_;
-            }
-            virtual bool do_always_noconv() const throw()
-            {
-                return false;
-            }
-            
-            virtual std::codecvt_base::result 
-            do_in(  std::mbstate_t &state,
-                    char const *from,
-                    char const *from_end,
-                    char const *&from_next,
-                    uchar *uto,
-                    uchar *uto_end,
-                    uchar *&uto_next) const
-            {
-                typedef typename details::uchar_traits<uchar>::uint_type uint_type;
-                uint_type *to=reinterpret_cast<uint_type *>(uto);
-                uint_type *to_end=reinterpret_cast<uint_type *>(uto_end);
-                uint_type *&to_next=reinterpret_cast<uint_type *&>(uto_next);
-                return do_real_in(state,from,from_end,from_next,to,to_end,to_next);
-            }
-
-            virtual std::codecvt_base::result 
-            do_out( std::mbstate_t &state,
-                    uchar const *ufrom,
-                    uchar const *ufrom_end,
-                    uchar const *&ufrom_next,
-                    char *to,
-                    char *to_end,
-                    char *&to_next) const
-            {
-                typedef typename details::uchar_traits<uchar>::uint_type uint_type;
-                uint_type const *from=reinterpret_cast<uint_type const *>(ufrom);
-                uint_type const *from_end=reinterpret_cast<uint_type const *>(ufrom_end);
-                uint_type const *&from_next=reinterpret_cast<uint_type const *&>(ufrom_next);
-                return do_real_out(state,from,from_end,from_next,to,to_end,to_next);
-            }
-           
-
-        private:
-
-            //
-            // Implementation for UTF-32
-            //
-            std::codecvt_base::result
-            do_real_in( std::mbstate_t &state,
-                        char const *from,
-                        char const *from_end,
-                        char const *&from_next,
-                        uint32_t *to,
-                        uint32_t *to_end,
-                        uint32_t *to_next) const
-            {
-                details::converter cvt(encoding_);
-                std::codecvt_base::result r=std::codecvt_base::ok;
-                while(to < to_end && from < from_end)
-                {
-                    uint32_t ch=cvt.to_unicode(from,from_end);
-                    if(ch==details::converter::illegal) {
-                        r=std::codecvt_base::error;
-                        break;
-                    }
-                    if(ch==details::converter::incomplete) {
-                        r=std::codecvt_base::partial;
-                        break;
-                    }
-                    *to++=ch;
-                }
-                from_next=from;
-                to_next=to;
-                if(r!=std::codecvt_base::ok)
-                    return r;
-                if(from!=from_end)
-                    return std::codecvt_base::partial;
-                return r;
-            }
-
-            //
-            // Implementation for UTF-32
-            //
-            std::codecvt_base::result
-            do_real_out(std::mbstate_t &state,
-                        uint32_t const *from,
-                        uint32_t const *from_end,
-                        uint32_t const *&from_next,
-                        char *to,
-                        char *to_end,
-                        char *&to_next) const
-            {
-                details::converter cvt(encoding_);
-                std::codecvt_base::result r=std::codecvt_base::ok;
-                while(to < to_end && from < from_end)
-                {
-                    uint32_t len=cvt.from_unicode(*from,to,to_end);
-                    if(len==details::converter::illegal) {
-                        r=std::codecvt_base::error;
-                        break;
-                    }
-                    if(len==details::converter::incomplete) {
-                        r=std::codecvt_base::partial;
-                        break;
-                    }
-                    from++;
-                    to+=len;
-                }
-                from_next=from;
-                to_next=to;
-                if(r!=std::codecvt_base::ok)
-                    return r;
-                if(from!=from_end)
-                    return std::codecvt_base::partial;
-                return r;
-            }
-
-			//
-			// Can't handle full UTF-16, only UCS-2
-			// because:
-			//   1. codecvt facet must be able to work on single
-			//      internal character ie if  do_in(s,from,from_end,x,y,z,t) returns ok
-			//      then do_in(s,from,from+1) should return ok according to the standard papars
-			//   2. I have absolutly NO information about mbstat_t -- I can't even know if its 0 
-			//      or it is somehow initialized. So I can't store any state information
-			//      about suragate pairs... So it works only for UCS-2
-			//
-			
-			
-            //
-            // Implementation for UTF-16
-            //
-            std::codecvt_base::result
-            do_real_in( std::mbstate_t &state,
-                        char const *from,
-                        char const *from_end,
-                        char const *&from_next,
-                        uint16_t *to,
-                        uint16_t *to_end,
-                        uint16_t *to_next) const
-            {
-                details::converter cvt(encoding_);
-                std::codecvt_base::result r=std::codecvt_base::ok;
-                while(to < to_end && from < from_end)
-                {
-                    char const *save_from=from;
-                    uint32_t ch=cvt.to_unicode(from,from_end);
-                    if(ch==details::converter::illegal) {
-                        r=std::codecvt_base::error;
-                        break;
-                    }
-                    if(ch==details::converter::incomplete) {
-                        r=std::codecvt_base::partial;
-                        break;
-                    }
-                    if(ch <= 0xFFFF) {
-                        *to++=ch;
-					}
-                    else { /// can't handle surrogates
-						r=std::codecvt_base::error;
-                        break;
-                    }
-                }
-                from_next=from;
-                to_next=to;
-                if(r!=std::codecvt_base::ok)
-                    return r;
-                if(from!=from_end)
-                    return std::codecvt_base::partial;
-                return r;
-            }
-
-            //
-            // Implementation for UTF-16
-            //
-            std::codecvt_base::result
-            do_real_out(std::mbstate_t &state,
-                        uint16_t const *from,
-                        uint16_t const *from_end,
-                        uint16_t const *&from_next,
-                        char *to,
-                        char *to_end,
-                        char *&to_next) const
-            {
-                details::converter cvt(encoding_);
-                std::codecvt_base::result r=std::codecvt_base::ok;
-                while(to < to_end && from < from_end)
-                {
-                    uint32_t ch=*from;
-                    if(0xD800 <= ch && ch<=0xDFFF) {
-                        r=std::codecvt_base::error;
-						// Can't handle surragates
-                        break;
-                    }
-                            
-                    uint32_t len=cvt.from_unicode(ch,to,to_end);
-                    if(len==details::converter::illegal) {
-                        r=std::codecvt_base::error;
-                        break;
-                    }
-                    if(len==details::converter::incomplete) {
-                        r=std::codecvt_base::partial;
-                        break;
-                    }
-                    to+=len;
-					from++;
-                }
-                from_next=from;
-                to_next=to;
-                if(r!=std::codecvt_base::ok)
-                    return r;
-                if(from!=from_end)
-                    return std::codecvt_base::partial;
-                return r;
-            }
-            
-            int max_len_;
-            std::string encoding_;
-
-        };
+        std::codecvt<CharType,char,mbstate_t> *create_codecvt(info const &inf);
         
         template<>
-        class code_converter<char>
-		{
-		public:
-			static std::codecvt<char,char,mbstate_t> *create(info const &inf)
-			{
-				return new std::codecvt<char,char,mbstate_t>();
-			}
-        };
+        BOOST_LOCALE_DECL std::codecvt<char,char,mbstate_t> *create_codecvt(info const &inf);
 
+        #ifndef BOOST_NO_STD_WSTRING
+        template<>
+        BOOST_LOCALE_DECL std::codecvt<wchar_t,char,mbstate_t> *create_codecvt(info const &inf);
+        #endif
+
+        #ifdef BOOST_HAS_CHAR16_T
+        template<>
+        BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(info const &inf);
+        #endif
+
+        #ifdef BOOST_HAS_CHAR32_T
+        template<>
+        BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(info const &inf);
+        #endif
 
         namespace conv {
-
             class conversion_error : public std::runtime_error {
             public:
                 conversion_error() : std::runtime_error("Conversion failed") {}
@@ -449,10 +156,7 @@ namespace boost {
             template<>
             BOOST_LOCALE_DECL std::string from_utf(char32_t const *begin,char32_t const *end,std::string const &charset,method_type how);
             #endif
-
-
         } // conv
-
 
     } // locale
 } // boost
