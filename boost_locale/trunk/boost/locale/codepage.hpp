@@ -26,27 +26,10 @@ namespace boost {
                 converter(std::string const &encoding);
                 ~converter();
 
-                int max_len()
-                {
-                    if(is_utf8_)
-                        return 4;
-                    else
-                        return max_len_;
-                }
+                int max_len();
 
-                uint32_t to_unicode(char const *&begin,char const *end)
-                {
-                    if(is_utf8_)
-                        return from_utf8(begin,end);
-                    return from_charset(begin,end);
-                }
-
-                uint32_t from_unicode(uint32_t u,char *begin,char const *end)
-                {
-                    if(is_utf8_)
-                        return to_utf8(u,begin,end);
-                    return to_charset(u,begin,end);
-                }
+                uint32_t to_unicode(char const *&begin,char const *end);
+                uint32_t from_unicode(uint32_t u,char *begin,char const *end);
             private:
 
                 //
@@ -58,144 +41,8 @@ namespace boost {
                 uint32_t from_charset(char const *&begin,char const *end);
                 uint32_t to_charset(uint32_t u,char *begin,char const *end);
 
-                uint32_t to_utf8(uint32_t u,char *begin,char const *end)
-                {
-                    if(u>0x10ffff)
-                        return illegal;
-                    if(0xd800 <=u && u<= 0xdfff) // surrogates
-                        return illegal;
-                    ptrdiff_t d=end-begin;
-                    if(u <=0x7F) { 
-                        if(d>=1) {
-                            *begin++=u;
-                            return 1;
-                        }
-                        else
-                            return incomplete;
-                    }
-                    else if(u <= 0x7FF) {
-                        if(d>=2) {
-                            *begin++=(u >> 6) | 0xC0;
-                            *begin++=(u & 0x3F) | 0x80;
-                            return 2;
-                        }
-                        else
-                            return incomplete;
-                    }
-                    else if(u <= 0xFFFF) {
-                        if(d>=3) {
-                            *begin++=(u >> 12) | 0xE0;
-                            *begin++=((u >> 6) & 0x3F) | 0x80;
-                            *begin++=(u & 0x3F) | 0x80;
-                            return 3;
-                        }
-                        else
-                            return incomplete;
-                    }
-                    else {
-                        if(d>=4) {
-                            *begin++=(u >> 18) | 0xF0;
-                            *begin++=((u >> 12) & 0x3F) | 0x80;
-                            *begin++=((u >> 6) & 0x3F) | 0x80;
-                            *begin++=(u & 0x3F) | 0x80;
-                            return 4;
-                        }
-                        else
-                            return incomplete;
-                    }
-                }
-                uint32_t from_utf8(char const *&begin,char const *end)
-                {
-                    unsigned char const *p=reinterpret_cast<unsigned char const *>(begin);
-                    unsigned char const *e=reinterpret_cast<unsigned char const *>(end);
-                    if(p==e)
-                        return incomplete;
-                    unsigned char c=*p++;
-                    unsigned char seq0,seq1=0,seq2=0,seq3=0;
-                    seq0=c;
-                    int len=1;
-                    if((c & 0xC0) == 0xC0) {
-                        if(p==e)
-                            return incomplete;
-                        seq1=*p++;
-                        len=2;
-                    }
-                    if((c & 0xE0) == 0xE0) {
-                        if(p==e)
-                            return incomplete;
-                        seq2=*p++;
-                        len=3;
-                    }
-                    if((c & 0xF0) == 0xF0) {
-                        if(p==e)
-                            return incomplete;
-                        seq3=*p++;
-                        len=4;
-                    }
-                    switch(len) {
-                    case 1:
-                        break;
-                    case 2: // non-overloading 2 bytes
-                        if( 0xC2 <= seq0 && seq0 <= 0xDF
-                            && 0x80 <= seq1 && seq1<= 0xBF)
-                        {
-                                break;
-                        }
-                        return illegal;
-                    case 3: 
-                        if(seq0==0xE0) { // exclude overloading
-                            if(0xA0 <=seq1 && seq1<= 0xBF && 0x80 <=seq2 && seq2<=0xBF)
-                                break;
-                        }
-                        else if( (0xE1 <= seq0 && seq0 <=0xEC) || seq0==0xEE || seq0==0xEF) { // stright 3 bytes
-                            if(0x80 <=seq1 && seq1<=0xBF &&
-                               0x80 <=seq2 && seq2<=0xBF)
-                                break;
-                        }
-                        else if(seq0 == 0xED) { // exclude surrogates
-                            if( 0x80 <=seq1 && seq1<=0x9F &&
-                                0x80 <=seq2 && seq2<=0xBF)
-                                break;
-                        }
-                        return illegal;
-                    case 4:
-                        switch(seq0) {
-                        case 0xF0: // planes 1-3
-                            if( 0x90 <=seq1 && seq1<=0xBF &&
-                                0x80 <=seq2 && seq2<=0xBF &&
-                                0x80 <=seq3 && seq3<=0xBF)
-                                break;
-                            return illegal;
-                        case 0xF1: // planes 4-15
-                        case 0xF2:
-                        case 0xF3:
-                            if( 0x80 <=seq1 && seq1<=0xBF &&
-                                0x80 <=seq2 && seq2<=0xBF &&
-                                0x80 <=seq3 && seq3<=0xBF)
-                                break;
-                            return illegal;
-                        case 0xF4: // pane 16
-                            if( 0x80 <=seq1 && seq1<=0x8F &&
-                                0x80 <=seq2 && seq2<=0xBF &&
-                                0x80 <=seq3 && seq3<=0xBF)
-                                break;
-                            return illegal;
-                        default:
-                            return illegal;
-                        }
-                    }
-                    begin=reinterpret_cast<char const *>(p);
-                    switch(len) {
-                    case 1:
-                        return seq0;
-                    case 2:
-                        return ((seq0 & 0x1F) << 6) | (seq1 & 0x3F);
-                    case 3:
-                        return ((seq0 & 0x0F) << 12) | ((seq1 & 0x3F) << 6) | (seq2 & 0x3F)  ;
-					default: // can be only 4
-                        return ((seq0 & 0x07) << 18) | ((seq1 & 0x3F) << 12) | ((seq2 & 0x3F) << 6) | (seq3 & 0x3F) ;
-                    }
-                }
+                uint32_t to_utf8(uint32_t u,char *begin,char const *end);
+                uint32_t from_utf8(char const *&begin,char const *end);
 
                 // Private data members
                 bool is_utf8_;
@@ -215,9 +62,10 @@ namespace boost {
             struct uchar_traits<CharType,4> {
                 typedef uint32_t uint_type;
             };
+
         } // details
 
-
+        
         ///
         /// \brief this class reimplements standard C++ codecvt facet. It is rarely used directly however it can be
         /// useful for code page conversions
@@ -489,43 +337,43 @@ namespace boost {
             };
 
             typedef enum {
-                stop            = 0, ///!< Stop conversion on first illegal/unconvertable character
-                skip            = 1, ///!< Skip illegal/unconvertable characters
-                stop_and_throw  = 2, ///!< Throw a error 
+                skip            = 0, ///!< Skip illegal/unconvertable characters
+                stop            = 1, ///!< Stop conversion and throw conversion_error
+                default_method  = skip ///!< Default method - skip
             } method_type;
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::string const &charset,method_type how=stop);
+            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::string const &charset,method_type how=default_method);
 
             template<typename CharType>
-            std::string from_utf(CharType const *begin,CharType const *end,std::string const &charset,method_type how=stop);
+            std::string from_utf(CharType const *begin,CharType const *end,std::string const &charset,method_type how=default_method);
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::locale const &loc,method_type how=stop)
+            std::basic_string<CharType> to_utf(char const *begin,char const *end,std::locale const &loc,method_type how=default_method)
             {
                 return to_utf<CharType>(begin,end,std::use_facet<info>(loc).encoding(),how);
             }
 
             template<typename CharType>
-            std::string from_utf(CharType const *begin,CharType const *end,std::locale const &loc,method_type how=stop)
+            std::string from_utf(CharType const *begin,CharType const *end,std::locale const &loc,method_type how=default_method)
             {
                 return from_utf(begin,end,std::use_facet<info>(loc).encoding(),how);
             }
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(std::string const &text,std::string const &charset,method_type how=stop)
+            std::basic_string<CharType> to_utf(std::string const &text,std::string const &charset,method_type how=default_method)
             {
                 return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),charset,how);
             }
 
             template<typename CharType>
-            std::string from_utf(std::basic_string<CharType> const &text,std::string const &charset,method_type how=stop)
+            std::string from_utf(std::basic_string<CharType> const &text,std::string const &charset,method_type how=default_method)
             {
                 return from_utf(text.c_str(),text.c_str()+text.size(),charset,how);
             }
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(char const *text,std::string const &charset,method_type how=stop)
+            std::basic_string<CharType> to_utf(char const *text,std::string const &charset,method_type how=default_method)
             {
                 char const *text_end = text;
                 while(*text_end) 
@@ -534,7 +382,7 @@ namespace boost {
             }
 
             template<typename CharType>
-            std::string from_utf(CharType const *text,std::string const &charset,method_type how=stop)
+            std::string from_utf(CharType const *text,std::string const &charset,method_type how=default_method)
             {
                 CharType const *text_end = text;
                 while(*text_end) 
@@ -543,19 +391,19 @@ namespace boost {
             }
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(std::string const &text,std::locale const &loc,method_type how=stop)
+            std::basic_string<CharType> to_utf(std::string const &text,std::locale const &loc,method_type how=default_method)
             {
                 return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),loc,how);
             }
 
             template<typename CharType>
-            std::string from_utf(std::basic_string<CharType> const &text,std::locale const &loc,method_type how=stop)
+            std::string from_utf(std::basic_string<CharType> const &text,std::locale const &loc,method_type how=default_method)
             {
                 return from_utf(text.c_str(),text.c_str()+text.size(),loc,how);
             }
 
             template<typename CharType>
-            std::basic_string<CharType> to_utf(char const *text,std::locale const &loc,method_type how=stop)
+            std::basic_string<CharType> to_utf(char const *text,std::locale const &loc,method_type how=default_method)
             {
                 char const *text_end = text;
                 while(*text_end) 
@@ -564,7 +412,7 @@ namespace boost {
             }
 
             template<typename CharType>
-            std::string from_utf(CharType const *text,std::locale const &loc,method_type how=stop)
+            std::string from_utf(CharType const *text,std::locale const &loc,method_type how=default_method)
             {
                 CharType const *text_end = text;
                 while(*text_end) 
