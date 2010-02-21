@@ -71,7 +71,10 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale")
 
 
-set(LOCALE_TESTS test_collate)
+set(LOCALE_TESTS
+		test_collate
+		test_convert
+		)
 set(LOCALE_EXAMPLES 	hello
 			whello
 			boundary
