@@ -371,7 +371,7 @@ namespace locale {
                     char const *&from_next,
                     uint32_t *to,
                     uint32_t *to_end,
-                    uint32_t *to_next) const
+                    uint32_t *&to_next) const
         {
             details::converter cvt(encoding_);
             std::codecvt_base::result r=std::codecvt_base::ok;
@@ -586,7 +586,7 @@ namespace locale {
         std::basic_string<CharType> to_utf_impl(char const *begin,char const *end,std::string const &charset,method_type how=default_method)
         {
             impl::icu_std_converter<char> cvt_from(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
-            impl::icu_std_converter<CharType> cvt_to(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
+            impl::icu_std_converter<CharType> cvt_to("UTF-8",how == skip ? impl::cvt_skip : impl::cvt_stop);
             try {
                 return cvt_to.std(cvt_from.icu(begin,end));
             }
@@ -598,7 +598,7 @@ namespace locale {
         template<typename CharType>
         std::string from_utf_impl(CharType const *begin,CharType const *end,std::string const &charset,method_type how=default_method)
         {
-            impl::icu_std_converter<CharType> cvt_from(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
+            impl::icu_std_converter<CharType> cvt_from("UTF-8",how == skip ? impl::cvt_skip : impl::cvt_stop);
             impl::icu_std_converter<char> cvt_to(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
             try {
                 return cvt_to.std(cvt_from.icu(begin,end));
