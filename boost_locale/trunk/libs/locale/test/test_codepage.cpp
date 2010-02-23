@@ -27,8 +27,7 @@ void test_ok(std::string file,std::locale const &l,std::basic_string<Char> cmp=s
 
     stream_type f1("testi.txt",stream_type::in);
     f1.imbue(l);
-    std::wstring ss=read_file<Char>(f1);
-    TEST(ss == cmp); 
+    TEST(read_file<Char>(f1) == cmp); 
     f1.close();
 
     stream_type f2("testo.txt",stream_type::out);
