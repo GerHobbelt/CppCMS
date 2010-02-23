@@ -2,7 +2,7 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>
 #include <iomanip>
-#include "test.h"
+#include "test_locale.hpp"
 
 
 template<typename Char>

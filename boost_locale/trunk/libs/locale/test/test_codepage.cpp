@@ -2,7 +2,7 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>
 #include <fstream>
-#include "test.h"
+#include "test_locale.hpp"
 
 template<typename Char>
 std::basic_string<Char> read_file(std::basic_istream<Char> &in)
