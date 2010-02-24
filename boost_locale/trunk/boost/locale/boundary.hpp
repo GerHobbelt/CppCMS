@@ -625,11 +625,11 @@ namespace boost {
                         offset_=map_->index_.size()-1;
                     else
                         offset_=ptr - map_->index_.begin();
+                    if(map_->index_[offset_].offset > diff && offset_ > 0)
+                        offset_--;
                     if(mask_==0)
                         return;
-                    while(offset_ > 0 && (map_->index_[offset_].next & mask_) == 0)
-                        offset_--;
-                    if(offset_==0 && (map_->index_[offset_].next & mask_) == 0)
+                    if(!at_end() && (map_->index_[offset_].next & mask_) == 0)
                         next();
                 }
                 bool at_end() const

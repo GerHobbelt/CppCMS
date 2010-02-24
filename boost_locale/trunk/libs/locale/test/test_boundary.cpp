@@ -62,17 +62,15 @@ void test_word_container(Iterator begin,Iterator end,
             i=0;
             for(Iterator optr=begin;optr!=end;optr++,i++) {
                 p=optr;
-                std::cerr << i <<"," << chunk_ptr <<","<<pos[chunk_ptr]<<std::endl;
-                if(chunk_ptr < pos.size() && i>pos[chunk_ptr]){
+                if(chunk_ptr < pos.size() && i>=unsigned(pos[chunk_ptr])){
                     chunk_ptr++;
                 }
                 if(chunk_ptr>=pos.size()) {
                     TEST(p==map.end());
                 }
                 else {
-                    std::cerr << "bi["<< *p << "] t[" << chunks[chunk_ptr] << "] <" << std::string(begin,optr)<<"|"<<std::string(optr,end)<<">" <<std::endl;
                     TEST(*p==chunks[chunk_ptr]);
-                    TEST(p.flag()==masks[chunk_ptr]);
+                    TEST(p.flag()==unsigned(masks[chunk_ptr]));
                 }
             }
 
@@ -103,8 +101,8 @@ void run_word(std::string *original,int *num,int *word,int *kana,int *ideo,std::
     std::basic_string<Char> test_string;
     for(int i=0;!original[i].empty();i++) {
         chunks.push_back(to_correct_string<Char>(original[i],l));
-        pos.push_back(test_string.size());
         test_string+=chunks.back();
+        pos.push_back(test_string.size());
         masks.push_back(num[i] | (word[i]<<1) | (kana[i] << 2) | (ideo[i]<<3));
     }
 
@@ -141,7 +139,7 @@ void word_boundary()
     run_word<char>(all2,zero,zero,zero,zero,g("ja_JP.Shift-JIS"));
     run_word<char>(all3,zero,word3,zero,zero,g("ja_JP.Shift-JIS"));
 
-    #if 0//#ifndef BOOST_NO_STD_WSTRING
+    #ifndef BOOST_NO_STD_WSTRING
     std::cout << " wchar_t"<<std::endl;
     run_word<wchar_t>(all1,num1,word1,kana1,ideo1,g("ja_JP.UTF-8"));
     run_word<wchar_t>(all2,zero,zero,zero,zero,g("en_US.UTF-8"));
