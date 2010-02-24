@@ -17,6 +17,7 @@
 #include <iterator>
 #include <algorithm>
 #include <typeinfo>
+#include <iterator>
 
 namespace boost {
     namespace locale {
@@ -36,10 +37,14 @@ namespace boost {
             /// Flags used with word boundary analysis -- the type of word found
             ///
             typedef enum {
-                number  = 1 << 0,   ///< Word that appear to be a number
-                letter  = 1 << 1,   ///< Word that contains letters
-                kana    = 1 << 2,   ///< Word that contains kana characters
-                ideo    = 1 << 3,   ///< Word that contains ideographic characters
+                anything     =  0,   ///< Special case: catch anything, including non word tokens as spaces or punctuation marks
+                number       =  1,   ///< Word that appear to be a number
+                letter       =  2,   ///< Word that contains letters, excluding kana and ideographic characters 
+                kana         =  4,   ///< Word that contains kana characters
+                ideo         =  8,   ///< Word that contains ideographic characters
+                any_word     = 15,   ///< Any word including numbers, 0 is special flag, equivalent to 15
+                letters_word = 14,   ///< Any word, excluding numbers
+                kana_or_ideo = 12    ///< Word that includes kana or ideographic characters
             } word_type;
             ///
             /// Flags that describe a type of line break
@@ -175,6 +180,8 @@ namespace boost {
                                 || typeid(IteratorType) == typeid(typename std::basic_string<char_type>::const_iterator)
                                 || typeid(IteratorType) == typeid(typename std::vector<char_type>::iterator)
                                 || typeid(IteratorType) == typeid(typename std::vector<char_type>::const_iterator)
+                                || typeid(IteratorType) == typeid(char_type *)
+                                || typeid(IteratorType) == typeid(char_type const *)
                             )
                             &&
                                 b!=e
@@ -424,7 +431,7 @@ namespace boost {
                 ///
                 IteratorType operator*() const
                 {
-                    return map_->begin_ + map_->index_[offset_].offset;
+                    return std::advance(map_->begin_, map_->index_[offset_].offset);
                 }
 
                 ///
@@ -466,8 +473,8 @@ namespace boost {
             private:
                 void at_most(IteratorType p)
                 {
-                    unsigned diff =  p - map_->begin_;
-                    impl::index_type::iterator ptr = std::lower_bound(map_->index_.begin(),map_->index_.end(),impl::break_info(diff));
+                    unsigned diff =  std::distance(map_->begin_,p);
+                    impl::index_type::iterator const ptr = std::lower_bound(map_->index_.begin(),map_->index_.end(),impl::break_info(diff));
                     if(ptr==map_->index_.end())
                         offset_=map_->index_.size()-1;
                     else
@@ -549,7 +556,7 @@ namespace boost {
                         offset_ = 0;
                     else
                         offset_=map_->index_.size()-1;
-                    if(begin && mask_!=0 && (map_->index_[0].next & mask_)==0)
+                    if(begin && mask_!=0 && (map_->index_[0].next & mask_)==0 && !at_end())
                         next();
                 }
 
@@ -565,8 +572,10 @@ namespace boost {
 
                 ValueType operator*() const
                 {
-                    IteratorType ob=map_->begin_ + map_->index_[offset_].offset;
-                    IteratorType oe=map_->begin_ + map_->index_[offset_+1].offset;
+                    IteratorType ob = map_->begin_;
+                    std::advance(ob, map_->index_[offset_].offset);
+                    IteratorType oe=ob;
+                    std::advance(oe, map_->index_[offset_+1].offset - map_->index_[offset_].offset);
                     return ValueType(ob,oe);
                 }
                 ///
@@ -608,8 +617,10 @@ namespace boost {
             private:
                 void at_most(IteratorType p)
                 {
-                    unsigned diff =  p - map_->begin_;
-                    impl::index_type::iterator ptr = std::lower_bound(map_->index_.begin(),map_->index_.end(),impl::break_info(diff));
+                    unsigned diff =  std::distance(map_->begin_,p);
+                    impl::index_type::const_iterator b=map_->index_.begin();
+                    impl::index_type::const_iterator e=map_->index_.end();
+                    impl::index_type::const_iterator ptr = std::lower_bound(b,e,impl::break_info(diff));
                     if(ptr==map_->index_.end())
                         offset_=map_->index_.size()-1;
                     else

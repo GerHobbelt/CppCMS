@@ -75,6 +75,7 @@ set(LOCALE_TESTS
 		test_collate
 		test_convert
 		test_codepage
+		test_boundary
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello
