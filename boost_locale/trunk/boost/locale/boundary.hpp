@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <typeinfo>
 #include <iterator>
+#include <stdexcept>
 
 namespace boost {
     namespace locale {
@@ -37,23 +38,50 @@ namespace boost {
             /// Flags used with word boundary analysis -- the type of word found
             ///
             typedef enum {
-                anything     =  0,   ///< Special case: catch anything, including non word tokens as spaces or punctuation marks
-                number       =  1,   ///< Word that appear to be a number
-                letter       =  2,   ///< Word that contains letters, excluding kana and ideographic characters 
-                kana         =  4,   ///< Word that contains kana characters
-                ideo         =  8,   ///< Word that contains ideographic characters
-                any_word     = 15,   ///< Any word including numbers, 0 is special flag, equivalent to 15
-                letters_word = 14,   ///< Any word, excluding numbers
-                kana_or_ideo = 12    ///< Word that includes kana or ideographic characters
+                word_none       =  000007,   ///< Not a word
+                word_number     =  000070,   ///< Word that appear to be a number
+                word_letter     =  000700,   ///< Word that contains letters, excluding kana and ideographic characters 
+                word_kana       =  007000,   ///< Word that contains kana characters
+                word_ideo       =  070000,   ///< Word that contains ideographic characters
+                word_any        =  077770,   ///< Any word including numbers, 0 is special flag, equivalent to 15
+                word_letters    =  077700,   ///< Any word, excluding numbers but including letters, kana and ideograms.
+                word_kana_ideo  =  077000,   ///< Word that includes kana or ideographic characters
+                word_mask       =  077777    ///< Maximal used mask
             } word_type;
             ///
             /// Flags that describe a type of line break
             ///
             typedef enum {
-                soft    = 1 << 0,   ///< Optional line break
-                hard    = 1 << 1    ///< Mandatory line break
+                line_soft       =  007,   ///< Optional line break
+                line_hard       =  070,   ///< Mandatory line break
+                line_any        =  077,   ///< Mandatory or optional line break
+                line_mask       =  077
             } line_break_type;
             
+            typedef enum {
+                sentence_term   =  007,   ///< The sentence was terminated with a sentence terminator 
+                                          ///  like ".", "!" possible followed by hard separator like CR, LF, PS
+                sentence_sep    =  070,   ///< The sentence does not contain terminator like ".", "!" but ended with hard separator
+                                          ///  like CR, LF, PS or end of input.
+                sentence_any    =  077,   ///< Either first or second sentence break type;.
+                sentence_mask   =  077
+            } sentence_break_type;
+
+            typedef enum {
+                character_any   = 07,   ///< Not in use, just for consistency
+                character_mask  = 07,
+            } character_break_type;
+
+            inline unsigned boundary_mask(boundary_type t)
+            {
+                switch(t) {
+                case character: return character_mask;
+                case word:      return word_mask;
+                case sentence:  return sentence_mask;
+                case line:      return line_mask;
+                default:        return 0;
+                }
+            }
            
             namespace impl {
 
@@ -67,10 +95,7 @@ namespace boost {
                     /// 
                     break_info() : 
                         offset(0),
-                        next(0),
-                        prev(0),
-                        brk (0),
-                        reserved(0)
+                        mark(0)
                     {
                     }
                     ///
@@ -78,18 +103,12 @@ namespace boost {
                     ///
                     break_info(unsigned v) :
                         offset(v),
-                        next(0),
-                        prev(0),
-                        brk (0),
-                        reserved(0)
+                        mark(0)
                     {
                     }
 
                     uint32_t offset;            ///< Offset from the beginning of the text where break occurs
-                    uint32_t next       : 10;   ///< The flag describing a word following the break position
-                    uint32_t prev       : 10;   ///< The flag describing a word preceding the break position
-                    uint32_t brk        : 10;   ///< The flag describing a type of line break
-                    uint32_t reserved   : 2;
+                    uint32_t mark;
                    
                     ///
                     /// Comparison operator allowing usage of break_info in STL algorithms
@@ -225,7 +244,7 @@ namespace boost {
                 ///
                 mapping(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
-                    create_mapping(type,begin,end,loc,0);
+                    create_mapping(type,begin,end,loc,0xFFFFFFFFu);
                 }
 
                 mapping(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
@@ -238,7 +257,7 @@ namespace boost {
                 ///
                 void map(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
-                    create_mapping(type,begin,end,loc,0);
+                    create_mapping(type,begin,end,loc,0xFFFFFFFFu);
                 }
 
                 void map(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
@@ -248,7 +267,7 @@ namespace boost {
 
                 mapping()
                 {
-                    mask_=0;
+                    mask_=0xFFFFFFFF;
                 }
 
                 template<typename ORangeIterator>
@@ -311,7 +330,8 @@ namespace boost {
                     end_ = end;
                     mask_=mask;
                 }
-
+                template<typename I,typename M> 
+                friend class base_boundary_iterator; 
                 template<typename I> 
                 friend class break_iterator; 
                 template<typename I,typename V>
@@ -325,31 +345,54 @@ namespace boost {
             };
 
             ///
-            /// \brief break_iterator is bidirectional iterator that returns text boundary positions
+            /// \brief This is base class for both token and break iterators, it is not designed that classes
+            /// other then token and break iterators would be derived from.
             ///
-            /// This iterator is used when boundary points are more interesting then text chunks themselves.
-            ///
-            template<typename IteratorType>
-            class break_iterator : public std::iterator<std::bidirectional_iterator_tag,IteratorType> {
+
+            template<typename IteratorType,typename MappingType>
+            class base_boundary_iterator {
             public:
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 typedef IteratorType base_iterator;
+
+                bool operator==(base_boundary_iterator const &other) const
+                {
+                    return  (map_ == other.map_ && offset_==other.offset_);
+                }
+
+                bool operator!=(base_boundary_iterator const &other) const
+                {
+                    return !(*this==other);
+                }
+
+                unsigned mark() const
+                {
+                    return map_->index_.at(offset_).mark;
+                }
+
+            private:
+
+                template<typename I,typename V>
+                friend class token_iterator;
                 
-                break_iterator() : 
+                template<typename I>
+                friend class break_iterator;
+                                
+                base_boundary_iterator() : 
                     map_(0),
                     offset_(0),
-                    mask_(0)
+                    mask_(0xFFFFFFFF)
                 {
                 }
 
-                break_iterator(break_iterator<IteratorType> const &other):
+                base_boundary_iterator(base_boundary_iterator const &other):
                     map_(other.map_),
                     offset_(other.offset_),
                     mask_(other.mask_)
                 {
                 }
                 
-                break_iterator const &operator=(break_iterator<IteratorType> const &other)
+                base_boundary_iterator const &operator=(base_boundary_iterator const &other)
                 {
                     if(this!=&other) {
                         map_ = other.map_;
@@ -359,26 +402,195 @@ namespace boost {
                     return *this;
                 }
 
+                base_boundary_iterator(MappingType const &map,bool begin,unsigned mask) :
+                    map_(&map),
+                    mask_(mask)
+                {
+                    if(begin)
+                        offset_ = 0;
+                    else
+                        offset_=map_->index_.size();
+                }
 
-                ///
-                /// Set break iterator to new position \a p. 
-                ///
-                /// \a p should be in range of [\a begin, \a end] of the original text.
-                ///
-                /// If \a p points to actual boundary point, break iterator would point to this point, otherwise,
-                /// it would point to the proceeding boundary point.
-                ///
-                /// Note: break iterator should be created and mapping should be assigned to it.
-                ///
-                /// \code 
-                ///    break_iterator<char const *>  begin(map),end;
-                ///    begin=some_point_in_text; // Ok
-                ///    end=some_point_in_text; // Wrong!
-                /// \endcode
-                ///
+                bool valid_offset(unsigned offset) const
+                {
+                    return  offset == 0 
+                            || offset == map_->index_.size()
+                            || (map_->index_[offset].mark & mask_)!=0;
+                }
+
+                bool at_end() const
+                {
+                    return !map_ || offset_>=map_->index_.size();
+                }
+                
+                void next()
+                {
+                    while(offset_ < map_->index_.size()) {
+                        offset_++;
+                        if(valid_offset(offset_))
+                            break;
+                    }
+                }
+                void prev()
+                {
+                    while(offset_ > 0) {
+                        offset_ --;
+                        if(valid_offset(offset_))
+                            break;
+                    }
+                }
+
+                void at_most(IteratorType p)
+                {
+                    unsigned diff =  std::distance(map_->begin_,p);
+
+                    impl::index_type::const_iterator b=map_->index_.begin();
+                    impl::index_type::const_iterator e=map_->index_.end();
+                    impl::index_type::const_iterator ptr = std::lower_bound(b,e,impl::break_info(diff));
+
+                    if(ptr==map_->index_.end())
+                        offset_=map_->index_.size()-1;
+                    else
+                        offset_=ptr - map_->index_.begin();
+                    if(map_->index_[offset_].offset > diff && offset_ > 0)
+                        offset_--;
+                    
+                    while(offset_ > 0 && !valid_offset(offset_))
+                        offset_ --;
+                }
+
+                MappingType const * map_;
+                size_t offset_;
+                unsigned mask_;
+            };
+
+
+            ///
+            /// \brief token iterator is an iterator that returns text chunks between boundary positions
+            ///
+            /// It is similar to break iterator, but it rather "points" to string then iterator. It is used when we are more
+            /// interested in text chunks themselves then boundary points.
+            ///
+            
+            template<
+                typename IteratorType,
+                typename ValueType = std::basic_string<typename std::iterator_traits<IteratorType>::value_type> 
+            >
+            class token_iterator : 
+                public base_boundary_iterator<
+                        IteratorType,
+                        mapping<token_iterator<IteratorType,ValueType> > 
+                    >,
+                public std::iterator<std::bidirectional_iterator_tag,ValueType> 
+            {
+            public:
+                typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+                typedef IteratorType base_iterator;
+                typedef mapping<token_iterator<IteratorType,ValueType> > mapping_type;
+                typedef base_boundary_iterator<IteratorType,mapping_type > base_boundary_iter;
+                                
+                token_iterator() : full_select_(false)
+                {
+                }
+
+                token_iterator const &operator=(IteratorType p)
+                {
+                    base_boundary_iter::at_most(p);
+                    return *this;
+                }
+
+                token_iterator(mapping_type const &map,bool begin,unsigned mask) :
+                    base_boundary_iterator<IteratorType,mapping_type>(map,begin,mask),
+                    full_select_(false)
+                {
+                    base_boundary_iter::next();
+                }
+
+                ValueType operator*() const
+                {
+                    unsigned offset=base_boundary_iter::offset_;
+                    mapping_type const *map = base_boundary_iter::map_;
+                    if(offset < 1 || offset >= map->index_.size())
+                        throw std::out_of_range("Invalid boundary iterator location");
+                    unsigned pos=offset-1;
+                    if(full_select_)
+                        while(!base_boundary_iter::valid_offset(pos))
+                            pos--;
+                    base_iterator b=map->begin_;
+                    unsigned b_off = map->index_[pos].offset;
+                    std::advance(b,b_off);
+                    base_iterator e=b;
+                    unsigned e_off = map->index_[offset].offset;
+                    std::advance(e,e_off-b_off);
+                    return ValueType(b,e);
+                }
+
+                token_iterator &operator++() 
+                {
+                    base_boundary_iter::next();
+                    return *this;
+                }
+                
+                token_iterator &operator--() 
+                {
+                    base_boundary_iter::prev();
+                    return *this;
+                }
+                
+                token_iterator operator++(int unused) 
+                {
+                    token_iterator tmp(*this);
+                    base_boundary_iter::next();
+                    return tmp;
+                }
+
+                token_iterator operator--(int unused) 
+                {
+                    token_iterator tmp(*this);
+                    base_boundary_iter::prev();
+                    return tmp;
+                }
+
+                bool full_select() const
+                {
+                    return full_select_;
+                }
+                void full_select(bool fs)
+                {
+                    full_select_ = fs;
+                }
+
+
+            private:
+                uint32_t full_select_ : 1;
+                uint32_t reserved_ : 31;
+            };
+
+
+            ///
+            /// \brief break_iterator is bidirectional iterator that returns text boundary positions
+            ///
+            /// This iterator is used when boundary points are more interesting then text chunks themselves.
+            ///
+            template<typename IteratorType>
+            class break_iterator : 
+                public base_boundary_iterator<IteratorType,mapping<break_iterator<IteratorType> > >,
+                public std::iterator<std::bidirectional_iterator_tag,IteratorType> 
+            {
+            public:
+                typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+                typedef IteratorType base_iterator;
+                typedef mapping<break_iterator<IteratorType> > mapping_type;
+                typedef base_boundary_iterator<IteratorType,mapping<break_iterator<IteratorType> > > base_boundary_iter;
+                
+                break_iterator()
+                {
+                }
+
                 break_iterator const &operator=(IteratorType p)
                 {
-                    at_most(p);
+                    base_boundary_iter::at_most(p);
                     return *this;
                 }
 
@@ -399,31 +611,9 @@ namespace boost {
                 /// 
                 /// Would create an iterator p that would iterate only over soft line break points.
                 ///
-                break_iterator(mapping<break_iterator> const &map,bool begin,unsigned mask) :
-                    map_(&map),
-                    mask_(mask)
+                break_iterator(mapping_type const &map,bool begin,unsigned mask) :
+                    base_boundary_iterator<IteratorType,mapping_type>(map,begin,mask)
                 {
-                    if(begin)
-                        offset_=0;
-                    else
-                        offset_=map_->index_.size();
-                }
-
-                ///
-                /// Compare two iterators,              
-                ///
-                
-                bool operator==(break_iterator<IteratorType> const &other) const
-                {
-                    return  (map_ == other.map_ && offset_==other.offset_);
-                }
-
-                ///
-                /// Opposite of ==
-                ///
-                bool operator!=(break_iterator<IteratorType> const &other) const
-                {
-                    return !(*this==other);
                 }
 
                 ///
@@ -431,228 +621,43 @@ namespace boost {
                 ///
                 IteratorType operator*() const
                 {
-                    return std::advance(map_->begin_, map_->index_[offset_].offset);
+                    base_iterator p = base_boundary_iter::map_->begin_;
+                    std::advance(p, base_boundary_iter::map_->index_[base_boundary_iter::offset_].offset);
+                    return p;
                 }
 
-                ///
-                /// return flags describing the break point, like \a line_break_type
-                ///
-                
-                unsigned flag() const
-                {
-                    return map_->index_[offset_].brk;
-                }
-                
                 break_iterator &operator++() 
                 {
-                    next();
+                    base_boundary_iter::next();
                     return *this;
                 }
                 
                 break_iterator &operator--() 
                 {
-                    prev();
+                    base_boundary_iter::prev();
                     return *this;
                 }
                 
                 break_iterator operator++(int unused) 
                 {
                     break_iterator tmp(*this);
-                    next();
+                    base_boundary_iter::next();
                     return tmp;
                 }
 
                 break_iterator operator--(int unused) 
                 {
                     break_iterator tmp(*this);
-                    prev();
+                    base_boundary_iter::prev();
                     return tmp;
                 }
-
 
             private:
-                void at_most(IteratorType p)
-                {
-                    unsigned diff =  std::distance(map_->begin_,p);
-                    impl::index_type::iterator const ptr = std::lower_bound(map_->index_.begin(),map_->index_.end(),impl::break_info(diff));
-                    if(ptr==map_->index_.end())
-                        offset_=map_->index_.size()-1;
-                    else
-                        offset_=ptr - map_->index_.begin();
-                    if(mask_==0)
-                        return;
-                    while(offset_ > 0 && (map_->index_[offset_].brk & mask_) == 0)
-                        offset_--;
-                }
-                bool at_end() const
-                {
-                    return !map_ || offset_ >= map_->index_.size();
-                }
-                void next()
-                {
-                    do {
-                        offset_++;
-                    }while(!at_end() && mask_ != 0 && ((map_->index_[offset_].brk & mask_) == 0));
-                }
-                void prev()
-                {
-                    do {
-                        offset_--;
-                    }while(offset_ >0 && mask_ != 0 && ((map_->index_[offset_].brk & mask_) == 0));
-                }
-
-                mapping<break_iterator> const * map_;
-                size_t offset_;
-                unsigned mask_;
+                uint32_t reserved_;
             };
 
-            ///
-            /// \brief token iterator is an iterator that returns text chunks between boundary positions
-            ///
-            /// It is similar to break iterator, but it rather "points" to string then iterator. It is used when we are more
-            /// interested in text chunks themselves then boundary points.
-            ///
-            
-            template<typename IteratorType,typename ValueType = std::basic_string<typename std::iterator_traits<IteratorType>::value_type> >
-            class token_iterator : public std::iterator<std::bidirectional_iterator_tag,ValueType> {
-            public:
-                typedef typename std::iterator_traits<IteratorType>::value_type char_type;
-                typedef IteratorType base_iterator;
-                                
-                token_iterator() : 
-                    map_(0),
-                    offset_(0),
-                    mask_(0)
-                {
-                }
-
-                token_iterator(token_iterator const &other):
-                    map_(other.map_),
-                    offset_(other.offset_),
-                    mask_(other.mask_)
-                {
-                }
-                
-                token_iterator const &operator=(token_iterator<IteratorType,ValueType> const &other)
-                {
-                    if(this!=&other) {
-                        map_ = other.map_;
-                        offset_ = other.offset_;
-                        mask_=other.mask_;
-                    }
-                    return *this;
-                }
-
-                token_iterator const &operator=(IteratorType p)
-                {
-                    at_most(p);
-                    return *this;
-                }
-                token_iterator(mapping<token_iterator> const &map,bool begin,unsigned mask) :
-                    map_(&map),
-                    mask_(mask)
-                {
-                    if(begin)
-                        offset_ = 0;
-                    else
-                        offset_=map_->index_.size()-1;
-                    if(begin && mask_!=0 && (map_->index_[0].next & mask_)==0 && !at_end())
-                        next();
-                }
-
-                bool operator==(token_iterator<IteratorType,ValueType> const &other) const
-                {
-                    return  (map_ == other.map_ && offset_==other.offset_);
-                }
-
-                bool operator!=(token_iterator<IteratorType,ValueType> const &other) const
-                {
-                    return !(*this==other);
-                }
-
-                ValueType operator*() const
-                {
-                    IteratorType ob = map_->begin_;
-                    std::advance(ob, map_->index_[offset_].offset);
-                    IteratorType oe=ob;
-                    std::advance(oe, map_->index_[offset_+1].offset - map_->index_[offset_].offset);
-                    return ValueType(ob,oe);
-                }
-                ///
-                /// return flags describing the selected string, like \a word_type
-                ///
-                
-                unsigned flag() const
-                {
-                    return map_->index_[offset_].next;
-                }
-                
-                token_iterator &operator++() 
-                {
-                    next();
-                    return *this;
-                }
-                
-                token_iterator &operator--() 
-                {
-                    prev();
-                    return *this;
-                }
-                
-                token_iterator operator++(int unused) 
-                {
-                    token_iterator<IteratorType,ValueType> tmp(*this);
-                    next();
-                    return tmp;
-                }
-
-                token_iterator operator--(int unused) 
-                {
-                    token_iterator<IteratorType,ValueType> tmp(*this);
-                    prev();
-                    return tmp;
-                }
 
 
-            private:
-                void at_most(IteratorType p)
-                {
-                    unsigned diff =  std::distance(map_->begin_,p);
-                    impl::index_type::const_iterator b=map_->index_.begin();
-                    impl::index_type::const_iterator e=map_->index_.end();
-                    impl::index_type::const_iterator ptr = std::lower_bound(b,e,impl::break_info(diff));
-                    if(ptr==map_->index_.end())
-                        offset_=map_->index_.size()-1;
-                    else
-                        offset_=ptr - map_->index_.begin();
-                    if(map_->index_[offset_].offset > diff && offset_ > 0)
-                        offset_--;
-                    if(mask_==0)
-                        return;
-                    if(!at_end() && (map_->index_[offset_].next & mask_) == 0)
-                        next();
-                }
-                bool at_end() const
-                {
-                    return !map_ || offset_ >= map_->index_.size()-1;
-                }
-                void next()
-                {
-                    do {
-                        offset_++;
-                    }while(!at_end() && mask_ != 0 && ((map_->index_[offset_].next & mask_) == 0));
-                }
-                void prev()
-                {
-                    do {
-                        offset_--;
-                    }while(offset_ >0 && mask_ != 0 && ((map_->index_[offset_].next & mask_) == 0));
-                }
-
-                mapping<token_iterator> const * map_;
-                size_t offset_;
-                unsigned mask_;
-            };
             
             
         } // boundary
