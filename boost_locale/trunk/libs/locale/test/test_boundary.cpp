@@ -4,6 +4,8 @@
 #include "test_locale_tools.hpp"
 #include <list>
 
+#define BOOST_NO_STD_WSTRING
+
 namespace lb = boost::locale::boundary;
 
 template<typename Char,typename Iterator>
@@ -18,8 +20,8 @@ void test_word_container(Iterator begin,Iterator end,
     {   // token iterator tests
         typedef lb::token_iterator<Iterator> iter_type;
         lb::mapping<iter_type> map(lb::word,begin,end,l);
-
-        for(int sm=31;sm>=0;sm--) {
+        
+        for(int sm=(bt == lb::word ? 31 : 3 ) ;sm>=0;sm--) {
             unsigned mask = 
                   ((sm & 1 ) != 0) * 07
                 + ((sm & 2 ) != 0) * 070
@@ -32,28 +34,24 @@ void test_word_container(Iterator begin,Iterator end,
             std::vector<std::basic_string<Char> > fchunks;
 
             std::vector<int> masks,pos;
-            std::string empty_chunk;
+            std::basic_string<Char> empty_chunk;
             for(unsigned i=0;i<imasks.size();i++) {
                 if(imasks[i] & mask) {
                     masks.push_back(imasks[i]);
                     chunks.push_back(ichunks[i]);
-                    if(fchunks.empty())
-                        fchunks.push_back(empty_chunk + ichunks[i]);
-                    else
-                        fchunks.push_back(ichunks[i]);
+                    fchunks.push_back(empty_chunk + ichunks[i]);
+                    empty_chunk.clear();
                     pos.push_back(ipos[i]);
                 }
                 else {
-                    if(!fchunks.empty())
-                        fchunks.back()+=ichunks[i];
-                    else
-                        empty_chunk+=ichunks[i];
+                    empty_chunk+=ichunks[i];
                 }
             }
         
             unsigned i=0;
             iter_type p;
             for(p=map.begin();p!=map.end();++p,i++) {
+                std::cerr<<"["<<*p<<"]=["<<chunks[i]<<"]"<<std::endl;
                 p.full_select(false);
                 TEST(*p==chunks[i]);
                 p.full_select(true);
@@ -76,7 +74,7 @@ void test_word_container(Iterator begin,Iterator end,
                     TEST(p.mark() == unsigned(masks[i]));
                 }
             }
-            /* 
+            
             unsigned chunk_ptr=0;
             i=0;
             for(Iterator optr=begin;optr!=end;optr++,i++) {
@@ -88,16 +86,13 @@ void test_word_container(Iterator begin,Iterator end,
                     TEST(p==map.end());
                 }
                 else {
-                    std::cerr<<std::oct << mask<<":<"<<std::string(begin,optr)<<"|"<<std::string(optr,end)<<">"<<std::endl;
                     p.full_select(false);
-                    std::cerr<<"Small ["<<*p<<"] ["<<chunks[chunk_ptr]<<"]"<<std::endl;
                     TEST(*p==chunks[chunk_ptr]);
                     p.full_select(true);
-                    std::cerr<<"Full ["<<*p<<"] ["<<fchunks[chunk_ptr]<<"]"<<std::endl;
                     TEST(*p==fchunks[chunk_ptr]);
                     TEST(p.mark()==unsigned(masks[chunk_ptr]));
                 }
-            }*/
+            }
 
         } // for mask
     }
@@ -129,9 +124,42 @@ void run_word(std::string *original,int *none,int *num,int *word,int *kana,int *
     test_word_container<Char>(test_string.begin(),test_string.end(),pos,masks,chunks,l,b);
 }
 
+std::string character[]={"שָ","ל","וֹ","ם","!",""};
+int         nones[]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+
+std::string sentence1[]={"To be\n","or not\n","to be?\n"," That is."" The question",""};
+int         sentence1a[]={      0,          0,        1,          1,              1, 0};
+int         sentence1b[]={      1,          1,        0,          0,              0, 0};
+
+std::string line1[]={"To ","be\n","or ","not\n","to ","be",""};
+int         line1a[]={ 1,   0,     1 ,  0,       1,   1 , 0 };
+int         line1b[]={ 0,   1,     0 ,  1,       0,   0 , 0 };
+
+
+void test_boundaries(std::string *all,int *first,int *second,lb::boundary_type t)
+{
+    boost::locale::generator g;
+    std::cout << " char UTF-8" << std::endl;
+    run_word<char>(all,first,second,0,0,0,g("he_IL.UTF-8"),t);
+    std::cout << " char CP1255" << std::endl;
+    run_word<char>(all,first,second,0,0,0,g("he_IL.cp1255"),t);
+    #ifndef BOOST_NO_STD_WSTRING
+    std::cout << " wchar_t"<<std::endl;
+    run_word<wchar_t>(all,first,second,0,0,0,g("he_IL.UTF-8"),t);
+    #endif
+    #ifdef BOOST_HAS_CHAR16_T
+    std::cout << " char16_t"<<std::endl;
+    run_word<char16_t>(all,first,second,0,0,0,g("he_IL.UTF-8"),t);
+    #endif
+    #ifdef BOOST_HAS_CHAR32_T
+    std::cout << " char32_t"<<std::endl;
+    run_word<char32_t>(all,first,second,0,0,0,g("he_IL.UTF-8"),t);
+    #endif
+
+}
+
 void word_boundary()
 {
-    std::cout << "Testing word boundary" << std::endl;
     boost::locale::generator g;
     
     std::string all1[]={"10"," ","Hello"," ","Windows7"," ","平仮名","ひらがな","ヒラガナ",""};
@@ -182,11 +210,17 @@ void word_boundary()
 }
 
 
-
 int main()
 {
     try {
+        std::cout << "Testing word boundary" << std::endl;
         word_boundary();
+        std::cout << "Testing character boundary" << std::endl;
+        test_boundaries(character,nones,0,lb::character);
+        std::cout << "Testing sentence boundary" << std::endl;
+        test_boundaries(sentence1,sentence1a,sentence1b,lb::sentence);
+        std::cout << "Testing line boundary" << std::endl;
+        test_boundaries(line1,line1a,line1b,lb::line);
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;

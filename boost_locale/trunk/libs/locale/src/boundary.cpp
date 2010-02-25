@@ -86,7 +86,8 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
                     else if(UBRK_SENTENCE_SEP<=buf[i] && buf[i]<UBRK_SENTENCE_SEP_LIMIT)
                         indx.back().mark |= sentence_sep;
                     break;
-
+                default:
+                    ;
                 }
             }
         }

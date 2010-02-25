@@ -496,7 +496,14 @@ namespace boost {
 
                 token_iterator const &operator=(IteratorType p)
                 {
-                    base_boundary_iter::at_most(p);
+                    mapping_type const *map=base_boundary_iter::map_;
+                    unsigned dist=std::distance(map->begin_,p);
+                    impl::index_type::const_iterator b=map->index_.begin(),e=map->index_.end();
+                    impl::index_type::const_iterator 
+                        bound=std::upper_bound(b,e,impl::break_info(dist));
+                    while(bound != e && (bound->mark & base_boundary_iter::mask_)==0)
+                        bound++;
+                    base_boundary_iter::offset_ = bound - b;
                     return *this;
                 }
 

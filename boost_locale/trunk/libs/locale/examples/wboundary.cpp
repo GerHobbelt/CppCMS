@@ -47,13 +47,13 @@ int main(int argc,char **argv)
 
     for(p=index.begin(),e=index.end();p!=e;++p) {
         wcout<<L"Part ["<<*p<<L"] has ";
-        if(p.flag() & boundary::number)
+        if(p.mark() & boundary::word_number)
             wcout<<L"number ";
-        if(p.flag() & boundary::letter)
+        if(p.mark() & boundary::word_letter)
             wcout<<L"letter ";
-        if(p.flag() & boundary::kana)
+        if(p.mark() & boundary::word_kana)
             wcout<<L"kana characters ";
-        if(p.flag() & boundary::ideo)
+        if(p.mark() & boundary::word_ideo)
             wcout<<L"ideographic characters ";
         wcout<<endl;
     }
