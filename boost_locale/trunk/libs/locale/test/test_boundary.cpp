@@ -4,7 +4,7 @@
 #include "test_locale_tools.hpp"
 #include <list>
 
-#define BOOST_NO_STD_WSTRING
+//#define BOOST_NO_STD_WSTRING
 
 namespace lb = boost::locale::boundary;
 
@@ -19,7 +19,7 @@ void test_word_container(Iterator begin,Iterator end,
 {
     {   // token iterator tests
         typedef lb::token_iterator<Iterator> iter_type;
-        lb::mapping<iter_type> map(lb::word,begin,end,l);
+        lb::mapping<iter_type> map(bt,begin,end,l);
         
         for(int sm=(bt == lb::word ? 31 : 3 ) ;sm>=0;sm--) {
             unsigned mask = 
@@ -51,7 +51,6 @@ void test_word_container(Iterator begin,Iterator end,
             unsigned i=0;
             iter_type p;
             for(p=map.begin();p!=map.end();++p,i++) {
-                std::cerr<<"["<<*p<<"]=["<<chunks[i]<<"]"<<std::endl;
                 p.full_select(false);
                 TEST(*p==chunks[i]);
                 p.full_select(true);
@@ -127,9 +126,9 @@ void run_word(std::string *original,int *none,int *num,int *word,int *kana,int *
 std::string character[]={"שָ","ל","וֹ","ם","!",""};
 int         nones[]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
-std::string sentence1[]={"To be\n","or not\n","to be?\n"," That is."" The question",""};
-int         sentence1a[]={      0,          0,        1,          1,              1, 0};
-int         sentence1b[]={      1,          1,        0,          0,              0, 0};
+std::string sentence1[]={"To be\n","or not\n","to be?\n"," That is the question. ","Or maybe not",""};
+int         sentence1a[]={      0,          0,        1,                         1,             0, 0};
+int         sentence1b[]={      1,          1,        0,                         0,             1, 0};
 
 std::string line1[]={"To ","be\n","or ","not\n","to ","be",""};
 int         line1a[]={ 1,   0,     1 ,  0,       1,   1 , 0 };
@@ -203,9 +202,9 @@ void word_boundary()
 
     #ifdef BOOST_HAS_CHAR32_T
     std::cout << " char32_t"<<std::endl;
-    run_word<char32_t>(all1,num1,word1,kana1,ideo1,g("ja_JP.UTF-8"));
-    run_word<char32_t>(all2,zero,zero,zero,zero,g("en_US.UTF-8"));
-    run_word<char32_t>(all3,zero,word3,zero,zero,g("en_US.UTF-8"));
+    run_word<char32_t>(all1,none1,num1,word1,kana1,ideo1,g("ja_JP.UTF-8"));
+    run_word<char32_t>(all2,zero,zero,zero,zero,zero,g("en_US.UTF-8"));
+    run_word<char32_t>(all3,none3,zero,word3,zero,zero,g("en_US.UTF-8"));
     #endif 
 }
 

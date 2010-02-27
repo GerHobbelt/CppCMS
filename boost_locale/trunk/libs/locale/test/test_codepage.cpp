@@ -62,7 +62,6 @@ void test_wfail(std::string file,std::locale const &l,int pos)
     stream_type f1("testo.txt",stream_type::out);
     f1.imbue(l);
     std::basic_string<Char> out=to<Char>(file);
-    Char c;
     int i;
     for(i=0;i<pos;i++) {
         f1 << out.at(i);
@@ -100,11 +99,11 @@ void test_wide_io()
     std::cout << "  wchar_t" << std::endl;
     test_for_char<wchar_t>();
     #endif
-    #ifdef BOOST_HAS_CHAR16_T
+    #if defined BOOST_HAS_CHAR16_T && !defined(BOOST_NO_CHAR16_T_CODECVT)
     std::cout << "  char16_t" << std::endl;
     test_for_char<char16_t>();
     #endif
-    #ifdef BOOST_HAS_CHAR32_T
+    #if defined BOOST_HAS_CHAR32_T && !defined(BOOST_NO_CHAR32_T_CODECVT)
     std::cout << "  char32_t" << std::endl;
     test_for_char<char32_t>();
     #endif

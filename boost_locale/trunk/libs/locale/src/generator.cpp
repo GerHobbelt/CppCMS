@@ -176,6 +176,14 @@ namespace boost {
                 }
             }
             if(d->cats & codepage_facet) {
+                #if defined(BOOST_HAS_CHAR16_T) && defined(BOOST_NO_CHAR16_T_CODECVT)
+                if(typeid(CharType)==typeid(char16_t))
+                    return result;
+                #endif
+                #if defined(BOOST_HAS_CHAR32_T) && defined(BOOST_NO_CHAR32_T_CODECVT)
+                if(typeid(CharType)==typeid(char32_t))
+                    return result;
+                #endif
                 result=std::locale(result,create_codecvt<CharType>(inf));
             }
             return result;

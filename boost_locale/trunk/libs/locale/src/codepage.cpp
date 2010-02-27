@@ -12,7 +12,7 @@
 #include <unicode/ucnv_err.h>
 
 #include "icu_util.hpp"
-
+#include <vector>
 namespace boost {
 namespace locale {
     namespace details {
@@ -341,6 +341,21 @@ namespace locale {
             uint_type *&to_next=reinterpret_cast<uint_type *&>(uto_next);
             return do_real_in(state,from,from_end,from_next,to,to_end,to_next);
         }
+        
+        virtual int
+        do_length(  std::mbstate_t &state,
+                char const *from,
+                char const *from_end,
+                size_t max) const
+        {
+            char const *from_next=from;
+            std::vector<uchar> chrs(max+1);
+            uchar *to=&chrs.front();
+            uchar *to_end=to+max;
+            uchar *to_next=to;
+            do_in(state,from,from_end,from_next,to,to_end,to_next);
+            return from_next-from;
+        }
 
         virtual std::codecvt_base::result 
         do_out( std::mbstate_t &state,
@@ -567,7 +582,11 @@ namespace locale {
     template<>
     BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(info const &inf)
     {
+        #ifdef BOOST_NO_CHAR16_T_CODECVT
+        throw std::runtime_error("std::codecvt<char16_t,char,mbstate_t> is not supported by this compiler");
+        #else
         return code_converter<char16_t>::create(inf);
+        #endif
     }
     #endif
 
@@ -575,7 +594,11 @@ namespace locale {
     template<>
     BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(info const &inf)
     {
-        return code_converter<char32_t>::create(inf);
+        #ifdef BOOST_NO_CHAR32_T_CODECVT
+        throw std::runtime_error("std::codecvt<char32_t,char,mbstate_t> is not supported by this compiler");
+        #else
+        return code_converter<char32_t>::create(inf);i
+        #endif
     }
     #endif
 
@@ -659,7 +682,7 @@ namespace locale {
         template<>
         BOOST_LOCALE_DECL std::string from_utf(char32_t const *begin,char32_t const *end,std::string const &charset,method_type how)
         {
-            return to_utf_impl<char32_t>(begin,end,charset,how);
+            return from_utf_impl<char32_t>(begin,end,charset,how);
         }
         #endif
     } // conv

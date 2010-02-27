@@ -52,9 +52,9 @@ namespace boost {
             /// Flags that describe a type of line break
             ///
             typedef enum {
-                line_soft       =  007,   ///< Optional line break
-                line_hard       =  070,   ///< Mandatory line break
-                line_any        =  077,   ///< Mandatory or optional line break
+                line_soft       =  007,   ///< Soft line break: optional but not required
+                line_hard       =  070,   ///< Hard line break: like break is required (as per CR/LF)
+                line_any        =  077,   ///< Soft or Hard line break
                 line_mask       =  077
             } line_break_type;
             
