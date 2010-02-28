@@ -92,7 +92,7 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
             }
         }
         else {
-            indx.back().mark |=07; // Baisc mark... for character
+            indx.back().mark |=character_any; // Baisc mark... for character
         }
     }
     return indx;

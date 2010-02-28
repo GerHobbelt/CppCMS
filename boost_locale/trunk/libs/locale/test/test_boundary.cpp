@@ -17,36 +17,52 @@ void test_word_container(Iterator begin,Iterator end,
     lb::boundary_type bt=lb::word
     )
 {
-    {   // token iterator tests
-        typedef lb::token_iterator<Iterator> iter_type;
-        lb::mapping<iter_type> map(bt,begin,end,l);
-        
-        for(int sm=(bt == lb::word ? 31 : 3 ) ;sm>=0;sm--) {
-            unsigned mask = 
-                  ((sm & 1 ) != 0) * 07
-                + ((sm & 2 ) != 0) * 070
-                + ((sm & 4 ) != 0) * 0700
-                + ((sm & 8 ) != 0) * 07000
-                + ((sm & 16) != 0) * 070000;
+    for(int sm=(bt == lb::word ? 31 : 3 ) ;sm>=0;sm--) {
+        unsigned mask = 
+              ((sm & 1 ) != 0) * 0xF
+            + ((sm & 2 ) != 0) * 0xF0
+            + ((sm & 4 ) != 0) * 0xF00
+            + ((sm & 8 ) != 0) * 0xF000
+            + ((sm & 16) != 0) * 0xF0000;
+
+        std::vector<int> masks,pos;
+        std::vector<unsigned> bmasks;
+        std::basic_string<Char> empty_chunk;
+
+        std::vector<std::basic_string<Char> > chunks;
+        std::vector<std::basic_string<Char> > fchunks;
+        std::vector<Iterator> iters;
+        iters.push_back(begin);
+        bmasks.push_back(0);
+
+        for(unsigned i=0;i<imasks.size();i++) {
+            if(imasks[i] & mask) {
+                masks.push_back(imasks[i]);
+                chunks.push_back(ichunks[i]);
+                fchunks.push_back(empty_chunk + ichunks[i]);
+                empty_chunk.clear();
+                pos.push_back(ipos[i]);
+            }
+            else {
+                empty_chunk+=ichunks[i];
+            }
+
+            if((imasks[i] & mask) || i==imasks.size()-1){
+                Iterator ptr=begin;
+                std::advance(ptr,ipos[i]);
+                iters.push_back(ptr);
+                bmasks.push_back(imasks[i]);
+            }
+        }
+
+        //
+        // token iterator tests
+        //
+        {
+            typedef lb::token_iterator<Iterator> iter_type;
+            lb::mapping<iter_type> map(bt,begin,end,l);
 
             map.mask(mask);
-            std::vector<std::basic_string<Char> > chunks;
-            std::vector<std::basic_string<Char> > fchunks;
-
-            std::vector<int> masks,pos;
-            std::basic_string<Char> empty_chunk;
-            for(unsigned i=0;i<imasks.size();i++) {
-                if(imasks[i] & mask) {
-                    masks.push_back(imasks[i]);
-                    chunks.push_back(ichunks[i]);
-                    fchunks.push_back(empty_chunk + ichunks[i]);
-                    empty_chunk.clear();
-                    pos.push_back(ipos[i]);
-                }
-                else {
-                    empty_chunk+=ichunks[i];
-                }
-            }
         
             unsigned i=0;
             iter_type p;
@@ -57,6 +73,7 @@ void test_word_container(Iterator begin,Iterator end,
                 TEST(*p==fchunks[i]);
                 TEST(p.mark() == unsigned(masks[i]));
             }
+
             TEST(chunks.size() == i);
                 
             
@@ -93,8 +110,39 @@ void test_word_container(Iterator begin,Iterator end,
                 }
             }
 
-        } // for mask
-    }
+        } // token iterator tests
+
+        { // break iterator tests
+            typedef lb::break_iterator<Iterator> iter_type;
+            lb::mapping<iter_type> map(bt,begin,end,l);
+
+            map.mask(mask);
+        
+            unsigned i=0;
+            iter_type p;
+            for(p=map.begin();p!=map.end();++p,i++) {
+                TEST(*p==iters[i]);
+                TEST(p.mark()==bmasks[i]);
+            }
+
+            TEST(iters.size() == i);
+            do {
+                --p;
+                --i;
+                TEST(*p==iters[i]);
+            } while(p!=map.begin());
+            TEST(i==0);
+
+            unsigned iters_ptr=0;
+            for(Iterator optr=begin;optr!=end;optr++) {
+                p=optr;
+                TEST(*p==iters[iters_ptr]);
+                if(iters.at(iters_ptr)==optr)
+                    iters_ptr++;
+            }
+        
+        } // break iterator tests
+    } // for mask
 
 }
 
@@ -110,11 +158,11 @@ void run_word(std::string *original,int *none,int *num,int *word,int *kana,int *
         test_string+=chunks.back();
         pos.push_back(test_string.size());
         masks.push_back(
-              ( none ? none[i]*7 : 0)
-            | ( num  ? ((num[i]*7)  << 3) : 0) 
-            | ( word ? ((word[i]*7) << 6) : 0) 
-            | ( kana ? ((kana[i]*7) << 9) : 0)
-            | ( ideo ? ((ideo[i]*7) << 12) : 0)
+              ( none ? none[i]*15 : 0)
+            | ( num  ? ((num[i]*15)  << 4) : 0) 
+            | ( word ? ((word[i]*15) << 8) : 0) 
+            | ( kana ? ((kana[i]*15) << 12) : 0)
+            | ( ideo ? ((ideo[i]*15) << 16) : 0)
         );
     }
 
