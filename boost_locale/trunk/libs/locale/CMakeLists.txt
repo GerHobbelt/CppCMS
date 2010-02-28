@@ -76,6 +76,7 @@ set(LOCALE_TESTS
 		test_convert
 		test_codepage
 		test_boundary
+		test_message
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello

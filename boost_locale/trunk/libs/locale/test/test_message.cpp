@@ -1,5 +1,7 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/message.hpp>
+#include "test_locale.hpp"
+#include "test_locale_tools.hpp"
 
 namespace bl = boost::locale;
 
@@ -7,13 +9,13 @@ template<typename Char>
 void strings_equal(std::string original,std::string iexpected,std::locale const &l,std::string domain)
 {
     typedef std::basic_string<Char> string_type;
-    string_type expected=to_correct_string<Char>(iexpected);
+    string_type expected=to_correct_string<Char>(iexpected,l);
     if(domain=="default") {
         TEST(bl::translate(original).str<Char>(l)==expected);
         TEST(bl::translate(original.c_str()).str<Char>(l)==expected);
         std::locale tmp_locale=std::locale();
         std::locale::global(l);
-        tmp=bl::translate(original);
+        string_type tmp=bl::translate(original);
         TEST(tmp==expected);
         tmp=bl::translate(original).str<Char>();
         TEST(tmp==expected);
