@@ -5,6 +5,8 @@
 
 namespace bl = boost::locale;
 
+#define BOOST_NO_STD_WSTRING
+
 template<typename Char>
 void strings_equal(std::string original,std::string iexpected,std::locale const &l,std::string domain)
 {
@@ -66,17 +68,28 @@ int main()
     try {
         boost::locale::generator g;
         g.add_messages_domain("default");
-        g.add_messages_domain("additional");
+        g.add_messages_domain("simple");
         g.add_messages_path("./");
         
-        std::locale lh1=g("he_IL.UTF-8");
-        std::locale lh2=g("he_IL.ISO-8859-8");
-        std::locale le=g("en_US.UTF-8");
+        std::string locales[] = { "he_IL.UTF-8", "he_IL.ISO-8859-8" };
 
-        test_translate("foo","foo",lh1,"default");
-        test_translate("foo","foo",lh1,"undefined");
-        test_translate("#xx#foo","foo",lh1,"undefined");
-        test_translate("##foo","#foo",lh1,"undefined");
+        for(int i=0;i<sizeof(locales)/sizeof(locales[0]);i++){
+            std::locale l=g(locales[i]);
+            
+            std::cout << "Testing "<<locales[i]<<std::endl;
+            std::cout << " single forms" << std::endl;
+
+            test_translate("hello","שלום",l,"default");
+            test_translate("hello","היי",l,"simple");
+            test_translate("hello","hello",l,"undefined");
+            test_translate("untranslated","untranslated",l,"default");
+            test_translate("##untranslated","#untranslated",l,"default");
+            test_translate("#xx#untranslated","untranslated",l,"default");
+            test_translate("##hello","#hello",l,"undefined");
+            test_translate("#xx#hello","hello",l,"undefined");
+            test_translate("#context#hello","שלום בהקשר אחר",l,"default");
+            test_translate("##hello","#שלום",l,"default");
+        }
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
