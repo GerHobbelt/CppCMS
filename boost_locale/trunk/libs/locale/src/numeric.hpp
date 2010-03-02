@@ -251,11 +251,8 @@ namespace boost {
                 string_type tmp;
                 tmp.reserve(64);
 
-                // just a hard limit
-                std::ctype<CharType> const &type=std::use_facet<std::ctype<CharType> >(ios.getloc());
-            
-                // SunCC does not like space | cntrl
-                while(in!=end && (type.is(std::ctype_base::space,*in) || type.is(std::ctype_base::cntrl,*in)) )
+                CharType c;
+                while(in!=end && (((c=*in)<=32 && (c>0)) || c==127)) // Assuming that ASCII is a subset
                     ++in;
 
                 while(tmp.size() < 4096 && in!=end && *in!='\n') {

@@ -6,7 +6,6 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #include "mo_lambda.hpp"
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -261,11 +260,14 @@ namespace lambda {
         int pos;
         int next_tocken;
         int int_value;
-		// MSVC does not have isblank
 		bool is_blank(char c)
 		{
 			return c==' ' || c=='\r' || c=='\n' || c=='\t';
 		}
+        bool isdigit(char c) 
+        {
+            return '0'<=c && c<='9'; 
+        }
         void step() 
         {
             while(text[pos] && is_blank(text[pos])) pos++;

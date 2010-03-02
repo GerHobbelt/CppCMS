@@ -23,6 +23,8 @@
 
 #include <limits>
 
+#include <iostream>
+
 namespace boost {
 namespace locale {
     namespace impl {
@@ -434,8 +436,8 @@ namespace locale {
                     if(U_FAILURE(err)) {
                         return fmt;
                     }
+                    nf->setMaximumFractionDigits(ios.precision());
                     if(how == std::ios_base::scientific || how == std::ios_base::fixed ) {
-                        nf->setMaximumFractionDigits(ios.precision());
                         nf->setMinimumFractionDigits(ios.precision());
                     }
                     fmt.reset(new number_format<CharType>(nf,encoding));
@@ -478,7 +480,13 @@ namespace locale {
                     nf.reset(icu::NumberFormat::createPercentInstance(locale,err));
                     if(U_FAILURE(err))
                         return fmt;
+                    nf->setMaximumFractionDigits(ios.precision());
+                    std::ios_base::fmtflags how = (ios.flags() & std::ios_base::floatfield);
+                    if(how == std::ios_base::scientific || how == std::ios_base::fixed ) {
+                        nf->setMinimumFractionDigits(ios.precision());
+                    }
                     fmt.reset(new number_format<CharType>(nf,encoding));
+                    
                 }
                 break;
             case spellout:

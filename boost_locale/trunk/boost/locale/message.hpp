@@ -247,9 +247,8 @@ namespace boost {
                 if(!translated) {
                     char const *msg = plural ? ( n_ == 1 ? cut_comment(id) : plural) : cut_comment(id);
 
-                    std::ctype<CharType> const &ct = std::use_facet<std::ctype<CharType> >(loc);
                     while(*msg)
-                        buffer+=ct.widen(*msg++);
+                        buffer+=static_cast<CharType>(*msg++);
 
                     translated = buffer.c_str();
                 }
