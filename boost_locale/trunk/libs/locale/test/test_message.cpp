@@ -5,7 +5,32 @@
 
 namespace bl = boost::locale;
 
-//#define BOOST_NO_STD_WSTRING
+std::string same_s(std::string s)
+{
+    return s;
+}
+
+#ifndef BOOST_NO_STD_WSTRING
+std::wstring same_w(std::wstring s)
+{
+    return s;
+}
+#endif
+
+#ifdef BOOST_HAS_CHAR16_T
+std::u16string same_u16(std::u16string s)
+{
+    return s;
+}
+#endif
+
+#ifdef BOOST_HAS_CHAR32_T
+std::u32string same_u32(std::u32string s)
+{
+    return s;
+}
+#endif
+
 
 template<typename Char>
 void strings_equal(std::string s,std::string p,int n,std::string iexpected,std::locale const &l,std::string domain)
@@ -14,7 +39,8 @@ void strings_equal(std::string s,std::string p,int n,std::string iexpected,std::
     string_type expected=to_correct_string<Char>(iexpected,l);
     if(domain=="default") {
         TEST(bl::translate(s,p,n).str<Char>(l)==expected);
-        TEST(bl::translate(s.c_str(),p.c_str(),n).str<Char>(l)==expected);
+        char const *s_c_str=s.c_str(), *p_c_str=p.c_str(); // workaround gcc-3.4 bug
+        TEST(bl::translate(s_c_str,p_c_str,n).str<Char>(l)==expected);
         std::locale tmp_locale=std::locale();
         std::locale::global(l);
         string_type tmp=bl::translate(s,p,n);
@@ -53,7 +79,8 @@ void strings_equal(std::string original,std::string iexpected,std::locale const 
     string_type expected=to_correct_string<Char>(iexpected,l);
     if(domain=="default") {
         TEST(bl::translate(original).str<Char>(l)==expected);
-        TEST(bl::translate(original.c_str()).str<Char>(l)==expected);
+        char const *original_c_str=original.c_str(); // workaround gcc-3.4 bug
+        TEST(bl::translate(original_c_str).str<Char>(l)==expected);
         std::locale tmp_locale=std::locale();
         std::locale::global(l);
         string_type tmp=bl::translate(original);
@@ -171,6 +198,25 @@ int main(int argc,char **argv)
         std::cout << "Testing fallbacks" <<std::endl;
         test_translate("test","he_IL",g("he_IL.UTF-8"),"full");
         test_translate("test","he",g("he_IL.UTF-8"),"fall");
+        
+        std::cout << "Testing automatic conversions " << std::endl;
+        std::locale::global(g("he_IL.UTF-8"));
+
+
+        TEST(same_s(bl::translate("hello"))=="שלום");
+        #ifndef BOOST_NO_STD_WSTRING
+        TEST(same_w(bl::translate("hello"))==to<wchar_t>("שלום"));
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR16_T
+        TEST(same_u16(bl::translate("hello"))==to<char16_t>("שלום"));
+        #endif
+        
+        #ifdef BOOST_HAS_CHAR32_T
+        TEST(same_u32(bl::translate("hello"))==to<char32_t>("שלום"));
+        #endif
+        
+
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
