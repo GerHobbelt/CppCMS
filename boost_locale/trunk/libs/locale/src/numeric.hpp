@@ -153,7 +153,7 @@ namespace boost {
                     // We do not really know internal point, so we assume that it does not
                     // exists. So according to standard field should be right aligned
                     //
-                    if(flags == std::ios_base::internal || flags == std::ios_base::right)
+                    if(flags != std::ios_base::left)
                         on_left = n;
                     on_right = n - on_left;
                 }
