@@ -80,6 +80,7 @@ set(LOCALE_TESTS
 		test_codepage
 		test_boundary
 		test_message
+		test_formatting
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello
