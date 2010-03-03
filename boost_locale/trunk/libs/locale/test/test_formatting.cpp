@@ -6,12 +6,20 @@
 #include <iostream>
 #include <iomanip>
 
+#include <unicode/uversion.h>
 
 using namespace boost::locale;
 
-//#define BOOST_NO_STD_WSTRING
-//#define TESTEQ(x,y) do { std::cerr << x << " " << y << std::endl; TEST((x)==(y)); } while(0)
+//#define TEST_DEBUG
+
+#ifdef TEST_DEBUG
+#define BOOST_NO_STD_WSTRING
+#undef BOOST_HAS_CHAR16_T
+#undef BOOST_HAS_CHAR32_T
+#define TESTEQ(x,y) do { std::cerr << x << " " << y << std::endl; TEST((x)==(y)); } while(0)
+#else
 #define TESTEQ(x,y) TEST((x)==(y))
+#endif
 
 #define TEST_FMT(manip,value,expected) \
 do{ \
@@ -57,6 +65,13 @@ do { \
     TEST_PAR(m1>>m2>>m3,type,str,value_out); \
 }while(0)
 
+#define TEST_FP4(m1,m2,m3,m4,value_in,str,type,value_out) \
+do { \
+    TEST_FMT(m1<<m2<<m3<<m4,value_in,str); \
+    TEST_PAR(m1>>m2>>m3>>m4,type,str,value_out); \
+}while(0)
+
+
 
 template<typename CharType>
 void test_manip()
@@ -81,7 +96,76 @@ void test_manip()
     TEST_FP2(as::currency,as::currency_national,1345.34,"USD1,345.34",double,1345.34);
     #endif
     TEST_FP1(as::spellout,132,"one hundred and thirty-two",int,132);
-    //TEST_FP1(as::ordinal,1,"1st",int,1);
+    loc=g("he_IL.UTF-8");
+    TEST_FP1(as::ordinal,3,"שלישי",int,3);
+    loc=g("en_US.UTF-8");
+
+    time_t a_date = 3600*24*(31+4); // Feb 5th
+    time_t a_time = 3600*15+60*33; // 15:33:05
+    time_t a_timesec = 13;
+    time_t a_datetime = a_date + a_time + a_timesec;
+
+    TEST_FP2(as::date,                as::gmt,a_datetime,"Feb 5, 1970",time_t,a_date);
+    TEST_FP3(as::date,as::date_short ,as::gmt,a_datetime,"2/5/70",time_t,a_date);
+    TEST_FP3(as::date,as::date_medium,as::gmt,a_datetime,"Feb 5, 1970",time_t,a_date);
+    TEST_FP3(as::date,as::date_long  ,as::gmt,a_datetime,"February 5, 1970",time_t,a_date);
+    TEST_FP3(as::date,as::date_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970",time_t,a_date);
+    
+    TEST_FP2(as::time,                as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_short ,as::gmt,a_datetime,"3:33 PM",time_t,a_time);
+    TEST_FP3(as::time,as::time_medium,as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_long  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_full  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
+
+    TEST_FP2(as::time,                as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_short ,as::time_zone("GMT+01:00"),a_datetime,"4:33 PM",time_t,a_time);
+    TEST_FP3(as::time,as::time_medium,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_long  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
+    TEST_FP3(as::time,as::time_full  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
+
+    TEST_FP2(as::datetime,                                as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
+    TEST_FP4(as::datetime,as::date_short ,as::time_short ,as::gmt,a_datetime,"2/5/70 3:33 PM",time_t,a_date+a_time);
+    TEST_FP4(as::datetime,as::date_medium,as::time_medium,as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
+    TEST_FP4(as::datetime,as::date_long  ,as::time_long  ,as::gmt,a_datetime,"February 5, 1970 3:33:13 PM GMT+00:00",time_t,a_datetime);
+    TEST_FP4(as::datetime,as::date_full  ,as::time_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970 3:33:13 PM GMT+00:00",time_t,a_datetime);
+
+    time_t now=time(0);
+    char local_time_str[256];
+    std::string format="%H:%M:%S";
+    std::basic_string<CharType> format_string(format.begin(),format.end());
+    strftime(local_time_str,sizeof(local_time_str),format.c_str(),localtime(&now));
+    TEST_FMT(as::ftime(format_string),now,local_time_str);
+    TEST_FMT(as::ftime(format_string)<<as::gmt<<as::local_time,now,local_time_str);
+
+    std::string marks =  
+        "aAbB" 
+        "cdeh"
+        "HIjm"
+        "Mnpr"
+        "RStT"
+        "xXyY"
+        "Z%";
+
+    std::string result[]= { 
+        "Thu","Thursday","Feb","February",  // aAbB
+        "Thursday, February 5, 1970 3:33:13 PM GMT+00:00","05","5","Feb", // cdeh
+        "15","03","36","02", // HIjm
+        "33","\n","PM", "03:33:13 PM",// Mnpr
+        "15:33","13","\t","15:33:13", // RStT
+        "Feb 5, 1970","3:33:13 PM","70","1970", // xXyY
+        "GMT+00:00","%" }; /// Z%
+
+    for(unsigned i=0;i<marks.size();i++) {
+        format_string.clear();
+        format_string+=static_cast<CharType>('%');
+        format_string+=static_cast<CharType>(marks[i]);
+        TEST_FMT(as::ftime(format_string)<<as::gmt,a_datetime,result[i]);
+    }
+
+    /*std::string sample="Now is %A, %H o'clock ' or not ' ";
+    format_string.assign(sample.begin(),sample.end());
+    TEST_FMT(as::ftime(format_string)<<as::gmt,a_datetime,"Now is Thursday, 15 o'clock ' or not ' ");*/
+
 }
 
 

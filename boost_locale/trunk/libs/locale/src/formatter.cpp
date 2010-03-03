@@ -333,7 +333,7 @@ namespace locale {
             case 'p': // am-pm
                 return "a";
             case 'r': // time with AM/PM %I:%M:%S %p
-                return "HH:mm:ss a";
+                return "hh:mm:ss a";
             case 'R': // %H:%M
                 return "HH:mm";
             case 'S': // second [00,61]
