@@ -719,6 +719,7 @@ Following format key-value pairs are supported:
     -   `hex` -- display hexadecimal number
     -   `oct` -- display in octal format
     -   `sci` or `scientific` -- display in scientific format
+    -   `fix` or `fixed` -- display in fixed format
         
     For example `number=sci`
 -   `cur` or `currency` -- format currency. Optional values are:

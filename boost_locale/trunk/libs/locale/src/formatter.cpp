@@ -362,7 +362,7 @@ namespace locale {
             case 'Y': // Year 1998
                 return "YYYY";
             case 'Z': // timezone
-                return "VVVV";
+                return "vvvv";
             case '%': // %
                 return "%";
             default:
@@ -374,6 +374,7 @@ namespace locale {
         {
             unsigned len=ftime.length();
             icu::UnicodeString result;
+            bool escaped=false;
             for(unsigned i=0;i<len;i++) {
                 UChar c=ftime[i];
                 if(c=='%') {
@@ -383,23 +384,25 @@ namespace locale {
                         i++;
                         c=ftime[i];
                     }
+                    if(escaped) {
+                        result+="'";
+                        escaped=false;
+                    }
                     result+=strftime_to_icu_symbol(c,locale);
                 }
-                else if(('a'<=c && c<='z') || ('A'<=c && c<='Z')) {
-                    result+="'";
-                    while(('a'<=c && c<='z') || ('A'<=c && c<='Z')) {
-                        result+=c;
-                        i++;
-                        c=ftime[i];
-                    }
-                    result+="'";
-                }
                 else if(c=='\'') {
-                    result+="''";
+                        result+="''";
                 }
-                else
+                else {
+                    if(!escaped) {
+                        result+="'";
+                        escaped=true;
+                    }
                     result+=c;
+                }
             }
+            if(escaped)
+                result+="'";
             return result;
         }
         

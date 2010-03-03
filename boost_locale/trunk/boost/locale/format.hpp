@@ -204,8 +204,14 @@ namespace boost {
                 CharType const *format=sformat.c_str();
                 while(format[pos]!=0) {
                     if(format[pos] != obrk) {
-                        out<<format[pos];
-                        pos++;
+                        if(format[pos]==cbrk && format[pos+1]==cbrk) {
+                            out << cbrk;
+                            pos+=2;
+                        }
+                        else {
+                            out<<format[pos];
+                            pos++;
+                        }
                         continue;
                     }
 

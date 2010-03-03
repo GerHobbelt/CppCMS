@@ -78,6 +78,8 @@ namespace boost {
                         ios_.setf(std::ios_base::oct,std::ios_base::basefield);
                     else if(value=="sci" || value=="scientific")
                         ios_.setf(std::ios_base::scientific,std::ios_base::floatfield);
+                    else if(value=="fix" || value=="fixed")
+                        ios_.setf(std::ios_base::fixed,std::ios_base::floatfield);
                 }
                 else if(key=="cur" || key=="currency") {
                     as::currency(ios_);
