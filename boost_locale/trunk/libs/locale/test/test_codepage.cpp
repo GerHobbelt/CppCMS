@@ -84,8 +84,8 @@ void test_for_char()
         test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
     }
     else {
-        test_rfail<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8"),4);
-        test_wfail<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8"),4);
+        test_rfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
+        test_wfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
     }
     std::cout << "    ISO-8859-8" << std::endl;
     test_ok<Char>("hello \xf9\xec\xe5\xed",g("en_US.ISO-8859-8"),to<Char>("hello שלום"));

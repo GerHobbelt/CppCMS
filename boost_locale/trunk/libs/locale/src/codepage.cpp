@@ -471,7 +471,7 @@ namespace locale {
                     char const *&from_next,
                     uint16_t *to,
                     uint16_t *to_end,
-                    uint16_t *to_next) const
+                    uint16_t *&to_next) const
         {
             details::converter cvt(encoding_);
             std::codecvt_base::result r=std::codecvt_base::ok;
