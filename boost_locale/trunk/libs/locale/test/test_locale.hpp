@@ -38,14 +38,14 @@ do {                                \
 #define FINALIZE()                                                      \
     do {                                                                \
         int passed=test_counter - error_counter;                        \
-        std::cout << std::endl; std::cerr<<std::endl;                   \
+        std::cout << std::endl;                                         \
         std::cout << "Passed "<<passed<<" tests" << std::endl;          \
         if(error_counter >0 ) {                                         \
             std::cout << "Failed "<<error_counter<<" tests"<<std::endl; \
         }                                                               \
         std::cout <<" "<< std::fixed << std::setprecision(1)            \
                 << std::setw(5) << 100.0 * passed / test_counter <<     \
-                "% of tests completed sucsessefully";                   \
+                "% of tests completed sucsessefully" << std::endl;      \
         return error_counter == 0 ? EXIT_SUCCESS : EXIT_FAILURE ;       \
     }while(0)
 

@@ -10,7 +10,6 @@
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
-#include <boost/noncopyable.hpp>
 
 #include <string>
 #include "icu_util.hpp"
@@ -77,7 +76,9 @@ namespace impl {
             return cvt.cut(code_points,begin+from_char,end);
         }
 
-        struct uconv : public boost::noncopyable {
+        struct uconv  {
+            uconv(uconv const &other);
+            void operator=(uconv const &other);
         public:
             uconv(std::string const &charset,cpcvt_type cvt_type=cvt_skip) 
             {

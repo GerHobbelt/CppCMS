@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 include(CheckCXXSourceCompiles)
+enable_testing()
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	if(MSVC)
@@ -136,6 +137,7 @@ set(LOCALE_TESTS
 		test_boundary
 		test_message
 		test_formatting
+		test_ios_prop
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello
@@ -147,6 +149,7 @@ set(LOCALE_EXAMPLES 	hello
 
 foreach(TEST_TAR ${LOCALE_TESTS})
 	add_executable(${TEST_TAR} test/${TEST_TAR}.cpp)
+	add_test(${TEST_TAR} ${TEST_TAR} "${CMAKE_SOURCE_DIR}/test")
 	target_link_libraries(${TEST_TAR} ${BOOST_LOCALE_LIB})
 endforeach(TEST_TAR)
 

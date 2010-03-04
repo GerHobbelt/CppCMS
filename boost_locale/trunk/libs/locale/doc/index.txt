@@ -9,13 +9,13 @@ It uses `std::locale`, and `std::locale` facets in order to provide localization
 C++ aware way to user.
 
 C++ has quite a good base for localization via existing C++ locale facets: `std::num_put`, `std::ctype`, `std::collate` etc.. But
-they are very limited and sometimes buggy by design. The support of localization varies between different operating systems
-and incompatible between them.
+they are very limited and sometimes buggy by design. The support of localization varies between different
+operating systems, compilers, standard libraries and frequently incompatible between them.
 
 On the other hand, there is great, well debugged, high quality, widely used ICU library that gives all of the goodies but,
 it has very old API that mimics Java behavior, it completely ignores STL and provides useful API only
-for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-32, or limited national character sets
-like Latin1.
+for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-32 and limited but still popular
+national character sets like Latin1.
 
 
 Boost.Locale provides the natural glue between C++ locales framework, iostreams and powerful ICU library in following areas:
