@@ -1,32 +1,72 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.6)
+include(CheckCXXSourceCompiles)
 
-find_library(ICU_UC icuuc)
-find_library(ICU_DATA icudata NAMES icudt)
-find_library(ICU_I18N icui18n NAMES icuin)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	if(MSVC)
+		set(ICU_SUFFIX "d")
+	endif()
+endif()
 
-if(WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND NOT DISABLE_SHARED)
-	include(CheckCXXSourceCompiles)
+message("-- Looking for ICU libraries")
+
+find_library(ICU_UC icuuc${ICU_SUFFIX})
+find_library(ICU_DATA icudt NAMES icudata)
+find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
+find_path(ICU_INCLUDE_DIR unicode/unistr.h)
+
+message("-- Looking for Boost")
+find_path(BOOST_INCLUDE_DIR boost/shared_ptr.hpp)
+
+include_directories(${ICU_INCLUDE_DIR})
+include_directories(${BOOST_INCLUDE_DIR})
+
+
+if(CMAKE_COMPILER_IS_GNUCXX)
 	check_cxx_source_compiles(
 		"#if __GNUC__ < 4
 		#error
 		#endif
-		int main() {return 0;}"
+		int main() {}"
 		GCC_IS_GCC4)
+
+	set(CXX_FLAGS "-Wall")
+
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+		set(CXX_FLAGS "${CXX_FLAGS} -pthreads")
+	endif()
+
 	if(NOT GCC_IS_GCC4)
-		message("GCC version is below gcc4, thus disabling shared library")
-		set(DISABLE_SHARED 1)
-	endif(NOT GCC_IS_GCC4)
-endif(WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND NOT DISABLE_SHARED)
+		# Uninitalized checks are bogous under gcc-3.4
+		set(CXX_FLAGS "${CXX_FLAGS} -Wno-uninitialized")
+	endif()
 
+	if(WIN32)
+		if(GCC_IS_GCC4) 
+			# Very important, otherwise process would not start under cygwin
+			set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--enable-auto-import")
+		else()
+			# gcc-3 does not have shared library for libstdc++ -- cause dll faitures with locale
+			set(DISABLE_SHARED ON)
+		endif()
+	endif()
 
-if(GCC_IS_GCC4 AND WIN32)
-	set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--enable-auto-import")
-endif(GCC_IS_GCC4 AND WIN32)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+	set(CXX_FLAGS "-Wall")
+elseif(MSVC)
+	set(CXX_FLAGS "/EHsc /W3")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+	#
+	# We use STL port under Sun Studio, standard library is broken
+	#
 	
+	set(CXX_FLAGS "-library=stlport4")
 
-if(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
-	message(FATAL " Failed to find icu")
-endif(NOT ICU_UC OR NOT ICU_DATA OR NOT ICU_I18N)
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+		set(CXX_FLAGS "${CXX_FLAGS} -mt")
+	endif()
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
 include_directories(../..)
 

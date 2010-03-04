@@ -116,8 +116,7 @@ int main()
         std::cerr << "Failed " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Ok" << std::endl;
-    return EXIT_SUCCESS;
+    FINALIZE();
 
 }
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

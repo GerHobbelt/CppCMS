@@ -3,19 +3,46 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <unicode/utf8.h>
 
-#define TEST(X)                                                 \
-    do {                                                        \
-        if(X) break;                                            \
-        std::ostringstream oss;                                 \
-        oss << "Error " << __FILE__ << ":"<<__LINE__ << " "#X;  \
-        throw std::runtime_error(oss.str());                    \
+
+int error_counter=0;
+int test_counter=0;
+
+
+#define TEST(X)                                                         \
+    do {                                                                \
+        test_counter++;                                                 \
+        if(X) break;                                                    \
+        std::cerr << "Error in line:"<<__LINE__ << " "#X  << std::endl; \
+        error_counter++;                                                \
+    }while(0)    
+#endif
+
+#define TEST_THROWS(X,E)                                                \
+    do {                                                                \
+        test_counter++;                                                 \
+        try { X; } catch(E const &e) {break;} catch(...){}              \
+        std::cerr << "Error in line:"<<__LINE__ << " "#X  << std::endl; \
+        error_counter++;                                                \
     }while(0)    
 
+#define FINALIZE()                                                      \
+    do {                                                                \
+        int passed=test_counter - error_counter;                        \
+        std::cout << std::endl; std::cerr<<std::endl;                   \
+        std::cout << "Passed "<<passed<<" tests" << std::endl;          \
+        if(error_counter >0 ) {                                         \
+            std::cout << "Failed "<<error_counter<<" tests"<<std::endl; \
+        }                                                               \
+        std::cout <<" "<< std::fixed << std::setprecision(1)            \
+                << std::setw(5) << 100.0 * passed / test_counter <<     \
+                "% of tests completed sucsessefully";                   \
+        return error_counter == 0 ? EXIT_SUCCESS : EXIT_FAILURE ;       \
+    }while(0)
 
-#endif
 
 template<typename Char>
 std::basic_string<Char> to(std::string const &utf8)

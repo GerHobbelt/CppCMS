@@ -132,12 +132,7 @@ void test_pos(std::string source,std::basic_string<Char> target,std::string enco
     TEST(from_utf<Char>(target.c_str(),target.c_str()+target.size(),l)==source);
 }
 
-#define TESTF(X) \
-    do { \
-        try { X; } catch(boost::locale::conv::conversion_error const &e) { break; } \
-        std::ostringstream ss; ss<< __FILE__ << " " << __LINE__ << "Error not thrown"; \
-        throw std::runtime_error(ss.str()); \
-    } while(0)
+#define TESTF(X) TEST_THROWS(X,boost::locale::conv::conversion_error)
 
 template<typename Char>
 void test_to_neg(std::string source,std::basic_string<Char> target,std::string encoding)
@@ -234,8 +229,7 @@ int main()
         std::cerr << "Failed " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Ok" << std::endl;
-    return EXIT_SUCCESS;
+    FINALIZE();
 }
 
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

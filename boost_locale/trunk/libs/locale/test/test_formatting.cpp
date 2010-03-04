@@ -30,6 +30,28 @@ do{ \
     TESTEQ(ss.str(),to_correct_string<CharType>(expected,loc)); \
 }while(0)
 
+#define TEST_NOPAR(manip,actual,type)                           \
+do{                                                             \
+    type v;                                                     \
+    std::basic_string<CharType> act=                            \
+        to_correct_string<CharType>(actual,loc);                \
+    {                                                           \
+        std::basic_istringstream<CharType> ss;                  \
+        ss.imbue(loc);                                          \
+        ss.str(act);                                            \
+        ss >> manip >> v ;                                      \
+        TEST(ss.fail());                                        \
+    }                                                           \
+    {                                                           \
+        std::basic_istringstream<CharType> ss;                  \
+        ss.imbue(loc);                                          \
+        ss.str(act);                                            \
+        ss.exceptions(std::ios_base::failbit);                  \
+        ss >> manip;                                            \
+        TEST_THROWS(ss >> v,std::ios_base::failure);            \
+    }                                                           \
+}while(0)
+ 
 #define TEST_PAR(manip,type,actual,expected) \
 do{ \
     type v; \
@@ -100,10 +122,22 @@ void test_manip(std::string e_charset="UTF-8")
     TEST_FP3(as::number,std::right,std::setw(3),15," 15",int,15);
     TEST_FP3(as::number,std::setprecision(3),std::fixed,13.1,"13.100",double,13.1);
     TEST_FP3(as::number,std::setprecision(3),std::scientific,13.1,"1.310E1",double,13.1);
+
+    TEST_NOPAR(as::number,"",int);
+    TEST_NOPAR(as::number,"--3",int);
+    TEST_NOPAR(as::number,"y",int);
+
     TEST_FP1(as::percent,0.1,"10%",double,0.1);
     TEST_FP3(as::percent,std::fixed,std::setprecision(1),0.10,"10.0%",double,0.1);
+
+    TEST_NOPAR(as::percent,"1",double);
+
     TEST_FP1(as::currency,1345,"$1,345.00",int,1345);
     TEST_FP1(as::currency,1345.34,"$1,345.34",double,1345.34);
+
+    TEST_NOPAR(as::currency,"$",double);
+
+
     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
     TEST_FP2(as::currency,as::currency_national,1345,"$1,345.00",int,1345);
     TEST_FP2(as::currency,as::currency_national,1345.34,"$1,345.34",double,1345.34);
@@ -111,7 +145,12 @@ void test_manip(std::string e_charset="UTF-8")
     TEST_FP2(as::currency,as::currency_iso,1345.34,"USD1,345.34",double,1345.34);
     #endif
     TEST_FP1(as::spellout,10,"ten",int,10);
-    TEST_FMT(as::ordinal,3,"3rd");
+    #if U_ICU_VERSION_MAJOR_NUM >= 4
+    if(e_charset=="UTF-8")
+       TEST_FMT(as::ordinal,1,"1\xcb\xa2\xe1\xb5\x97"); // 1st with st as ligatures
+    #else
+       TEST_FMT(as::ordinal,1,"1st");
+    #endif
 
     time_t a_date = 3600*24*(31+4); // Feb 5th
     time_t a_time = 3600*15+60*33; // 15:33:05
@@ -124,17 +163,25 @@ void test_manip(std::string e_charset="UTF-8")
     TEST_FP3(as::date,as::date_long  ,as::gmt,a_datetime,"February 5, 1970",time_t,a_date);
     TEST_FP3(as::date,as::date_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970",time_t,a_date);
     
+    TEST_NOPAR(as::date>>as::date_short,"aa/bb/cc",double);
+    
     TEST_FP2(as::time,                as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
     TEST_FP3(as::time,as::time_short ,as::gmt,a_datetime,"3:33 PM",time_t,a_time);
     TEST_FP3(as::time,as::time_medium,as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
     TEST_FP3(as::time,as::time_long  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
     TEST_FP3(as::time,as::time_full  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
+    
+    TEST_NOPAR(as::time,"AM",double);
 
     TEST_FP2(as::time,                as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
     TEST_FP3(as::time,as::time_short ,as::time_zone("GMT+01:00"),a_datetime,"4:33 PM",time_t,a_time);
     TEST_FP3(as::time,as::time_medium,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
     TEST_FP3(as::time,as::time_long  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
+    #if (U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM == 308) && defined(__CYGWIN__)
+    // Known faliture ICU issue
+    #else
     TEST_FP3(as::time,as::time_full  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
+    #endif
 
     TEST_FP2(as::datetime,                                as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
     TEST_FP4(as::datetime,as::date_short ,as::time_short ,as::gmt,a_datetime,"2/5/70 3:33 PM",time_t,a_date+a_time);
@@ -217,7 +264,10 @@ void test_format(std::string charset="UTF-8")
     FORMAT("{1,cur}",1234,"$1,234.00");
     FORMAT("{1,currency}",1234,"$1,234.00");
     if(charset=="UTF-8") {
-        FORMAT("{1,cur,locale=de_DE}",10,"10,00 €");
+        if(U_ICU_VERSION_MAJOR_NUM >=4)
+            FORMAT("{1,cur,locale=de_DE}",10,"10,00\xC2\xA0€");
+        else
+            FORMAT("{1,cur,locale=de_DE}",10,"10,00 €");
     }
     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
     FORMAT("{1,cur=nat}",1234,"$1,234.00");
@@ -226,8 +276,15 @@ void test_format(std::string charset="UTF-8")
     #endif
     FORMAT("{1,spell}",10,"ten");
     FORMAT("{1,spellout}",10,"ten");
+    #if U_ICU_VERSION_MAJOR_NUM >= 4
+    if(charset=="UTF-8") {
+        FORMAT("{1,ord}",1,"1\xcb\xa2\xe1\xb5\x97");
+        FORMAT("{1,ordinal}",1,"1\xcb\xa2\xe1\xb5\x97");
+    }
+    #else
     FORMAT("{1,ord}",1,"1st");
     FORMAT("{1,ordinal}",1,"1st");
+    #endif
 
     time_t now=time(0);
     char local_time_str[256];
@@ -291,8 +348,7 @@ int main()
         std::cerr << "Failed " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Ok" << std::endl;
-    return EXIT_SUCCESS;
+    FINALIZE();
 
 }
 
