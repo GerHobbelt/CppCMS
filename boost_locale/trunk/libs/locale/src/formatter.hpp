@@ -125,25 +125,25 @@ namespace boost {
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL std::auto_ptr<formatter<char> > formatter<char>::create(std::ios_base &ios);
+        std::auto_ptr<formatter<char> > formatter<char>::create(std::ios_base &ios);
 
         ///
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL formatter<char> const *formatter<char>::get(std::ios_base &ios);
+        formatter<char> const *formatter<char>::get(std::ios_base &ios);
 
         #ifndef BOOST_NO_STD_WSTRING
         ///
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios);
+        std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios);
         ///
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL formatter<wchar_t> const *formatter<wchar_t>::get(std::ios_base &ios);
+        formatter<wchar_t> const *formatter<wchar_t>::get(std::ios_base &ios);
         #endif
 
         #ifdef BOOST_HAS_CHAR16_T
@@ -151,12 +151,12 @@ namespace boost {
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL std::auto_ptr<formatter<char16_t> > formatter<char16_t>::create(std::ios_base &ios);
+        std::auto_ptr<formatter<char16_t> > formatter<char16_t>::create(std::ios_base &ios);
         ///
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL formatter<char16_t> const *formatter<char16_t>::get(std::ios_base &ios);
+        formatter<char16_t> const *formatter<char16_t>::get(std::ios_base &ios);
         #endif
 
         #ifdef BOOST_HAS_CHAR32_T
@@ -164,12 +164,12 @@ namespace boost {
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL std::auto_ptr<formatter<char32_t> > formatter<char32_t>::create(std::ios_base &ios);
+        std::auto_ptr<formatter<char32_t> > formatter<char32_t>::create(std::ios_base &ios);
         ///
         /// Specialization for real implementation
         ///
         template<>
-        BOOST_LOCALE_DECL formatter<char32_t> const *formatter<char32_t>::get(std::ios_base &ios);
+        formatter<char32_t> const *formatter<char32_t>::get(std::ios_base &ios);
         #endif
 
     } // namespace locale

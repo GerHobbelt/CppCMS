@@ -12,7 +12,7 @@
 #include <string>
 #include <ios>
 #include <limits>
-#include <boost/locale/formatter.hpp>
+#include "formatter.hpp"
 #include <boost/locale/formatting.hpp>
 #include <algorithm>
 

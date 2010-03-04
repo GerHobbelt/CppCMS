@@ -13,7 +13,6 @@
 #include <boost/locale/codepage.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/locale/format.hpp>
-#include <boost/locale/formatter.hpp>
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>

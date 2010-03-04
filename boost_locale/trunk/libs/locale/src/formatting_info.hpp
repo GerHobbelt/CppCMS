@@ -11,7 +11,7 @@
 
 #include <boost/config.hpp>
 #include <boost/locale/formatting.hpp>
-#include <boost/locale/formatter.hpp>
+#include "formatter.hpp"
 #include <boost/cstdint.hpp>
 #include <string>
 #include <ios>

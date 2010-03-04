@@ -12,12 +12,18 @@ int error_counter=0;
 int test_counter=0;
 
 
+#define THROW_IF_TOO_BIG(X)         \
+do {                                \
+    if((X) > 20)                    \
+        throw std::runtime_error("Error limits reached, stopping unit test");   \
+}while(0)
+
 #define TEST(X)                                                         \
     do {                                                                \
         test_counter++;                                                 \
         if(X) break;                                                    \
         std::cerr << "Error in line:"<<__LINE__ << " "#X  << std::endl; \
-        error_counter++;                                                \
+        THROW_IF_TOO_BIG(error_counter++);                              \
     }while(0)    
 #endif
 
@@ -26,7 +32,7 @@ int test_counter=0;
         test_counter++;                                                 \
         try { X; } catch(E const &e) {break;} catch(...){}              \
         std::cerr << "Error in line:"<<__LINE__ << " "#X  << std::endl; \
-        error_counter++;                                                \
+        THROW_IF_TOO_BIG(error_counter++);                              \
     }while(0)    
 
 #define FINALIZE()                                                      \

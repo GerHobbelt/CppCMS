@@ -7,7 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/formatting.hpp>
-#include <boost/locale/formatter.hpp>
+#include "formatter.hpp"
 #include <boost/locale/info.hpp>
 #include "ios_prop.hpp"
 #include "formatting_info.hpp"
