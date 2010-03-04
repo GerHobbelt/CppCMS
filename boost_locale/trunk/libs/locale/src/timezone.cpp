@@ -8,7 +8,6 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/timezone.hpp>
 #include <boost/locale/info.hpp>
-#include <boost/noncopyable.hpp>
 #include <unicode/timezone.h>
 #include <unicode/strenum.h>
 #include "uconv.hpp"
@@ -16,7 +15,12 @@
 
 namespace boost{
     namespace locale {
-        class time_zone_impl : public boost::noncopyable {
+        class time_zone_impl {
+
+            // non-copyable
+            time_zone_impl(time_zone_impl const &other);
+            void operator=(time_zone_impl const &other);
+
         public:
             time_zone_impl(icu::TimeZone *ptr) : tz_(ptr) 
             {

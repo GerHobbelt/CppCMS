@@ -18,7 +18,22 @@ message("-- Looking for Boost")
 find_path(BOOST_INCLUDE_DIR boost/shared_ptr.hpp)
 
 include_directories(${ICU_INCLUDE_DIR})
-include_directories(${BOOST_INCLUDE_DIR})
+
+if(BOOST_INCLUDE_DIR)
+	include_directories(${BOOST_INCLUDE_DIR})
+endif()
+
+
+check_cxx_source_compiles(
+	"#include <unordered_map> 
+	int main() { std::unordered_map<int,int> m; }"
+	LOCALE_HAVE_STD_UNORDERED_MAP)
+
+check_cxx_source_compiles(
+	"#include <tr1/unordered_map> 
+	int main() { std::tr1::unordered_map<int,int> m; }"
+	LOCALE_HAVE_STD_TR1_UNORDERED_MAP)
+
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)

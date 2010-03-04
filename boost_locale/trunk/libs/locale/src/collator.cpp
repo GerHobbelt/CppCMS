@@ -8,13 +8,12 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/collator.hpp>
 #include <boost/locale/info.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/functional/hash.hpp>
 #include <vector>
 #include <limits>
 
 #include "info_impl.hpp"
 #include "uconv.hpp"
+#include "mo_hash.hpp"
 
 #include <unicode/coll.h>
 
@@ -51,28 +50,33 @@ namespace boost {
                         return 1;
                     return 0;
                 }
-                
-                std::basic_string<CharType> do_transform(level_type level,CharType const *b,CharType const *e) const
+               
+                std::vector<uint8_t> do_basic_transform(level_type level,CharType const *b,CharType const *e) const 
                 {
                     icu::UnicodeString str=cvt_.icu(b,e);
                     std::vector<uint8_t> tmp;
                     tmp.resize(str.length());
-                    boost::shared_ptr<icu::Collator> collate=collates_[limit(level)];
-                    int len = collate->getSortKey(str,&tmp[0],tmp.size());
+                    icu::Collator const &collate=*collates_[limit(level)];
+                    int len = collate.getSortKey(str,&tmp[0],tmp.size());
                     if(len > int(tmp.size())) {
                         tmp.resize(len);
-                        collate->getSortKey(str,&tmp[0],tmp.size());
+                        collate.getSortKey(str,&tmp[0],tmp.size());
                     }
                     else 
                         tmp.resize(len);
-
+                    return tmp;
+                }
+                std::basic_string<CharType> do_transform(level_type level,CharType const *b,CharType const *e) const
+                {
+                    std::vector<uint8_t> tmp = do_basic_transform(level,b,e);
                     return std::basic_string<CharType>(tmp.begin(),tmp.end());
                 }
                 
                 long do_hash(level_type level,CharType const *b,CharType const *e) const
                 {
-                    boost::hash<std::basic_string<CharType> > hasher;
-                    return hasher(do_transform(level,b,e));
+                    std::vector<uint8_t> tmp = do_basic_transform(level,b,e);
+                    tmp.push_back(0);
+                    return pj_winberger_hash_function(reinterpret_cast<char *>(&tmp.front()));
                 }
 
                 collate_impl(icu::Locale const &locale,std::string encoding) : cvt_(encoding)
@@ -103,7 +107,7 @@ namespace boost {
             private:
                 static const int level_count = 5;
                 icu_std_converter<CharType>  cvt_;
-                boost::shared_ptr<icu::Collator> collates_[level_count];
+                std::auto_ptr<icu::Collator> collates_[level_count];
             };
 
         } /// impl
