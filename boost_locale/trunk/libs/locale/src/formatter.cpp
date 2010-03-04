@@ -458,9 +458,9 @@ namespace locale {
                     uint64_t curr = info.flags() & currency_flags_mask;
 
                     if(curr == currency_default || curr == currency_national)
-                        nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kIsoCurrencyStyle,err));
-                    else
                         nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kCurrencyStyle,err));
+                    else
+                        nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kIsoCurrencyStyle,err));
 
                     #else
                     //

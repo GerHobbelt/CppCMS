@@ -87,7 +87,7 @@ do { \
 
 
 template<typename CharType>
-void test_manip(std::string e_charset="UTF-8",std::string h_charset="UTF-8")
+void test_manip(std::string e_charset="UTF-8")
 {
     boost::locale::generator g;
     std::locale loc=g("en_US."+e_charset);
@@ -105,13 +105,13 @@ void test_manip(std::string e_charset="UTF-8",std::string h_charset="UTF-8")
     TEST_FP1(as::currency,1345,"$1,345.00",int,1345);
     TEST_FP1(as::currency,1345.34,"$1,345.34",double,1345.34);
     #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
-    TEST_FP2(as::currency,as::currency_national,1345,"USD1,345.00",int,1345);
-    TEST_FP2(as::currency,as::currency_national,1345.34,"USD1,345.34",double,1345.34);
+    TEST_FP2(as::currency,as::currency_national,1345,"$1,345.00",int,1345);
+    TEST_FP2(as::currency,as::currency_national,1345.34,"$1,345.34",double,1345.34);
+    TEST_FP2(as::currency,as::currency_iso,1345,"USD1,345.00",int,1345);
+    TEST_FP2(as::currency,as::currency_iso,1345.34,"USD1,345.34",double,1345.34);
     #endif
-    TEST_FP1(as::spellout,132,"one hundred and thirty-two",int,132);
-    loc=g("he_IL."+h_charset);
-    TEST_FP1(as::ordinal,3,"שלישי",int,3);
-    loc=g("en_US."+e_charset);
+    TEST_FP1(as::spellout,10,"ten",int,10);
+    TEST_FMT(as::ordinal,3,"3rd");
 
     time_t a_date = 3600*24*(31+4); // Feb 5th
     time_t a_time = 3600*15+60*33; // 15:33:05
@@ -255,38 +255,6 @@ void test_format(std::string charset="UTF-8")
     FORMAT("{1,gmt,ftime='%H'''}",a_datetime,"15'");
     FORMAT("{1,gmt,ftime='''%H'}",a_datetime,"'15");
     FORMAT("{1,gmt,ftime='%H o''clock'}",a_datetime,"15 o'clock");
-
-/*    TEST_FP2(as::date,                as::gmt,a_datetime,"Feb 5, 1970",time_t,a_date);
-    TEST_FP3(as::date,as::date_short ,as::gmt,a_datetime,"2/5/70",time_t,a_date);
-    TEST_FP3(as::date,as::date_medium,as::gmt,a_datetime,"Feb 5, 1970",time_t,a_date);
-    TEST_FP3(as::date,as::date_long  ,as::gmt,a_datetime,"February 5, 1970",time_t,a_date);
-    TEST_FP3(as::date,as::date_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970",time_t,a_date);
-    
-    TEST_FP2(as::time,                as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_short ,as::gmt,a_datetime,"3:33 PM",time_t,a_time);
-    TEST_FP3(as::time,as::time_medium,as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_long  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_full  ,as::gmt,a_datetime,"3:33:13 PM GMT+00:00",time_t,a_time+a_timesec);
-
-    TEST_FP2(as::time,                as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_short ,as::time_zone("GMT+01:00"),a_datetime,"4:33 PM",time_t,a_time);
-    TEST_FP3(as::time,as::time_medium,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_long  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
-    TEST_FP3(as::time,as::time_full  ,as::time_zone("GMT+01:00"),a_datetime,"4:33:13 PM GMT+01:00",time_t,a_time+a_timesec);
-
-    TEST_FP2(as::datetime,                                as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
-    TEST_FP4(as::datetime,as::date_short ,as::time_short ,as::gmt,a_datetime,"2/5/70 3:33 PM",time_t,a_date+a_time);
-    TEST_FP4(as::datetime,as::date_medium,as::time_medium,as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
-    TEST_FP4(as::datetime,as::date_long  ,as::time_long  ,as::gmt,a_datetime,"February 5, 1970 3:33:13 PM GMT+00:00",time_t,a_datetime);
-    TEST_FP4(as::datetime,as::date_full  ,as::time_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970 3:33:13 PM GMT+00:00",time_t,a_datetime);
-
-    time_t now=time(0);
-    char local_time_str[256];
-    std::string format="%H:%M:%S";
-    std::basic_string<CharType> format_string(format.begin(),format.end());
-    strftime(local_time_str,sizeof(local_time_str),format.c_str(),localtime(&now));
-    TEST_FMT(as::ftime(format_string),now,local_time_str);
-    TEST_FMT(as::ftime(format_string)<<as::gmt<<as::local_time,now,local_time_str);*/
 }
 
 
@@ -296,8 +264,8 @@ int main()
         std::cout << "Testing char, UTF-8" << std::endl;
         test_manip<char>();
         test_format<char>();
-        std::cout << "Testing char, ISO-8859" << std::endl;
-        test_manip<char>("ISO-8859-1","ISO-8859-8");
+        std::cout << "Testing char, ISO-8859-1" << std::endl;
+        test_manip<char>("ISO-8859-1");
         test_format<char>("ISO-8859-1");
 
         #ifndef BOOST_NO_STD_WSTRING
