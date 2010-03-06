@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckCXXSourceCompiles)
 enable_testing()
 
+option(DISABLE_SHARED	"Disable shared libraries build" OFF)
+option(DISABLE_STATIC	"Disable static libraries build" OFF)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+	      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	if(MSVC)
 		set(ICU_SUFFIX "d")

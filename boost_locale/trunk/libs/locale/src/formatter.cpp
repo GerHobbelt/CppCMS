@@ -99,7 +99,7 @@ namespace locale {
             }
             virtual size_t parse(string_type const &str,uint32_t &value) const
             {
-                int64_t v;
+                int64_t v = 0;
                 size_t cut = do_parse(str,v);
                 if(cut==0)
                     return 0;
@@ -115,7 +115,7 @@ namespace locale {
 
             virtual size_t parse(string_type const &str,uint64_t &value) const
             {
-                double v;
+                double v = 0;
                 size_t cut = do_parse(str,v);
                 if(cut==0)
                     return 0;

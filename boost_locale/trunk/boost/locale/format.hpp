@@ -182,22 +182,13 @@ namespace boost {
             
         private:
             
-            string_type widen(char const *ptr,string_type &out) const
-            {
-                string_type tmp;
-                tmp.reserve(10);
-                while(*ptr)
-                    tmp+=out.widen(*ptr++);
-                return tmp;
-            }
-
             void format_output(stream_type &out,string_type const &sformat) const
             {
-                char_type obrk=out.widen('{');
-                char_type cbrk=out.widen('}');
-                char_type eq=out.widen('=');
-                char_type comma=out.widen(',');
-                char_type quote=out.widen('\'');
+                char_type obrk='{';
+                char_type cbrk='}';
+                char_type eq='=';
+                char_type comma=',';
+                char_type quote='\'';
 
                 size_t pos = 0;
                 size_t size=sformat.size();
@@ -234,8 +225,9 @@ namespace boost {
                             char_type c=format[pos];
                             if(c==comma || c==eq || c==cbrk)
                                 break;
-                            else
-                                key+=out.narrow(c,'?');
+                            else {
+                                key+=static_cast<char>(c);
+                            }
                         }
 
                         if(format[pos]==eq) {
@@ -263,7 +255,7 @@ namespace boost {
                             else {
                                 char_type c;
                                 while((c=format[pos])!=0 && c!=comma && c!=cbrk) {
-                                    svalue+=out.narrow(c,'?');
+                                    svalue+=static_cast<char>(c);
                                     pos++;
                                 }
                             }

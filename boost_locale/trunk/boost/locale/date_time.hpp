@@ -11,108 +11,122 @@
 namespace boost {
     namespace locale {
         namespace date_time {
-
             
-            class date_time_duration;
+            class date_time_error : public std::runtime_error {
+            public:
+                date_time_error(std::string const &e) : std::runtime_error(e) {}
+            };
 
-            namespace fields {
 
-                typedef enum {
-                    invalid,
-                    ara,
-                    year,
-                    extended_year,
-                    month,
-                    month_is_leap,
-                    day,
-                    day_of_year,
-                    day_of_week,
-                    day_of_week_in_month,
-                    day_of_week_local,
-                    hour,
-                    hour_12,
-                    am_pm,
-                    minute,
-                    second,
-                    week_of_year,
-                    week_of_month,
-                } field_type;
+            typedef enum {
+                invalid,
+                ara,
+                year,
+                extended_year,
+                month,
+                day,
+                day_of_year,
+                day_of_week,
+                day_of_week_in_month,
+                day_of_week_local,
+                hour,
+                hour_12,
+                am_pm,
+                minute,
+                second,
+                week_of_year,
+                week_of_month,
+            } field_type;
+
+
+            struct date_time_field 
+            {
+                field_type field;
+                int value;
+                date_time_field operator+() const { return *this; }
+                date_time_field operator-() const { return date_time_field(type,-value); }
                 
-                struct field_set {
-                    typedef  std::pair<fields::field_type,int> element_type;
-                    void add(fields::field_type type,int v) 
-                    {
-                        ext_.push_back(element_type(F,f()));
-                    }
-                    size_t size() const { return ext_.size(); }
-                    element_type operator[](int n) const { return ext_.at(n); }
-                private:
-                    std::vector<element_type> ext_;
-                };
+                date_time_field(field_type f=invalid,int v=1) : field(f), value(v) {}
+            };
 
-                template<fileds_type field>
-                struct basic_field {
-                    static const field_type type=field;
+            inline date_time_field operator+(field_type f) 
+            {
+                return date_time_field(f);
+            }
+            inline date_time_field operator-(field_type f)
+            {
+                return date_time_field(f,-1);
+            }
 
-                    basic_field(int v=0) : value_(v) {}
+            #define BOOST_LOCALE_DATE_TIME_OPERATORS(type) \
+                inline date_time_field operator*(field_type f,type v) { return date_time_field(f,v); } \
+                inline date_time_field operator*(type v,field_type f) { return date_time_field(f,v); } \
+                inline date_time_field operator*(type v,date_time_field f) { return date_time_field(f.field,f.value*v); } \
+                inline date_time_field operator*(date_time_field f,type v) { return date_time_field(f.field,f.value*v); }
 
-                    basic_field(date_time_duration const &d);
+            BOOST_LOCALE_DATE_TIME_OPERATORS(char)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(short int)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(int)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(long int)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned char)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned short int)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned int)
+            BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned long int)
 
-                    void value(int v) { value_ = v; }
+            #undef BOOST_LOCALE_DATE_TIME_OPERATORS
 
-                    int value() const { return value_; }
-
-                    int operator() const { return value_; }
-
-                    basic_field operator-() const { return basic_field(-value_); }
-
-                    template<field_type F>
-                    field_set operator+(basic_field<F> const &other) const
-                    {
-                        field_set s;
-                        s.add(field,value_);
-                        s.add(F,other.value_);
-                    }
-
-                private:
-                    int value_;
-                };
-
-                template<field_type F>
-                field_set &operator+(field_set &set,basic_field<F> const &other)
+            class date_time_field_set {
+            public:
+                date_time_field_set()
                 {
-                    set.add(F,other());
-                    return set;
                 }
+                date_time_field_set(date_time_field const &fl)
+                {
+                    basic_=fl;
+                }
+                void add(date_time_field f)
+                {
+                    if(basic_.type==invalid)
+                        basic_=f;
+                    else
+                        fields_.push_back(f);
+                }
+                size_t size() const
+                {
+                    return basic_.type==invalid ? 0 : 1 + fields_.size();
+                }
+                date_time_field const &operator[](int n) const 
+                {
+                    if(n==0)
+                        return basic_;
+                    else
+                        return fields_[n-1]; 
+                }
+            private:
+                date_time_field basic_;
+                std::vector<date_time_field> fields_;
+            };
 
-            } // fields
-
-
-            #define BOOST_LOCALE_FIELDS_DEF(name) typedef basic_field<fields::name> name
-            BOOST_LOCALE_FIELDS_DEF(ara);
-            BOOST_LOCALE_FIELDS_DEF(year);
-            BOOST_LOCALE_FIELDS_DEF(extended_year);
-            BOOST_LOCALE_FIELDS_DEF(month);
-            BOOST_LOCALE_FIELDS_DEF(month_is_leap);
-            BOOST_LOCALE_FIELDS_DEF(date);
-            BOOST_LOCALE_FIELDS_DEF(day);
-            BOOST_LOCALE_FIELDS_DEF(day_of_year);
-            BOOST_LOCALE_FIELDS_DEF(day_of_week);
-            BOOST_LOCALE_FIELDS_DEF(day_of_week_in_month);
-            BOOST_LOCALE_FIELDS_DEF(day_of_week_local);
-            BOOST_LOCALE_FIELDS_DEF(hour);
-            BOOST_LOCALE_FIELDS_DEF(hour_12);
-            BOOST_LOCALE_FIELDS_DEF(am_pm);
-            BOOST_LOCALE_FIELDS_DEF(minute);
-            BOOST_LOCALE_FIELDS_DEF(second);
-            BOOST_LOCALE_FIELDS_DEF(week_of_year);
-            BOOST_LOCALE_FIELDS_DEF(week_of_month);
-            #undef BOOST_LOCALE_FIELDS_DEF
-
+            inline date_time_field_set operator+(date_time_field_set const &a,date_time_field_set const &b)
+            {
+                date_time_field_set s(a);
+                for(unsigned i=0;i<b.size();i++)
+                    s.add(b[i]);
+                return s;
+            }
+            
+            inline date_time_field_set operator-(date_time_field_set const &a,date_time_field_set const &b)
+            {
+                date_time_field_set s(a);
+                for(unsigned i=0;i<b.size();i++)
+                    s.add(-b[i]);
+                return s;
+            }
 
             class BOOST_LOCALE_DECL calendar {
             public:
 
+                calendar(std::ios_base &ios);
                 calendar(std::locale const &l,time_zone const &zone);
                 calendar(std::locale const &l);
                 calendar(time_zone const &zone);
@@ -125,39 +139,20 @@ namespace boost {
                 boost::locale::time_zone time_zone() const
                 std::locale locale() const;
 
-                template<Field>
-                Field minimum() const
-                {
-                    return Field(range(Field::type).first);
-                }
-                template<Field>
-                Field greatest_minimum() const
-                {
-                    return Field(min_range(Field::type).first);
-                }
-                template<Field>
-                Field maximum() const
-                {
-                    return Field(range(Field::type).second);
-                }
-                template<Field>
-                Field least_maximum() const
-                {
-                    return Field(min_range(Field::type).second);
-                }
+                int minimum(field_type f) const
+                int greatest_minimum(field_type f) const
+                int maximum(field_type f) const
+                int least_maximum(field_type f) const
+                int first_day_of_week() const;
 
-                day_of_week first_day_of_week() const;
-
-                std::pair<int,int> range(fields::field_type t) const;
-                std::pair<int,int> min_range(fields::field_type t) const;
+                std::locale get_locale() const;
+                time_zone get_time_zone() const;
 
                 bool operator==(calendar const &other) const;
                 bool operator!=(calendar const &other) const
-                {
-                    return !(*this == other);
-                }
 
             private:
+                friend class date_time;
                 std::locale locale_;
                 boost::locale::time_zone tz_;
                 void *impl_;
@@ -167,96 +162,52 @@ namespace boost {
             class BOOST_LOCALE_DECL date_time {
             public:
 
-                date_time(std::ios_base &ios);
                 date_time();
-                date_time(double time);
-                date_time(double time,calendar const &cal);
-
-                date_time(fields::field_set const &set)
-                {
-                    init();
-                    for(unsigned i=0;i<set.size();i++)
-                        set_field(set[i].first,set[i].second);
-                }
-
-                date_time(fields::field_set const &set,calendar const &cal)
-                {
-                    init(cal);
-                    for(unsigned i=0;i<set.size();i++)
-                        set_field(set[i].first,set[i].second);
-                }
-
+                date_time(date_time const &other);
+                date_time const &operator=(date_time const &other);
                 ~date_time();
 
-                template<fields::field_type F>
-                date_time(fields::basic_field<F> f1)
-                {
-                    init();
-                    set(f1);
-                }
+                date_time(double time);
+                date_time(double time,calendar const &cal);
                 
-                template<fields::field_type F>
-                date_time(fields::basic_field<F> f1,calendar const &cal)
-                {
-                    init(cal);
-                    set(f1);
-                }
+                date_time(date_time_field_set const &set)
+                date_time(date_time_field_set const &set,calendar const &cal)
 
-
-
-                template<typename F1,typename F2>
-                template<fields::field_type f>
-                date_time const &operator=(fields::basic_field<f> v)
-                {
-                    set(f,v);
-                }
-
-                template<F>
-                F get() const
-                {
-                    return F(get_field(F::type));
-                }
                 
-                template<F>
-                void set() const
-                {
-                    return set_field(F::type,F());
-                }
-                 
-                template<fields::field_type f>
-                date_time operator+(fields::basic_field<f> v) const
-                {
-                    date_time tmp(*this);
-                    tmp.advance(f,v());
-                    return tmp;
-                }
+                date_time const &operator=(date_time_field_set const &f);
 
-                template<fields::field_type f>
-                date_time operator-(fields::basic_field<f> v) const
-                {
-                    date_time tmp(*this);
-                    tmp.advance(f,-v());
-                    return tmp;
-                }
+                void set(field_type f,int v);
+                int get(field_type f) const;
 
-                template<fields::field_type f>
-                date_time const &operator+=(fields::basic_field<f> v)
-                {
-                    advance(f,v());
-                    return *this;
-                }
+                date_time operator+(date_time_field_set const &v) const;
+                date_time operator-(date_time_field_set const &v) const ;
+                date_time const &operator+=(date_time_field_set const &v);
+                date_time const &operator-=(date_time_field_set const &v);
 
-                template<fields::field_type f>
-                date_time const &operator-=(fields::basic_field<f> v)
-                {
-                    advance(f,-v());
-                    return *this;
-                }
+                date_time operator<<(date_time_field_set const &v) const;
+                date_time operator>>(date_time_field_set const &v) const ;
+                date_time const &operator<<=(date_time_field_set const &v);
+                date_time const &operator>>=(date_time_field_set const &v);
 
                 double time() const;
                 void time(double v);
-            private:
 
+                bool operator==(date_time const &other) const;
+                bool operator!=(date_time const &other) const;
+                bool operator<(date_time const &other) const;
+                bool operator>(date_time const &other) const;
+                bool operator<=(date_time const &other) const;
+                bool operator>=(date_time const &other) const;
+
+                void swap(date_time &other);
+
+                int difference(date_time const &other,field_type f) const;
+
+                int minimum(field_type f) const;
+                int maximum(field_type f) const;
+
+            private:
+                void *impl_;
             };
 
             template<typename CharType>
@@ -268,16 +219,37 @@ namespace boost {
             template<typename CharType>
             std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,date_time &t)
             {
-                date_time tmp(in);
+                calendar cal(in);
+                date_time tmp(cal);
                 double v;
                 in >> v;
                 tmp.time(v);
-                t=tmp;
+                t.swap(tmp);
                 return in;
             }
+
+            class date_time_duration {
+            public:
+                date_time_duration(date_time const &first,date_time const &second) :
+                    s_(first),
+                    e_(second)
+                {
+                }
+
+                int operator / (field_type f) const
+                {
+                    return start().difference(end(),f);
+                }
+
+                date_time const &start() const { return s_; }
+                date_time const &end() const { return e_; }
+            private:
+                date_time s_,e_;
+            };
+
             
 
-
+/*
             template<fields::field_type Field>
             struct date_time_iterator : public std::random_access_iterator_tag<date_time> {
                 typedef fields::basic_field<Field> field_type;
@@ -373,7 +345,7 @@ namespace boost {
 
             private:
                 date_time dt_;
-            };
+            };*/
 
             class date_time_duration {
             public:
@@ -389,13 +361,6 @@ namespace boost {
                 date_time first_,second_;
             };
 
-            namespace fields {
-                template<field_type F>
-                basic_field::basic_field(date_time_duration const &d) :
-                    value_(d.begin().difference(F,d.end()))
-                {
-                }
-            }
         }
     }
 }
