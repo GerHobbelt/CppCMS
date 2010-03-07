@@ -25,7 +25,7 @@ namespace date_time {
 static UCalendarDateFields to_icu(field_type f)
 {
     switch(f) {
-    case ara: return UCAL_ERA;
+    case era: return UCAL_ERA;
     case year: return UCAL_YEAR;
     case extended_year: return UCAL_EXTENDED_YEAR;
     case month: return UCAL_MONTH;
@@ -225,6 +225,13 @@ date_time::date_time(double time,calendar const &cal)
     }
 }
 
+date_time::date_time(calendar const &cal)
+{
+    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
+}
+
+
+
 date_time::date_time(date_time_field_set const &s)
 {
     impl_=create_calendar();
@@ -271,6 +278,67 @@ int date_time::get(field_type f) const
     return v;
 }
 
+date_time date_time::operator+(date_time_field const &v) const
+{
+    date_time tmp(*this);
+    tmp+=v;
+    return tmp;
+}
+
+date_time date_time::operator-(date_time_field const &v) const
+{
+    date_time tmp(*this);
+    tmp-=v;
+    return tmp;
+}
+
+date_time date_time::operator<<(date_time_field const &v) const
+{
+    date_time tmp(*this);
+    tmp<<=v;
+    return tmp;
+}
+
+date_time date_time::operator>>(date_time_field const &v) const
+{
+    date_time tmp(*this);
+    tmp>>=v;
+    return tmp;
+}
+
+date_time const &date_time::operator+=(date_time_field const &v) 
+{
+    UErrorCode e=U_ZERO_ERROR;
+    calendar_->add(to_icu(v.field),v.value,e);
+    check_and_throw(e);
+    return *this;
+}
+
+date_time const &date_time::operator-=(date_time_field const &v) 
+{
+    UErrorCode e=U_ZERO_ERROR;
+    calendar_->add(to_icu(v.field),-v.value,e);
+    check_and_throw(e);
+    return *this;
+}
+
+date_time const &date_time::operator<<=(date_time_field const &v) 
+{
+    UErrorCode e=U_ZERO_ERROR;
+    calendar_->roll(to_icu(v.field),int32_t(v.value),e);
+    check_and_throw(e);
+    return *this;
+}
+
+date_time const &date_time::operator>>=(date_time_field const &v) 
+{
+    UErrorCode e=U_ZERO_ERROR;
+    calendar_->roll(to_icu(v.field),int32_t(-v.value),e);
+    check_and_throw(e);
+    return *this;
+}
+
+
 date_time date_time::operator+(date_time_field_set const &v) const
 {
     date_time tmp(*this);
@@ -302,9 +370,7 @@ date_time date_time::operator>>(date_time_field_set const &v) const
 date_time const &date_time::operator+=(date_time_field_set const &v) 
 {
     for(unsigned i=0;i<v.size();i++) {
-        UErrorCode e;
-        calendar_->add(to_icu(v[i].field),v[i].value,e);
-        check_and_throw(e);
+        *this+=v[i];
     }
     return *this;
 }
@@ -312,9 +378,7 @@ date_time const &date_time::operator+=(date_time_field_set const &v)
 date_time const &date_time::operator-=(date_time_field_set const &v) 
 {
     for(unsigned i=0;i<v.size();i++) {
-        UErrorCode e;
-        calendar_->add(to_icu(v[i].field),-v[i].value,e);
-        check_and_throw(e);
+        *this-=v[i];
     }
     return *this;
 }
@@ -322,9 +386,7 @@ date_time const &date_time::operator-=(date_time_field_set const &v)
 date_time const &date_time::operator<<=(date_time_field_set const &v) 
 {
     for(unsigned i=0;i<v.size();i++) {
-        UErrorCode e;
-        calendar_->roll(to_icu(v[i].field),v[i].value,e);
-        check_and_throw(e);
+        *this<<=v[i];
     }
     return *this;
 }
@@ -332,9 +394,7 @@ date_time const &date_time::operator<<=(date_time_field_set const &v)
 date_time const &date_time::operator>>=(date_time_field_set const &v) 
 {
     for(unsigned i=0;i<v.size();i++) {
-        UErrorCode e;
-        calendar_->roll(to_icu(v[i].field),-v[i].value,e);
-        check_and_throw(e);
+        *this>>=v[i];
     }
     return *this;
 }

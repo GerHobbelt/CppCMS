@@ -149,6 +149,7 @@ set(LOCALE_TESTS
 		test_message
 		test_formatting
 		test_ios_prop
+		test_date_time
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello

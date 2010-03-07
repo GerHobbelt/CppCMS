@@ -25,7 +25,7 @@ namespace boost {
 
             typedef enum {
                 invalid,
-                ara,
+                era,
                 year,
                 extended_year,
                 month,
@@ -84,6 +84,10 @@ namespace boost {
             public:
                 date_time_field_set()
                 {
+                }
+                date_time_field_set(field_type f)
+                {
+                    basic_=date_time_field(f);
                 }
                 date_time_field_set(date_time_field const &fl)
                 {
@@ -171,6 +175,7 @@ namespace boost {
 
                 date_time(double time);
                 date_time(double time,calendar const &cal);
+                date_time(calendar const &cal);
                 
                 date_time(date_time_field_set const &set);
                 date_time(date_time_field_set const &set,calendar const &cal);
@@ -181,8 +186,59 @@ namespace boost {
                 void set(field_type f,int v);
                 int get(field_type f) const;
 
+                date_time operator+(field_type f) const
+                {
+                    return *this+date_time_field(f);
+                }
+
+                date_time operator-(field_type f) const
+                {
+                    return *this-date_time_field(f);
+                }
+
+                date_time const &operator+=(field_type f)
+                {
+                    return *this+=date_time_field(f);
+                }
+                date_time const &operator-=(field_type f)
+                {
+                    return *this-=date_time_field(f);
+                }
+
+                date_time operator<<(field_type f) const
+                {
+                    return *this<<date_time_field(f);
+                }
+
+                date_time operator>>(field_type f) const
+                {
+                    return *this>>date_time_field(f);
+                }
+
+                date_time const &operator<<=(field_type f)
+                {
+                    return *this<<=date_time_field(f);
+                }
+                date_time const &operator>>=(field_type f)
+                {
+                    return *this>>=date_time_field(f);
+                }
+
+
+
+
+                date_time operator+(date_time_field const &v) const;
+                date_time operator-(date_time_field const &v) const;
+                date_time const &operator+=(date_time_field const &v);
+                date_time const &operator-=(date_time_field const &v);
+
+                date_time operator<<(date_time_field const &v) const;
+                date_time operator>>(date_time_field const &v) const ;
+                date_time const &operator<<=(date_time_field const &v);
+                date_time const &operator>>=(date_time_field const &v);
+
                 date_time operator+(date_time_field_set const &v) const;
-                date_time operator-(date_time_field_set const &v) const ;
+                date_time operator-(date_time_field_set const &v) const;
                 date_time const &operator+=(date_time_field_set const &v);
                 date_time const &operator-=(date_time_field_set const &v);
 
@@ -216,6 +272,7 @@ namespace boost {
             std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,date_time const &t)
             {
                 out << t.time();
+                return out;
             }
 
             template<typename CharType>
@@ -248,6 +305,11 @@ namespace boost {
             private:
                 date_time s_,e_;
             };
+
+            inline date_time_duration operator-(date_time const &later,date_time const &earlier)
+            {
+                return date_time_duration(earlier,later);
+            }
 
             
 
