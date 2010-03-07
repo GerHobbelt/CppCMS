@@ -8,6 +8,11 @@
 #ifndef BOOST_LOCALE_DATE_TIME_HPP_INCLUDED
 #define BOOST_LOCALE_DATE_TIME_HPP_INCLUDED
 
+#include <boost/locale/timezone.hpp>
+#include <locale>
+#include <vector>
+#include <stdexcept>
+
 namespace boost {
     namespace locale {
         namespace date_time {
@@ -44,7 +49,7 @@ namespace boost {
                 field_type field;
                 int value;
                 date_time_field operator+() const { return *this; }
-                date_time_field operator-() const { return date_time_field(type,-value); }
+                date_time_field operator-() const { return date_time_field(field,-value); }
                 
                 date_time_field(field_type f=invalid,int v=1) : field(f), value(v) {}
             };
@@ -86,14 +91,14 @@ namespace boost {
                 }
                 void add(date_time_field f)
                 {
-                    if(basic_.type==invalid)
+                    if(basic_.field==invalid)
                         basic_=f;
                     else
                         fields_.push_back(f);
                 }
                 size_t size() const
                 {
-                    return basic_.type==invalid ? 0 : 1 + fields_.size();
+                    return basic_.field==invalid ? 0 : 1 + fields_.size();
                 }
                 date_time_field const &operator[](int n) const 
                 {
@@ -136,20 +141,17 @@ namespace boost {
                 calendar(calendar const &other);
                 calendar const &operator=(calendar const &other);
 
-                boost::locale::time_zone time_zone() const
-                std::locale locale() const;
-
-                int minimum(field_type f) const
-                int greatest_minimum(field_type f) const
-                int maximum(field_type f) const
-                int least_maximum(field_type f) const
+                int minimum(field_type f) const;
+                int greatest_minimum(field_type f) const;
+                int maximum(field_type f) const;
+                int least_maximum(field_type f) const;
                 int first_day_of_week() const;
 
                 std::locale get_locale() const;
                 time_zone get_time_zone() const;
 
                 bool operator==(calendar const &other) const;
-                bool operator!=(calendar const &other) const
+                bool operator!=(calendar const &other) const;
 
             private:
                 friend class date_time;
@@ -170,8 +172,8 @@ namespace boost {
                 date_time(double time);
                 date_time(double time,calendar const &cal);
                 
-                date_time(date_time_field_set const &set)
-                date_time(date_time_field_set const &set,calendar const &cal)
+                date_time(date_time_field_set const &set);
+                date_time(date_time_field_set const &set,calendar const &cal);
 
                 
                 date_time const &operator=(date_time_field_set const &f);
@@ -347,23 +349,9 @@ namespace boost {
                 date_time dt_;
             };*/
 
-            class date_time_duration {
-            public:
-                date_time_duration(date_time const &first,date_time const &second) :
-                    first_(first),
-                    second_(second)
-                {
-                }
-
-                date_time const &begin() const { return first_; }
-                date_time const &end() const { return second_; }
-            private:
-                date_time first_,second_;
-            };
-
-        }
-    }
-}
+        } // date_time
+    } // locale
+} // boost
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

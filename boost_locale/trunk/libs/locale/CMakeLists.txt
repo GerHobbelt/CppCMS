@@ -107,7 +107,9 @@ set(BOOST_LOCALE_SRC
 	src/info.cpp 
 	src/format.cpp 
 	src/message.cpp 
-	src/mo_lambda.cpp)
+	src/mo_lambda.cpp
+	src/date_time.cpp
+	)
 
 if(DISABLE_SHARED AND DISABLE_STATIC)
 	message(FATAL " Can't build with both DISABLE_SHARED AND DISABLE_STATIC")

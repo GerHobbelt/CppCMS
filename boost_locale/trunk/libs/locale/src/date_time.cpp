@@ -9,7 +9,9 @@
 #include <boost/locale/date_time.hpp>
 #include <boost/locale/formatting.hpp>
 #include <unicode/calendar.h>
+#include <unicode/utypes.h>
 #include "info_impl.hpp"
+#include "timezone_impl.hpp"
 
 namespace boost {
 namespace locale {
@@ -17,7 +19,7 @@ namespace date_time {
 
 /// UTILITY
 
-#define CALENDAR(ptr) (*reinterpret_cast<icu::Calendar **>(&(ptr)->impl_))
+#define CALENDAR(ptr) (reinterpret_cast<icu::Calendar *>((ptr)->impl_))
 #define calendar_ CALENDAR(this)
 
 static UCalendarDateFields to_icu(field_type f)
@@ -44,13 +46,20 @@ static UCalendarDateFields to_icu(field_type f)
     }
 }
 
+static void check_and_throw(UErrorCode &e)
+{
+    if(U_FAILURE(e)) {
+        date_time_error(u_errorName(e));
+    }
+}
+
 static void *create_calendar(std::locale const &loc=std::locale(),time_zone const &zone=time_zone())
 {
     std::auto_ptr<icu::Calendar> cal;
     std::auto_ptr<icu::TimeZone> tz(zone.impl()->icu_tz()->clone());
-    UErrorCode err=U_ZERO_ERROR:
+    UErrorCode err=U_ZERO_ERROR;
     if(std::has_facet<info>(loc)) {
-        cal.reset(icu::Calendar::createInstance(std::use_facet<info>(loc).impl()->locale,tz.release(),err));
+        cal.reset(icu::Calendar::createInstance(tz.release(),std::use_facet<info>(loc).impl()->locale,err));
     }
     else {
         cal.reset(icu::Calendar::createInstance(tz.release(),err));
@@ -71,58 +80,58 @@ calendar::calendar(std::locale const &l,time_zone const &zone) :
     locale_(l),
     tz_(zone)
 {
-    calendar_=create_calendar(locale_,tz_);
+    impl_=create_calendar(locale_,tz_);
 }
 
 calendar::calendar(std::locale const &l) :
     locale_(l)
 {
-    calendar_=create_calendar(locale_,tz_);
+    impl_=create_calendar(locale_,tz_);
 }
 
 calendar::calendar(std::ios_base &ios) :
     locale_(ios.getloc()),
     tz_(ext_pattern<char>(ios,flags::time_zone_id))
 {
-    calendar_=create_calendar(locale_,tz_);
+    impl_=create_calendar(locale_,tz_);
 }
 
 calendar::calendar() 
 {
-    calendar_=create_calendar(locale_,tz_);
+    impl_=create_calendar(locale_,tz_);
 }
 
 calendar::~calendar()
 {
     delete calendar_;
-    calendar_=0;
+    impl_=0;
 }
 
 calendar::calendar(calendar const &other) :
     locale_(other.locale_),
     tz_(other.tz_)
 {
-    calendar_=CALENDAR(&other)->clone();
+    impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
 }
 
-calendar const &operator = (calendar const &other) 
+calendar const &calendar::operator = (calendar const &other) 
 {
     if(this !=&other) {
         locale_ = other.locale_;
         tz_ = other.tz_;
         delete calendar_;
-        calendar_=0;
-        calendar_=CALENDAR(&other)->clone();
+        impl_=0;
+        impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
     }
     return *this;
 }
 
-boost::locale::time_zone calendar::time_zone() const
+boost::locale::time_zone calendar::get_time_zone() const
 {
     return tz_;
 }
 
-std::locale calendar::locale() const
+std::locale calendar::get_locale() const
 {
     return locale_;
 }
@@ -134,7 +143,7 @@ int calendar::minimum(field_type f) const
 
 int calendar::greatest_minimum(field_type f) const
 {
-    return calendar_->getGreatesMinimum(to_icu(f));
+    return calendar_->getGreatestMinimum(to_icu(f));
 }
 
 int calendar::maximum(field_type f) const
@@ -157,7 +166,7 @@ int calendar::first_day_of_week() const
 
 bool calendar::operator==(calendar const &other) const
 {
-    return calendar_.isEquivalentTo(CALENDAR(&other));
+    return calendar_->isEquivalentTo(*CALENDAR(&other));
 }
 
 bool calendar::operator!=(calendar const &other) const
@@ -171,19 +180,19 @@ bool calendar::operator!=(calendar const &other) const
 
 date_time::date_time()
 {
-    calendar_=create_calendar();
+    impl_=create_calendar();
 }
 
 date_time::date_time(date_time const &other)
 {
-    calendar_=CALENDAR(&other)->clone();
+    impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
 }
 
 date_time const &date_time::operator = (date_time const &other)
 {
     if(this != &other) {
         delete calendar_;
-        calendar_=CALENDAR(&other)->clone();
+        impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
     }
     return *this;
 }
@@ -191,12 +200,12 @@ date_time const &date_time::operator = (date_time const &other)
 date_time::~date_time()
 {
     delete calendar_;
-    calendar_ = 0;
+    impl_ = 0;
 }
 
 date_time::date_time(double time)
 {
-    calendar_=create_calendar();
+    impl_=create_calendar();
     UErrorCode e=U_ZERO_ERROR;
     calendar_->setTime(time * 1000.0,e);
     if(U_FAILURE(e)) {
@@ -207,7 +216,7 @@ date_time::date_time(double time)
 
 date_time::date_time(double time,calendar const &cal)
 {
-    calendar_=CALENDAR(&cal)->clone();
+    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
     UErrorCode e=U_ZERO_ERROR;
     calendar_->setTime(time * 1000.0,e);
     if(U_FAILURE(e)) {
@@ -218,7 +227,7 @@ date_time::date_time(double time,calendar const &cal)
 
 date_time::date_time(date_time_field_set const &s)
 {
-    calendar_=create_calendar();
+    impl_=create_calendar();
     try {
         for(unsigned i=0;i<s.size();i++)
             set(s[i].field,s[i].value);
@@ -228,9 +237,9 @@ date_time::date_time(date_time_field_set const &s)
         throw;
     }
 }
-date_time::date_time(date_time_field_set const &set,calendar const &cal)
+date_time::date_time(date_time_field_set const &s,calendar const &cal)
 {
-    calendar_=CALENDAR(&cal)->clone();
+    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
     try {
         for(unsigned i=0;i<s.size();i++)
             set(s[i].field,s[i].value);
@@ -257,8 +266,9 @@ void date_time::set(field_type f,int v)
 int date_time::get(field_type f) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    calendar_->set(to_icu(f),e);
+    int v=calendar_->get(to_icu(f),e);
     check_and_throw(e);
+    return v;
 }
 
 date_time date_time::operator+(date_time_field_set const &v) const
@@ -387,13 +397,13 @@ void date_time::swap(date_time &other)
 {
     void *tmp=impl_;
     impl_=other.impl_;
-    other_.impl_=tmp;
+    other.impl_=tmp;
 }
 
 int date_time::difference(date_time const &other,field_type f) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    int d = calendar_->fieldDifference(to_icu(f),1000.0*other.time(),e);
+    int d = calendar_->fieldDifference(1000.0*other.time(),to_icu(f),e);
     check_and_throw(e);
     return d;
 }
