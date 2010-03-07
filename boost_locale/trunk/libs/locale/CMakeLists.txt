@@ -150,6 +150,7 @@ set(LOCALE_TESTS
 		test_formatting
 		test_ios_prop
 		test_date_time
+		test_generator
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello

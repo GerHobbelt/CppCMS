@@ -106,7 +106,7 @@ namespace boost {
         }
         void generator::clear_cache()
         {
-            d->cached.empty();
+            d->cached.clear();
         }
 
         std::locale generator::generate(std::string const &id) const

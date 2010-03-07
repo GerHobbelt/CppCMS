@@ -14,6 +14,10 @@
 
 namespace boost {
     namespace locale {
+
+        static std::string encoding_from_id(std::string id)
+        {
+        }
         
         std::locale::id info::id;
 
@@ -53,7 +57,16 @@ namespace boost {
             std::locale::facet(refs)
         {
             impl_.reset(new info_impl());
-            impl_->encoding = encoding;
+            size_t n = posix_id.find('.');
+            if(n!=std::string::npos) {
+                size_t e = posix_id.find('@',n);
+                if(e == std::string::npos)
+                    impl_->encoding = posix_id.substr(n+1);
+                else
+                    impl_->encoding = posix_id.substr(n+1,e-n-1);
+            }
+            else
+                impl_->encoding = encoding;
 
             if(!posix_id.empty()) {
                 impl_->locale = icu::Locale::createCanonical(posix_id.c_str());

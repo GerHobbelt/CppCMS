@@ -1,7 +1,22 @@
 #include <boost/locale/generator.hpp>
+#include <boost/locale/info.hpp>
 #include <boost/locale/collator.hpp>
 #include <iomanip>
 #include "test_locale.hpp"
+
+
+bool has_collator(std::locale const &l)
+{
+    return std::has_facet<std::collate<char> >(l) 
+        && dynamic_cast<boost::locale::collator<char> const *>(&std::use_facet<std::collate<char> >(l));
+}
+
+struct test_facet : public std::locale::facet {
+    test_facet() : std::locale::facet(0) {}
+    static std::locale::id id;
+};
+
+std::locale::id test_facet::id;
 
 
 int main()
@@ -9,22 +24,61 @@ int main()
     try {
         boost::locale::generator g;
         std::locale l=g("en_US.UTF-8");
-        TEST(std::has_facet<boost::locale::collator<char> >(l));
+        TEST(has_collator(l));
 
         g.categories(g.categories() ^ boost::locale::collation_facet);
         g.preload("en_US.UTF-8");
         g.categories(g.categories() | boost::locale::collation_facet);
         l=g("en_US.UTF-8");
-        TEST(!std::has_facet<boost::locale::collator<char> >(l));
+        TEST(!has_collator(l));
         g.clear_cache();
         l=g("en_US.UTF-8");
-        TEST(std::has_facet<boost::locale::collator<char> >(l));
+        TEST(has_collator(l));
         g.characters(g.characters() ^ boost::locale::char_facet);
         l=g("en_US.UTF-8");
-        TEST(!std::has_facet<boost::locale::collator<char> >(l));
+        TEST(!has_collator(l));
         g.characters(g.characters() | boost::locale::char_facet);
         l=g("en_US.UTF-8");
-        TEST(std::has_facet<boost::locale::collator<char> >(l));
+        TEST(has_collator(l));
+
+        l=g("en_US.ISO-8859-1");
+        TEST(std::use_facet<boost::locale::info>(l).language()=="en");
+        TEST(std::use_facet<boost::locale::info>(l).country()=="US");
+        TEST(!std::use_facet<boost::locale::info>(l).utf8());
+        TEST(std::use_facet<boost::locale::info>(l).encoding()=="ISO-8859-1");
+
+        g.octet_encoding("UTF-8");
+        l=g("en_US");
+        TEST(std::use_facet<boost::locale::info>(l).language()=="en");
+        TEST(std::use_facet<boost::locale::info>(l).country()=="US");
+        TEST(std::use_facet<boost::locale::info>(l).utf8());
+
+        l=g("en_US.ISO-8859-1");
+        TEST(std::use_facet<boost::locale::info>(l).language()=="en");
+        TEST(std::use_facet<boost::locale::info>(l).country()=="US");
+        TEST(!std::use_facet<boost::locale::info>(l).utf8());
+        TEST(std::use_facet<boost::locale::info>(l).encoding()=="ISO-8859-1");
+
+        l=g("en_US","ISO-8859-1");
+        TEST(std::use_facet<boost::locale::info>(l).language()=="en");
+        TEST(std::use_facet<boost::locale::info>(l).country()=="US");
+        TEST(!std::use_facet<boost::locale::info>(l).utf8());
+        TEST(std::use_facet<boost::locale::info>(l).encoding()=="ISO-8859-1");
+
+        std::locale l_wt(std::locale::classic(),new test_facet);
+        
+        TEST(std::has_facet<test_facet>(g.generate(l_wt,"en_US")));
+        TEST(std::has_facet<test_facet>(g.generate(l_wt,"en_US","ISO-8859-1")));
+        TEST(!std::has_facet<test_facet>(g("en_US")));
+        TEST(!std::has_facet<test_facet>(g("en_US","ISO-8859-1")));
+
+        g.preload(l_wt,"en_US");
+        g.preload(l_wt,"en_US","ISO-8859-1");
+        TEST(std::has_facet<test_facet>(g("en_US")));
+        TEST(std::has_facet<test_facet>(g("en_US","ISO-8859-1")));
+        TEST(std::use_facet<boost::locale::info>(g("en_US")).utf8());
+        TEST(!std::use_facet<boost::locale::info>(g("en_US","ISO-8859-1")).utf8());
+
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
