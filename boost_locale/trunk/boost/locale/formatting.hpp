@@ -9,7 +9,7 @@
 #define BOOST_LOCALE_FORMATTING_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
-#include <boost/locale/timezone.hpp>
+#include <boost/locale/time_zone.hpp>
 #include <boost/cstdint.hpp>
 #include <ostream>
 #include <istream>

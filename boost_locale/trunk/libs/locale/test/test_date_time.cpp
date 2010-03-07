@@ -7,20 +7,30 @@
 
 #define RESET() do { time_point = base_time_point; ss.str(""); } while(0)
 #define TESTR(X) do { TEST(X); RESET(); } while(0)
-//#define TESTEQSR(t,X) do { ss << (t); TESTR(ss.str() == X); } while(0)
-#define TESTEQSR(t,X) do { ss << (t); if(ss.str()!=X) { std::cerr <<"[" << ss.str() <<"]" << std::endl; } TESTR(ss.str() == X); } while(0)
+#define TESTEQSR(t,X) do { ss << (t); TESTR(ss.str() == X); } while(0)
+//#define TESTEQSR(t,X) do { ss << (t); if(ss.str()!=X) { std::cerr <<"[" << ss.str() <<"]" << std::endl; } TESTR(ss.str() == X); } while(0)
 
 int main()
 {
     try {
-        using namespace boost::locale::date_time;
+        using namespace boost::locale;
+        using namespace boost::locale::period;
         
         boost::locale::generator g;
 
         std::locale loc=g("en_US.UTF-8");
+
+        std::locale::global(loc);
         
-        boost::locale::time_zone tz("GMT");
-        boost::locale::date_time::calendar cal(loc,tz); 
+        time_zone tz("GMT");
+        time_zone::global(tz);
+        calendar cal(loc,tz); 
+
+        TEST(calendar() == cal);
+        TEST(calendar(loc) == cal);
+        TEST(calendar(tz) == cal);
+        TEST(calendar(loc,time_zone("GMT+01:00")) != cal);
+        TEST(calendar(g("ru_RU.UTF-8")) != cal);
 
         TEST(cal.minimum(month)==0);
         TEST(cal.maximum(month)==11);
@@ -38,15 +48,15 @@ int main()
         ss<<boost::locale::as::time_zone(tz);
 
 
-        boost::locale::date_time::date_time time_point(boost::locale::date_time::calendar(loc,boost::locale::time_zone("GMT")));
+        date_time time_point;
         
         time_point=year * 1970 + month * 1 + 5 * day;
 
-        ss << boost::locale::as::date << time_point;
+        ss << as::date << time_point;
         TEST(ss.str() == "Feb 5, 1970");
         time_point = 3 * hour_12 + 1 * am_pm + 33 * minute + 13 * second; 
         ss.str("");
-        ss << boost::locale::as::datetime << time_point;
+        ss << as::datetime << time_point;
         TEST( ss.str() == "Feb 5, 1970 3:33:13 PM"); ss.str("");
 
         time_t a_date = 3600*24*(31+4); // Feb 5th
@@ -54,7 +64,7 @@ int main()
         time_t a_timesec = 13;
         time_t a_datetime = a_date + a_time + a_timesec;
 
-        boost::locale::date_time::date_time base_time_point=boost::locale::date_time::date_time(a_datetime,cal);
+        date_time base_time_point=date_time(a_datetime);
 
         RESET();
 
@@ -99,6 +109,9 @@ int main()
         TEST(time_point > time_point - second);
         TEST(!(time_point > time_point + second));
 
+        TEST(time_point.get(day) == 5);
+        TEST(time_point.get(year) == 1970);
+
         TEST(time_point.get(era) == 1);
         TEST(time_point.get(year) == 1970);
         TEST(time_point.get(extended_year) == 1970);
@@ -111,17 +124,18 @@ int main()
         TEST(time_point.get(day_of_year) == 36);
         TEST(time_point.get(day_of_week) == 5);
         // TODO
-        // TEST(time_point.get(day_of_week_in_month));
+        // TEST(time_point.get(day_of_week_in_month)==?);
         //
-        time_point=date_time(a_datetime,calendar(g("ru_RU.UTF-8"),tz));
+        time_point=date_time(a_datetime,calendar(g("ru_RU.UTF-8")));
         TEST(time_point.get(day_of_week_local) == 4);
         RESET();
         TEST(time_point.get(hour) == 15);
+        TEST(date_time(a_datetime,calendar(time_zone("GMT+01:00"))).get(hour) ==16);
         TEST(time_point.get(hour_12) == 3);
         TEST(time_point.get(am_pm) == 1);
         TEST(time_point.get(minute) == 33);
         TEST(time_point.get(second) == 13);
-        TEST(time_point.get(week_of_year) == 5);
+        TEST(date_time(year* 1984 + month * 1 + day).get(week_of_year)==5);
         TEST(time_point.get(week_of_month) == 1);
 
     }

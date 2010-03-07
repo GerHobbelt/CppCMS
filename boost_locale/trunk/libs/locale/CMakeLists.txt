@@ -98,7 +98,7 @@ include_directories(../..)
 set(BOOST_LOCALE_SRC 
 	src/generator.cpp
 	src/boundary.cpp
-	src/timezone.cpp
+	src/time_zone.cpp
 	src/collator.cpp
 	src/codepage.cpp
 	src/conversion.cpp
@@ -157,7 +157,9 @@ set(LOCALE_EXAMPLES 	hello
 			wboundary
 			conversions
 			wconversions
-			collate)
+			collate
+			calendar
+			)
 
 foreach(TEST_TAR ${LOCALE_TESTS})
 	add_executable(${TEST_TAR} test/${TEST_TAR}.cpp)

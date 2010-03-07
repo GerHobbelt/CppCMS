@@ -5,7 +5,7 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <boost/locale/timezone.hpp>
+#include <boost/locale/time_zone.hpp>
 #include <boost/locale/info.hpp>
 #include <unicode/timezone.h>
 #include <unicode/strenum.h>
@@ -27,7 +27,7 @@ namespace boost{
             time_zone_impl(std::string const &id) : tz_(icu::TimeZone::createTimeZone(id.c_str()))
             {
             }
-            time_zone_impl() : tz_(icu::TimeZone::getGMT()->clone())
+            time_zone_impl() : tz_(icu::TimeZone::createDefault())
             {
             }
             time_zone_impl *clone() const

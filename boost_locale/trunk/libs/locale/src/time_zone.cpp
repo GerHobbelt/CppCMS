@@ -6,16 +6,21 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
-#include <boost/locale/timezone.hpp>
+#include <boost/locale/time_zone.hpp>
 #include <boost/locale/info.hpp>
 #include <unicode/timezone.h>
 #include <unicode/strenum.h>
 #include "uconv.hpp"
-#include "timezone_impl.hpp"
+#include "time_zone_impl.hpp"
 #include "info_impl.hpp"
 
 namespace boost{
     namespace locale {
+
+        void time_zone::global(time_zone const &zone)
+        {
+            icu::TimeZone::adoptDefault(zone.impl()->icu_tz()->clone());
+        }
 
         time_zone::time_zone() : impl_(new time_zone_impl())
         {

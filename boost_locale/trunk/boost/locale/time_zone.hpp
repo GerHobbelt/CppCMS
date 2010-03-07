@@ -24,9 +24,19 @@ namespace boost {
         ///
         class time_zone {
         public:
-            
+
             ///
-            /// Create GMT Time Zone
+            /// Get a list of all supported time zone ids
+            ///
+            static std::set<std::string> all_zones();
+
+            ///
+            /// Set default time zone
+            ///
+            static void global(time_zone const &zone);
+ 
+            ///
+            /// Creates default Time Zone
             ///
             time_zone();
 
@@ -38,13 +48,15 @@ namespace boost {
             ///
             time_zone(std::string const &id);
 
+            ///
+            /// Compares two time zones by ids
+            ///
             bool operator==(time_zone const &other) const;
 
             bool operator!=(time_zone const &other) const
             {
                 return !(*this==other);
             }
-
 
             ///
             /// Get time zone id
@@ -56,29 +68,7 @@ namespace boost {
             /// should be set to true
             /// 
             double offset_from_gmt(double time,bool is_local_time = false) const;
-
-            ///
-            /// Adjust locale time to GMT time
-            ///
-            template<typename TimeType>
-            TimeType to_gmt(TimeType local_time) const
-            {
-                return local_time - offset_from_gmt(static_cast<double>(local_time),true);
-            }
-
-            ///
-            /// Adjust GMT time to local time
-            ///
-            template<typename TimeType>
-            TimeType to_local(TimeType gmt_time) const
-            {
-                return gmt_time + offset_from_gmt(static_cast<double>(gmt_time),false);
-            }
             
-            ///
-            /// Get a list of all supported time zone ids
-            ///
-            static std::set<std::string> all_zones();
 
             ///
             /// For internal Use only -- don't use it
@@ -106,7 +96,6 @@ namespace boost {
         template<>
         BOOST_LOCALE_DECL std::basic_ostream<wchar_t> &operator<<(std::basic_ostream<wchar_t> &out,time_zone const &tz);
         #endif
-    
         
         #ifdef BOOST_HAS_CHAR16_T
         template<>
