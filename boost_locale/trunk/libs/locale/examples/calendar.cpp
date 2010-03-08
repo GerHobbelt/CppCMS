@@ -23,11 +23,11 @@ int main(int argc,char **argv)
 	start.set(period::month,now.minimum(period::month));
 	start.set(period::day,start.minimum(period::day));
 
-	int current_year = now.get(period::year);
+	int current_year = now / period::year;
 
 	std::cout.imbue(std::locale());
 	std::cout << format("{1,ftime='%Y'}") % now << std::endl;
-	for(now=start;now.get(period::year) == current_year;) {
+	for(now=start;now / period::year == current_year;) {
 		
 		/// Print heading of month
 		if(calendar().is_gregorian()) 
@@ -46,13 +46,13 @@ int main(int argc,char **argv)
 		}
 		std::cout << std::endl;
 
-		int current_month = now.get(period::month);
-		int skip = now.get(period::day_of_week_local) - 1;
+		int current_month = now / period::month;
+		int skip = now / period::day_of_week_local - 1;
 		for(int i=0;i<skip*9;i++)
 			std::cout << ' ';
-		for(;now.get(period::month) == current_month ;now += period::day) {
+		for(;now / period::month == current_month ;now += period::day) {
 			std::cout << format("{1,w=8,ftime='%e'} ") % now;	
-			if(now.get(period::day_of_week_local) == 7)
+			if(now / period::day_of_week_local == 7)
 				std::cout << std::endl;
 		}
 		std::cout << std::endl;

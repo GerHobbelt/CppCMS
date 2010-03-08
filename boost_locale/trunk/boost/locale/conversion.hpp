@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,6 +10,10 @@
 
 #include <boost/locale/config.hpp>
 #include <locale>
+
+///
+/// \brief This module provides various function for string manipulation like Unicode normalization, case conversion etc.
+///
 
 namespace boost {
     namespace locale {
@@ -37,7 +41,7 @@ namespace boost {
         } // impl
  
         ///
-        /// Type of normalization
+        /// \brief Type of normalization
         ///
 
         typedef enum {
@@ -45,7 +49,7 @@ namespace boost {
             norm_nfc,   ///< Canonical decomposition followed by canonical composition
             norm_nfkd,  ///< Compatibility decomposition
             norm_nfkc,  ///< Compatibility decomposition followed by canonical composition.
-            norm_default = norm_nfc, /// Default normalization - canonical decomposition followed by canonical composition
+            norm_default = norm_nfc, ///< Default normalization - canonical decomposition followed by canonical composition
         } norm_type;
        
         ///

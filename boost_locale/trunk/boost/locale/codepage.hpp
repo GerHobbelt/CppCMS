@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -16,6 +16,9 @@
 namespace boost {
     namespace locale {
 
+        ///
+        /// Create codecvt facet to integrate to locale class
+        ///
         template<typename CharType>
         std::codecvt<CharType,char,mbstate_t> *create_codecvt(info const &inf);
         
@@ -38,47 +41,76 @@ namespace boost {
         #endif
 
         namespace conv {
+            ///
+            /// \brief The excepton that is thrown in case of conversion error
+            ///
             class conversion_error : public std::runtime_error {
             public:
                 conversion_error() : std::runtime_error("Conversion failed") {}
             };
+            
 
+            ///
+            /// \brief enum that defines conversion policy
+            ///
             typedef enum {
-                skip            = 0, ///!< Skip illegal/unconvertable characters
-                stop            = 1, ///!< Stop conversion and throw conversion_error
-                default_method  = skip ///!< Default method - skip
+                skip            = 0,    ///< Skip illegal/unconvertable characters
+                stop            = 1,    ///< Stop conversion and throw conversion_error
+                default_method  = skip  ///< Default method - skip
             } method_type;
 
+            ///
+            /// \brief convert string to UTF string from text in range [begin,end) encoded with \a charset according to policy \a how
+            ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *begin,char const *end,std::string const &charset,method_type how=default_method);
 
+            ///
+            /// \brief convert UTF text in range [begin,end) to a text encoded with \a charset according to policy \a how
+            ///
             template<typename CharType>
             std::string from_utf(CharType const *begin,CharType const *end,std::string const &charset,method_type how=default_method);
 
+            ///
+            /// \brief convert string to UTF string from text in range [begin,end) encoded according to locale \a loc according to policy \a how
+            ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *begin,char const *end,std::locale const &loc,method_type how=default_method)
             {
                 return to_utf<CharType>(begin,end,std::use_facet<info>(loc).encoding(),how);
             }
 
+            ///
+            /// \brief convert UTF text in range [begin,end) to a text encoded according to locale \a loc according to policy \a how
+            ///
             template<typename CharType>
             std::string from_utf(CharType const *begin,CharType const *end,std::locale const &loc,method_type how=default_method)
             {
                 return from_utf(begin,end,std::use_facet<info>(loc).encoding(),how);
             }
 
+            ///
+            /// \brief convert a string \a text encoded with \a charset to UTF string
+            ///
+            
             template<typename CharType>
             std::basic_string<CharType> to_utf(std::string const &text,std::string const &charset,method_type how=default_method)
             {
                 return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),charset,how);
             }
 
+            ///
+            /// Convert a \a text from \a charset to UTF string
+            ///
             template<typename CharType>
             std::string from_utf(std::basic_string<CharType> const &text,std::string const &charset,method_type how=default_method)
             {
                 return from_utf(text.c_str(),text.c_str()+text.size(),charset,how);
             }
 
+            ///
+            /// Convert a \a text from \a charset to UTF string
+            ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *text,std::string const &charset,method_type how=default_method)
             {
@@ -88,6 +120,9 @@ namespace boost {
                 return to_utf<CharType>(text,text_end,charset,how);
             }
 
+            ///
+            /// Convert a \a text from UTF to \a charset
+            ///
             template<typename CharType>
             std::string from_utf(CharType const *text,std::string const &charset,method_type how=default_method)
             {
@@ -97,18 +132,27 @@ namespace boost {
                 return from_utf(text,text_end,charset,how);
             }
 
+            ///
+            /// Convert a \a text in locale encoding given by \a loc to UTF
+            ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(std::string const &text,std::locale const &loc,method_type how=default_method)
             {
                 return to_utf<CharType>(text.c_str(),text.c_str()+text.size(),loc,how);
             }
 
+            ///
+            /// Convert a \a text in UTF to locale encoding given by \a loc
+            ///
             template<typename CharType>
             std::string from_utf(std::basic_string<CharType> const &text,std::locale const &loc,method_type how=default_method)
             {
                 return from_utf(text.c_str(),text.c_str()+text.size(),loc,how);
             }
 
+            ///
+            /// Convert a \a text in locale encoding given by \a loc to UTF
+            ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *text,std::locale const &loc,method_type how=default_method)
             {
@@ -118,6 +162,9 @@ namespace boost {
                 return to_utf<CharType>(text,text_end,loc,how);
             }
 
+            ///
+            /// Convert a \a text in UTF to locale encoding given by \a loc
+            ///
             template<typename CharType>
             std::string from_utf(CharType const *text,std::locale const &loc,method_type how=default_method)
             {

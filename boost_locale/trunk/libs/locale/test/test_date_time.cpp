@@ -98,6 +98,7 @@ int main()
         TEST(time_point == time_point);
         TEST(!(time_point != time_point));
         TEST(time_point.get(hour) == 15);
+        TEST(time_point/hour == 15);
         TEST(time_point+year != time_point);
         TEST(time_point - minute <= time_point);
         TEST(time_point <= time_point);

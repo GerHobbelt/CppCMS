@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -15,6 +15,10 @@
 #include <set>
 #include <memory>
 #include <boost/locale/formatting.hpp>
+
+///
+/// \brief This module provides message translation functionality, i.e. allow your application to speak native language
+///
 
 namespace boost {
     namespace locale {
@@ -53,8 +57,17 @@ namespace boost {
             {
             }
 
+            ///
+            /// Internal do not use directly
+            ///
             virtual char_type const *get(int domain_id,char const *id) const = 0;
+            ///
+            /// Internal do not use directly
+            ///
             virtual char_type const *get(int domain_id,char const *single_id,int n) const = 0;
+            ///
+            /// Internal do not use directly
+            ///
             virtual int domain(std::string const &domain) const = 0;
 
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)

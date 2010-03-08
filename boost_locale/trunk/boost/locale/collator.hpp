@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -10,6 +10,11 @@
 
 #include <locale>
 #include <boost/locale/config.hpp>
+
+///
+/// \brief a module that introduces collation related classes
+///
+
 
 namespace boost {
 namespace locale {
@@ -26,11 +31,11 @@ namespace locale {
         /// Unicode collation level types
         ///
         typedef enum {
-            primary     = 0, ///!< 1st collation level: base letters
-            secondary   = 1, ///!< 2nd collation level: letters and accents
-            tertiary    = 2, ///!< 3rd collation level: letters, accents and case
-            quaternary  = 3, ///!< 4th collation level: letters, accents, case and punctuation
-            identical   = 4  ///!< identical collation level: include code-point comparison
+            primary     = 0, ///< 1st collation level: base letters
+            secondary   = 1, ///< 2nd collation level: letters and accents
+            tertiary    = 2, ///< 3rd collation level: letters, accents and case
+            quaternary  = 3, ///< 4th collation level: letters, accents, case and punctuation
+            identical   = 4  ///< identical collation level: include code-point comparison
         } level_type;
     };
     
@@ -49,7 +54,7 @@ namespace locale {
         
 
         ///
-        /// Compare two strings in rage [b1,e1), [b2,e2) according using a collation level \a level
+        /// Compare two strings in rage [b1,e1), [b2,e2) according using a collation level \a level. Calls do_compare
         ///
         int compare(level_type level,
                     char_type const *b1,char_type const *e1,
@@ -58,8 +63,8 @@ namespace locale {
             return do_compare(level,b1,e1,b2,e2);
         }
         ///
-        /// Create a binary string that can be compared to other, usefull for collation of multiple
-        /// strings for text in range [b,e)
+        /// Create a binary string that can be compared to other in order to get collation order. The string is created
+        /// for text in range [b,e). It is useful for collation of multiple strings for text. Calls do_transform
         ///
         string_type transform(level_type level,char_type const *b,char_type const *e) const
         {
@@ -67,7 +72,7 @@ namespace locale {
         }
 
         ///
-        /// Calculate a hash that can be used for collation sensitive string comparison of a text in range [b,e)
+        /// Calculate a hash of a text in range [b,e). The value can be used for collation sensitive string comparison. Calls do_hash
         ///
         long hash(level_type level,char_type const *b,char_type const *e) const
         {
@@ -91,8 +96,8 @@ namespace locale {
             return do_hash(level,s.data(),s.data()+s.size());
         }
         ///
-        /// Create a binary string that can be compared to other, usefull for collation of multiple
-        /// strings for string  \a s
+        /// Create a binary string from string \a s, that can be compared to other, useful for collation of multiple
+        /// strings.
         ///
         string_type transform(level_type level,string_type const &s) const
         {
@@ -113,24 +118,45 @@ namespace locale {
         {
         }
         
+        ///
+        /// This function is used to override default collation function that does not take in account collation level.
+        /// Uses primary level
+        ///
         virtual int do_compare( char_type const *b1,char_type const *e1,
                                 char_type const *b2,char_type const *e2) const
         {
             return do_compare(primary,b1,e1,b2,e2);
         }
+        ///
+        /// This function is used to override default collation function that does not take in account collation level.
+        /// Uses primary level
+        ///
         virtual string_type do_transform(char_type const *b,char_type const *e) const
         {
             return do_transform(primary,b,e);
         }
+        ///
+        /// This function is used to override default collation function that does not take in account collation level.
+        /// Uses primary level
+        ///
         virtual long do_hash(char_type const *b,char_type const *e) const
         {
             return do_hash(primary,b,e);
         }
 
+        ///
+        /// Actual function that performs comparison between the strings. For details see compare member function. Can be overridden. 
+        ///
         virtual int do_compare( level_type level,
                                 char_type const *b1,char_type const *e1,
                                 char_type const *b2,char_type const *e2) const = 0;
+        ///
+        /// Actual function that performs transformation. For details see transform member function. Can be overridden. 
+        ///
         virtual string_type do_transform(level_type level,char_type const *b,char_type const *e) const = 0;
+        ///
+        /// Actual function that calculates hash. For details see hash member function. Can be overridden. 
+        ///
         virtual long do_hash(level_type level,char_type const *b,char_type const *e) const = 0;
 
 

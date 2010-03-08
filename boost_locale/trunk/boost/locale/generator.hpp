@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -11,6 +11,10 @@
 #include <string>
 #include <locale>
 #include <memory>
+
+///
+/// \brief This module provides the central class that used for generation of locales for this library
+///
 
 namespace boost {
     namespace locale {
@@ -156,7 +160,7 @@ namespace boost {
             ///
             std::locale get(std::string const &id) const;
             ///
-            /// Get a locale with id \a id and encoding \a encociding from cache, if not found, generate one
+            /// Get a locale with id \a id and encoding \a encoding from cache, if not found, generate one
             ///
             std::locale get(std::string const &id,std::string const &encoding) const;
 

@@ -20,9 +20,14 @@
 #include <iterator>
 #include <stdexcept>
 
+///
+/// \brief This module contains all operations required for boundary analysis of text
+///
+
+
 namespace boost {
     namespace locale {
-        
+       
         namespace boundary {
             ///
             /// \brief The enum that describes possible break types
