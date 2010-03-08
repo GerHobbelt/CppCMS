@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -35,7 +35,7 @@ namespace boost {
             } boundary_type;
 
             ///
-            /// Flags used with word boundary analysis -- the type of word found
+            /// \brief Flags used with word boundary analysis -- the type of the word found
             ///
             typedef enum {
                 word_none       =  0x0000F,   ///< Not a word
@@ -49,7 +49,7 @@ namespace boost {
                 word_mask       =  0xFFFFF    ///< Maximal used mask
             } word_type;
             ///
-            /// Flags that describe a type of line break
+            /// \brief Flags that describe a type of line break
             ///
             typedef enum {
                 line_soft       =  0x0F,   ///< Soft line break: optional but not required
@@ -58,20 +58,30 @@ namespace boost {
                 line_mask       =  0xFF
             } line_break_type;
             
+            ///
+            /// \brief Flags that describe a type of sentence break
+            ///
             typedef enum {
-                sentence_term   =  0x0F,   ///< The sentence was terminated with a sentence terminator 
-                                          ///  like ".", "!" possible followed by hard separator like CR, LF, PS
-                sentence_sep    =  0xF0,   ///< The sentence does not contain terminator like ".", "!" but ended with hard separator
-                                          ///  like CR, LF, PS or end of input.
-                sentence_any    =  0xFF,   ///< Either first or second sentence break type;.
+                sentence_term   =  0x0F,    ///< The sentence was terminated with a sentence terminator 
+                                            ///  like ".", "!" possible followed by hard separator like CR, LF, PS
+                sentence_sep    =  0xF0,    ///< The sentence does not contain terminator like ".", "!" but ended with hard separator
+                                            ///  like CR, LF, PS or end of input.
+                sentence_any    =  0xFF,    ///< Either first or second sentence break type;.
                 sentence_mask   =  0xFF
             } sentence_break_type;
 
+            ///
+            /// \brief Flags that describe a type of character break. At this point break iterator does not distinguish different
+            /// kinds of characters so it is used for consistency.
+            ///
             typedef enum {
-                character_any   = 0xF,   ///< Not in use, just for consistency
-                character_mask  = 0xF,
+                character_any   =  0xF,     ///< Not in use, just for consistency
+                character_mask  =  0xF,
             } character_break_type;
 
+            ///
+            /// This function returns the mask that covers all variants for specific boundary type
+            ///
             inline unsigned boundary_mask(boundary_type t)
             {
                 switch(t) {
@@ -85,56 +95,33 @@ namespace boost {
            
             namespace impl {
 
-                ///
-                /// \ brief a structure that describes break position
-                /// 
                 struct break_info {
 
-                    ///
-                    /// Default constructor -- all fields are zero
-                    /// 
                     break_info() : 
                         offset(0),
                         mark(0)
                     {
                     }
-                    ///
-                    /// Create a break info with offset \a v
-                    ///
                     break_info(unsigned v) :
                         offset(v),
                         mark(0)
                     {
                     }
 
-                    uint32_t offset;            ///< Offset from the beginning of the text where break occurs
+                    uint32_t offset;
                     uint32_t mark;
                    
-                    ///
-                    /// Comparison operator allowing usage of break_info in STL algorithms
-                    /// 
                     bool operator<(break_info const &other) const
                     {
                         return offset < other.offset;
                     }
                 };
                
-                ///
-                /// The index of all found boundaries. Note: for a string with length \a len, 0 and len are always considered
-                /// boundaries
-                /// 
-                typedef std::vector<break_info> index_type;
+               typedef std::vector<break_info> index_type;
 
-
-                ///
-                /// Find boundary positions of type \a t for text in range [begin,end) using locale \a loc
-                ///
                 template<typename CharType>
                 index_type map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc=std::locale());
                 
-                ///
-                /// Find boundary positions of type \a t for string \a str using locale \a loc
-                ///
                 template<typename CharType>
                 static index_type map(
                                 boundary_type t,
@@ -226,10 +213,15 @@ namespace boost {
             /// \brief Class the holds boundary mapping of the text that can be used with iterators
             ///
             /// When the object is created in creates index and provides access to it with iterators.
-            /// it is used mostly together with break_iterator and token_iterator
+            /// it is used mostly together with break_iterator and token_iterator. For each boundary point it
+            /// provides the description mark of it that allows distinguish between different types of boundaries.
+            /// For example it marks if sentence terminates because a mark like "?" or "." was found or because
+            /// new line symbol is present in the text.
+            ///
+            /// These marks can be read out with token_iterator::mark() and break_iterator::mark() member functions.
             ///
             /// This class stores iterators to the original text, so you should be careful with iterators
-            /// invalidation. The text, iterators pointing to should not change
+            /// invalidation. If the iterators on original text are invalid you can't use this mapping any more.
             ///
 
             template<class RangeIterator>
@@ -240,36 +232,50 @@ namespace boost {
                 typedef typename std::iterator_traits<base_iterator>::value_type char_type;
 
                 ///
-                /// create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
+                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
                 ///
                 mapping(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
                     create_mapping(type,begin,end,loc,0xFFFFFFFFu);
                 }
 
+                ///
+                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc and set the boundaries
+                /// mask to \a mask
+                ///
                 mapping(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
                 {
                     create_mapping(type,begin,end,loc,mask);
                 }
 
                 ///
-                /// create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
+                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
                 ///
                 void map(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
                     create_mapping(type,begin,end,loc,0xFFFFFFFFu);
                 }
 
+                ///
+                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc, and set a mask to \a mask
+                ///
                 void map(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
                 {
                     create_mapping(type,begin,end,loc,mask);
                 }
+
+                ///
+                /// Default constructor of empty mapping
+                ///
 
                 mapping()
                 {
                     mask_=0xFFFFFFFF;
                 }
 
+                ///
+                /// Copy the mapping, note, you can copy the mapping that is used for token_iterator to break_iterator and vise versa.
+                ///
                 template<typename ORangeIterator>
                 mapping(mapping<ORangeIterator> const &other) :
                     index_(other.index_),
@@ -278,7 +284,11 @@ namespace boost {
                     mask_(other.mask_)
                 {
                 }
-                
+
+                ///
+                /// Swap the mappings, note, you swap the mappings between those that are used for token_iterator to break_iterator and vise versa.
+                /// This operation invalidates all iterators.
+                ///
                 template<typename ORangeIterator>
                 void swap(mapping<ORangeIterator> &other)
                 {
@@ -288,6 +298,9 @@ namespace boost {
                     std::swap(mask_,other.mask_);
                 }
 
+                ///
+                /// Copy the mapping, note, you can copy the mapping that is used for token_iterator to break_iterator and vise versa.
+                ///
                 template<typename ORangeIterator>
                 mapping const &operator=(mapping<ORangeIterator> const &other)
                 {
@@ -297,10 +310,34 @@ namespace boost {
                     mask_=other.mask_;
                 }
 
+                ///
+                /// Get current boundary mask
+                ///
                 unsigned mask() const
                 {
                     return mask_;
                 }
+                ///
+                /// \brief Set current boundary mask.
+                ///
+                /// This mask provides fine grained control on the type of boundaries and tokens you need to relate to. For example, if 
+                /// you want to find sentence breaks that are caused only by terminator like "." or "?" and ignore new lines, you can set the mask
+                /// value sentence_term and break iterator would iterate only over boundaries that much this mask.
+                ///
+                /// Note: the beginning of the text and the end of the text are always considered legal boundaries regardless if they have
+                /// a mark that fits the mask.
+                ///
+                /// For token iterator it means which kind of tokens should be selected. Please note that token iterator generally selects the
+                /// biggest amount of text that has specific mark. This is especially relevant for word boundary analysis.
+                ///
+                /// For example: if you set mask to word_any (selects numbers, letters) then when you iterate Over "To be, or not to be?" You would 
+                /// get "To", "be", "or", "not", "to", "be". You can request from token iterator to use wider type of selection by
+                /// calling token_iterator::full_select(true) so it would select only "To", " be", ", or", " not", " to", " be" tokens. All depends
+                /// on your actual needs. For word selection you would probably want the first (default) and for sentence selection the second.
+                ///
+                /// Changing a mask does not invalidate current iterators but all new created iterators would not be compatible with old ones
+                /// So you can't compare them, be careful with it.
+                ///
                 void mask(unsigned u)
                 {
                     mask_ = u;
@@ -309,14 +346,14 @@ namespace boost {
                 ///
                 /// Get \a begin iterator used when object was created
                 ///
-                RangeIterator begin()
+                RangeIterator begin() const
                 {
                     return RangeIterator(*this,true,mask_);
                 }
                 ///
                 /// Get \a end iterator used when object was created
                 ///
-                RangeIterator end()
+                RangeIterator end() const
                 {
                     return RangeIterator(*this,false,mask_);
                 }
@@ -348,8 +385,13 @@ namespace boost {
             ///
             /// \brief token iterator is an iterator that returns text chunks between boundary positions
             ///
-            /// It is similar to break iterator, but it rather "points" to string then iterator. It is used when we are more
-            /// interested in text chunks themselves then boundary points.
+            /// Token iterator may behave in two different ways: select specific tokens in only tide way and
+            /// select them widely. For tide selection (default) it would not return text chunks that
+            /// do not fit the selection mask. For example, for word iteration with mask "word_letters"
+            /// for text "I met him at 7" it would return "I", "met", "him", "at" ignoring white spaces
+            /// punctuation and numbers, But sometimes, you need to perform full selection of almost entry text
+            /// for example for sentence boundaries and sentence_term mask you may want to specify full_select(true), 
+            /// So "Hello! How<LF>are you?" would return you biggest possible chunks "Hello!", " How<LF>are you?".
             ///
             
             template<
@@ -363,6 +405,9 @@ namespace boost {
                 typedef IteratorType base_iterator;
                 typedef mapping<token_iterator<IteratorType,ValueType> > mapping_type;
                                 
+                ///
+                /// \brief Default constructor
+                ///
                 token_iterator() : 
                     map_(0),
                     offset_(0),
@@ -371,6 +416,20 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// \breif set position of the token iterator to the location of underlying iterator.
+                ///
+                /// This operator sets the token iterator to first token following that position. For example:
+                ///
+                /// For word boundary with "word_any" mask:
+                ///
+                /// - "to| be or ", would point to "be",
+                /// - "t|o be or ", would point to "to",
+                /// - "to be or| ", would point to end.
+                ///
+                /// \a p - should be in range of the original mapping.
+                ///
+                
                 token_iterator const &operator=(IteratorType p)
                 {
                     unsigned dist=std::distance(map_->begin_,p);
@@ -383,6 +442,12 @@ namespace boost {
                     return *this;
                 }
 
+                ///
+                /// Create token iterator for mapping \a map with location at begin or end according to value of flag \a begin,
+                /// and a mask \a mask
+                ///
+                /// It is strongly recommended to use map.begin(), map.end() instead.
+                ///
                 token_iterator(mapping_type const &map,bool begin,unsigned mask) :
                     map_(&map),
                     mask_(mask),
@@ -395,6 +460,9 @@ namespace boost {
                     else
                         offset_=map_->index_.size();
                 }
+                ///
+                /// \brief Copy constructor
+                ///
                 token_iterator(token_iterator const &other) :
                     map_(other.map_),
                     offset_(other.offset_),
@@ -403,6 +471,9 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// Assignment operator
+                ///
                 token_iterator const &operator=(token_iterator const &other)
                 {
                     if(this!=&other) {
@@ -414,6 +485,12 @@ namespace boost {
                     return *this;
                 }
 
+                ///
+                /// Return the token the iterator points it. Iterator must not point to the
+                /// end of the range. Throws std::out_of_range exception
+                ///
+                /// Note, returned value is not lvalue, you can't use this iterator to assign new values to text.
+                /// 
                 ValueType operator*() const
                 {
                     if(offset_ < 1 || offset_ >= map_->index_.size())
@@ -431,18 +508,27 @@ namespace boost {
                     return ValueType(b,e);
                 }
 
+                ///
+                /// \brief Increment operator
+                ///
                 token_iterator &operator++() 
                 {
                     next();
                     return *this;
                 }
                 
+                ///
+                /// \brief Decrement operator
+                ///
                 token_iterator &operator--() 
                 {
                     prev();
                     return *this;
                 }
                 
+                ///
+                /// \brief Increment operator
+                ///
                 token_iterator operator++(int unused) 
                 {
                     token_iterator tmp(*this);
@@ -450,6 +536,9 @@ namespace boost {
                     return tmp;
                 }
 
+                ///
+                /// \brief Decrement operator
+                ///
                 token_iterator operator--(int unused) 
                 {
                     token_iterator tmp(*this);
@@ -457,15 +546,24 @@ namespace boost {
                     return tmp;
                 }
 
+                ///
+                /// \brief Get full selection flag, see description of token_iterator
+                ///
                 bool full_select() const
                 {
                     return full_select_;
                 }
+                ///
+                /// \brief Set full selection flag, see description of token_iterator
+                ///
                 void full_select(bool fs)
                 {
                     full_select_ = fs;
                 }
                 
+                ///
+                /// \brief Compare two iterators. They equal if they point to same map, have same position and same mask
+                ///
                 bool operator==(token_iterator const &other) const
                 {
                     return  map_ == other.map_ 
@@ -473,11 +571,17 @@ namespace boost {
                             && mask_ == other.mask_;
                 }
 
+                ///
+                /// \brief Opposite of ===
+                ///
                 bool operator!=(token_iterator const &other) const
                 {
                     return !(*this==other);
                 }
 
+                ///
+                /// \brief Return the mark that token iterator points at. See description of mapping class and various boundary flags
+                ///
                 unsigned mark() const
                 {
                     return map_->index_.at(offset_).mark;
@@ -526,7 +630,14 @@ namespace boost {
             ///
             /// \brief break_iterator is bidirectional iterator that returns text boundary positions
             ///
-            /// This iterator is used when boundary points are more interesting then text chunks themselves.
+            /// It returns rather iterators to break position then text chunks themselves. It stops only
+            /// on boundaries that their marks fit the required mask. Also beginning of text and end of 
+            /// text are valid boundaries regardless their marks.
+            ///
+            /// Please note for text in range [text_begin,text_end) and break_iterator it over it
+            /// in range [begin,end): if *it==text_end then it!=end. And if it==end then *it is invalid.
+            /// Thus for example for work iterator over text "hello", break iterator returns at beginning
+            /// text_begin ("|hello"), then text_end ("hello|") and then it points to end.
             ///
             template<typename IteratorType>
             class break_iterator : public std::iterator<std::bidirectional_iterator_tag,IteratorType> 
@@ -536,6 +647,9 @@ namespace boost {
                 typedef IteratorType base_iterator;
                 typedef mapping<break_iterator<IteratorType> > mapping_type;
                 
+                ///
+                /// \brief Default constructor
+                ///
                 break_iterator() : 
                     map_(0),
                     offset_(0),
@@ -543,6 +657,9 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// \brief Copy constructor
+                ///
                 break_iterator(break_iterator const &other):
                     map_(other.map_),
                     offset_(other.offset_),
@@ -550,6 +667,9 @@ namespace boost {
                 {
                 }
                 
+                ///
+                /// \brief Assignment operator
+                ///
                 break_iterator const &operator=(break_iterator const &other)
                 {
                     if(this!=&other) {
@@ -560,6 +680,12 @@ namespace boost {
                     return *this;
                 }
 
+                ///
+                /// Create break iterator for mapping \a map with location at begin or end according to value of flag \a begin,
+                /// and a mask \a mask
+                ///
+                /// It is strongly recommended to use map.begin(), map.end() instead.
+                ///
                 break_iterator(mapping_type const &map,bool begin,unsigned mask) :
                     map_(&map),
                     mask_(mask)
@@ -570,6 +696,9 @@ namespace boost {
                         offset_=map_->index_.size();
                 }
 
+                ///
+                /// \brief Compare two iterators. They equal if they point to same map, have same position and same mask
+                ///
                 bool operator==(break_iterator const &other) const
                 {
                     return  map_ == other.map_ 
@@ -577,22 +706,47 @@ namespace boost {
                             && mask_==other.mask_;
                 }
 
+                ///
+                /// \brief Opposite of ===
+                ///
                 bool operator!=(break_iterator const &other) const
                 {
                     return !(*this==other);
                 }
 
+                ///
+                /// \brief Return the mark that token iterator points at. See description of mapping class and various boundary flags
+                ///
                 unsigned mark() const
                 {
                     return map_->index_.at(offset_).mark;
                 }
  
+                ///
+                /// \breif set position of the break_iterator to the location of underlying iterator.
+                ///
+                /// This operator sets the break_iterator to position of the iterator p or to the first valid following position
+                /// For example:
+                ///
+                /// For word boundary:
+                ///
+                /// - "|to be or ", would point to "|to be or " 
+                /// - "t|o be or ", would point to "to| be or " 
+                ///
+                /// \a p - should be in range of the original mapping.
+                ///
                 break_iterator const &operator=(base_iterator p)
                 {
                     at_least(p);
                     return *this;
                 }
                 
+                ///
+                /// Return the underlying iterator that break_iterator points it. Iterator must not point to the
+                /// end of the range, otherwise throws std::out_of_range exception
+                ///
+                /// Note, returned value is not lvalue, you can't use this iterator to change underlying iterators.
+                /// 
                 base_iterator operator*() const
                 {
                     if(offset_ >=map_->index_.size())
@@ -602,18 +756,27 @@ namespace boost {
                     return p;
                 }
 
+                ///
+                /// Increment operator
+                ///
                 break_iterator &operator++() 
                 {
                     next();
                     return *this;
                 }
                 
+                ///
+                /// Decrement operator
+                ///
                 break_iterator &operator--() 
                 {
                     prev();
                     return *this;
                 }
                 
+                ///
+                /// Increment operator
+                ///
                 break_iterator operator++(int unused) 
                 {
                     break_iterator tmp(*this);
@@ -621,6 +784,9 @@ namespace boost {
                     return tmp;
                 }
 
+                ///
+                /// Decrement operator
+                ///
                 break_iterator operator--(int unused) 
                 {
                     break_iterator tmp(*this);
