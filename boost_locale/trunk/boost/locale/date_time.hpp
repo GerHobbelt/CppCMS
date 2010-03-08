@@ -13,12 +13,17 @@
 #include <vector>
 #include <stdexcept>
 
-///
-/// \brief this module provides various calendar and date time services
-///
 
 namespace boost {
     namespace locale {
+        ///
+        /// \defgroup date_time Date, Time, Timezone and Calendar manipulations 
+        ///
+        /// This module provides various calendar, timezone and date time services
+        ///
+        /// @{
+
+
         ///
         /// \brief This error is thrown in case of invalid state that occurred
         ///
@@ -76,6 +81,7 @@ namespace boost {
             return date_time_period(f,-1);
         }
 
+        /// \cond INTERNAL 
         #define BOOST_LOCALE_DATE_TIME_OPERATORS(Type) \
             inline date_time_period operator*(period::period_type f,Type v) { return date_time_period(f,v); } \
             inline date_time_period operator*(Type v,period::period_type f) { return date_time_period(f,v); } \
@@ -92,6 +98,8 @@ namespace boost {
         BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned long int)
 
         #undef BOOST_LOCALE_DATE_TIME_OPERATORS
+
+        /// \endcond 
 
         ///
         /// \brief the class that represents a set of periods, It is generally created by operations on periods:
@@ -318,7 +326,7 @@ namespace boost {
             }
 
             ///
-            /// \brief substract period f from the current date_time and return it
+            /// \brief subtract period f from the current date_time and return it
             ///
             date_time operator-(period::period_type f) const
             {
@@ -333,7 +341,7 @@ namespace boost {
                 return *this+=date_time_period(f);
             }
             ///
-            /// \brief substract period f from the current date_time
+            /// \brief subtract period f from the current date_time
             ///
             date_time const &operator-=(period::period_type f)
             {
@@ -341,7 +349,9 @@ namespace boost {
             }
 
             ///
-            /// \brief roll up a date by period f, If overflow occures no other periods changed. i.e.:
+            /// \brief roll up a date by period f.
+            ///
+            /// If overflow occures no other periods changed. i.e.:
             /// date_time(1990*year + 0 * month + 31 * day) << day == date_time(1990*year + 0 * month + 1 * day)
             ///
             date_time operator<<(period::period_type f) const
@@ -493,6 +503,8 @@ namespace boost {
         {
             return date_time_duration(earlier,later);
         }
+
+        /// @}
 
     } // locale
 } // boost

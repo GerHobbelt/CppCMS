@@ -16,12 +16,16 @@
 #include <memory>
 #include <boost/locale/formatting.hpp>
 
-///
-/// \brief This module provides message translation functionality, i.e. allow your application to speak native language
-///
 
 namespace boost {
     namespace locale {
+        ///
+        /// \defgroup message Message Formatting (translation) 
+        ///
+        ///This module provides message translation functionality, i.e. allow your application to speak native language
+        ///
+        /// @{
+        /// 
 
         class info;
         ///
@@ -414,7 +418,12 @@ namespace boost {
             } // details
 
             ///
-            /// Manipulator for switching domain in ostream,
+            /// \addtogroup manipulators
+            ///
+            /// @{
+            
+            ///
+            /// \brief Manipulator for switching message domain in ostream,
             ///
             inline details::set_domain domain(std::string const &id)
             {
@@ -422,7 +431,12 @@ namespace boost {
                 tmp.domain_id = id;
                 return tmp;
             }
+            /// @}
         } // as
+
+        ///
+        /// @}
+        ///
     } // locale 
 } // boost
 

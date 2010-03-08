@@ -16,9 +16,6 @@
 namespace boost {
     namespace locale {
 
-        ///
-        /// Create codecvt facet to integrate to locale class
-        ///
         template<typename CharType>
         std::codecvt<CharType,char,mbstate_t> *create_codecvt(info const &inf);
         
@@ -40,8 +37,15 @@ namespace boost {
         BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(info const &inf);
         #endif
 
+        ///
+        /// \brief Namespace that contains all functions related to character set conversion
+        ///
         namespace conv {
             ///
+            /// \defgroup codepage Character conversion functions
+            ///
+            /// @{
+
             /// \brief The excepton that is thrown in case of conversion error
             ///
             class conversion_error : public std::runtime_error {
@@ -100,7 +104,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text from \a charset to UTF string
+            /// \brief Convert a \a text from \a charset to UTF string
             ///
             template<typename CharType>
             std::string from_utf(std::basic_string<CharType> const &text,std::string const &charset,method_type how=default_method)
@@ -109,7 +113,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text from \a charset to UTF string
+            /// \brief Convert a \a text from \a charset to UTF string
             ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *text,std::string const &charset,method_type how=default_method)
@@ -121,7 +125,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text from UTF to \a charset
+            /// \brief Convert a \a text from UTF to \a charset
             ///
             template<typename CharType>
             std::string from_utf(CharType const *text,std::string const &charset,method_type how=default_method)
@@ -133,7 +137,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text in locale encoding given by \a loc to UTF
+            /// \brief Convert a \a text in locale encoding given by \a loc to UTF
             ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(std::string const &text,std::locale const &loc,method_type how=default_method)
@@ -142,7 +146,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text in UTF to locale encoding given by \a loc
+            /// \brief Convert a \a text in UTF to locale encoding given by \a loc
             ///
             template<typename CharType>
             std::string from_utf(std::basic_string<CharType> const &text,std::locale const &loc,method_type how=default_method)
@@ -151,7 +155,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text in locale encoding given by \a loc to UTF
+            /// \brief Convert a \a text in locale encoding given by \a loc to UTF
             ///
             template<typename CharType>
             std::basic_string<CharType> to_utf(char const *text,std::locale const &loc,method_type how=default_method)
@@ -163,7 +167,7 @@ namespace boost {
             }
 
             ///
-            /// Convert a \a text in UTF to locale encoding given by \a loc
+            /// \brief Convert a \a text in UTF to locale encoding given by \a loc
             ///
             template<typename CharType>
             std::string from_utf(CharType const *text,std::locale const &loc,method_type how=default_method)
@@ -173,6 +177,10 @@ namespace boost {
                     text_end++;
                 return from_utf(text,text_end,loc,how);
             }
+
+            /// @}
+
+            /// \cond INTERNAL
 
             template<>
             BOOST_LOCALE_DECL std::basic_string<char> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
@@ -203,6 +211,8 @@ namespace boost {
             template<>
             BOOST_LOCALE_DECL std::string from_utf(char32_t const *begin,char32_t const *end,std::string const &charset,method_type how);
             #endif
+
+            /// \endcond
         } // conv
 
     } // locale

@@ -15,13 +15,18 @@
 #include <sstream>
 #include <iostream>
 
-///
-/// \brief This module provides printf like functionality integrated to iostreams and suitable for localization
-///
-
 
 namespace boost {
     namespace locale {
+        
+        ///
+        /// \defgroup format Format
+        ///
+        /// This module provides printf like functionality integrated to iostreams and suitable for localization
+        ///
+        /// @{
+        ///
+
         namespace details {
 
             template<typename CharType>
@@ -330,6 +335,11 @@ namespace boost {
             std::vector<formattible_type> ext_params_;
         };
 
+        ///
+        /// \brief Write formatted message to stream.
+        ///
+        /// This operator actually causes actual text formatting. It use locale and of \a out stream
+        ///
         template<typename CharType>
         std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,basic_format<CharType> const &fmt)
         {
@@ -338,19 +348,35 @@ namespace boost {
         }
 
 
+        ///
+        /// \brief Definiton of char based format
+        ///
         typedef basic_format<char> format;
 
         #ifndef BOOST_NO_STD_WSTRING
+        ///
+        /// \brief Definiton of wchar_t based format
+        ///
         typedef basic_format<wchar_t> wformat;
         #endif
 
         #ifdef BOOST_HAS_CHAR16_T
+        ///
+        /// \brief Definiton of char16_t based format
+        ///
         typedef basic_format<char16_t> u16format;
         #endif
 
         #ifdef BOOST_HAS_CHAR32_T
+        ///
+        /// \brief Definiton of char32_t based format
+        ///
         typedef basic_format<char32_t> u32format;
         #endif
+
+        ///
+        /// @}
+        ///
 
     }
 }

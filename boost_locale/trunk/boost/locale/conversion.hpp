@@ -11,13 +11,18 @@
 #include <boost/locale/config.hpp>
 #include <locale>
 
-///
-/// \brief This module provides various function for string manipulation like Unicode normalization, case conversion etc.
-///
 
 namespace boost {
     namespace locale {
+        
+        ///
+        /// \defgroup convert Text Conversions 
+        ///
+        ///  This module provides various function for string manipulation like Unicode normalization, case conversion etc.
+        /// @{
+        ///
 
+        /// \cond INTERNAL
         namespace impl {
             typedef enum {
                 normalization,
@@ -39,6 +44,7 @@ namespace boost {
             #endif
 
         } // impl
+        /// \endcond
  
         ///
         /// \brief Type of normalization
@@ -225,7 +231,9 @@ namespace boost {
             return impl::convert(impl::case_folding,begin,end,0,&loc);
         }
 
-
+        ///
+        ///@}
+        ///
     } // locale
 
 } // boost

@@ -11,15 +11,18 @@
 #include <locale>
 #include <boost/locale/config.hpp>
 
-///
-/// \brief a module that introduces collation related classes
-///
-
 
 namespace boost {
 namespace locale {
 
     class info;
+
+    ///
+    /// \defgroup collation Collation 
+    ///
+    /// This module that introduces collation related classes
+    ///
+    /// @{
 
     ///
     /// \brief a base class that included collation level flags
@@ -209,7 +212,11 @@ namespace locale {
     };
 
 
-}
-} // boost::locale
+    ///
+    ///@}
+    ///
+
+    } // locale
+} // boost
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

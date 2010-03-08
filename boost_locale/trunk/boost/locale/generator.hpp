@@ -12,10 +12,6 @@
 #include <locale>
 #include <memory>
 
-///
-/// \brief This module provides the central class that used for generation of locales for this library
-///
-
 namespace boost {
     namespace locale {
 

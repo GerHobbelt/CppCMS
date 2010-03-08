@@ -20,15 +20,23 @@
 #include <iterator>
 #include <stdexcept>
 
-///
-/// \brief This module contains all operations required for boundary analysis of text
-///
-
 
 namespace boost {
+
     namespace locale {
-       
+        
+        ///
+        /// \brief This namespae contains all operations required for boundary analysis of text
+        ///
         namespace boundary {
+            ///
+            /// \defgroup boundary Boundary Analysis
+            ///
+            /// This module contains all operations required for boundary analysis of text: character, word, like and sentence boundaries
+            ///
+            /// @{
+            ///
+
             ///
             /// \brief The enum that describes possible break types
             ///
@@ -97,7 +105,8 @@ namespace boost {
                 default:        return 0;
                 }
             }
-           
+            
+            /// \cond INTERNAL 
             namespace impl {
 
                 struct break_info {
@@ -213,6 +222,8 @@ namespace boost {
                 };
 
             } // details 
+
+            /// \endcond 
 
             ///
             /// \brief Class the holds boundary mapping of the text that can be used with iterators
@@ -852,13 +863,15 @@ namespace boost {
                 uint32_t reserved_;
             };
 
+            ///
+            /// @}
+            ///
 
-
-            
-            
         } // boundary
+
     } // locale
 } // boost
+
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
