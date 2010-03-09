@@ -21,11 +21,15 @@ namespace locale {
 
 #define CALENDAR(ptr) (reinterpret_cast<icu::Calendar *>((ptr)->impl_))
 #define calendar_ CALENDAR(this)
+#define const_calendar_ (const_cast<icu::Calendar const *>(calendar_))
+#define const_calendar_of(other) (const_cast<icu::Calendar const *>(CALENDAR(&(other))))
 
-using namespace period;
+using period::period_type;
 
 static UCalendarDateFields to_icu(period_type f)
 {
+    using namespace period;
+
     switch(f) {
     case era: return UCAL_ERA;
     case year: return UCAL_YEAR;
@@ -122,7 +126,7 @@ calendar::calendar(calendar const &other) :
     locale_(other.locale_),
     tz_(other.tz_)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(other)->clone());
 }
 
 calendar const &calendar::operator = (calendar const &other) 
@@ -132,14 +136,14 @@ calendar const &calendar::operator = (calendar const &other)
         tz_ = other.tz_;
         delete calendar_;
         impl_=0;
-        impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
+        impl_=reinterpret_cast<void *>(const_calendar_of(other)->clone());
     }
     return *this;
 }
 
 bool calendar::is_gregorian() const
 {
-    return dynamic_cast<icu::GregorianCalendar *>(calendar_);
+    return dynamic_cast<icu::GregorianCalendar const *>(const_calendar_);
 }
 
 boost::locale::time_zone calendar::get_time_zone() const
@@ -154,35 +158,35 @@ std::locale calendar::get_locale() const
 
 int calendar::minimum(period_type f) const
 {
-    return calendar_->getMinimum(to_icu(f));
+    return const_calendar_->getMinimum(to_icu(f));
 }
 
 int calendar::greatest_minimum(period_type f) const
 {
-    return calendar_->getGreatestMinimum(to_icu(f));
+    return const_calendar_->getGreatestMinimum(to_icu(f));
 }
 
 int calendar::maximum(period_type f) const
 {
-    return calendar_->getMaximum(to_icu(f));
+    return const_calendar_->getMaximum(to_icu(f));
 }
 
 int calendar::least_maximum(period_type f) const
 {
-    return calendar_->getLeastMaximum(to_icu(f));
+    return const_calendar_->getLeastMaximum(to_icu(f));
 }
 
 int calendar::first_day_of_week() const
 {
     UErrorCode e=U_ZERO_ERROR;
-    int first=static_cast<int>(calendar_->getFirstDayOfWeek(e));
+    int first=static_cast<int>(const_calendar_->getFirstDayOfWeek(e));
     check_and_throw(e);
     return first;
 }
 
 bool calendar::operator==(calendar const &other) const
 {
-    return calendar_->isEquivalentTo(*CALENDAR(&other));
+    return calendar_->isEquivalentTo(*const_calendar_of(other));
 }
 
 bool calendar::operator!=(calendar const &other) const
@@ -201,12 +205,12 @@ date_time::date_time()
 
 date_time::date_time(date_time const &other)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(other)->clone());
 }
 
 date_time::date_time(date_time const &other,date_time_period_set const &s)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(other)->clone());
     for(unsigned i=0;i<s.size();i++)
         set(s[i].type,s[i].value);
 }
@@ -215,7 +219,7 @@ date_time const &date_time::operator = (date_time const &other)
 {
     if(this != &other) {
         delete calendar_;
-        impl_=reinterpret_cast<void *>(CALENDAR(&other)->clone());
+        impl_=reinterpret_cast<void *>(const_calendar_of(other)->clone());
     }
     return *this;
 }
@@ -239,7 +243,7 @@ date_time::date_time(double time)
 
 date_time::date_time(double time,calendar const &cal)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(cal)->clone());
     UErrorCode e=U_ZERO_ERROR;
     calendar_->setTime(time * 1000.0,e);
     if(U_FAILURE(e)) {
@@ -250,7 +254,7 @@ date_time::date_time(double time,calendar const &cal)
 
 date_time::date_time(calendar const &cal)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(cal)->clone());
 }
 
 
@@ -269,7 +273,7 @@ date_time::date_time(date_time_period_set const &s)
 }
 date_time::date_time(date_time_period_set const &s,calendar const &cal)
 {
-    impl_=reinterpret_cast<void *>(CALENDAR(&cal)->clone());
+    impl_=reinterpret_cast<void *>(const_calendar_of(cal)->clone());
     try {
         for(unsigned i=0;i<s.size();i++)
             set(s[i].type,s[i].value);
@@ -296,7 +300,7 @@ void date_time::set(period_type f,int v)
 int date_time::get(period_type f) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    int v=calendar_->get(to_icu(f),e);
+    int v=const_calendar_->get(to_icu(f),e);
     check_and_throw(e);
     return v;
 }
@@ -425,7 +429,7 @@ date_time const &date_time::operator>>=(date_time_period_set const &v)
 double date_time::time() const
 {
     UErrorCode e=U_ZERO_ERROR;
-    double v=calendar_->getTime(e);
+    double v=const_calendar_->getTime(e);
     check_and_throw(e);
     return v/1000.0;
 }
@@ -440,7 +444,7 @@ void date_time::time(double v)
 bool date_time::operator==(date_time const &other) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    bool v=calendar_->equals(*CALENDAR(&other),e);
+    bool v=const_calendar_->equals(*CALENDAR(&other),e);
     check_and_throw(e);
     return v;
 }
@@ -453,7 +457,7 @@ bool date_time::operator!=(date_time const &other) const
 bool date_time::operator<(date_time const &other) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    bool v=calendar_->before(*CALENDAR(&other),e);
+    bool v=const_calendar_->before(*CALENDAR(&other),e);
     check_and_throw(e);
     return v;
 }
@@ -466,7 +470,7 @@ bool date_time::operator>=(date_time const &other) const
 bool date_time::operator>(date_time const &other) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    bool v=calendar_->after(*CALENDAR(&other),e);
+    bool v=const_calendar_->after(*CALENDAR(&other),e);
     check_and_throw(e);
     return v;
 }
@@ -483,7 +487,7 @@ void date_time::swap(date_time &other)
     other.impl_=tmp;
 }
 
-int date_time::difference(date_time const &other,period_type f) const
+int date_time::difference(date_time const &other,period_type f)
 {
     UErrorCode e=U_ZERO_ERROR;
     int d = calendar_->fieldDifference(1000.0*other.time(),to_icu(f),e);
@@ -491,10 +495,20 @@ int date_time::difference(date_time const &other,period_type f) const
     return d;
 }
 
+
+int date_time::difference(date_time const &other,period_type f) const
+{
+    UErrorCode e=U_ZERO_ERROR;
+    std::auto_ptr<icu::Calendar> cal(const_calendar_->clone());
+    int d = cal->fieldDifference(1000.0*other.time(),to_icu(f),e);
+    check_and_throw(e);
+    return d;
+}
+
 int date_time::maximum(period_type f) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    int v = calendar_->getActualMaximum(to_icu(f),e);
+    int v = const_calendar_->getActualMaximum(to_icu(f),e);
     check_and_throw(e);
     return v;
 }
@@ -502,7 +516,7 @@ int date_time::maximum(period_type f) const
 int date_time::minimum(period_type f) const
 {
     UErrorCode e=U_ZERO_ERROR;
-    int v = calendar_->getActualMinimum(to_icu(f),e);
+    int v = const_calendar_->getActualMinimum(to_icu(f),e);
     check_and_throw(e);
     return v;
 }

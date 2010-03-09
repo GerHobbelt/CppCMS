@@ -18,6 +18,10 @@ namespace boost {
     namespace locale {
 
         class time_zone_impl;
+        ///
+        /// \addtogroup date_time
+        ///
+        /// @{
 
         ///
         /// \brief class used for calculation of time zone offsets
@@ -26,22 +30,32 @@ namespace boost {
         public:
 
             ///
-            /// Get a list of all supported time zone ids
+            /// \brief Get a list of all supported time zone ids
             ///
             static std::set<std::string> all_zones();
 
             ///
-            /// Set default time zone
+            /// \brief Set default time zone
+            ///
+            /// Please note, this function does not change system time zone but all time zones related to this library/
+            /// This function is not safe to use in multithreaded environment.
             ///
             static void global(time_zone const &zone);
  
             ///
-            /// Creates default Time Zone
+            /// \brief Creates default Time Zone
             ///
             time_zone();
 
+            ///
+            /// \brief Copies time zone
+            /// 
             time_zone(time_zone const &other);
+            ///
+            /// \brief Assigns time zone
+            ///
             time_zone const &operator=(time_zone const &other);
+
             ~time_zone();
             ///
             /// Create time zone with id \a id
@@ -53,6 +67,9 @@ namespace boost {
             ///
             bool operator==(time_zone const &other) const;
 
+            ///
+            /// Opposite of ==
+            ///
             bool operator!=(time_zone const &other) const
             {
                 return !(*this==other);
@@ -70,14 +87,18 @@ namespace boost {
             double offset_from_gmt(double time,bool is_local_time = false) const;
             
 
-            ///
-            /// For internal Use only -- don't use it
-            ///
+            /// \cond INTERNAL
+
+            //
+            // For internal Use only -- don't use it
+            //
 
             time_zone_impl *impl() const
             {
                 return impl_.get();
             }
+
+            /// \endcond
         private:
             std::auto_ptr<time_zone_impl> impl_;
         };
@@ -89,6 +110,8 @@ namespace boost {
         template<typename CharType>
         std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,time_zone const &tz);
         
+
+        /// \cond INTERNAL
         template<>
         BOOST_LOCALE_DECL std::basic_ostream<char> &operator<<(std::basic_ostream<char> &out,time_zone const &tz);
     
@@ -106,9 +129,14 @@ namespace boost {
         template<>
         BOOST_LOCALE_DECL std::basic_ostream<char32_t> &operator<<(std::basic_ostream<char32_t> &out,time_zone const &tz);
         #endif
+        /// \endcond
     
-    }
-}
+        ///
+        /// @}
+        ///
+
+    } // locale
+} // boost
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

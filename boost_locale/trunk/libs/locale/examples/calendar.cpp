@@ -33,7 +33,7 @@ int main(int argc,char **argv)
 		if(calendar().is_gregorian()) 
 			std::cout << format("{1,ftime='%B'}") % now <<std::endl;
 		else
-			std::cout << format("{1,ftime='%B'} ({1,date=s,locale=en,date=s} - {2,locale=en,date=s})")
+			std::cout << format("{1,ftime='%B'} ({1,ftime='%Y-%m-%d',locale=en} - {2,locale=en,ftime='%Y-%m-%d'})")
 					% now 
 					% date_time(now,now.maximum(period::day)*period::day) << std::endl;
 

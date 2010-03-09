@@ -28,26 +28,16 @@ namespace boost {
         /// 
 
         class info;
+
         ///
-        /// \brief Hook class for DLL
-        ///
-        /// This class is big ugly hook for DLL in order to make sure that both program and DLL
-        /// refer to same locale::id when it uses some atomic static members.
-        ///
-        /// Further we specialize it for char, wchar_t, char16_t and char32_t in order to make them work.
+        /// \cond INTERNAL
         ///
         template<typename CharType>
         struct base_message_format: public std::locale::facet
         {
         };
-
        
        
-        ///
-        /// \brief A facet used for message formatting
-        ///
-        /// This class is usually used via translate function
-        /// 
         template<typename CharType>
         class message_format : public base_message_format<CharType>
         {
@@ -61,17 +51,8 @@ namespace boost {
             {
             }
 
-            ///
-            /// Internal do not use directly
-            ///
             virtual char_type const *get(int domain_id,char const *id) const = 0;
-            ///
-            /// Internal do not use directly
-            ///
             virtual char_type const *get(int domain_id,char const *single_id,int n) const = 0;
-            ///
-            /// Internal do not use directly
-            ///
             virtual int domain(std::string const &domain) const = 0;
 
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
@@ -86,6 +67,7 @@ namespace boost {
 
         };
 
+        /// \endcond
 
         ///
         /// This class represents a message that can be converted to specific locale message
@@ -337,6 +319,10 @@ namespace boost {
         {
             return message(single,plural,n);
         }
+
+        ///
+        /// \cond INTERNAL
+        ///
         
         template<>
         struct BOOST_LOCALE_DECL base_message_format<char> : public std::locale::facet 
@@ -403,7 +389,14 @@ namespace boost {
 
         #endif
 
+        /// \endcond
+
+        ///
+        /// @}
+        ///
+
         namespace as {
+            /// \cond INTERNAL
             namespace details {
                 struct set_domain {
                     std::string domain_id;
@@ -416,6 +409,7 @@ namespace boost {
                     return out;
                 }
             } // details
+            /// \endcond
 
             ///
             /// \addtogroup manipulators
@@ -433,10 +427,6 @@ namespace boost {
             }
             /// @}
         } // as
-
-        ///
-        /// @}
-        ///
     } // locale 
 } // boost
 

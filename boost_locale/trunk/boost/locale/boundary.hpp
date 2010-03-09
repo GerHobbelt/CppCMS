@@ -131,7 +131,7 @@ namespace boost {
                     }
                 };
                
-               typedef std::vector<break_info> index_type;
+                typedef std::vector<break_info> index_type;
 
                 template<typename CharType>
                 index_type map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc=std::locale());
@@ -243,8 +243,17 @@ namespace boost {
             template<class RangeIterator>
             class mapping {
             public:
+                ///
+                /// \brief Iterator type that is used to iterate over boundaries
+                ///
                 typedef RangeIterator iterator;
+                ///
+                /// \brief Underlying iterator that is used to iterate original text.
+                ///
                 typedef typename RangeIterator::base_iterator base_iterator;
+                ///
+                /// \brief The character type of the text
+                ///
                 typedef typename std::iterator_traits<base_iterator>::value_type char_type;
 
                 ///
@@ -417,8 +426,17 @@ namespace boost {
             class token_iterator : public std::iterator<std::bidirectional_iterator_tag,ValueType> 
             {
             public:
+                ///
+                /// \brief The character type of the text
+                ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+                ///
+                /// \brief Underlying iterator that is used to iterate original text.
+                ///
                 typedef IteratorType base_iterator;
+                ///
+                /// \brief The type of mapping that iterator can iterate over it
+                /// 
                 typedef mapping<token_iterator<IteratorType,ValueType> > mapping_type;
                                 
                 ///
@@ -433,7 +451,7 @@ namespace boost {
                 }
 
                 ///
-                /// \breif set position of the token iterator to the location of underlying iterator.
+                /// \brief set position of the token iterator to the location of underlying iterator.
                 ///
                 /// This operator sets the token iterator to first token following that position. For example:
                 ///
@@ -659,8 +677,17 @@ namespace boost {
             class break_iterator : public std::iterator<std::bidirectional_iterator_tag,IteratorType> 
             {
             public:
+                ///
+                /// \brief The character type of the text
+                ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+                ///
+                /// \brief Underlying iterator that is used to iterate original text.
+                ///
                 typedef IteratorType base_iterator;
+                ///
+                /// \brief The type of mapping that iterator can iterate over it
+                /// 
                 typedef mapping<break_iterator<IteratorType> > mapping_type;
                 
                 ///
@@ -739,7 +766,7 @@ namespace boost {
                 }
  
                 ///
-                /// \breif set position of the break_iterator to the location of underlying iterator.
+                /// \brief set position of the break_iterator to the location of underlying iterator.
                 ///
                 /// This operator sets the break_iterator to position of the iterator p or to the first valid following position
                 /// For example:

@@ -29,10 +29,17 @@ namespace boost {
         ///
         class date_time_error : public std::runtime_error {
         public:
+            ///
+            /// \brief Constructor of date_time_error class
+            /// 
             date_time_error(std::string const &e) : std::runtime_error(e) {}
         };
 
+        ///
+        /// \brief Namespace that contains a enum that defines various periods like years, days
+        ///
         namespace period {
+            ///
             ///
             /// \brief This enum provides the list of various time periods that can be used for manipulation over date and time
             /// Operators like +, - * defined for these period allowing to perform easy calculations over them
@@ -64,83 +71,371 @@ namespace boost {
         /// 
         struct date_time_period 
         {
-            period::period_type type;
-            int value;
+            period::period_type type;   ///< The type of period, i.e. era, year, day etc.
+            int value;                  ///< The value the actual number of \a periods
+            ///
+            /// \brief Operator + returns copy of itself
+            ///
             date_time_period operator+() const { return *this; }
+            ///
+            /// \brief Operator -, switches the sign of period
+            ///
             date_time_period operator-() const { return date_time_period(type,-value); }
             
+            ///
+            /// \brief Constructor that creates date_time_period from period_type \a f and a value \a v -- default 1.
+            ///
             date_time_period(period::period_type f=period::invalid,int v=1) : type(f), value(v) {}
         };
 
+        ///
+        /// \brief convers period_type to date_time_period(f,1)
+        ///
         inline date_time_period operator+(period::period_type f) 
         {
             return date_time_period(f);
         }
+        ///
+        /// \brief convers period_type to date_time_period(f,-1)
+        ///
         inline date_time_period operator-(period::period_type f)
         {
             return date_time_period(f,-1);
         }
 
-        /// \cond INTERNAL 
-        #define BOOST_LOCALE_DATE_TIME_OPERATORS(Type) \
-            inline date_time_period operator*(period::period_type f,Type v) { return date_time_period(f,v); } \
-            inline date_time_period operator*(Type v,period::period_type f) { return date_time_period(f,v); } \
-            inline date_time_period operator*(Type v,date_time_period f) { return date_time_period(f.type,f.value*v); } \
-            inline date_time_period operator*(date_time_period f,Type v) { return date_time_period(f.type,f.value*v); }
-
-        BOOST_LOCALE_DATE_TIME_OPERATORS(char)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(short int)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(int)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(long int)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned char)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned short int)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned int)
-        BOOST_LOCALE_DATE_TIME_OPERATORS(unsigned long int)
-
-        #undef BOOST_LOCALE_DATE_TIME_OPERATORS
-
-        /// \endcond 
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,char v)
+        {
+            return date_time_period(f,v);
+        }
 
         ///
-        /// \brief the class that represents a set of periods, It is generally created by operations on periods:
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(char v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(char v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,char v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,short int v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(short int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(short int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,short int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,int v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,long int v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(long int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(long int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,long int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,unsigned char v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned char v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned char v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,unsigned char v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,unsigned short int v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned short int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned short int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,unsigned short int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,unsigned int v)
+        {
+            return date_time_period(f,v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+        
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+        
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,unsigned int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(period::period_type f,unsigned long int v)
+        {
+            return date_time_period(f,v);
+        }
+        
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned long int v,period::period_type f)
+        {
+            return date_time_period(f,v);
+        }
+        
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(unsigned long int v,date_time_period f)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+        
+        ///
+        /// \brief Create date_time_period of type \a f with value \a v. 
+        ///
+        inline date_time_period operator*(date_time_period f,unsigned long int v)
+        {
+            return date_time_period(f.type,f.value*v);
+        }
+
+
+        ///
+        /// \brief the class that represents a set of periods, 
+        ///
+        /// It is generally created by operations on periods:
         /// 1995*year + 3*month + 1*day. Note: operations are not commutative.
         ///
         class date_time_period_set {
         public:
+            
+            ///
+            /// \brief Default constructor - empty set
+            ///
             date_time_period_set()
             {
             }
+            ///
+            /// \brief Create a set of single period with value 1
+            ///
             date_time_period_set(period::period_type f)
             {
-                basic_=date_time_period(f);
+                basic_[0]=date_time_period(f);
             }
+            ///
+            /// \brief Create a set of single period \a fl
+            ///
             date_time_period_set(date_time_period const &fl)
             {
-                basic_=fl;
+                basic_[0]=fl;
             }
+            ///
+            /// \brief Append date_time_period \a f to the set
+            ///
             void add(date_time_period f)
             {
-                if(basic_.type==period::invalid)
-                    basic_=f;
+                size_t n=size();
+                if(n < 4)
+                    basic_[n]=f;
                 else
                     periods_.push_back(f);
             }
+            ///
+            /// \brief Get number if items in list
+            ///
             size_t size() const
             {
-                return basic_.type==period::invalid ? 0 : 1 + periods_.size();
+                if(basic_[0].type == period::invalid)
+                    return 0;
+                if(basic_[1].type == period::invalid)
+                    return 1;
+                if(basic_[2].type == period::invalid)
+                    return 2;
+                if(basic_[3].type == period::invalid)
+                    return 3;
+                return 4+periods_.size();
             }
-            date_time_period const &operator[](int n) const 
+            ///
+            /// \brief Get item at position \a n the set, n should be in range [0,size)
+            ///
+            date_time_period const &operator[](unsigned n) const 
             {
-                if(n==0)
-                    return basic_;
+                if(n >= size())
+                    throw std::out_of_range("Invalid index to date_time_period");
+                if(n < 4)
+                    return basic_[n];
                 else
-                    return periods_[n-1]; 
+                    return periods_[n-4];
             }
         private:
-            date_time_period basic_;
+            date_time_period basic_[4];
             std::vector<date_time_period> periods_;
         };
 
+        
+        ///
+        /// \brief Append two periods sets. Note this operator is not commutative 
+        ///
         inline date_time_period_set operator+(date_time_period_set const &a,date_time_period_set const &b)
         {
             date_time_period_set s(a);
@@ -149,6 +444,9 @@ namespace boost {
             return s;
         }
         
+        ///
+        /// \brief Append two period sets when all periods of set \b change their sign
+        ///
         inline date_time_period_set operator-(date_time_period_set const &a,date_time_period_set const &b)
         {
             date_time_period_set s(a);
@@ -159,7 +457,11 @@ namespace boost {
 
 
         ///
-        /// \brief this class provides an access to general calendar information. That is not related to specific date
+        /// \brief this class provides an access to general calendar information. 
+        ///
+        /// This information is not connected to specific date but generic to locale, and timezone.
+        /// It is used in obtaining general information about calendar and is essential for creation of
+        /// date_time objects.
         ///
         class BOOST_LOCALE_DECL calendar {
         public:
@@ -250,6 +552,22 @@ namespace boost {
         /// \brief this class represents a date time and allows to perform various operation according to the
         /// locale settings.
         ///
+        /// This class allows to manipulate various aspects of dates and times easily using arithmetic operations with
+        /// periods.
+        ///
+        /// General arithmetic functions:
+        ///
+        /// - date_time + date_time_period_set = date_time: move time point forward by specific periods like date_time + month;
+        /// - date_time - date_time_period_set = date_time: move time point backward by specific periods like date_time - month;
+        /// - date_time << date_time_period_set  = date_time: roll time point forward by specific periods with rolling to begin if overflows: like "2010-01-31" << 2* day == "2010-01-02" instead of "2010-02-02"
+        /// - date_time >> date_time_period_set  = date_time: roll time point backward by specific periods with rolling to end if overflows: like "2010-01-02" >> 2* day == "2010-01-31" instead of "2009-12-30"
+        /// - date_time / period_type = int - current period value: like "2010-12-21" / month == 12. "2010-12-21" / year = 2010
+        /// - (date_time - date_time) / period_type = int: distance between dates in period_type. Like ("2010-12-01" - "2008-12-01") / month = 24.
+        ///
+        /// You can also assign specific periods using assignment operator like:
+        /// some_time = year * 1995 that sets the year to 1995.
+        ///
+        ///
         
         class BOOST_LOCALE_DECL date_time {
         public:
@@ -318,7 +636,7 @@ namespace boost {
             }
 
             ///
-            /// \brief add period f to the current date_time and return it
+            /// \brief add single period f to the current date_time
             ///
             date_time operator+(period::period_type f) const
             {
@@ -326,7 +644,7 @@ namespace boost {
             }
 
             ///
-            /// \brief subtract period f from the current date_time and return it
+            /// \brief subtract single period f from the current date_time
             ///
             date_time operator-(period::period_type f) const
             {
@@ -334,14 +652,14 @@ namespace boost {
             }
 
             ///
-            /// \brief add period f to the current date_time
+            /// \brief add single period f to the current date_time
             ///
             date_time const &operator+=(period::period_type f)
             {
                 return *this+=date_time_period(f);
             }
             ///
-            /// \brief subtract period f from the current date_time
+            /// \brief subtract single period f from the current date_time
             ///
             date_time const &operator-=(period::period_type f)
             {
@@ -349,10 +667,7 @@ namespace boost {
             }
 
             ///
-            /// \brief roll up a date by period f.
-            ///
-            /// If overflow occures no other periods changed. i.e.:
-            /// date_time(1990*year + 0 * month + 31 * day) << day == date_time(1990*year + 0 * month + 1 * day)
+            /// \brief roll forward a date by single period f.
             ///
             date_time operator<<(period::period_type f) const
             {
@@ -360,8 +675,7 @@ namespace boost {
             }
 
             ///
-            /// \brief roll down a date by period f, If overflow occures no other periods changed. i.e.:
-            /// date_time(1990*year + 0 * month + 1 * day) >> day == date_time(1990*year + 0 * month + 31 * day)
+            /// \brief roll backward a date by single period f.
             ///
             date_time operator>>(period::period_type f) const
             {
@@ -369,49 +683,99 @@ namespace boost {
             }
 
             ///
-            /// \brief roll up a date by period f, If overflow occures no other periods changed. i.e.:
-            /// date_time(1990*year + 0 * month + 31 * day) << day == date_time(1990*year + 0 * month + 1 * day)
+            /// \brief roll forward a date by single period f.
             ///
             date_time const &operator<<=(period::period_type f)
             {
                 return *this<<=date_time_period(f);
             }
             ///
-            /// \brief roll down a date by period f, If overflow occures no other periods changed. i.e.:
-            /// date_time(1990*year + 0 * month + 1 * day) >> day == date_time(1990*year + 0 * month + 31 * day)
+            /// \brief roll backward a date by single period f.
             ///
             date_time const &operator>>=(period::period_type f)
             {
                 return *this>>=date_time_period(f);
             }
 
-
+            ///
+            /// \brief add date_time_period to the current date_time
+            ///
             date_time operator+(date_time_period const &v) const;
+            ///
+            /// \brief substract date_time_period from the current date_time
+            ///
             date_time operator-(date_time_period const &v) const;
+            ///
+            /// \brief add date_time_period to the current date_time
+            ///
             date_time const &operator+=(date_time_period const &v);
+            ///
+            /// \brief substract date_time_period from the current date_time
+            ///
             date_time const &operator-=(date_time_period const &v);
 
+            ///
+            /// \brief roll current date_time forward by date_time_period v
+            ///
             date_time operator<<(date_time_period const &v) const;
+            ///
+            /// \brief roll current date_time backward by date_time_period v
+            ///
             date_time operator>>(date_time_period const &v) const ;
+            ///
+            /// \brief roll current date_time forward by date_time_period v
+            ///
             date_time const &operator<<=(date_time_period const &v);
+            ///
+            /// \brief roll current date_time backward by date_time_period v
+            ///
             date_time const &operator>>=(date_time_period const &v);
 
+            ///
+            /// \brief add date_time_period_set v to the current date_time
+            ///
             date_time operator+(date_time_period_set const &v) const;
+            ///
+            /// \brief substract date_time_period_set v from the current date_time
+            ///
             date_time operator-(date_time_period_set const &v) const;
+            ///
+            /// \brief add date_time_period_set v to the current date_time
+            ///
             date_time const &operator+=(date_time_period_set const &v);
+            ///
+            /// \brief substract date_time_period_set v from the current date_time
+            ///
             date_time const &operator-=(date_time_period_set const &v);
 
+            ///
+            /// \brief roll current date_time forward by date_time_period_set v
+            ///
             date_time operator<<(date_time_period_set const &v) const;
+            ///
+            /// \brief roll current date_time backward by date_time_period_set v
+            ///
             date_time operator>>(date_time_period_set const &v) const ;
+            ///
+            /// \brief roll current date_time forward by date_time_period_set v
+            ///
             date_time const &operator<<=(date_time_period_set const &v);
+            ///
+            /// \brief roll current date_time backward by date_time_period_set v
+            ///
             date_time const &operator>>=(date_time_period_set const &v);
 
             ///
             /// \brief Get POSIX time
             ///
+            /// The POSIX time is number of seconds since January 1st, 1970 00:00 UTC, ignoring leap seconds.
+            ///
             double time() const;
             ///
             /// \brief set POSIX time
+            ///
+            /// The POSIX time is number of seconds since January 1st, 1970 00:00 UTC, ignoring leap seconds.
+            /// This time can be fetched from Operating system clock using C function time, gettimeofdat and others.
             ///
             void time(double v);
 
@@ -441,7 +805,7 @@ namespace boost {
             bool operator>=(date_time const &other) const;
 
             ///
-            /// \brief swaps to dates -- efficient
+            /// \brief swaps two dates - efficient, does not throw
             ///
             void swap(date_time &other);
 
@@ -449,6 +813,11 @@ namespace boost {
             /// \brief calculate the distance from this date_time to \a other in terms of perios \a f
             ///
             int difference(date_time const &other,period::period_type f) const;
+
+            ///
+            /// \brief calculate the distance from this date_time to \a other in terms of perios \a f
+            ///
+            int difference(date_time const &other,period::period_type f);
 
             ///
             /// \brief Get minimal possible value for current time point for a period \a f.
@@ -464,6 +833,19 @@ namespace boost {
             void *impl_;
         };
 
+        ///
+        /// \brief Writes date_time \a t to output stream \a out.
+        ///
+        /// This function uses locale, calendar and time zone of the target stream \a in.
+        ///
+        /// For example:
+        /// \code
+        ///  date_time now(time(0),hebrew_calendar)
+        ///  cout << "Year:" t / perood::year <<" Full Date:"<< as::date_time << t;
+        /// \endcode
+        ///
+        /// The output may be Year:5770 Full Date:Jan 1, 2010
+        /// 
         template<typename CharType>
         std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,date_time const &t)
         {
@@ -471,6 +853,11 @@ namespace boost {
             return out;
         }
 
+        ///
+        /// \brief Reads date_time \a t from output stream \a in
+        ///
+        /// This function uses locale, calendar and time zone of the source stream \a in.
+        ///
         template<typename CharType>
         std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,date_time &t)
         {
@@ -480,25 +867,52 @@ namespace boost {
             return in;
         }
 
+        ///
+        /// \brief This class represents a period: a pair of two date_time objects.
+        /// 
+        /// It is generally used as syntactic sugar to calculate difference between two dates.
+        ///
+        /// Note: it stores references to the original objects, so it is not recommended to be used
+        /// outside of the equation you calculate the difference in.
+        ///
         class date_time_duration {
         public:
+
+            ///
+            /// \brief Create an object were \a first represents earlier point on time line and \a second is later
+            /// point.
+            /// 
             date_time_duration(date_time const &first,date_time const &second) :
                 s_(first),
                 e_(second)
             {
             }
 
+            ///
+            /// \brief find a difference in terms of period_type \a f
+            ///
             int operator / (period::period_type f) const
             {
                 return start().difference(end(),f);
             }
 
+            ///
+            /// \brief Get starting point
+            ///
             date_time const &start() const { return s_; }
+            ///
+            /// \brief Get ending point
+            ///
             date_time const &end() const { return e_; }
         private:
-            date_time s_,e_;
+            date_time const &s_;
+            date_time const &e_;
         };
 
+        ///
+        /// \brief Calculates the difference between two dates, the left operand is a later point on time line.
+        /// Returns date_time_duration object.
+        ///
         inline date_time_duration operator-(date_time const &later,date_time const &earlier)
         {
             return date_time_duration(earlier,later);

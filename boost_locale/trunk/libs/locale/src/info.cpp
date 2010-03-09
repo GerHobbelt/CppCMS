@@ -15,10 +15,6 @@
 namespace boost {
     namespace locale {
 
-        static std::string encoding_from_id(std::string id)
-        {
-        }
-        
         std::locale::id info::id;
 
         info::~info()

@@ -341,6 +341,7 @@ namespace boost {
             }            
             
             
+            /// \cond INTERNAL 
             namespace details {
                 template<typename CharType>
                 struct add_ftime {
@@ -370,6 +371,7 @@ namespace boost {
                 }
 
             }
+            /// \endcond 
 
             ///
             /// \brief Set strftime like formatting string
@@ -426,6 +428,7 @@ namespace boost {
                 return fmt;
             }
 
+            /// \cond INTERNAL
             namespace details {
                 struct set_timezone {
                     std::string id;
@@ -444,6 +447,7 @@ namespace boost {
                     return in;
                 }
             }
+            /// \endcond
             
             ///
             /// \brief Set GMT time zone to stream

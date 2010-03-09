@@ -7,8 +7,8 @@
 
 #define RESET() do { time_point = base_time_point; ss.str(""); } while(0)
 #define TESTR(X) do { TEST(X); RESET(); } while(0)
-#define TESTEQSR(t,X) do { ss << (t); TESTR(ss.str() == X); } while(0)
-//#define TESTEQSR(t,X) do { ss << (t); if(ss.str()!=X) { std::cerr <<"[" << ss.str() <<"]" << std::endl; } TESTR(ss.str() == X); } while(0)
+//#define TESTEQSR(t,X) do { ss << (t); TESTR(ss.str() == X); } while(0)
+#define TESTEQSR(t,X) do { ss << (t); if(ss.str()!=X) { std::cerr <<"[" << ss.str() <<"]" << std::endl; } TESTR(ss.str() == X); } while(0)
 
 int main()
 {
@@ -85,6 +85,17 @@ int main()
 
         time_point >>= minute * 40;
         TESTEQSR( time_point, "Feb 5, 1970 3:53:13 PM");
+
+        TEST((time_point + month) / month == 2);
+        TEST(time_point / month == 1);
+        TEST((time_point - month) / month == 0);
+        TEST(time_point / month == 1);
+        TEST((time_point << month) / month == 2);
+        TEST(time_point / month == 1);
+        TEST((time_point >> month) / month == 0);
+        TEST(time_point / month == 1);
+
+
 
         TEST( (time_point + 2 * hour - time_point) / minute == 120);
         TEST( (time_point + month - time_point) / day == 28);

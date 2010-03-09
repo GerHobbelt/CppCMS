@@ -52,7 +52,13 @@ namespace locale {
         public collator_base
     {
     public:
+        ///
+        /// \brief Type of underlying character
+        ///
         typedef CharType char_type;
+        ///
+        /// \brief Type of string used with this facet
+        ///
         typedef std::basic_string<CharType> string_type;
         
 
@@ -114,9 +120,13 @@ namespace locale {
         
     protected:
 
+        ///
+        /// \brief constructor of the collator object
+        ///
         collator(size_t refs = 0) : std::collate<CharType>(refs) 
         {
         }
+
         virtual ~collator()
         {
         }
@@ -165,6 +175,8 @@ namespace locale {
 
     };
 
+    /// \cond INTERNAL 
+
     template<>
     BOOST_LOCALE_DECL collator<char> *collator<char>::create(info const &inf);
     #ifndef BOOST_NO_STD_WSTRING
@@ -181,10 +193,19 @@ namespace locale {
     template<>
     BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf);
     #endif
+    /// \endcond
 
     ///
-    /// This class can be used in STL algorithms and containers for comparison of strings
+    /// \brief This class can be used in STL algorithms and containers for comparison of strings
     /// with different level then primary
+    ///
+    /// For example:
+    ///
+    /// \code
+    ///  std::map<std::string,std::string,comparator<char,collator_base::secondary> > data;
+    /// \endcode
+    /// 
+    /// Would create a map the keys of which are sorted using secondary collation level
     ///
     template<typename CharType,collator_base::level_type default_level = collator_base::primary>
     struct comparator
