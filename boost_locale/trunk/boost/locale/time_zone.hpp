@@ -29,7 +29,7 @@ namespace boost {
         /// It allows to readout all supported time zones, set default time zone and receive an information like
         /// the offset from UTC time.
         ///
-        class time_zone {
+        class BOOST_LOCALE_DECL time_zone {
         public:
 
             ///
