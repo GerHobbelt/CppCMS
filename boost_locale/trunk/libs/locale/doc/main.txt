@@ -1,0 +1,26 @@
+/// \mainpage Boost Locale
+///
+/// Boost.Locale is a library that brings high quality localization facilities in C++ way.
+/// It uses \c std::locale, and \c std::locale facets in order to provide localization in transparent and
+/// C++ aware way to user.
+/// C++ has quite a good base for localization via existing C++ locale facets: \c std::num_put, \c std::ctype`, \c std::collate etc.. But
+/// they are very limited and sometimes buggy by design. The support of localization varies between different
+/// operating systems, compilers, standard libraries and frequently incompatible between them.
+/// 
+/// On the other hand, there is great, well debugged, high quality, widely used ICU library that gives all of the goodies but,
+/// it has very old API that mimics Java behavior, it completely ignores STL and provides useful API only
+/// for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-32 and limited but still popular
+/// national character sets like Latin1.
+///
+/// Boost.Locale provides the natural glue between C++ locales framework, iostreams and powerful ICU library in following areas:
+/// 
+/// - Correct case conversion, case folding and normalization
+/// - Collation including support of 4 Unicode collation levels.
+/// - Date and time formatting and parsing including support of timezones and calendars other then Gregorian.
+/// - Number formatting, spelling and parsing
+/// - Monetary formatting and parsing
+/// - Powerful message formatting including support plural forms, using GNU catalogs.
+/// - Character, word, sentence and line-break boundary analysis.
+/// - Support of 8-bit character sets like Latin1 and UTF-8 encoded text.
+/// - Support of \c char, \c wchar_t and C++0x \c char16_t, \c char32_t strings and streams.
+/// 
