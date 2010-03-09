@@ -352,7 +352,7 @@ date_time const &date_time::operator-=(date_time_period const &v)
 date_time const &date_time::operator<<=(date_time_period const &v) 
 {
     UErrorCode e=U_ZERO_ERROR;
-    calendar_->roll(to_icu(v.type),int32_t(v.value),e);
+    calendar_->roll(to_icu(v.type),::int32_t(v.value),e);
     check_and_throw(e);
     return *this;
 }
@@ -360,7 +360,7 @@ date_time const &date_time::operator<<=(date_time_period const &v)
 date_time const &date_time::operator>>=(date_time_period const &v) 
 {
     UErrorCode e=U_ZERO_ERROR;
-    calendar_->roll(to_icu(v.type),int32_t(-v.value),e);
+    calendar_->roll(to_icu(v.type),::int32_t(-v.value),e);
     check_and_throw(e);
     return *this;
 }

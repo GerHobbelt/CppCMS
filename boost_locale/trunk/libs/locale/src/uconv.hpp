@@ -215,7 +215,7 @@ namespace impl {
             #ifdef __SUNPRO_CC
             int len=0;
             #else
-            int32_t len=0;
+            ::int32_t len=0;
             #endif
 
             UErrorCode code=U_ZERO_ERROR;

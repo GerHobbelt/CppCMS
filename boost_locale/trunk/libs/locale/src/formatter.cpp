@@ -75,7 +75,7 @@ namespace locale {
                 #ifdef __SUNPRO_CC 
                 icu_fmt_->format(static_cast<int>(value),tmp);
                 #else
-                icu_fmt_->format(value,tmp);
+                icu_fmt_->format(::int32_t(value),tmp);
                 #endif
                 code_points=tmp.countChar32();
                 return cvt_.std(tmp);

@@ -40,10 +40,10 @@ namespace boost{
             }
             double offset(double time,bool is_local_time) const
             {
-                int32_t raw=0;
-                int32_t dst=0;
+                ::int32_t raw=0;
+                ::int32_t dst=0;
                 UErrorCode err=U_ZERO_ERROR;
-                tz_->getOffset(time*1000,is_local_time,raw,dst,err);
+                tz_->getOffset(time*1000,UBool(is_local_time),raw,dst,err);
                 return raw/1e3+dst/1e3;
             }
             std::string id() const
