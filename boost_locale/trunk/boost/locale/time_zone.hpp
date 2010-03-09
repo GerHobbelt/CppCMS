@@ -24,18 +24,21 @@ namespace boost {
         /// @{
 
         ///
-        /// \brief class used for calculation of time zone offsets
+        /// \brief this class represents time zone and time zone related information
+        ///
+        /// It allows to readout all supported time zones, set default time zone and receive an information like
+        /// the offset from UTC time.
         ///
         class time_zone {
         public:
 
             ///
-            /// \brief Get a list of all supported time zone ids
+            /// Get a list of all supported time zone ids
             ///
             static std::set<std::string> all_zones();
 
             ///
-            /// \brief Set default time zone
+            /// Set default time zone
             ///
             /// Please note, this function does not change system time zone but all time zones related to this library/
             /// This function is not safe to use in multithreaded environment.
@@ -43,16 +46,16 @@ namespace boost {
             static void global(time_zone const &zone);
  
             ///
-            /// \brief Creates default Time Zone
+            /// Creates default Time Zone
             ///
             time_zone();
 
             ///
-            /// \brief Copies time zone
+            /// Copies time zone
             /// 
             time_zone(time_zone const &other);
             ///
-            /// \brief Assigns time zone
+            /// Assigns time zone
             ///
             time_zone const &operator=(time_zone const &other);
 

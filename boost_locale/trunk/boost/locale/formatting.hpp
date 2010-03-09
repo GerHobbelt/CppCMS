@@ -130,7 +130,7 @@ namespace boost {
             ///
 
             ///
-            /// \brief Format values with "POSIX" or "C"  locale. Note, if locale was created with additional non-classic locale then
+            /// Format values with "POSIX" or "C"  locale. Note, if locale was created with additional non-classic locale then
             /// These numbers may be localized
             ///
             
@@ -141,7 +141,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Format a number. Note, unlike standard number formatting, integers would be treated like real numbers when std::fixed or
+            /// Format a number. Note, unlike standard number formatting, integers would be treated like real numbers when std::fixed or
             /// std::scientific manipulators were applied
             ///
             inline std::ios_base & number(std::ios_base & ios)
@@ -151,7 +151,7 @@ namespace boost {
             }
             
             ///
-            /// \brief Format currency, number is treated like amount of money
+            /// Format currency, number is treated like amount of money
             ///
             inline std::ios_base & currency(std::ios_base & ios)
             {
@@ -160,7 +160,7 @@ namespace boost {
             }
             
             ///
-            /// \brief Format percent, value 0.3 is treaded as 30%.
+            /// Format percent, value 0.3 is treaded as 30%.
             ///
             inline std::ios_base & percent(std::ios_base & ios)
             {
@@ -169,7 +169,7 @@ namespace boost {
             }
             
             ///
-            /// \brief Format a date, number is treaded as POSIX time
+            /// Format a date, number is treaded as POSIX time
             ///
             inline std::ios_base & date(std::ios_base & ios)
             {
@@ -178,7 +178,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Format a time, number is treaded as POSIX time
+            /// Format a time, number is treaded as POSIX time
             ///
             inline std::ios_base & time(std::ios_base & ios)
             {
@@ -187,7 +187,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Format a date and time, number is treaded as POSIX time
+            /// Format a date and time, number is treaded as POSIX time
             ///
             inline std::ios_base & datetime(std::ios_base & ios)
             {
@@ -196,7 +196,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Create formatted date time, Please note, this manipulator only changes formatting mode,
+            /// Create formatted date time, Please note, this manipulator only changes formatting mode,
             /// and not format itself, so you are probably looking for ftime manipulator
             ///
             inline std::ios_base & strftime(std::ios_base & ios)
@@ -206,7 +206,7 @@ namespace boost {
             }
             
             ///
-            /// \brief Spell the number, like "one hundred and ten"
+            /// Spell the number, like "one hundred and ten"
             ///
             inline std::ios_base & spellout(std::ios_base & ios)
             {
@@ -215,7 +215,7 @@ namespace boost {
             }
             
             ///
-            /// \brief Write an order of the number like 4th.
+            /// Write an order of the number like 4th.
             ///
             inline std::ios_base & ordinal(std::ios_base & ios)
             {
@@ -224,7 +224,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set default currency formatting style -- national, like "$"
+            /// Set default currency formatting style -- national, like "$"
             ///
             inline std::ios_base & currency_default(std::ios_base & ios)
             {
@@ -233,7 +233,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set ISO currency formatting style, like "USD", (requires ICU >= 4.2)
+            /// Set ISO currency formatting style, like "USD", (requires ICU >= 4.2)
             ///
             inline std::ios_base & currency_iso(std::ios_base & ios)
             {
@@ -242,7 +242,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set national currency formatting style, like "$"
+            /// Set national currency formatting style, like "$"
             ///
             inline std::ios_base & currency_national(std::ios_base & ios)
             {
@@ -251,7 +251,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set default (medium) time formatting style
+            /// set default (medium) time formatting style
             ///
             inline std::ios_base & time_default(std::ios_base & ios)
             {
@@ -260,7 +260,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set short time formatting style
+            /// set short time formatting style
             ///
             inline std::ios_base & time_short(std::ios_base & ios)
             {
@@ -269,7 +269,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set medium time formatting style
+            /// set medium time formatting style
             ///
             inline std::ios_base & time_medium(std::ios_base & ios)
             {
@@ -278,7 +278,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set long time formatting style
+            /// set long time formatting style
             ///
             inline std::ios_base & time_long(std::ios_base & ios)
             {
@@ -287,7 +287,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set full time formatting style
+            /// set full time formatting style
             ///
             inline std::ios_base & time_full(std::ios_base & ios)
             {
@@ -296,7 +296,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set default (medium) date formatting style
+            /// set default (medium) date formatting style
             ///
             inline std::ios_base & date_default(std::ios_base & ios)
             {
@@ -305,7 +305,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set short date formatting style
+            /// set short date formatting style
             ///
             inline std::ios_base & date_short(std::ios_base & ios)
             {
@@ -314,7 +314,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set medium date formatting style
+            /// set medium date formatting style
             ///
             inline std::ios_base & date_medium(std::ios_base & ios)
             {
@@ -323,7 +323,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set long date formatting style
+            /// set long date formatting style
             ///
             inline std::ios_base & date_long(std::ios_base & ios)
             {
@@ -332,7 +332,7 @@ namespace boost {
             }
 
             ///
-            /// \brief set full date formatting style
+            /// set full date formatting style
             ///
             inline std::ios_base & date_full(std::ios_base & ios)
             {
@@ -374,7 +374,7 @@ namespace boost {
             /// \endcond 
 
             ///
-            /// \brief Set strftime like formatting string
+            /// Set strftime like formatting string
             ///
             /// Please note, formatting flags are very similar but not exactly the same as flags for C function strftime.
             /// Differences: some flags as "%e" do not add blanks to fill text up to two spaces, not all flags supported.
@@ -418,7 +418,7 @@ namespace boost {
             }
 
             ///
-            /// \brief See ftime(std::basic_string<CharType> const &format)
+            /// See ftime(std::basic_string<CharType> const &format)
             ///
             template<typename CharType>
             details::add_ftime<CharType> ftime(CharType const *format)
@@ -450,7 +450,7 @@ namespace boost {
             /// \endcond
             
             ///
-            /// \brief Set GMT time zone to stream
+            /// Set GMT time zone to stream
             /// 
             inline std::ios_base &gmt(std::ios_base &ios)
             {
@@ -459,7 +459,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set local time zone to stream
+            /// Set local time zone to stream
             ///
             inline std::ios_base &local_time(std::ios_base &ios)
             {
@@ -468,7 +468,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set time zone using \a id
+            /// Set time zone using \a id
             ///
             inline details::set_timezone time_zone(char const *id) 
             {
@@ -478,7 +478,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set time zone using \a id
+            /// Set time zone using \a id
             ///
             inline details::set_timezone time_zone(std::string const &id) 
             {
@@ -488,7 +488,7 @@ namespace boost {
             }
 
             ///
-            /// \brief Set time zone using time_zone class \a id
+            /// Set time zone using time_zone class \a id
             ///
             inline details::set_timezone time_zone(boost::locale::time_zone const &id) 
             {

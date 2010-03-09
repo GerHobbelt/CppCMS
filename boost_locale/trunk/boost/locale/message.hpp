@@ -70,7 +70,11 @@ namespace boost {
         /// \endcond
 
         ///
-        /// This class represents a message that can be converted to specific locale message
+        /// \brief This class represents a message that can be converted to specific locale message
+        ///
+        /// It holds original ASCII string that is queried in the dictionary when converting to output string.
+        /// The created string may be UTF-8, UTF-16, UTF-32 or other 8-bit encoded string according to target 
+        /// character type and locale encoding.
         ///
         struct message {
         public:
@@ -417,7 +421,7 @@ namespace boost {
             /// @{
             
             ///
-            /// \brief Manipulator for switching message domain in ostream,
+            /// Manipulator for switching message domain in ostream,
             ///
             inline details::set_domain domain(std::string const &id)
             {

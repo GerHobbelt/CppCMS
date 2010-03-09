@@ -38,7 +38,7 @@ namespace boost {
             ///
 
             ///
-            /// \brief The enum that describes possible break types
+            /// The enum that describes possible break types
             ///
             typedef enum {
                 character,  ///< Find character boundaries
@@ -48,7 +48,7 @@ namespace boost {
             } boundary_type;
 
             ///
-            /// \brief Flags used with word boundary analysis -- the type of the word found
+            /// Flags used with word boundary analysis -- the type of the word found
             ///
             typedef enum {
                 word_none       =  0x0000F,   ///< Not a word
@@ -62,7 +62,7 @@ namespace boost {
                 word_mask       =  0xFFFFF    ///< Maximal used mask
             } word_type;
             ///
-            /// \brief Flags that describe a type of line break
+            /// Flags that describe a type of line break
             ///
             typedef enum {
                 line_soft       =  0x0F,   ///< Soft line break: optional but not required
@@ -72,7 +72,7 @@ namespace boost {
             } line_break_type;
             
             ///
-            /// \brief Flags that describe a type of sentence break
+            /// Flags that describe a type of sentence break
             ///
             typedef enum {
                 sentence_term   =  0x0F,    ///< The sentence was terminated with a sentence terminator 
@@ -84,7 +84,7 @@ namespace boost {
             } sentence_break_type;
 
             ///
-            /// \brief Flags that describe a type of character break. At this point break iterator does not distinguish different
+            /// Flags that describe a type of character break. At this point break iterator does not distinguish different
             /// kinds of characters so it is used for consistency.
             ///
             typedef enum {
@@ -244,15 +244,15 @@ namespace boost {
             class mapping {
             public:
                 ///
-                /// \brief Iterator type that is used to iterate over boundaries
+                /// Iterator type that is used to iterate over boundaries
                 ///
                 typedef RangeIterator iterator;
                 ///
-                /// \brief Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate original text.
                 ///
                 typedef typename RangeIterator::base_iterator base_iterator;
                 ///
-                /// \brief The character type of the text
+                /// The character type of the text
                 ///
                 typedef typename std::iterator_traits<base_iterator>::value_type char_type;
 
@@ -343,7 +343,7 @@ namespace boost {
                     return mask_;
                 }
                 ///
-                /// \brief Set current boundary mask.
+                /// Set current boundary mask.
                 ///
                 /// This mask provides fine grained control on the type of boundaries and tokens you need to relate to. For example, if 
                 /// you want to find sentence breaks that are caused only by terminator like "." or "?" and ignore new lines, you can set the mask
@@ -408,7 +408,7 @@ namespace boost {
 
 
             ///
-            /// \brief token iterator is an iterator that returns text chunks between boundary positions
+            /// \brief token_iterator is an iterator that returns text chunks between boundary positions
             ///
             /// Token iterator may behave in two different ways: select specific tokens in only tide way and
             /// select them widely. For tide selection (default) it would not return text chunks that
@@ -427,20 +427,20 @@ namespace boost {
             {
             public:
                 ///
-                /// \brief The character type of the text
+                /// The character type of the text
                 ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 ///
-                /// \brief Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate original text.
                 ///
                 typedef IteratorType base_iterator;
                 ///
-                /// \brief The type of mapping that iterator can iterate over it
+                /// The type of mapping that iterator can iterate over it
                 /// 
                 typedef mapping<token_iterator<IteratorType,ValueType> > mapping_type;
                                 
                 ///
-                /// \brief Default constructor
+                /// Default constructor
                 ///
                 token_iterator() : 
                     map_(0),
@@ -451,7 +451,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief set position of the token iterator to the location of underlying iterator.
+                /// set position of the token iterator to the location of underlying iterator.
                 ///
                 /// This operator sets the token iterator to first token following that position. For example:
                 ///
@@ -495,7 +495,7 @@ namespace boost {
                         offset_=map_->index_.size();
                 }
                 ///
-                /// \brief Copy constructor
+                /// Copy constructor
                 ///
                 token_iterator(token_iterator const &other) :
                     map_(other.map_),
@@ -543,7 +543,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Increment operator
+                /// Increment operator
                 ///
                 token_iterator &operator++() 
                 {
@@ -552,7 +552,7 @@ namespace boost {
                 }
                 
                 ///
-                /// \brief Decrement operator
+                /// Decrement operator
                 ///
                 token_iterator &operator--() 
                 {
@@ -561,7 +561,7 @@ namespace boost {
                 }
                 
                 ///
-                /// \brief Increment operator
+                /// Increment operator
                 ///
                 token_iterator operator++(int unused) 
                 {
@@ -571,7 +571,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Decrement operator
+                /// Decrement operator
                 ///
                 token_iterator operator--(int unused) 
                 {
@@ -581,14 +581,14 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Get full selection flag, see description of token_iterator
+                /// Get full selection flag, see description of token_iterator
                 ///
                 bool full_select() const
                 {
                     return full_select_;
                 }
                 ///
-                /// \brief Set full selection flag, see description of token_iterator
+                /// Set full selection flag, see description of token_iterator
                 ///
                 void full_select(bool fs)
                 {
@@ -596,7 +596,7 @@ namespace boost {
                 }
                 
                 ///
-                /// \brief Compare two iterators. They equal if they point to same map, have same position and same mask
+                /// Compare two iterators. They equal if they point to same map, have same position and same mask
                 ///
                 bool operator==(token_iterator const &other) const
                 {
@@ -606,7 +606,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Opposite of ===
+                /// Opposite of ===
                 ///
                 bool operator!=(token_iterator const &other) const
                 {
@@ -614,7 +614,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Return the mark that token iterator points at. See description of mapping class and various boundary flags
+                /// Return the mark that token iterator points at. See description of mapping class and various boundary flags
                 ///
                 unsigned mark() const
                 {
@@ -678,20 +678,20 @@ namespace boost {
             {
             public:
                 ///
-                /// \brief The character type of the text
+                /// The character type of the text
                 ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 ///
-                /// \brief Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate original text.
                 ///
                 typedef IteratorType base_iterator;
                 ///
-                /// \brief The type of mapping that iterator can iterate over it
+                /// The type of mapping that iterator can iterate over it
                 /// 
                 typedef mapping<break_iterator<IteratorType> > mapping_type;
                 
                 ///
-                /// \brief Default constructor
+                /// Default constructor
                 ///
                 break_iterator() : 
                     map_(0),
@@ -701,7 +701,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Copy constructor
+                /// Copy constructor
                 ///
                 break_iterator(break_iterator const &other):
                     map_(other.map_),
@@ -711,7 +711,7 @@ namespace boost {
                 }
                 
                 ///
-                /// \brief Assignment operator
+                /// Assignment operator
                 ///
                 break_iterator const &operator=(break_iterator const &other)
                 {
@@ -740,7 +740,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Compare two iterators. They equal if they point to same map, have same position and same mask
+                /// Compare two iterators. They equal if they point to same map, have same position and same mask
                 ///
                 bool operator==(break_iterator const &other) const
                 {
@@ -750,7 +750,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Opposite of ===
+                /// Opposite of ===
                 ///
                 bool operator!=(break_iterator const &other) const
                 {
@@ -758,7 +758,7 @@ namespace boost {
                 }
 
                 ///
-                /// \brief Return the mark that token iterator points at. See description of mapping class and various boundary flags
+                /// Return the mark that token iterator points at. See description of mapping class and various boundary flags
                 ///
                 unsigned mark() const
                 {
@@ -766,7 +766,7 @@ namespace boost {
                 }
  
                 ///
-                /// \brief set position of the break_iterator to the location of underlying iterator.
+                /// set position of the break_iterator to the location of underlying iterator.
                 ///
                 /// This operator sets the break_iterator to position of the iterator p or to the first valid following position
                 /// For example:

@@ -43,7 +43,9 @@ namespace locale {
     };
     
     ///
-    /// Collation facet. It reimplements standard C++ stc::collate
+    /// \brief Collation facet. 
+    ///
+    /// It reimplements standard C++ stc::collate
     /// allowing usage of std::locale class for direct string comparison
     ///
     template<typename CharType>
@@ -53,11 +55,11 @@ namespace locale {
     {
     public:
         ///
-        /// \brief Type of underlying character
+        /// Type of underlying character
         ///
         typedef CharType char_type;
         ///
-        /// \brief Type of string used with this facet
+        /// Type of string used with this facet
         ///
         typedef std::basic_string<CharType> string_type;
         
@@ -121,7 +123,7 @@ namespace locale {
     protected:
 
         ///
-        /// \brief constructor of the collator object
+        /// constructor of the collator object
         ///
         collator(size_t refs = 0) : std::collate<CharType>(refs) 
         {

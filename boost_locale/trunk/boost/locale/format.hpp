@@ -125,7 +125,7 @@ namespace boost {
         /// \endcond
 
         ///
-        /// \brief a printf line class that allows type-safe and locale aware message formatting
+        /// \brief a printf like class that allows type-safe and locale aware message formatting
         ///
         /// This class creates formatted message similarly to printf or boost::format and receives
         /// formatted entries via operator %.
@@ -188,7 +188,7 @@ namespace boost {
             /// \endcond 
 
             typedef std::basic_string<CharType> string_type; ///< string type for this type of character
-            typedef std::basic_ostream<CharType> stream_type; ///< std::ostream type for this type of character
+            typedef std::basic_ostream<CharType> stream_type; ///< output stream type for this type of character
  
 
             ///
@@ -394,7 +394,7 @@ namespace boost {
         };
 
         ///
-        /// \brief Write formatted message to stream.
+        /// Write formatted message to stream.
         ///
         /// This operator actually causes actual text formatting. It use locale and of \a out stream
         ///
@@ -407,27 +407,27 @@ namespace boost {
 
 
         ///
-        /// \brief Definiton of char based format
+        /// Definiton of char based format
         ///
         typedef basic_format<char> format;
 
         #ifndef BOOST_NO_STD_WSTRING
         ///
-        /// \brief Definiton of wchar_t based format
+        /// Definiton of wchar_t based format
         ///
         typedef basic_format<wchar_t> wformat;
         #endif
 
         #ifdef BOOST_HAS_CHAR16_T
         ///
-        /// \brief Definiton of char16_t based format
+        /// Definiton of char16_t based format
         ///
         typedef basic_format<char16_t> u16format;
         #endif
 
         #ifdef BOOST_HAS_CHAR32_T
         ///
-        /// \brief Definiton of char32_t based format
+        /// Definiton of char32_t based format
         ///
         typedef basic_format<char32_t> u32format;
         #endif

@@ -47,7 +47,7 @@ namespace boost {
         /// \endcond
  
         ///
-        /// \brief Type of normalization
+        /// Type of normalization
         ///
 
         typedef enum {
