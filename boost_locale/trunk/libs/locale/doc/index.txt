@@ -1,5 +1,5 @@
 <!--
- vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=mkd spell
+ vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=markdown spell
 -->
 
 # Introduction
@@ -33,19 +33,69 @@ Boost.Locale provides the natural glue between C++ locales framework, iostreams 
 
 # Tutorial
 
+## Introduction to C++ Standard Library localization support
+
+C++ standard library provides a simple and powerful way to provide locale specific information. It is done
+via `std::locale` class that is the container that holds all required information about specific culture like: number formatting
+patters, date and time formatting, currency, case conversion etc.
+
+All this information is provided by facets: special classes derived from `std::locale::facet` base class. Such facets are
+packed into `std::locale` class and allow you to provide arbitrary information about the locale. `std::locale` class keeps
+reference counters on installed facets and can be efficiently copied.
+
+Each facet that was installed into the `std::locale` object can be fetched using `std::use_facet`function. For example.
+`std::ctype<Char>` facet provides rules for case conversion. So you can convert character to upper case as following:
+
+    std::ctype<char> const &ctype_facet = std::use_facet<std::ctype>(some_locale);
+    char upper_a = ctype_facet.toupper('a');
+
+Locale class can be imbued to `iostream` so it would format information according to locale needs:
+
+    cout.imbue(std::locale("en_US.UTF-8"));
+    cout << 1345.45 << endl;
+    cout.imbue(std::locale("ru_RU.UTF-8"));
+    cout << 1345.45 << endl;
+
+Would display:
+
+    1,345.45 1.345,45
+
+You can also create your own facets and install them to existing locale class. For example:
+
+    class measure : public std::locale::facet {
+    public:
+        typedef enum { inches, ... } measure_type;
+        measure(measure_type m,size_t refs=0) 
+        double from_metric(double value) const;
+        std::string name() const;
+        ...
+    };
+
+And now you can simply provide such information to locale:
+
+    std::locale::global(std::locale(std::locale("en_US.UTF-8"),new measure(paper_size::inches)));
+    /// Create default locale built from en_US locale and add paper size facet.
+
+
+Now you can print distance according to correct locale:
+
+    void print_distance(std::ostream &out,double value)
+    {
+        measure const &m = std::use_facet<measure>(out.getloc());
+        // Fetch locale information from stream
+        std::cout << m.from_metric(value) << " " << m.name();
+    }
+
+This technique was adopted by Boost.Locale library in order to provide powerful and correct localization. However instead of using
+standard and very limited standard library C++ facets it created its own facets that use ICU under the hood in order to make much powerful.
 
 ## Locale Generation
 
-The major "container" of all localization information in C++ is class `std::locale`. It is designed to hold
-all general information about specific culture and can be easily extended with additional resources providing 
-information about specific area: facets. Facets are classes derived from `std::locale::facet` that hold
-required resources.
+Each locale is defined by specific locale identifier that contains a mandatory part---Language and optional pars Country, Variant, keywords
+and character encoding of `std::string`.
 
-Each locale is defined by specific locale identifier that contains a mandatory part---Language and optional pars Country, Variant, and keywords,
-when we use narrow strings (a.k.a. `std::string`) we need to specify encoding we use as well. 
-
-First we generate our locale with all required facets and then we can use it. Class `boost::locale::generator` provides us such tool.
-The simplest way to use generator is to create a locale and set it as global one:
+Class `boost::locale::generator` provides us tool to generate locales we need. The simplest way to use generator is to create a locale
+and set it as global one:
 
     #include <boost/locale.hpp>
     
@@ -101,12 +151,13 @@ For example:
 ## Collation 
 
 Boost.Locale provides `collator` class derived from `std::collate` that extends it with support of comparison levels:
-primary -- the default one, secondary, tertiary and quaternary levels. They can be approximately defined as:
+primary -- the default one, secondary, tertiary, quaternary and identical levels. They can be approximately defined as:
 
-1. Primary -- ignore accents and characters' case compare base characters only. For example "facade" and "Façade" are same.
+1. Primary -- ignore accents and characters' case compare base letters only. For example "facade" and "Façade" are same.
 2. Secondary -- ignore characters case but consider accents "facade" and "façade" are different but "Façade" and "façade" are same.
-3. Tertiary -- do not ignore case and accents: "Façade" and "façade" are different
-4. Quaternary -- the words are identical in terms of Unicode representation
+3. Tertiary -- consider case and accents: "Façade" and "façade" are different, ignore punctuation
+4. Quaternary -- consider all case, accents, punctuation, the words are identical in terms of Unicode representation.
+5. Identical -- as quaternary but consider code point comparison as well.
 
 There are two ways of using `collator` facet: direct by calling its member functions `compare`, `transform` and `hash` or indirect by
 using `comparator` template class in STL algorithms.
@@ -286,7 +337,7 @@ Unsupported `strftime` flags are: `%C`, `%u`, `%U`, `%V`, `%w`, `%W`. Also `O` a
 **General recommendations:**
 
 - Prefer using generic date-time manipulators rather then specifying full format using `as::ftime`.
-- Remember not all used calendars are Gregorian.
+- Remember that current calendars may be not Gregorian.
 
 
 ### Internals
@@ -296,20 +347,9 @@ of `std::ios_base`. All the information is stored and managed using special obje
 change its state.
 
 When a number is written to the stream or read from it. Custom Boost.Locale facet access to this object and checks required formatting
-information. Then it creates `boost::locale::formatter` object that actually formats the number and caches it in the `iostream`. When
+information. Then it creates special object that actually formats the number and caches it in the `iostream`. When
 next time another number is written to the stream same formatter would be used unless some flags had changed and formatter object is
 invalid.
-
-`boost::locale::formatter<CharType>` class generally used via special facets but it can be used directly as well. It has two kinds of member functions:
-
--   `std::basic_string<CharType> format(ValueType v,size_t &code_points)` -- convert a value `v` to a string and return number of Unicode
-    code points used in the string.
--   `size_t parse(std::basic_string<CharType> const &s,ValueType &b)` -- parse a value from string. If parsing fails 0 returned, otherwise
-    number of parsed characters of `CharType` is returned.
-
-
-Generally direct using of `formatter` class is preferred when the performance is critical.
-
 
 ## Messages Formatting
 
@@ -560,7 +600,24 @@ There are two ways of using non-default domains:
 
 ## Code-page conversions
 
-Boost.Locale provides codepage conversion facets based on `std::codecvt` facet.
+Boost.Locale provides `to_utf` and `from_utf` functions placed in `boost::locale::conv` namespace. They are simple functions
+to convert string from Unicode encodings like UTF-8, UTF-16, UTF-32 and other encodings.
+
+For example:
+
+    std::string utf8_string = to_utf<char>(latin1_string,"Latin1");
+    std::wstring wide_string = to_utf<wchar_t>(latin1_string,"Latin1");
+
+These function may use explicit encoding name like "Latin1" or "ISO-8859-8" or use std::locale as parameter and fetch this information from it.
+It also receives a policy parameter that directs it on how to behave if conversion can't be performed (illegal or unsupported character found).
+By default these function would skip all illegal characters and try to do the best they can, however, it is possible ask it to throw `onversion_error`
+exception by passing `stop` flag to it:
+
+    std::wstring s=to_utf<wchar_t>("\xFF\xFF","UTF-8",stop); 
+    // Throws because this string is illegal in UTF-8
+
+
+Boost.Locale provides stream codepage conversion facets based on `std::codecvt` facet.
 This allows converting between wide characters encoding and 8-bit encodings like UTF-8, ISO-8859 or Shift-JIS encodings.
 
 Most of compilers provide such facets, but:
@@ -570,7 +627,21 @@ Most of compilers provide such facets, but:
     it may be impossible to create `he_IL.CP1255` locale even when `he_IL` locale is available.
 
 Thus Boost.Locale provides an option to generate code-page conversion facets for using it with 
-Boost.Iostreams filters or `std::wfstream`. 
+Boost.Iostreams filters or `std::wfstream`. For example:
+
+    std::locale loc= generator().get("he_IL.UTF-8");
+    std::wofstream file.
+    file.imbue(loc);
+    file.open("hello.txt");
+    file << L"שלום!" << endl;
+
+Would create file `hello.txt` encoded as UTF-8 with "שלום!" (shalom) in it.
+
+**Important Note**
+
+Boost.Locale codepage conversion facets do not support UTF-16 text outside of BMP (i.e. it supports only UCS-2).
+So if you want to provide full Unicode support do not use wide strings under platforms where `sizeof(wchar_t)==2` (i.e. Windows)
+or do not use these facets for character I/O.
 
 **Limitations:**
 
@@ -605,77 +676,48 @@ places for line breaks.
 **Note:** Characters are not equivalent to Unicode code points. For example a Hebrew word Shalom -- "שָלוֹם" consists
 of 4 characters and 6 Unicode points, where two code points are used for vowels (diacritical marks).
 
-Boundary analysis is done by creating an index of break points. `boost::locale::boundary::index_type`, which is
-`std::vector<boundary::break_info>`. The index is created my calling static member function `map` of `boost::locale::boundary` class.
+Boost.Locale provides 3 major classes that are used for boundary analysis:
 
-Each vector element `break_info` has members:
+- `boost::locale::boundary::mapping` -- the special map that hold the boundary points of the text.
+- `boost::locale::boundary::token_iterator` -- the iterator that returns chunks of text that were split by text boundaries
+- `boost::locale::boundary::break_iterator` -- the iterator that returns iterator to the original text.
 
--   `offset` -- the position of the break in the original text.
--   `next`, `prev` -- flags describing the text following break position, used with words boundaries mapping.
--   `brk` -- flags describing a break type -- used with line break boundaries mapping.
+In order to perform boundary analysis we first of all create a boundary mapping or the text we want to work with it.
 
-For example:
+    using namespace boost::locale::boundary;
+    std::string text="To be, or not to be?"
+    // Create mapping of text for token iterator using default locale.
+    mapping<token_iterator<std::string::const_iterator> > map(word,text.begin(),text.end()); 
+    // Print all "word" -- chunks of word boundary
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
 
-    std::string text;
-    getline(cin,text);
-    boundary::index_type indx=boundary::map(boundary::character,text);
-    cout << translate("All characters the the sentences are:") << endl;
-    for(unsigned i=0;i<index.size()-1;i++) {
-        unsigned char_start = index[i].offset;
-        unsigned char_end = index[i].offset;
-        cout << text.substr(char_start,char_end-char_start) << endl;
-    }
+Would print: a list: "To", " ", "be", ",", " ", "or", " ","not"," ","to", " ", "be", "?"
+You can also provide filters for better selection of text chunks or boundaries you are interested in. For example:
 
-Sometimes it is important to find what kind of word break point was found. Using `next` and `prev` members of `break_info`
-we can figure this out. We can use an "or" mask of flags that are interested us:
+    map.mask(word_letters);
+    // Tell newly created iterators to select words that contain letters only.
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
 
--   `number` -- the word included numericals.
--   `letter` -- the word includes letters.
--   `kana`   -- the word includes Kana characters
--   `ideo`   -- the word included ideographic characters.
+Would now print only: "To", "be", "or", "not", "to", "be" words ignoring all non-words -- like punctuation.
 
-If `prev` or `next` are 0, that means that the break distinguish between white space or punctuation marks. For example,
-this how we count all the words in text.
+Break iterator has different role, instead of returning text chunks, it returns the underlying iterator used for text source iteration. For example,
+you can select two first sentences as following:
 
+    using namespace boost::locale::boundary;
+    std::string const text="First sentence. Second sentence! Third one?"
+    // Create a sentence boundary mapping and set the mask of boundaries
+    // to select sentence terminators only, like "?", "." ignoring new lines.
+    typedef break_iterator<std::string::const_iterator> iterator;
+    mapping<iterator> map(sentence,map.begin(),map.end(),sentense_term);
+    iterator p=map.begin();
+    /// Advance p by two steps, make sure p is still valid;
+    for(int i=0;i<2 && p!=text.end();i++)
+        ++p;
+    std::cout << "First two sentences are " << std::string(text.begin(),*p) << std::endl;
 
-    fstream file("some_text.txt");
-    typedef map<string,int,locale> words_type;
-    words_type words;
-    // Create a map of number of occurrences of the words using
-    // collation.
-    while(!file.eof()) {
-        string tmp;
-        getline(file,tmp);
-        boundary::index_type indx=boundary::map(boundary::word,text);
-        for(unsigned i=0;i<indx.size();i++) {
-            if( (indx[i].next & (boundary::letter | boundary::kana | boundary::ideo))==0)
-                // Ingore non-word and numbers
-                continue;
-            unsigned word_start = index[i].offset;
-            unsigned word_end = index[i].offset;
-            string word = tmp.substr(char_start,char_end-char_start);
-            if(words.find(word)==word.end())
-                word[word]=1;
-            else
-                word[word]++;
-        }
-    }
-    for(words_type::const_iterator p=words.begin();p!=words.end();++p) {
-        cout << "Word "<<p->first<<" had "<<p->second <<" occurrences "<<end;
-    }
-
-The additional member `brk` of `break_info` structure can be used for testing a type of line-break. It can be
-tested against a mask of following flags:
-
--   `soft` -- the line-break can appear there.
--   `hard` -- the line-break should appear there (for example new-line character found).
-
-An operator `<` defined for `break_info` structure. It allows using this index in STL algorithms as "binary search".
-For example: cut at most 100 characters of text at word boundary:
-
-    boundary::index_type indx=boundary::map(boundary::word,text);
-    boundary::index_type::iterator p=lower_range(indx.begin(),indx.end(),boundary::break_info(100));
-    return text.substr(0,p->offset);
+Would print: "First sentence. Second sentence!"
 
 ## Localized Text Formatting
 
@@ -785,6 +827,16 @@ Because temporary value of `(a+b)` is no longer exists when `fmt` is written to 
     int a_and_b = a+b;
     fmt % a_and_b;
     cout << fmt;
+
+## Working with dates, times, timezones and calendars.
+
+One of the important flaws of most libraries that provide operations over dates is the fact that they support only Gregorian calendar.
+It is correct for `boost::date_time`, it is correct for `std::tm` and standard functions like `localtime`, `gmtime` that
+assume that we use Gregorian calendar.
+
+Boost.Locale provides generic `date_time`, and `calendar`class that allows to to perform operation on dates and time 
+for non-Gregorian calendars like Hebrew, Islamic or Japanese calendars.
+
 
 ## Getting information about current locale
 
@@ -908,8 +960,8 @@ Almost each(!) facet has some flaws in their design:
     for UTF-8 encoding where only Unicode 0-0x7F range can be represented as single character. As a result, localized numbers can't be
     represented correctly under locales that use Unicode "EN SPACE" character for thousands separator, like Russian locale.
     
-    This actually cause a real bug under GCC where formatting numbers under Russian locale creates invalid UTF-8 sequences, even thou it
-    is rather GCC bug then real standard flaw.
+    This actually cause a real bugs under GCC and SunStudio compilers where formatting numbers under Russian locale creates invalid 
+    UTF-8 sequences..
 
 
 -   `std::time_put` and `std::time_get` have several flows:
@@ -1070,11 +1122,4 @@ Thus, at this point, `ptime` is not supported for formatting localized date and 
     for most POSIX platforms where `sizeof(wchar_t)==4`.
 
 
-## Introduction to standard STL localization 
 
-STL provides a wide range of localization facilities built-in. It is good to know and understand how to 
-use them before starting with Boost.Locale library.
-
-### Locale
-
-Locale is represented with `std::locale` class.
