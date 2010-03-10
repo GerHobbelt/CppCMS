@@ -1,5 +1,5 @@
 <!--
- vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=markdown spell
+ vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=mkd spell
 -->
 
 # Introduction
@@ -601,12 +601,13 @@ There are two ways of using non-default domains:
 ## Code-page conversions
 
 Boost.Locale provides `to_utf` and `from_utf` functions placed in `boost::locale::conv` namespace. They are simple functions
-to convert string from Unicode encodings like UTF-8, UTF-16, UTF-32 and other encodings.
+to convert string to and from UTF-8/16/32 strings and strings using other encodings.
 
 For example:
 
     std::string utf8_string = to_utf<char>(latin1_string,"Latin1");
     std::wstring wide_string = to_utf<wchar_t>(latin1_string,"Latin1");
+    std::string latin1_string = from_utf(wide_string,"Latin1");
 
 These function may use explicit encoding name like "Latin1" or "ISO-8859-8" or use std::locale as parameter and fetch this information from it.
 It also receives a policy parameter that directs it on how to behave if conversion can't be performed (illegal or unsupported character found).
@@ -1121,5 +1122,11 @@ Thus, at this point, `ptime` is not supported for formatting localized date and 
     advantage of simplicity of code points representation but quite wasteful in terms of memory usage. It is used for `std::wstring` encoding
     for most POSIX platforms where `sizeof(wchar_t)==4`.
 
+## Reference
 
+Full, Doxygen generated reference can be found:
 
+- [Main Page](html/index.html)
+- [Modules](html/modules.html)
+- [Classes](html/annotated.html)
+- [Namespaces](html/namespaces.html)
