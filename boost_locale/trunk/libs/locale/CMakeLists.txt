@@ -45,7 +45,6 @@ check_cxx_source_compiles(
 	LOCALE_HAVE_STD_TR1_UNORDERED_MAP)
 
 
-
 if(CMAKE_COMPILER_IS_GNUCXX)
 	check_cxx_source_compiles(
 		"#if __GNUC__ < 4
@@ -141,6 +140,7 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale")
 
 
+
 set(LOCALE_TESTS
 		test_collate
 		test_convert
@@ -182,4 +182,14 @@ if(MSVC AND NOT DISABLE_STATIC)
 	set_target_properties(boost_locale-static PROPERTIES PREFIX "lib")
 endif(MSVC AND NOT DISABLE_STATIC)
 
+install(TARGETS ${BOOST_LOCALE_LIBS}
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib)
 
+install(DIRECTORY ../../boost DESTINATION include
+        PATTERN ".svn" EXCLUDE)
+
+install(DIRECTORY examples DESTINATION share/doc/boost/locale
+        PATTERN ".svn" EXCLUDE)
+	
