@@ -575,7 +575,7 @@ namespace boost {
         public:
 
             ///
-            /// default constructor, uses default calendar
+            /// Dafault constructor, uses default calendar initialized date_time object to current time.
             ///
             date_time();
             ///
@@ -601,7 +601,7 @@ namespace boost {
             ///
             date_time(double time,calendar const &cal);
             ///
-            /// Create a date_time opject using calendar \a cal
+            /// Create a date_time opject using calendar \a cal and initializes it to current time.
             ///
             date_time(calendar const &cal);
             

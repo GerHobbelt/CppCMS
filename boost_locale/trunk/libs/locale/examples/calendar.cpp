@@ -15,7 +15,7 @@ int main(int argc,char **argv)
 	else
 		std::locale::global(gen("")); // system default
 
-	boost::locale::date_time now(std::time(0));
+	boost::locale::date_time now;
 	
 	date_time start=now;
 
