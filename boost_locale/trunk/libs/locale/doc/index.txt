@@ -450,9 +450,9 @@ These are basic translation functions
 
 -   `message translate(char const *msg)` -- create localized message from id `msg`. `msg` is **not** copied
 -   `message translate(std::string const &msg)` -- create localized message from id `msg`. `msg` is copied.
--   `message translate(char const *single,char const *plural)` -- create localized plural message with `signle` and `plural` forms for number `n`. 
+-   `message translate(char const *single,char const *plural)` -- create localized plural message with `single` and `plural` forms for number `n`. 
     Strings `single` and `plural` are **not** copied.
--   `message translate(std::string const &single,std::string const &plural,int n)` -- create localized plural message with `signle` 
+-   `message translate(std::string const &single,std::string const &plural,int n)` -- create localized plural message with `single` 
     and `plural` forms for number `n`. Strings `single` and `plural` are copied.
 
 
@@ -469,7 +469,7 @@ If the message is found in the dictionary is written to the output stream, other
 
 -   `message` can be explicitly converted to string using `str<CharType>` member function specific locale.
 
-        std::string msg = translate("Do you want to open the file?").str<wchar_t>(some_locale)
+        std::wstring msg = translate("Do you want to open the file?").str<wchar_t>(some_locale)
 
 
 This allows postpone translation of the message to the place where translation is actually needed, even to different
@@ -478,6 +478,7 @@ locale targets.
     std::ofstream en,ja,he,de,ar;
     std::wfstream w_ar;
 
+    // Send single message to multiple streams
     void send_to_all(message const &msg)
     {
         en << msg;
@@ -504,7 +505,7 @@ Let's try to solve a simple problem, display a message to user:
     if(files == 1)
         cout << translate("You have 1 file in the directory") << endl;
     else
-    cout < format(translate("You have {1} files in the directory")) % files << endl;
+        cout < format(translate("You have {1} files in the directory")) % files << endl;
 
 This quite simple task becomes quite complicated when we deal with language other then English. Many languages have more
 then two plural forms. For example, in Hebrew there are special forms for single, double, plural, and plural above 10.
@@ -512,7 +513,8 @@ They can't be distinguished by simple rule "`n` is 1 or not".
 
 The correct solution is:
 
-    cout << format(tranlsate("You have 1 file in the directory",You have {1} files in the directory",files)) % files << endl;
+    cout << format(translate("You have 1 file in the directory",
+                            "You have {1} files in the directory",files)) % files << endl;
 
 Where translate receives single, plural form of original string and the number it should be formatted for.
 On the other side, special entry in the dictionary specifies the rule to choose the correct plural form in the specific language,
@@ -795,12 +797,12 @@ Following format key-value pairs are supported:
 The constructor of `format` class may receive an object of type `message` allowing easier integration with localized messages.
 For example:
 
-    cout<< format(tranlsate("Adding {1} to {2}, we get {3}")) % a % b % (a+b) << endl;
+    cout<< format(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b) << endl;
 
 Formatted string can be fetched directly using `get(std::locale const &loc=std::locale())` member function. For example:
 
-    std::wstring de = (wformat(tranlsate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(de_locale);
-    std::wstring fr = (wformat(tranlsate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(fr_locale);
+    std::wstring de = (wformat(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(de_locale);
+    std::wstring fr = (wformat(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(fr_locale);
 
 **Important Note:**
 
@@ -925,6 +927,7 @@ For example:
     std::locale ar=get("ar_EG");
     // Because ar_EG not in cache, new locale is generated (but not cached)
 
+**Note:** generation of locale does not put it in cache only `generator::preload` does this.
 
 Then these locales can be imbued to `iostreams` or used directly as parameters in various functions.
 
