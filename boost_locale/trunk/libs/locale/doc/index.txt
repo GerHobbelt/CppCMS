@@ -838,6 +838,57 @@ assume that we use Gregorian calendar.
 Boost.Locale provides generic `date_time`, and `calendar`class that allows to to perform operation on dates and time 
 for non-Gregorian calendars like Hebrew, Islamic or Japanese calendars.
 
+`calendar` -- the class that represents generic information about the calender, independent from specific time point. For example you can get the maximal number of days in month for this calender.
+`date_time` -- represents current time point. It is constructed from calendar and allows us to perform manipulation of various time periods.
+`boost::locale::period` -- holds an enumeration of various periods like, month, year, day, hour that allows us to 
+manipulate with dates. You can add periods, multiply them by integers and get set them or add them to `date_time` objects.
+
+For example:
+
+    using namespace boost::locale;
+    date_time now; // Create date_time class width default calendar initialized to current time;
+    date_time tomorrow = now + period::day;
+    cout << "Let's met tomorrow at " << as::date << tomorrow << endl;
+    date_time some_point = period::year * 1995 + period::january + period::day*1;
+    // Set some_point's date to 1995-Jan-1.
+    cout << "The "<<as::date << some_point " is " 
+        << as::ordinal << some_point / period::day_of_week_local << " day of week"  << endl;
+
+You can calculate the difference between dates by dividing the difference between dates by period:
+
+    date_time now;
+    cout << " There are " << (now + 2 * period::month - now) / period::day << " days "
+            "between " << as::date << now << " and " << now + 2*period::month << endl;
+
+`date_time` -- provides member functions `minimum` and `maximum` to get the information about minimal and maximal
+possible value of certain period for specific time.
+
+For example, for February `maximum(period::date)` would be 28 or 29 if the year is leap and 31 for January. 
+
+**Note:** be very careful with assumptions about what you know about calendar. For example, in Hebrew calendar the
+number of months is changed according if current year is leap or not.
+
+It is recommended to take a look on `calendar.cpp` example provided to this library to get understanding of how
+to manipulate with dates and times using these classes.
+
+In order to convert between various calendar dates you may get and get current POSIX time via `time` member function.
+For example:
+
+    using namespace boost::locale;
+    using namespace boost::locale::period;
+    generator gen;
+    // Create locales with Hebrew and Gregorian (default) calendars.
+    std::locale l_hebrew=gen("en_US@calendar=hebrew");
+    std::locale l_gregorian=gen("en_US");
+    
+    // Create Gregorian date from fields
+    date_time greg(2010*year + february + 5*day,l_gregorian);
+    // Assign time point taken from Gregorian date to date_time with
+    // Hebrew calendar
+    date_time heb(greg.time(),l_hebrew);
+    // Now we can query the year now.
+    std::cout << "Hebrew year is " << heb / year << std::endl;
+
 
 ## Getting information about current locale
 

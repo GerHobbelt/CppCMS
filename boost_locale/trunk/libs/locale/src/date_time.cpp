@@ -255,6 +255,13 @@ date_time::date_time(double time,calendar const &cal)
 date_time::date_time(calendar const &cal)
 {
     impl_=reinterpret_cast<void *>(const_calendar_of(cal)->clone());
+    UErrorCode e=U_ZERO_ERROR;
+    calendar_->setTime(icu::Calendar::getNow(),e);
+    if(U_FAILURE(e)) {
+        delete calendar_;
+        check_and_throw(e);
+    }
+    
 }
 
 
@@ -275,6 +282,8 @@ date_time::date_time(date_time_period_set const &s,calendar const &cal)
 {
     impl_=reinterpret_cast<void *>(const_calendar_of(cal)->clone());
     try {
+        UErrorCode e=U_ZERO_ERROR;
+        calendar_->setTime(icu::Calendar::getNow(),e);
         for(unsigned i=0;i<s.size();i++)
             set(s[i].type,s[i].value);
     }

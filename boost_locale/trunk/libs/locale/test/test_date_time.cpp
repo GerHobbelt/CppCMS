@@ -58,7 +58,7 @@ int main()
 
         date_time time_point;
         
-        time_point=year * 1970 + month * 1 + 5 * day;
+        time_point=year * 1970 + february + 5 * day;
 
         ss << as::date << time_point;
         TEST(ss.str() == "Feb 5, 1970");
@@ -155,7 +155,7 @@ int main()
         TEST(time_point.get(am_pm) == 1);
         TEST(time_point.get(minute) == 33);
         TEST(time_point.get(second) == 13);
-        TEST(date_time(year* 1984 + month * 1 + day).get(week_of_year)==5);
+        TEST(date_time(year* 1984 + february + day).get(week_of_year)==5);
         TEST(time_point.get(week_of_month) == 1);
 
     }

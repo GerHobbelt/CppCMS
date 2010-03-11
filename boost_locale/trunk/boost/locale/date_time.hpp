@@ -90,6 +90,95 @@ namespace boost {
             date_time_period(period::period_type f=period::invalid,int v=1) : type(f), value(v) {}
         };
 
+        namespace period {
+            ///
+            /// Predefined constant for January
+            ///
+            static const date_time_period january(month,0);
+            ///
+            /// Predefined constant for February
+            ///
+            static const date_time_period february(month,1);
+            ///
+            /// Predefined constant for March
+            ///
+            static const date_time_period march(month,2);
+            ///
+            /// Predefined constant for April
+            ///
+            static const date_time_period april(month,3);
+            ///
+            /// Predefined constant for May
+            ///
+            static const date_time_period may(month,4);
+            ///
+            /// Predefined constant for June
+            ///
+            static const date_time_period june(month,5);
+            ///
+            /// Predefined constant for July
+            ///
+            static const date_time_period july(month,6);
+            ///
+            /// Predefined constant for August
+            ///
+            static const date_time_period august(month,7);
+            ///
+            /// Predefined constant for September
+            ///
+            static const date_time_period september(month,8);
+            ///
+            /// Predefined constant for October 
+            ///
+            static const date_time_period october(month,9);
+            ///
+            /// Predefined constant for November
+            ///
+            static const date_time_period november(month,10);
+            ///
+            /// Predefined constant for December
+            ///
+            static const date_time_period december(month,11);
+
+            ///
+            /// Predefined constant for Sunday
+            ///
+            static const date_time_period sunday(day_of_week,1);
+            ///
+            /// Predefined constant for Monday 
+            ///
+            static const date_time_period monday(day_of_week,2);
+            ///
+            /// Predefined constant for Tuesday
+            ///
+            static const date_time_period tuesday(day_of_week,3);
+            ///
+            /// Predefined constant for Wednesday
+            ///
+            static const date_time_period wednesday(day_of_week,4);
+            ///
+            /// Predefined constant for Thursday
+            ///
+            static const date_time_period thursday(day_of_week,5);
+            ///
+            /// Predefined constant for Friday
+            ///
+            static const date_time_period friday(day_of_week,6);
+            ///
+            /// Predefined constant for Saturday
+            ///
+            static const date_time_period saturday(day_of_week,7);
+            ///
+            /// Predefined constant for AM (Ante Meridiem)
+            ///
+            static const date_time_period am(am_pm,0);
+            ///
+            /// Predefined constant for PM (Post Meridiem)
+            ///
+            static const date_time_period pm(am_pm,1);
+
+        } // period
+
         ///
         /// convers period_type to date_time_period(f,1)
         ///
