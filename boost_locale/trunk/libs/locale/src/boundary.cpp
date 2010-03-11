@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -39,10 +39,10 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
         indx.push_back(break_info(pos));
         /// Character does not have any specific break types
         if(t!=character && rbbi) {
-			//
-			// There is a collapse for MSVC: int32_t defined by both boost::cstdint and icu...
-			// So need to pick one ;(
-			//
+            //
+            // There is a collapse for MSVC: int32_t defined by both boost::cstdint and icu...
+            // So need to pick one ;(
+            //
             std::vector< ::int32_t> buffer;
             ::int32_t membuf[8]={0}; // try not to use memory allocation if possible
             ::int32_t *buf=membuf;

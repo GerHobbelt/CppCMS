@@ -3,7 +3,7 @@
 /// Boost.Locale is a library that brings high quality localization facilities in C++ way.
 /// It uses \c std::locale, and \c std::locale facets in order to provide localization in transparent and
 /// C++ aware way to user.
-/// C++ has quite a good base for localization via existing C++ locale facets: \c std::num_put, \c std::ctype`, \c std::collate etc.. But
+/// C++ has quite a good base for localization via existing C++ locale facets: \c std::num_put, \c std::ctype, \c std::collate etc.. But
 /// they are very limited and sometimes buggy by design. The support of localization varies between different
 /// operating systems, compilers, standard libraries and frequently incompatible between them.
 /// 

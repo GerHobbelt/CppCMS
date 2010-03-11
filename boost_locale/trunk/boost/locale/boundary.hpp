@@ -899,6 +899,13 @@ namespace boost {
     } // locale
 } // boost
 
+///
+/// \example boundary.cpp
+/// Example of using boundary iterator
+/// \example wboundary.cpp
+/// Example of using boundary iterator over wide strings
+///
+
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

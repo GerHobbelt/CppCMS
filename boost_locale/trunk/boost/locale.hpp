@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -21,3 +21,4 @@
 #include <boost/locale/date_time.hpp>
 
 #endif
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

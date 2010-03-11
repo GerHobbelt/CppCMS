@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2009 Artyom Beilis (Tonkikh)
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -260,10 +260,10 @@ namespace lambda {
         int pos;
         int next_tocken;
         int int_value;
-		bool is_blank(char c)
-		{
-			return c==' ' || c=='\r' || c=='\n' || c=='\t';
-		}
+        bool is_blank(char c)
+        {
+            return c==' ' || c=='\r' || c=='\n' || c=='\t';
+        }
         bool isdigit(char c) 
         {
             return '0'<=c && c<='9'; 

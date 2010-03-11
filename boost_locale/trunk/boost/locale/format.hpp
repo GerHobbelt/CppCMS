@@ -218,7 +218,7 @@ namespace boost {
             basic_format &operator % (Formattible const &object)
             {
                 add(formattible_type(object));
-				return *this;
+                return *this;
             }
 
             ///
@@ -441,6 +441,17 @@ namespace boost {
 
 
 #endif
+
+///
+/// \example hello.cpp
+///
+/// Basic example of using various functions provided by this library
+///
+/// \example whello.cpp
+///
+/// Basic example of using various functions with wide strings provided by this library
+///
+///
 
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 

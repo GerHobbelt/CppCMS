@@ -926,4 +926,10 @@ namespace boost {
 } // boost
 
 #endif
+///
+/// \example calendar.cpp
+///
+/// Example of using date_time functions for generating calendar for current year.
+///
+
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

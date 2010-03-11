@@ -242,4 +242,8 @@ namespace locale {
     } // locale
 } // boost
 #endif
+///
+/// \example collate.cpp
+/// Example of using collation functions
+///
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

@@ -241,5 +241,15 @@ namespace boost {
 
 #endif
 
+///
+/// \example conversions.cpp
+///
+/// Example of using various text conversion functions.
+///
+/// \example wconversions.cpp
+///
+/// Example of using various text conversion functions with wide strings.
+///
+
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
