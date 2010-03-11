@@ -193,8 +193,6 @@ install(DIRECTORY ../../boost DESTINATION include
 install(DIRECTORY doc/html DESTINATION share/doc/boost_locale
         PATTERN ".svn" EXCLUDE)
 
-install(FILES "doc/index.html" "doc/boost_designed_for.png" "doc/boostbook.css" DESTINATION share/doc/boost_locale)
-
 install(DIRECTORY examples DESTINATION share/doc/boost_locale
         PATTERN ".svn" EXCLUDE)
 	

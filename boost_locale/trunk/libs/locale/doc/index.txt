@@ -1177,7 +1177,7 @@ Thus, at this point, `ptime` is not supported for formatting localized date and 
 
 Full, Doxygen generated reference can be found:
 
-- [Main Page](html/index.html)
-- [Modules](html/modules.html)
-- [Classes](html/annotated.html)
-- [Namespaces](html/namespaces.html)
+- [Main Page](index.html)
+- [Modules](modules.html)
+- [Classes](annotated.html)
+- [Namespaces](namespaces.html)
