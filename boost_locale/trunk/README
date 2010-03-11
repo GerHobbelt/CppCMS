@@ -1,0 +1,79 @@
+Boost Locale Installation instruction:
+--------------------------------------
+
+Requirements:
+
+1. C++ compiler 
+2. ICU library version 3.6 and above, 4.2 recommended
+3. CMake 2.6 and above
+4. Boost (headers only) 1.33.1 and above, 1.36 and above recommended
+
+
+Build:
+
+unzip the sources 
+
+$ unzip boost_locale.zip
+
+Create build directory:
+
+$ mkdir boost_locale_build
+$ cd
+
+Configure system
+
+$ cmake ../boost_locale/libs/locale
+
+run make (or nmake for MSVC)
+
+Test system with
+
+$ make test
+
+Install with 
+
+$ make install
+
+Useful CMake options:
+
+CMAKE_INCLUDE_PATH -- path to directory were ICU and boost headers placed
+CMAKE_LIBRARY_PATH -- path to directory were ICU library is placed
+DISABLE_STATIC=ON - disable build of static boost_locale library
+DISABLE_SHARED=ON - disable build of shared boost_locale library
+CMAKE_INSTALL_PREFIX - prefix were to install libraries
+
+Tested compilers and platforms:
+===============================
+
+- Compilers:
+  - GCC 3.4, 4.1, 4.2, 4.3, 4.4
+  - Intel Compiler 11.0
+  - SunStudio 12 with STLPort
+  - MSVC 2008
+- Operating Systems: Linux, FreeBSD, OpenSolaris, Windows XP, Windowns XP/Cygwin
+- ICU Versions: 3.6, 3.8, 4.2
+
+Full list of tests:
+===================
+
+- Linux:
+  - Debian GNU/Linux 2.6.18, x86, GCC 4.1.2, ICU 3.6.1
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 3.8.1
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.4 -std=c++0x, ICU 3.8.1 (Some faults on char16_t/char32_t support)
+  - Debian GNU/Linux 2.6.26, x86_64, Intel Compiler 11.0, ICU 3.8.1
+
+- FreeBSD
+  - FreeBSD 8.0, i386, GCC 4.2.1, ICU 3.8.1
+
+- OpenSolaris:
+  - SunOS OpenSolaris 5.11, i386; Sun Studio 12, with STLPort, ICU 4.2
+  - SunOS OpenSolaris 5.11, i386; GCC 3.4.3, ICU 4.2
+
+- Windows XP/SP2
+  - Cygwin 1.5, GCC 4.3, ICU 4.2
+  - Cygwin 1.5, GCC 3.4, ICU 3.8
+  - Windows XP/SP2, GCC 4.4, ICU 4.2 (Static build only)
+  - Windows XP/SP2, MSVC9 (2008)
+
+
+

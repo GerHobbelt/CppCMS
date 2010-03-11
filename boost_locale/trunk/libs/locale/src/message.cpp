@@ -288,12 +288,14 @@ namespace boost {
                             throw std::runtime_error("Invalid mo-format, encoding is not specified");
                         if(!plural.empty()) {
                             std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
+                            delete plural_forms_[id];
                             plural_forms_[id] = ptr.release();
                         }
                         if( sizeof(CharType) == 1
                             && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
                             && mo->has_hash())
                         {
+                            delete mo_catalogs_[id];
                             mo_catalogs_[id]=mo.release();
                         }
                         else {
