@@ -26,6 +26,6 @@
 /// - Support of \c char, \c wchar_t and C++0x \c char16_t, \c char32_t strings and streams.
 ///
 ///
-/// The full tutorial can be found <a href="../index.html">here</a>.
+/// The full tutorial can be found <a href="tutorial.html">here</a>.
 ///
 ///
