@@ -225,6 +225,15 @@ namespace boost {
 
             /// \endcond 
 
+
+            //
+            // Forward declarations to prevent collsion with boost::token_iterator
+            //
+            template<typename I> 
+            class break_iterator; 
+            template<typename I,typename V>
+            class token_iterator; 
+
             ///
             /// \brief Class the holds boundary mapping of the text that can be used with iterators
             ///
@@ -392,8 +401,6 @@ namespace boost {
                     end_ = end;
                     mask_=mask;
                 }
-                template<typename I,typename M> 
-                friend class base_boundary_iterator; 
                 template<typename I> 
                 friend class break_iterator; 
                 template<typename I,typename V>
