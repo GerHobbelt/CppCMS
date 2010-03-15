@@ -1,5 +1,7 @@
 /// \mainpage Boost Locale
 ///
+/// \htmlonly <p style="font-size:80%; text-align:center">(Under development for Boost)</p> \endhtmlonly
+///
 /// Boost.Locale is a library that brings high quality localization facilities in C++ way.
 /// It uses \c std::locale, and \c std::locale facets in order to provide localization in transparent and
 /// C++ aware way to user.
