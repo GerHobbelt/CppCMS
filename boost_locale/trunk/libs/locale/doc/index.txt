@@ -573,6 +573,42 @@ There are two ways of using non-default domains:
         std::wstring foo_msg = translate("Hello World").str<wchar_t>("foo");
         std::wstring bar_msg = translate("Hello World").str<wchar_t>("bar");
 
+### Extracting messages from the source code
+
+There are many tools that allow you to extract messages from the source code to `.po` file format. The most
+popular and "native" tool is `xgettext` which is installed by default on most Unix systems and freely downloadable
+for Windows.
+
+For example, we have a source that called `dir.cpp` that prints:
+
+    cout << translate("Listing of catalog {1}:") % file_name << endl;
+    cout << translate("Catalog {1} contains 1 file","Catalog {1} contains {2,num} files",files_no) 
+            % file_name % files_no << endl;
+
+Now we run:
+
+    xgettext --keyword=translate:1,1t --keyword=translate:1,2,3t dir.cpp
+
+And a file called `messages.po` created that looks like that (approximately):
+
+    #: dir.cpp:1
+    msgid "Listing of catalog {1}:"
+    msgstr ""
+    
+    #: dir.cpp:2
+    msgid "Catalog {1} contains 1 file"
+    msgid_plural "Catalog {1} contains {2,num} files"
+    msgstr[0] ""
+    msgstr[1] ""
+
+This file can be given to translator to adopt it to specific language.
+
+We had used `--keyword` parameter of `xgettext` in order to make it suitable for extracting messages from the
+source localized with Boost.Locale -- search for `translate()` function calls instead of default `gettext()` and `ngettext()` ones.
+First parameter `--keyword=translate:1,1t` parameters provides template for basic message: `translate` function that called with 1 
+argument (1t) and first message is taken as key. The second one `--keyword=translate:1,2,3t` -- is used for plural forms. 
+It tells `xgettext` to use `translate()` function call with 3 parameters (3t) and take 1st and 2nd parameter as keys.
+
 ### Questions and Answers
 
 -   Do I need GNU Gettext to use Boost.Locale?
