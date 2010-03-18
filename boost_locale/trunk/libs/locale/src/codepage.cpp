@@ -11,6 +11,10 @@
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4244) // loose data 
+#endif
+
 #include "icu_util.hpp"
 #include <vector>
 namespace boost {
@@ -613,7 +617,7 @@ namespace locale {
             try {
                 return cvt_to.std(cvt_from.icu(begin,end));
             }
-            catch(std::exception const &e) {
+            catch(std::exception const &/*e*/) {
                 throw conversion_error();
             }
         }
@@ -626,7 +630,7 @@ namespace locale {
             try {
                 return cvt_to.std(cvt_from.icu(begin,end));
             }
-            catch(std::exception const &e) {
+            catch(std::exception const &/*e*/) {
                 throw conversion_error();
             }
         }

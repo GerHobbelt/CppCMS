@@ -9,6 +9,10 @@
 #define BOOST_LOCALE_CONVERTER_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4275 4251 4231 4660)
+#endif
 #include <locale>
 
 
@@ -237,6 +241,10 @@ namespace boost {
     } // locale
 
 } // boost
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 
 #endif

@@ -5,6 +5,10 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS 
+// Disable this "security crap"
+#endif
 
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/format.hpp>
@@ -20,6 +24,9 @@
 using namespace boost::locale;
 
 //#define TEST_DEBUG
+#ifdef BOOST_MSVC
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #ifdef TEST_DEBUG
 #define BOOST_NO_STD_WSTRING

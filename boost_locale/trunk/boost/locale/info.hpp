@@ -7,16 +7,21 @@
 //
 #ifndef BOOST_LOCALE_INFO_HPP_INCLUDED
 #define BOOST_LOCALE_INFO_HPP_INCLUDED
+#include <boost/locale/config.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4275 4251 4231 4660)
+#endif
 #include <locale>
 #include <string>
 #include <map>
 #include <memory>
-#include <boost/locale/config.hpp>
+
 
 namespace boost {
     namespace locale {
 
-        class info_impl;
+        struct info_impl;
 
         ///
         /// \brief a facet that holds general information about locale
@@ -95,6 +100,9 @@ namespace boost {
     }
 }
 
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 #endif
 

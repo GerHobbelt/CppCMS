@@ -6,9 +6,9 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
+#include <boost/locale/info.hpp>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/collator.hpp>
-#include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
 #include <boost/locale/codepage.hpp>
 #include "numeric.hpp"

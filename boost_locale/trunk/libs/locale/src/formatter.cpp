@@ -25,6 +25,11 @@
 
 #include <iostream>
 
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4244) // loose data 
+#endif
+
+
 namespace boost {
 namespace locale {
     namespace impl {

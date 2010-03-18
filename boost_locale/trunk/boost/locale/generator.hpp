@@ -8,6 +8,10 @@
 #ifndef BOOST_LOCALE_GENERATOR_HPP
 #define BOOST_LOCALE_GENERATOR_HPP
 #include <boost/locale/config.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4275 4251 4231 4660)
+#endif
 #include <string>
 #include <locale>
 #include <memory>
@@ -193,6 +197,9 @@ namespace boost {
 
     }
 }
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 
 #endif
