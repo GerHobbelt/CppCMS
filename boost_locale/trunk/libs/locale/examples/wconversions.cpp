@@ -5,6 +5,31 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
+
+//
+// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+//
+// BIG FAT WARNING FOR Microsoft Visual Studio Users
+//
+// YOU NEED TO CONVERT THIS SOURCE FILE ENCODING TO UTF-8 WITH BOM ENCODING.
+//
+// Unfortunately MSVC understands that the source code is encoded as
+// UTF-8 only if you add useless BOM in the beginning.
+//
+// So, before you compile "wide" examples with MSVC, please convert them to text
+// files with BOM. There are two very simple ways to do it:
+//
+// 1. Open file with Notepad and save it from there. It would convert 
+//    it to file with BOM.
+// 2. In Visual Studio go File->Advances Save Options... and select
+//    Unicode (UTF-8  with signature) Codepage 65001
+//
+// Note: once converted to UTF-8 with BOM, this source code would not
+// compile with other compilers, because no-one uses BOM with UTF-8 today
+// because it is absolutely meaningless in context of UTF-8.
+//
+// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+//
 #include <boost/locale.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <iostream>
