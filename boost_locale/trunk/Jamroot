@@ -1,0 +1,2 @@
+build-project libs/locale/build ;
+build-project libs/locale/test ;
