@@ -232,7 +232,7 @@ namespace boost {
             {
                 std::basic_ostringstream<CharType> buffer;
                 buffer.imbue(loc);
-                write(buffer,false);
+                write(buffer);
                 return buffer.str();
             }
 

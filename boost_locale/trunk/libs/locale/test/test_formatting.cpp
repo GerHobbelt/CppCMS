@@ -120,6 +120,7 @@ do { \
         ss.str(to_correct_string<CharType>("",loc)); \
         ss << boost::locale::basic_format<CharType>(boost::locale::translate(f)) % v; \
         TESTEQ(ss.str(),to_correct_string<CharType>(exp,loc)); \
+        TESTEQ( (boost::locale::basic_format<CharType>(fmt) % v).str(loc),to_correct_string<CharType>(exp,loc)); \
     } while(0)
 
 
