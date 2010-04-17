@@ -17,7 +17,7 @@ dist_pkgsysconf_DATA = config.txt
 build_static:
 	g++ -g -Wall -O2 *.o templates/*.o \
 		cxxmarkdown/libmarkdowncxx.a \
-		/usr/lib/libdbixx.a /usr/lib/libcppcms.a /usr/lib/libcppcmstranstext.a \
+		/usr/lib/libdbixx.a /opt/cppcms_0/lib/libcppcms.a /opt/cppcms_0/lib/libcppcmstranstext.a \
 		-lfcgi++ -lcgicc -lboost_system -lboost_iostreams -lboost_regex -lboost_signals -ldbi -lmm -lgcrypt -lsqlite3 -lrt -o wikipp
 
 
