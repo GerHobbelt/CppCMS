@@ -481,7 +481,6 @@ namespace locale {
             std::codecvt_base::result r=std::codecvt_base::ok;
             while(to < to_end && from < from_end)
             {
-                char const *save_from=from;
                 uint32_t ch=cvt.to_unicode(from,from_end);
                 if(ch==details::converter::illegal) {
                     r=std::codecvt_base::error;
