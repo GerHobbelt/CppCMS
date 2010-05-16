@@ -9,7 +9,7 @@
 #include <boost/config.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
-#include <algorithm>
+#include <boost/shared_ptr.hpp>
 #if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
 #else
@@ -228,54 +228,40 @@ namespace boost {
                     std::string encoding = inf.encoding();
 
                     catalogs_.resize(domains.size());
-                    mo_catalogs_.resize(domains.size(),0);
-                    plural_forms_.resize(domains.size(),0);
-                    
-                    try {
-                        for(unsigned id=0;id<domains.size();id++) {
-                            std::string domain=domains[id];
-                            domains_[domain]=id;
-                            //
-                            // List of fallbacks: en_US@euro, en@euro, en_US, en. 
-                            //
-                            static const unsigned paths_no = 4;
+                    mo_catalogs_.resize(domains.size());
+                    plural_forms_.resize(domains.size());
 
-                            std::string paths[paths_no] = {
-                                std::string(inf.language()) + "_" + inf.country() + "@" + inf.variant(),
-                                std::string(inf.language()) + "@" + inf.variant(),
-                                std::string(inf.language()) + "_" + inf.country(),
-                                std::string(inf.language()),
-                            };
-                           
-                            bool found=false; 
-                            for(unsigned j=0;!found && j<paths_no;j++) {
-                                for(unsigned i=0;!found && i<search_paths.size();i++) {
-                                    std::string full_path = search_paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
-                                    
-                                    found = load_file(full_path,encoding,id);
-                                }
+                    for(unsigned id=0;id<domains.size();id++) {
+                        std::string domain=domains[id];
+                        domains_[domain]=id;
+                        //
+                        // List of fallbacks: en_US@euro, en@euro, en_US, en. 
+                        //
+                        static const unsigned paths_no = 4;
+
+                        std::string paths[paths_no] = {
+                            std::string(inf.language()) + "_" + inf.country() + "@" + inf.variant(),
+                            std::string(inf.language()) + "@" + inf.variant(),
+                            std::string(inf.language()) + "_" + inf.country(),
+                            std::string(inf.language()),
+                        };
+
+                        bool found=false; 
+                        for(unsigned j=0;!found && j<paths_no;j++) {
+                            for(unsigned i=0;!found && i<search_paths.size();i++) {
+                                std::string full_path = search_paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
+
+                                found = load_file(full_path,encoding,id);
                             }
                         }
-                    }
-                    catch(...) {
-                        destroy_all();
-                        throw;
                     }
                 }
 
                 virtual ~mo_message()
                 {
-                    destroy_all();
                 }
 
             private:
-                void destroy_all()
-                {
-                    for(unsigned i=0;i<mo_catalogs_.size();i++)
-                        delete mo_catalogs_[i];
-                    for(unsigned i=0;i<plural_forms_.size();i++) 
-                        delete plural_forms_[i];
-                }
 
                 bool load_file(std::string file_name,std::string encoding,int id)
                 {
@@ -288,15 +274,13 @@ namespace boost {
                             throw std::runtime_error("Invalid mo-format, encoding is not specified");
                         if(!plural.empty()) {
                             std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
-                            delete plural_forms_[id];
-                            plural_forms_[id] = ptr.release();
+                            plural_forms_[id] = ptr;
                         }
                         if( sizeof(CharType) == 1
                             && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
                             && mo->has_hash())
                         {
-                            delete mo_catalogs_[id];
-                            mo_catalogs_[id]=mo.release();
+                            mo_catalogs_[id]=mo;
                         }
                         else {
                             converter cvt(encoding,mo_encoding);
@@ -310,8 +294,7 @@ namespace boost {
                     }
                     catch(std::exception const &/*err*/)
                     {
-                        delete plural_forms_[id];
-                        plural_forms_[id]=0;
+                        plural_forms_[id].reset();
                         catalogs_[id].clear();
                         return false;
                     }
@@ -368,8 +351,8 @@ namespace boost {
                 }
 
                 catalogs_set_type catalogs_;
-                std::vector<mo_file *> mo_catalogs_;
-                std::vector<lambda::plural *> plural_forms_;
+                std::vector<boost::shared_ptr<mo_file> > mo_catalogs_;
+                std::vector<boost::shared_ptr<lambda::plural> > plural_forms_;
                 domains_map_type domains_;
 
                 
