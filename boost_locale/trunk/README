@@ -1,28 +1,97 @@
-Boost Locale Installation instruction:
---------------------------------------
+            ======================================
+            Boost Locale Installation instruction:
+            ======================================
 
+=============
 Requirements:
+=============
 
 1. C++ compiler 
 2. ICU library version 3.6 and above, 4.2 recommended
-3. CMake 2.6 and above
+3. CMake 2.6 and above (Boost-build is not supported at this point)
 4. Boost (headers only) 1.33.1 and above, 1.36 and above recommended
 
 
-Build:
+============
+Preparation:
+============
 
 unzip the sources 
 
 $ unzip boost_locale.zip
 
+
 Create build directory:
 
-$ mkdir boost_locale_build
-$ cd
+$ cp boost_locale
+$ mkdir build
+$ cd build
 
-Configure system
 
-$ cmake ../boost_locale/libs/locale
+==============
+Configuration:
+==============
+
+Boost.Locale requires ICU library, On most
+POSIX operating systems it would be found automatically 
+if installed. 
+
+The configuration should be as simple as
+
+$ cmake ..
+
+Under Windows or when using GCC Build on SunSolaris (which provides
+SunStudio ICU build instead of GCC's one) you need to provide 
+a path to ICU, and boost headers
+
+So you may need to supply a path to ICU libraries
+
+$ cmake -DCMAKE_INCLUDE_PATH=/path/to/icu-and-boost/include -DCMAKE_LIBRARY_PATH=/path/to/icu/lib ..
+
+
+You may also want to provide path to existing Boost Headers location 
+
+Additional options:
+-------------------
+
+- If you want to build only static or only shared library version you may supply
+  parameters -DDISABLE_STATIC=ON or -DDISABLE_SHARED=ON
+- If you want to specify different compiler for example Intel or Sun Studio you 
+  should provide following switches:
+
+  -DCMAKE_C_COMPILER=/full/path/to/c/compiler
+  -DCMAKE_CXX_COMPILER=/full/path/to/c++/compiler
+
+  For example
+
+  cmake -DCMAKE_C_COMPILER=/usr/local/bin/icc -DCMAKE_CXX_COMPILER=/usr/local/bin/icpc ..
+
+  IMPORTANT: provide full path
+
+
+Notes for MSVC Users:
+---------------------
+
+1. You may download precompiled ICU libraries from official site, but these
+   are only release libraries, for Debug versions you should download
+   the source code and follow ICU instructions.
+
+   ICU provide MSVC project files that allow you build them easily.
+
+2. Use NMake generators 
+
+   cmake -G "NMake Makefiles" [other options]
+
+   DO NOT BUILD MSVC PROJECTS!
+
+   Boost.Locale requires different libraries for Debug and Release modes,
+   because MSVC project is all in one you may accidentally find yourself
+   mixing incompatible libraries.
+
+
+==================
+Build Boost.Locale
+==================
 
 run make (or nmake for MSVC)
 
@@ -34,7 +103,19 @@ Install with
 
 $ make install
 
+For MSVC Users run:
+
+$ nmake install
+$ nmake test
+
+Note for Windows users
+---------------------
+
+Do not forget to set your PATH environment variable to point to
+location of ICU DLL libraries.
+
 Useful CMake options:
+---------------------
 
 CMAKE_INCLUDE_PATH -- path to directory were ICU and boost headers placed
 CMAKE_LIBRARY_PATH -- path to directory were ICU library is placed
@@ -42,6 +123,7 @@ DISABLE_STATIC=ON - disable build of static boost_locale library
 DISABLE_SHARED=ON - disable build of shared boost_locale library
 CMAKE_INSTALL_PREFIX - prefix were to install libraries
 
+===============================
 Tested compilers and platforms:
 ===============================
 
@@ -50,16 +132,21 @@ Tested compilers and platforms:
   - Intel Compiler 11.0
   - SunStudio 12 with STLPort
   - MSVC 2008
-- Operating Systems: Linux, FreeBSD, OpenSolaris, Windows XP, Windowns XP/Cygwin
-- ICU Versions: 3.6, 3.8, 4.2
 
-Full list of tests:
-===================
+- Operating Systems: Linux, FreeBSD, OpenSolaris, Windows XP, Windowns XP/Cygwin
+
+- ICU Versions: 3.6, 3.8, 4.2, 4.4
+
+========================================
+Full list of tested platforms/compilers:
+========================================
 
 - Linux:
   - Debian GNU/Linux 2.6.18, x86, GCC 4.1.2, ICU 3.6.1
   - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 3.8.1
-  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.4 -std=c++0x, ICU 3.8.1 (Some faults on char16_t/char32_t support)
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 4.4
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.4 -std=c++0x, ICU 3.8.1 
+           (Some faults on char16_t/char32_t support due to compiler issues)
   - Debian GNU/Linux 2.6.26, x86_64, Intel Compiler 11.0, ICU 3.8.1
 
 - FreeBSD
@@ -74,6 +161,5 @@ Full list of tests:
   - Cygwin 1.5, GCC 3.4, ICU 3.8
   - Windows XP/SP2, GCC 4.4, ICU 4.2 (Static build only)
   - Windows XP/SP2, MSVC9 (2008)
-
 
 

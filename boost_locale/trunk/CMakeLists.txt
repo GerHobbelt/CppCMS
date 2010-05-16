@@ -92,22 +92,22 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
-include_directories(../..)
+include_directories(.)
 
 set(BOOST_LOCALE_SRC 
-	src/generator.cpp
-	src/boundary.cpp
-	src/time_zone.cpp
-	src/collator.cpp
-	src/codepage.cpp
-	src/conversion.cpp
-	src/formatter.cpp 
-	src/formatting.cpp 
-	src/info.cpp 
-	src/format.cpp 
-	src/message.cpp 
-	src/mo_lambda.cpp
-	src/date_time.cpp
+	libs/locale/src/generator.cpp
+	libs/locale/src/boundary.cpp
+	libs/locale/src/time_zone.cpp
+	libs/locale/src/collator.cpp
+	libs/locale/src/codepage.cpp
+	libs/locale/src/conversion.cpp
+	libs/locale/src/formatter.cpp 
+	libs/locale/src/formatting.cpp 
+	libs/locale/src/info.cpp 
+	libs/locale/src/format.cpp 
+	libs/locale/src/message.cpp 
+	libs/locale/src/mo_lambda.cpp
+	libs/locale/src/date_time.cpp
 	)
 
 if(DISABLE_SHARED AND DISABLE_STATIC)
@@ -163,13 +163,13 @@ set(LOCALE_EXAMPLES 	hello
 			)
 
 foreach(TEST_TAR ${LOCALE_TESTS})
-	add_executable(${TEST_TAR} test/${TEST_TAR}.cpp)
-	add_test(${TEST_TAR} ${TEST_TAR} "${CMAKE_SOURCE_DIR}/test")
+	add_executable(${TEST_TAR} libs/locale/test/${TEST_TAR}.cpp)
+	add_test(${TEST_TAR} ${TEST_TAR} "${CMAKE_CURRENT_SOURCE_DIR}/libs/locale/test")
 	target_link_libraries(${TEST_TAR} ${BOOST_LOCALE_LIB})
 endforeach(TEST_TAR)
 
 foreach(EX_TAR ${LOCALE_EXAMPLES})
-	add_executable(${EX_TAR} examples/${EX_TAR}.cpp)
+	add_executable(${EX_TAR} libs/locale/examples/${EX_TAR}.cpp)
 	target_link_libraries(${EX_TAR} ${BOOST_LOCALE_LIB})
 endforeach(EX_TAR)
 
@@ -187,12 +187,12 @@ install(TARGETS ${BOOST_LOCALE_LIBS}
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-install(DIRECTORY ../../boost DESTINATION include
+install(DIRECTORY boost DESTINATION include
         PATTERN ".svn" EXCLUDE)
 
-install(DIRECTORY doc/html DESTINATION share/doc/boost_locale
+install(DIRECTORY libs/locale/doc/html DESTINATION share/doc/boost_locale
         PATTERN ".svn" EXCLUDE)
 
-install(DIRECTORY examples DESTINATION share/doc/boost_locale
+install(DIRECTORY libs/locale/examples DESTINATION share/doc/boost_locale
         PATTERN ".svn" EXCLUDE)
 	
