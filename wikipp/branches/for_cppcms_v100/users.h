@@ -15,8 +15,8 @@ class users : public master {
 	void login();
 	void do_auth();
 	void new_user();
-	void reset();
 public:
+	void reset();
 	bool user_exists(string);
 	bool check_login(string,string);
 	bool auth();

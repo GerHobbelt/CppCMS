@@ -36,7 +36,7 @@ public:
 	std::string root(string locale_name="");
 	bool set_locale(string);
 	void run(string lang,string url);
-	virtual void on_404();
+	//virtual void on_404();
 	virtual void main(std::string url);
 	wiki(cppcms::service &s);
 };

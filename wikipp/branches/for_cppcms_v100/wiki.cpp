@@ -1,22 +1,33 @@
 #include "wiki.h"
-#include <boost/bind.hpp>
-#include <cgicc/HTTPRedirectHeader.h>
-#include <boost/format.hpp>
+#include <booster/regex.h>
 #include "utf8/utf8.h"
 
+#include <cppcms/url_dispatcher.h>
+
 using namespace dbixx;
-using cgicc::HTTPRedirectHeader;
 namespace apps {
 
-wiki::wiki(worker_thread &w) :
-	application(w),
+wiki::wiki(cppcms::service &srv) :
+	cppcms::application(srv),
 	page(*this),
 	options(*this),
 	users(*this),
-	index(*this),
-	lang_regex("^/(\\w+)(/.*)?$");
+	index(*this)
 {
-//	dbixx_load(sql);
+	add(page);
+	add(options);
+	add(users);
+	add(index);
+
+	sql.driver(settings().get<std::string>("wikipp.sql.driver"));
+	cppcms::json::object ob=settings().get<cppcms::json::object>("wikipp.sql.params");
+	for(cppcms::json::object::const_iterator p=ob.begin();p!=ob.end();++p) {
+		if(p->second.type()==cppcms::json::is_string)
+			sql.param(p->first,p->second.str());
+		else if(p->second.type()==cppcms::json::is_number)
+			sql.param(p->first,p->second.number());
+	}
+	sql.connect();
 	script=settings().get<std::string>("wikipp.script");
 }
 
@@ -25,12 +36,14 @@ string wiki::root(string l)
 	if(l.empty()) l=locale_name;
 	return script+"/"+l;
 }
+static const booster::regex lang_regex("^/(\\w+)(/.*)?$");
 
 void wiki::main(std::string url)
 {
-	cppcms::regex_result res;
+	booster::smatch res;
 	options.reset();
-	if(lang_regex.match(url,res)) {
+	users.reset();
+	if(booster::regex_match(url,res,lang_regex)) {
 		std::string loc = settings().get("wikipp.languages." + res[1],"");
 		if(loc.empty()) {
 			page.redirect();
@@ -42,7 +55,8 @@ void wiki::main(std::string url)
 				page.redirect(locale_name);
 		}
 	}
-	page.redirect();
+	else
+		page.redirect();
 }
 
 

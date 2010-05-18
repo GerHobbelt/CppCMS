@@ -58,7 +58,9 @@ void options::load()
 	local.about.clear();
 	local.title.clear();
 	local.copyright.clear();
-	if(cache().fetch_page("global_ops",global)) {
+	// FIXME
+	//if(cache().fetch_frame("global_ops",tmp)) 
+	{
 		result res;
 		sql<<	"SELECT name,value FROM options "
 			"WHERE	lang='global' ",res;
@@ -73,13 +75,15 @@ void options::load()
 		}
 		if(global.contact.empty())
 			global.contact="no@mail";
-		cache.store_content("global_ops",global);
+		// FIXME
+		//cache.store_content("global_ops",global);
 	}
-	if(cache.fetch_content("local_ops:"+locale,local))
-		return;
+	// FIXME
+	//if(cache.fetch_content("local_ops:"+locale,local))
+	//	return;
 	result res;
 	sql<<	"SELECT value,name FROM options "
-		"WHERE  lang=?",locale,res;
+		"WHERE  lang=?",locale_name,res;
 	row r;
 	while(res.next(r)) {
 		string v,n;
@@ -92,16 +96,17 @@ void options::load()
 			local.copyright=v;
 	}
 	if(local.title.empty())
-		local.title=gettext("Wiki++ &mdash; CppCMS Wiki");
+		local.title=cppcms::locale::translate("Wiki++ &mdash; CppCMS Wiki").str<char>(context().locale());;
 	if(local.about.empty())
 		local.about=
-			gettext("## About\n"
+			cppcms::locale::translate("## About\n"
 				"\n"
 				"Wiki++ is a wiki engine powered by\n"
-				"[CppCMS](http://cppcms.sf.net/) web development framework.\n");
+				"[CppCMS](http://cppcms.sf.net/) web development framework.\n").str<char>(context().locale());
 	if(local.copyright.empty())
-		local.copyright=gettext("&copy; All Rights Reserverd");
-	cache.store_content("local_ops:"+locale,local);
+		local.copyright=cppcms::locale::translate("&copy; All Rights Reserverd").str<char>(context().locale());
+	// FIXME
+	//cache.store_content("local_ops:"+locale,local);
 	loaded=true;
 }
 
@@ -110,7 +115,7 @@ void options::save()
 {
 	sql<<	"DELETE FROM options "
 		"WHERE lang='global' OR lang=?",
-		locale,exec();
+		locale_name,exec();
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')",
 		global.users_only_edit,exec();
@@ -119,15 +124,15 @@ void options::save()
 		global.contact,exec();
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'title',?)",
-		local.title,locale,exec();
+		local.title,locale_name,exec();
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'about',?)",
-		local.about,locale,exec();
+		local.about,locale_name,exec();
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'copyright',?)",
-		local.copyright,locale,exec();
-	cache.rise("global_ops");
-	cache.rise("local_ops:"+locale);
+		local.copyright,locale_name,exec();
+	cache().rise("global_ops");
+	cache().rise("local_ops:"+locale_name);
 }
 
 void options::edit()
@@ -136,25 +141,25 @@ void options::edit()
 		wi.users.error_forbidden();
 		return;
 	}
-	content::edit_options c(&wi);
-	if(env->getRequestMethod()=="POST") {
-		c.form.load(*cgi);
+	content::edit_options c;
+	if(request().request_method()=="POST") {
+		c.form.load(context());
 		if(c.form.validate()) {
-			global.users_only_edit=c.form.users_only.get();
-			global.contact=c.form.contact_mail.get();
-			local.title=c.form.wiki_title.get();
-			local.copyright=c.form.copyright.get();
-			local.about=c.form.about.get();
+			global.users_only_edit=c.form.users_only.value();
+			global.contact=c.form.contact_mail.value();
+			local.title=c.form.wiki_title.value();
+			local.copyright=c.form.copyright.value();
+			local.about=c.form.about.value();
 			save();
 		}
 	}
 	else {
 		load();
-		c.form.users_only.set(global.users_only_edit);
-		c.form.wiki_title.set(local.title);
-		c.form.copyright.set(local.copyright);
-		c.form.about.set(local.about);
-		c.form.contact_mail.set(global.contact);
+		c.form.users_only.value(global.users_only_edit);
+		c.form.wiki_title.value(local.title);
+		c.form.copyright.value(local.copyright);
+		c.form.about.value(local.about);
+		c.form.contact_mail.value(global.contact);
 	}
 	ini(c);
 	render("edit_options",c);

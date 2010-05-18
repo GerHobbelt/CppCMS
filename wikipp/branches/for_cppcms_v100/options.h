@@ -26,8 +26,8 @@ class options : public master {
 	bool loaded;
 protected:
 	void edit();
-	void reset();
 public:
+	void reset();
 	options(wiki &);
 	void load();
 	void save();

@@ -1,50 +1,45 @@
-#include <cgicc/HTTPRedirectHeader.h>
 #include "page.h"
 #include "page_content.h"
 #include "wiki.h"
 #include "diff.h"
 
-using namespace dbixx;
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/cache_interface.h>
 
-using cgicc::HTTPRedirectHeader;
+using namespace dbixx;
+#define _(X) ::cppcms::locale::translate(X)
 
 namespace content { 
 // Page content
 page_form::page_form(wiki *_w):
-	w(_w),
-	title("title",w->gettext("Title")),
-	content("content",w->gettext("Content")),
-	sidebar("sidebar",w->gettext("Sidebar")),
-	save("save",w->gettext("Save")),
-	save_cont("save_cont",w->gettext("Save and Continue")),
-	preview("preview",w->gettext("Preview")),
-	users_only("users_only")
+	w(_w)
 {
 	title.message(_("Title"));
 	content.message(_("Content"));
 	sidebar.message(_("Sidebar"));
 	save.value(_("Save"));
 	save_cont.value(_("Save and Continue"));
-	preview.value("Preview");
-	*this & title & content & sidebar & save & save_cont & preview & users_only;
-	fields<<title<<content<<sidebar;
-	buttons<<save<<save_cont<<preview<<users_only;
-	users_only.help=w->gettext("Disable editing by visitors");
-	users_only.error_msg=w->gettext("Please Login");
-	title.set_nonempty();
-	content.set_nonempty();
-	content.rows=25;
-	content.cols=60;
-	sidebar.rows=10;
-	sidebar.cols=60;
+	preview.value(_("Preview"));
+	fields + title + content + sidebar;
+	buttons + save + save_cont + preview + users_only;
+	add(fields);
+	add(buttons);
+	users_only.help(_("Disable editing by visitors"));
+	users_only.error_message(_("Please Login"));
+	title.non_empty();
+	content.non_empty();
+	content.rows(25);
+	content.cols(60);
+	sidebar.rows(10);
+	sidebar.cols(60);
 }
 
 bool page_form::validate()
 {
 	bool res=form::validate();
-	if(users_only.get() && !w->users.auth()) {
-		users_only.not_valid();
-		users_only.set(false);
+	if(users_only.value() && !w->users.auth()) {
+		users_only.valid(false);
+		users_only.value(false);
 		return false;
 	}
 	return res;
@@ -57,21 +52,16 @@ namespace apps {
 page::page(wiki &w):
 	master(w)
 {
-	wi.url_next.add("^/page/(\\w+)/version/(\\d+)$",
-		boost::bind(&page::display_ver,this,_1,_2));
-	wi.url_next.add("^/page/(\\w+)/?$",
-		boost::bind(&page::display,this,_1));
-	wi.url_next.add("^/page/(\\w+)/edit(/version/(\\d+))?$",
-		boost::bind(&page::edit,this,_1,_3));
-	wi.url_next.add("^/page/(\\w+)/history(/|/(\\d+))?$",
-		boost::bind(&page::history,this,_1,_3));
-	wi.url_next.add("^/page/(\\w+)/diff/(\\d+)vs(\\d+)/?$",
-		boost::bind(&page::diff,this,_1,_2,_3));
+	wi.dispatcher().assign("^/page/(\\w+)/version/(\\d+)$",&page::display_ver,this,1,2);
+	wi.dispatcher().assign("^/page/(\\w+)/?$",&page::display,this,1);
+	wi.dispatcher().assign("^/page/(\\w+)/edit(/version/(\\d+))?$",&page::edit,this,1,3);
+	wi.dispatcher().assign("^/page/(\\w+)/history(/|/(\\d+))?$",&page::history,this,1,3);
+	wi.dispatcher().assign("^/page/(\\w+)/diff/(\\d+)vs(\\d+)/?$",&page::diff,this,1,2,3);
 }
 
 string page::diff_url(int v1,int v2,string l,string s)
 {
-	if(l.empty()) l=locale;
+	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l) + 
 		(boost::format("/page/%1%/diff/%2%vs%3%") % s % v1 % v2).str();
@@ -79,14 +69,14 @@ string page::diff_url(int v1,int v2,string l,string s)
 
 string page::page_url(string l,string s)
 {
-	if(l.empty()) l=locale;
+	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l)+"/page/"+s;
 }
 
 string page::page_version_url(int ver,string l,string s)
 {
-	if(l.empty()) l=locale;
+	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l)+
 		(boost::format("/page/%1%/version/%2%") % s % ver).str();
@@ -120,7 +110,7 @@ void page::diff(string slug,string sv1,string sv2)
 	sql<<	"SELECT version,history.title,history.content,history.sidebar,pages.title FROM pages "
 		"JOIN history ON pages.id=history.id "
 		"WHERE lang=? AND slug=? AND version IN (?,?) ",
-		locale,slug,v1,v2,rs;
+		locale_name,slug,v1,v2,rs;
 	if(rs.rows()!=2) {
 		c.no_versions=true;
 		master::ini(c);
@@ -179,10 +169,10 @@ void page::history(string slug,string page)
 
 	sql<<	"SELECT title,id FROM pages "
 		"WHERE pages.lang=? AND pages.slug=? ",
-		locale,slug;
+		locale_name,slug;
 	row r;
 	if(!sql.single(r)) {
-		redirect(locale);
+		redirect(locale_name);
 		return;
 	}
 	int id;
@@ -221,24 +211,24 @@ void page::history(string slug,string page)
 void page::display(string slug)
 {
 	this->slug=slug;
-	string key="article_"+locale+":"+slug;
-	if(cache.fetch_page(key))
+	string key="article_"+locale_name+":"+slug;
+	if(cache().fetch_page(key))
 		return;
 	content::page c;
 
 	sql<<	"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?",
-		locale,slug;
+		locale_name,slug;
 	row r;
 	if(!sql.single(r)) {
 		string redirect=edit_url();
-		set_header(new HTTPRedirectHeader(redirect));
-		add_header("Status: 302 Found");
+		std::cerr << " Page " << redirect << std::endl;
+		response().set_redirect_header(redirect);
 		return;
 	}
 	ini(c);
 	r >> c.title >> c.content >> c.sidebar;
 	render("page",c);
-	cache.store_page(key);
+	cache().store_page(key);
 }
 
 void page::ini(content::page &c)
@@ -252,7 +242,7 @@ void page::edit(string slug,string version)
 {
 	this->slug=slug;
 	content::edit_page c(&wi);
-	if(env->getRequestMethod()=="POST") {
+	if(request().request_method()=="POST") {
 		if(!edit_on_post(c))
 			return;
 	}
@@ -263,11 +253,11 @@ void page::edit(string slug,string version)
 		else {
 			int ver=atoi(version.c_str());
 			if(!load_history(ver,c.form)) {
-				redirect(locale,slug);
+				redirect(locale_name,slug);
 				return;
 			}
 		}
-		if(c.form.users_only.get() && !wi.users.auth()) {
+		if(c.form.users_only.value() && !wi.users.auth()) {
 			wi.users.error_forbidden();
 		}
 	}
@@ -282,15 +272,16 @@ bool page::load(content::page_form &form)
 	sql<<	
 		"SELECT title,content,sidebar,users_only "
 		"FROM pages WHERE lang=? AND slug=?",
-		locale,slug;
+		locale_name,slug;
 	row r;
 	if(sql.single(r)) {
+		std::string title,content,sidebar;
 		int users_only;
-		r>>form.title.str()
-		 >>form.content.str()
-		 >>form.sidebar.str()
-		 >>users_only;
-		form.users_only.set(users_only);
+		r >> title >> content >> sidebar >> users_only;
+		form.title.value(title);
+		form.content.value(content);
+		form.sidebar.value(sidebar);
+		form.users_only.value(users_only);
 		return true;
 	}
 	wi.options.load();
@@ -301,8 +292,7 @@ bool page::load(content::page_form &form)
 void page::redirect(string loc,string slug)
 {
 	string redirect=page_url(loc,slug);
-	set_header(new HTTPRedirectHeader(redirect));
-	add_header("Status: 302 Found");
+	response().set_redirect_header(redirect);
 }
 
 void page::save(int id,content::page_form &form)
@@ -315,18 +305,18 @@ void page::save(int id,content::page_form &form)
 	if(id!=-1) {
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
 			"WHERE lang=? AND slug=?",
-				form.content.get(),form.title.get(),
-				form.sidebar.get(),int(form.users_only.get()),
-				locale,slug,exec();
+				form.content.value(),form.title.value(),
+				form.sidebar.value(),int(form.users_only.value()),
+				locale_name,slug,exec();
 	}
 	else {
 		sql<<	"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
 			"VALUES(?,?,?,?,?,?)",
-			locale,slug,
-			form.title.get(),
-			form.content.get(),
-			form.sidebar.get(),
-			form.users_only.get(),
+			locale_name,slug,
+			form.title.value(),
+			form.content.value(),
+			form.sidebar.value(),
+			form.users_only.value(),
 			exec();
 		id=sql.rowid();
 	}
@@ -335,9 +325,9 @@ void page::save(int id,content::page_form &form)
 		"	(SELECT COALESCE(MAX(version),0)+1 FROM history WHERE id=?),"
 		"	?,?,?,?,?",
 			id,id,t,
-			form.title.get(),
-			form.content.get(),
-			form.sidebar.get(),
+			form.title.value(),
+			form.content.value(),
+			form.sidebar.value(),
 			wi.users.username,
 			exec();
 }
@@ -348,7 +338,7 @@ bool page::edit_on_post(content::edit_page &c)
 	wi.options.load();
 	
 	transaction tr(sql);
-	sql<<	"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale,slug;
+	sql<<	"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale_name,slug;
 	row r;
 	int id=-1,users_only=wi.options.global.users_only_edit;
 	if(sql.single(r)) {
@@ -358,21 +348,21 @@ bool page::edit_on_post(content::edit_page &c)
 		wi.users.error_forbidden();
 		return false;
 	}
-	c.form.load(*cgi);
+	c.form.load(context());
 	if(c.form.validate()) {
-		if(c.form.save.pressed || c.form.save_cont.pressed) {
+		if(c.form.save.value() || c.form.save_cont.value()) {
 			save(id,c.form);
-			cache.rise("article_"+locale+":"+slug);
+			cache().rise("article_"+locale_name+":"+slug);
 		}
-		if(c.form.save.pressed) {
-			redirect(locale,slug);
+		if(c.form.save.value()) {
+			redirect(locale_name,slug);
 			tr.commit();
 			return false;
 		}
-		if(c.form.preview.pressed) {
-			c.title=c.form.title.get();
-			c.content=c.form.content.get();
-			c.sidebar=c.form.sidebar.get();
+		if(c.form.preview.value()) {
+			c.title=c.form.title.value();
+			c.content=c.form.content.value();
+			c.sidebar=c.form.sidebar.value();
 		}
 	}
 	tr.commit();
@@ -385,13 +375,16 @@ bool page::load_history(int ver,content::page_form &form)
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
 		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-		locale,slug,ver;
+		locale_name,slug,ver;
 	row r;
 	if(sql.single(r)) {
+		std::string title,content,sidebar;
 		int uonly;
-		r>>form.title.str()>>form.content.str()
-		 >>form.sidebar.str()>>uonly;
-		 form.users_only.set(uonly);
+		r >> title >> content >> sidebar >> uonly;
+		form.title.value(title);
+		form.content.value(content);
+		form.sidebar.value(sidebar);
+		form.users_only.value(uonly);
 		return true;
 	}
 	return false;
@@ -406,10 +399,10 @@ void page::display_ver(string slug,string sid)
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
 		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-			locale,slug,id;
+			locale_name,slug,id;
 	row r;
 	if(!sql.single(r)) {
-		redirect(locale,slug);
+		redirect(locale_name,slug);
 		return;
 	}
 	r>>c.title>>c.content>>c.sidebar>>c.date;

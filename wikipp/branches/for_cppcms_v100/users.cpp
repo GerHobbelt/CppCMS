@@ -1,49 +1,51 @@
-#include <cgicc/HTTPRedirectHeader.h>
 #include "users.h"
 #include "wiki.h"
 #include "users_content.h"
 #include <sys/time.h>
 #include <time.h>
 
-using cgicc::HTTPRedirectHeader;
+#include <cppcms/url_dispatcher.h>
+#include <cppcms/cache_interface.h>
+#include <cppcms/session_interface.h>
+
 using namespace dbixx;
+#define _(X) ::cppcms::locale::translate(X)
 
 namespace content {
 login_form::login_form(wiki *_w) :
-	w(_w),
-	username("username",w->gettext("Username")),
-	password("password",w->gettext("Password")),
-	login("login",w->gettext("Login"))
+	w(_w)
 {
-	*this & username & password & login;
-	username.set_nonempty();
-	password.set_nonempty();
+	username.message(_("Username"));
+	password.message(_("Password"));
+	login.value(_("Login"));
+	*this + username + password + login;
+	username.non_empty();
+	password.non_empty();
 }
 
 bool login_form::validate()
 {
 	if(!form::validate())
 		return false;
-	if(w->users.check_login(username.get(),password.get()))
+	if(w->users.check_login(username.value(),password.value()))
 		return true;
-	password.not_valid();
+	password.valid(false);
 	return false;
 }
 
 
-
 new_user_form::new_user_form(wiki *_w):
-	w(_w),
-	username("username",w->gettext("Username")),
-	password1("p1",w->gettext("Password")),
-	password2("p2",w->gettext("Confirm")),
-	captcha("capt",w->gettext("Solve")),
-	submit("submit",w->gettext("Submit"))
+	w(_w)
 {
-	*this & username & password1 & password2 & captcha & submit;
-	username.set_nonempty();
-	password1.set_nonempty();
-	password2.set_equal(password1);
+	username.message(_("Username"));
+	password1.message(_("Password"));
+	password2.message(_("Confirm"));
+	captcha.message(_("Solve"));
+	submit.value(_("Submit"));
+	*this + username + password1 + password2 + captcha + submit;
+	username.non_empty();
+	password1.non_empty();
+	password2.check_equal(password1);
 }
 
 void new_user_form::generate_captcha()
@@ -54,9 +56,9 @@ void new_user_form::generate_captcha()
 	int num1=rand_r(&seed) % 10+1;
 	int num2=rand_r(&seed) % 10+1;
 	int sol=num1+num2;
-	captcha.help=(boost::format("%1% + %2%") % num1 % num2).str();
-	w->session.set("captcha",sol);
-	w->session.set_age(5*60); // at most 5 minutes
+	captcha.help((boost::format("%1% + %2%") % num1 % num2).str());
+	w->session().set("captcha",sol);
+	w->session().age(5*60); // at most 5 minutes
 }
 
 bool new_user_form::validate()
@@ -64,13 +66,13 @@ bool new_user_form::validate()
 	if(!form::validate())
 		return false;
 	
-	if(!w->session.is_set("captcha") || captcha.get()!=w->session["captcha"]) {
-		w->session.del("captcha");
+	if(!w->session().is_set("captcha") || captcha.value()!=w->session()["captcha"]) {
+		w->session().erase("captcha");
 		return false;
 	}
-	if(w->users.user_exists(username.get())) {
-		username.error_msg=w->gettext("This user exists");
-		username.not_valid();
+	if(w->users.user_exists(username.value())) {
+		username.error_message(_("This user exists"));
+		username.valid(false);
 		return false;
 	}
 	return true;
@@ -83,34 +85,31 @@ namespace apps {
 
 users::users(wiki &w) :	master(w)
 {
-	wi.url_next.add("^/login/?$",
-		boost::bind(&users::login,this));
-	disable_reg=app.config.get<int>("wikipp.disable_registration",1);
+	wi.dispatcher().assign("^/login/?$",&users::login,this);
+	disable_reg=settings().get<int>("wikipp.disable_registration",1);
 	if(!disable_reg){
-		wi.url_next.add("^/register/?$",
-			boost::bind(&users::new_user,this));
+		wi.dispatcher().assign("^/register/?$",&users::new_user,this);
 	}
-	on_start.connect(boost::bind(&users::reset,this));
 	reset();
 }
 
 void users::new_user()
 {
 	content::new_user c(&wi);
-	if(env->getRequestMethod()=="POST") {
-		c.form.load(*cgi);
+	if(request().request_method()=="POST") {
+		c.form.load(context());
 		transaction tr(sql);
 		if(c.form.validate()) {
 			sql<<	"INSERT INTO users(username,password) "
 				"VALUES(?,?)",
-				c.form.username.get(),
-				c.form.password1.get(),
+				c.form.username.value(),
+				c.form.password1.value(),
 				exec();
 			tr.commit();
-			wi.page.redirect(locale);
-			session["username"]=c.form.username.get();
-			session.expose("username");
-			session.set_age(); // return to default
+			wi.page.redirect(locale_name);
+			session()["username"]=c.form.username.value();
+			session().expose("username");
+			session().default_age(); // return to default
 			return;
 		}
 		tr.commit();
@@ -134,13 +133,13 @@ bool users::user_exists(string u)
 {
 	string key="user_exists_"+u;
 	string tmp;
-	if(cache.fetch_frame(key,tmp,true)) { // No triggers
+	if(cache().fetch_frame(key,tmp,true)) { // No triggers
 		return true;
 	}
 	sql<<"SELECT id FROM users WHERE username=?",u;
 	row r;
 	if(sql.single(r)) {
-		cache.store_frame(key,tmp);
+		cache().store_frame(key,tmp);
 		return true;
 	}
 	return false;
@@ -149,20 +148,19 @@ bool users::user_exists(string u)
 void users::login()
 {
 	content::login c(&wi);
-	if(env->getRequestMethod()=="POST") {
-		c.form.load(*cgi);
+	if(request().request_method()=="POST") {
+		c.form.load(context());
 		if(c.form.validate()) {
-			wi.page.redirect(locale);
-			session["username"]=c.form.username.get();
-			session.expose("username");
+			wi.page.redirect(locale_name);
+			session()["username"]=c.form.username.value();
+			session().expose("username");
 			return;
 		}
 	}
 	else {
 		if(auth()) {
-			set_header(new HTTPRedirectHeader(env->getReferrer()));
-			add_header("Status: 302 Found");
-			session.clear();
+			response().set_redirect_header(request().http_referer());
+			session().clear();
 			return;
 		}
 	}
@@ -198,23 +196,22 @@ bool users::auth()
 
 void users::do_auth()
 {
-	if(session.is_set("username") && user_exists(session["username"])) {
+	if(session().is_set("username") && user_exists(session()["username"])) {
 		auth_ok=true;
 	}
 	else {
 		auth_ok=false;
 	}
 	if(auth_ok)
-		username=session["username"];
+		username=session()["username"];
 	else
-		username=env->getRemoteAddr();
+		username=request().remote_addr();
 	auth_done=true;
 }
 
 void users::error_forbidden()
 {
-	set_header(new HTTPRedirectHeader(login_url()));
-	add_header("Status: 302 Found");
+	response().set_redirect_header(login_url());
 }
 
 

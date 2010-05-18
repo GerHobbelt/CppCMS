@@ -6,9 +6,9 @@ wikipp_LDFLAGS = -export-dynamic @CMSLIBS@
 wikipp_LDADD = cxxmarkdown/libmarkdowncxx.a
 wikipp_CXXFLAGS =-Wall
 
-noinst_HEADERS = data.h diff.h index.h index_data.h master.h \
-		 master_data.h options.h options_data.h page.h \
-		 page_data.h users.h users_data.h wiki.h index_data.h 
+noinst_HEADERS = content.h diff.h index.h index_content.h master.h \
+		 master_content.h options.h options_content.h page.h \
+		 page_content.h users.h users_content.h wiki.h index_content.h 
 
 pkgsysconfdir=$(sysconfdir)/wikipp
 dist_pkgdata_DATA = mysql.sql sqlite3.sql
