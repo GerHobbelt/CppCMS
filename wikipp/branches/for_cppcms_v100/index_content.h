@@ -19,7 +19,7 @@ struct recent_changes : public master {
 	struct element {
 		string title;
 		int version;
-		std::tm created;
+		time_t created;
 		string author;
 		string url;
 		string diff_url;

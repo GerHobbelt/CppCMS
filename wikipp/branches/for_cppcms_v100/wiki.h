@@ -39,6 +39,8 @@ public:
 	//virtual void on_404();
 	virtual void main(std::string url);
 	wiki(cppcms::service &s);
+private:
+	std::map<std::string,std::string> lang_map;
 };
 
 }

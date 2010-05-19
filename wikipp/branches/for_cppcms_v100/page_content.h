@@ -32,7 +32,7 @@ struct page : public master {
 struct page_hist: public page {
 	int version;
 	string rollback;
-	std::tm date;
+	time_t date;
 };
 
 struct edit_page: public page {
@@ -45,7 +45,7 @@ struct edit_page: public page {
 
 struct history : public master {
 	struct item {
-		std::tm update;
+		time_t update;
 		string show_url;
 		string edit_url;
 		string diff_url;

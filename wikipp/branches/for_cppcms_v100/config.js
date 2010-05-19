@@ -10,11 +10,10 @@
 		},
 
 		"sql" : {
-			"driver" : "sqlite3", // "mysql", "postgresql"
-			"params" : {
-				"dbname" : "wikipp.db",
-				"sqlite3_dbdir" : "./db/"
-			}
+			//"driver" : "sqlite3", // "mysql", "postgresql"
+			"driver" : "mysql", // "mysql", "postgresql"
+			//"params" : {"dbname" : "wikipp.db","sqlite3_dbdir" : "./db/"}
+			"params" : {"dbname" : "wikipp","username" : "root", "password" : "root" } // mysql
 		}
 		//	dbname="wikipp"
 		//	username="root"
@@ -27,12 +26,16 @@
 		//	postgresql.username="artik"
 	},
 	"service" : {
-		"api" : "http",
-		"port" : 8080
+		//"worker_processes" : 1,
+		"worker_threads" : 5,
+		//"api" : "http",
+		"api" : "scgi",
+		//"port" : 8080
+		"socket" : "/tmp/wikipp.sock"
 	},
 	"session" : {
 		"expire" : "renew",
-		"location" : "client",
+		//"location" : "client",
 		"cookies" :  {
 			"prefix" : "wikipp"
 		},
@@ -62,7 +65,11 @@
 		"script_names" : [ "/wikipp" ]
 	},
 	"logging" : {
-		"level" : "debug" 
+		//"level" : "debug" 
+	},
+	"cache" : {
+		"backend" : "thread_shared", 
+		"limit" : 100, // items - thread cache
 	}
 
 }

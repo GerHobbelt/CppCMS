@@ -40,16 +40,19 @@ master::master(wiki &_w) :
 				lname=p->first;
 			}
 		}
-		languages[lname]=wi.page.default_page_url(p->first);
+		languages[lname]=settings().get<std::string>("wikipp.script") +"/"+ p->first;
 	}
+	media=settings().get<std::string>("wikipp.media");
+	syntax_highlighter=settings().get("wikipp.syntax_highlighter","");
+	cookie_prefix=settings().get("session.cookies_prefix","cppcms_session")+"_";
 }
 
 void master::ini(content::master &c)
 {
 	wi.options.load();
-	c.media=settings().get<std::string>("wikipp.media");
-	c.syntax_highlighter=settings().get("wikipp.syntax_highlighter","");
-	c.cookie_prefix=settings().get("session.cookies_prefix","cppcms_session")+"_";
+	c.media=media;
+	c.syntax_highlighter=syntax_highlighter;
+	c.cookie_prefix=cookie_prefix;
 	c.main_link=wi.page.default_page_url();
 	c.main_local=wi.page.default_page_url(locale_name);
 	c.toc=wi.index.index_url();

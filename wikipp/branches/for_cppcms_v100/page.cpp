@@ -195,7 +195,9 @@ void page::history(string slug,string page)
 
 	for(unsigned i=0;rs.next(r) && i<vers;i++) {
 		int ver;
-		r>>c.hist[i].update >> ver >> c.hist[i].author ;
+		std::tm update;
+		r>> update >> ver >> c.hist[i].author ;
+		c.hist[i].update = mktime(&update);
 		c.hist[i].version=ver;
 		c.hist[i].show_url=page_version_url(ver);
 		c.hist[i].edit_url=edit_version_url(ver);
@@ -405,7 +407,9 @@ void page::display_ver(string slug,string sid)
 		redirect(locale_name,slug);
 		return;
 	}
-	r>>c.title>>c.content>>c.sidebar>>c.date;
+	std::tm date;
+	r>>c.title>>c.content>>c.sidebar>>date;
+	c.date = mktime(&date);
 	c.version=id;
 	c.rollback=edit_version_url(id);
 	ini(c);

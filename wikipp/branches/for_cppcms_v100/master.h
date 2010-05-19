@@ -19,6 +19,10 @@ protected:
 public:
 	master(wiki &w);
 	void ini(content::master &);
+private:
+	std::string media;
+	std::string syntax_highlighter;
+	std::string cookie_prefix;
 };
 
 } // namespace wiki

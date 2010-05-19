@@ -56,7 +56,9 @@ void index::changes(string page_no)
 	for(n=0;rs.next(r);n++) {
 		content::recent_changes::element &d=c.content[n];
 		string lang,slug;
-		r>>d.title>>d.version>>d.created>>d.author>>lang>>slug;
+		std::tm created;
+		r>>d.title>>d.version>>created>>d.author>>lang>>slug;
+		d.created = mktime(&created);
 		d.url=wi.page.page_version_url(d.version,lang,slug);
 		if(d.version>1)
 			d.diff_url=wi.page.diff_url(d.version-1,d.version,lang,slug);

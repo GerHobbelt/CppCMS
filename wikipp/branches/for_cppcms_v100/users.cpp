@@ -86,7 +86,7 @@ namespace apps {
 users::users(wiki &w) :	master(w)
 {
 	wi.dispatcher().assign("^/login/?$",&users::login,this);
-	disable_reg=settings().get<int>("wikipp.disable_registration",1);
+	disable_reg=settings().get("wikipp.disable_registration",true);
 	if(!disable_reg){
 		wi.dispatcher().assign("^/register/?$",&users::new_user,this);
 	}
