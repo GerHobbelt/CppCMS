@@ -2,7 +2,6 @@
 #define WIKI_H
 #include <cppcms/application.h>
 #include <dbixx/dbixx.h>
-#include <boost/format.hpp>
 
 #include "page.h"
 #include "users.h"
@@ -33,9 +32,9 @@ public:
 	apps::users users;
 	apps::index index;
 
-	std::string root(string locale_name="");
-	bool set_locale(string);
-	void run(string lang,string url);
+	std::string root(std::string locale_name="");
+	bool set_locale(std::string);
+	void run(std::string lang,std::string url);
 	//virtual void on_404();
 	virtual void main(std::string url);
 	wiki(cppcms::service &s);

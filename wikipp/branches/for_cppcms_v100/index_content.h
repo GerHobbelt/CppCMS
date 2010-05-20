@@ -7,25 +7,25 @@ namespace content {
 
 struct toc : public master {
 	struct element {
-		string letter;
-		string title;
-		string url;
+		std::string letter;
+		std::string title;
+		std::string url;
 	};
-	typedef vector<element> column_t;
+	typedef std::vector<element> column_t;
 	column_t left_col,right_col,middle_col;
 };
 
 struct recent_changes : public master {
 	struct element {
-		string title;
+		std::string title;
 		int version;
 		time_t created;
-		string author;
-		string url;
-		string diff_url;
+		std::string author;
+		std::string url;
+		std::string diff_url;
 	};
-	vector<element> content;
-	string next;
+	std::vector<element> content;
+	std::string next;
 };
 
 

@@ -5,8 +5,6 @@
 
 namespace apps {
 
-using namespace std;
-
 class users : public master {
 	bool auth_done;
 	bool auth_ok;
@@ -17,12 +15,12 @@ class users : public master {
 	void new_user();
 public:
 	void reset();
-	bool user_exists(string);
-	bool check_login(string,string);
+	bool user_exists(std::string);
+	bool check_login(std::string,std::string);
 	bool auth();
 	void error_forbidden();
-	string username;
-	string login_url();
+	std::string username;
+	std::string login_url();
 	users(wiki &);
 	
 };

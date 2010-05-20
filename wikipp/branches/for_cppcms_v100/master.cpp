@@ -8,11 +8,11 @@
 #define _(X) ::cppcms::locale::translate(X)
 #define N_(S,P,N)  ::cppcms::locale::translate(S,P,N)
 
-namespace content {
+namespace {
 
-string master::markdown(string s)
+std::string markdown(std::string s)
 {
-	string tmp;
+	std::string tmp;
 	markdown2html(s,tmp);
 	return tmp;
 }
@@ -27,9 +27,9 @@ master::master(wiki &_w) :
 	sql(wi.sql),
 	locale_name(wi.locale_name)
 {
-	json::object langs=settings().get("wikipp.languages",json::object());
-	for(json::object::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
-		string lname;
+	cppcms::json::object langs=settings().get("wikipp.languages",cppcms::json::object());
+	for(cppcms::json::object::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
+		std::string lname;
 		if(p->first=="en")
 			lname="English";
 		else {
@@ -50,6 +50,7 @@ master::master(wiki &_w) :
 void master::ini(content::master &c)
 {
 	wi.options.load();
+	c.markdown = markdown;
 	c.media=media;
 	c.syntax_highlighter=syntax_highlighter;
 	c.cookie_prefix=cookie_prefix;

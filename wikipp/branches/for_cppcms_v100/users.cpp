@@ -12,7 +12,7 @@ using namespace dbixx;
 #define _(X) ::cppcms::locale::translate(X)
 
 namespace content {
-login_form::login_form(wiki *_w) :
+login_form::login_form(apps::wiki *_w) :
 	w(_w)
 {
 	username.message(_("Username"));
@@ -34,7 +34,7 @@ bool login_form::validate()
 }
 
 
-new_user_form::new_user_form(wiki *_w):
+new_user_form::new_user_form(apps::wiki *_w):
 	w(_w)
 {
 	username.message(_("Username"));
@@ -56,7 +56,7 @@ void new_user_form::generate_captcha()
 	int num1=rand_r(&seed) % 10+1;
 	int num2=rand_r(&seed) % 10+1;
 	int sol=num1+num2;
-	captcha.help((boost::format("%1% + %2%") % num1 % num2).str());
+	captcha.help((booster::locale::format("{1} + {2}") % num1 % num2).str());
 	w->session().set("captcha",sol);
 	w->session().age(5*60); // at most 5 minutes
 }
@@ -124,15 +124,15 @@ void users::reset()
 	auth_done=auth_ok=false;
 }
 
-string users::login_url()
+std::string users::login_url()
 {
 	return wi.root()+"/login/";
 }
 
-bool users::user_exists(string u)
+bool users::user_exists(std::string u)
 {
-	string key="user_exists_"+u;
-	string tmp;
+	std::string key="user_exists_"+u;
+	std::string tmp;
 	if(cache().fetch_frame(key,tmp,true)) { // No triggers
 		return true;
 	}
@@ -170,7 +170,7 @@ void users::login()
 	render("login",c);
 }
 
-bool users::check_login(string u,string p)
+bool users::check_login(std::string u,std::string p)
 {
 	if(u.empty() || p.empty())
 		return false;
@@ -180,7 +180,7 @@ bool users::check_login(string u,string p)
 	if(!sql.single(r) ) {
 		return false;
 	}
-	string pass;
+	std::string pass;
 	r>>pass;
 	if(p!=pass)
 		return false;

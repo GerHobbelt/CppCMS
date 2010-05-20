@@ -4,19 +4,16 @@
 #include <cppcms/json.h>
 
 namespace apps {
-class wiki;
-using namespace cppcms;
-using namespace std;
 
 struct global_options {
 	int users_only_edit;
-	string contact;
+	std::string contact;
 };
 
 struct locale_options {
-	string title;
-	string about;
-	string copyright;
+	std::string title;
+	std::string about;
+	std::string copyright;
 };
 
 
@@ -28,10 +25,10 @@ protected:
 	void edit();
 public:
 	void reset();
-	options(wiki &);
+	options(apps::wiki &);
 	void load();
 	void save();
-	string edit_url();
+	std::string edit_url();
 	global_options global;
 	locale_options  local;
 };

@@ -44,7 +44,7 @@ void options::reset()
 	loaded=false;
 }
 
-string options::edit_url()
+std::string options::edit_url()
 {
 	return wi.root()+"/options/";
 }
@@ -66,7 +66,7 @@ void options::load()
 			"WHERE	lang='global' ",res;
 		row r;
 		while(res.next(r)) {
-			string n,v;
+			std::string n,v;
 			r >> n >> v;
 			if(n=="users_only_edit")
 				global.users_only_edit=atoi(v.c_str());
@@ -86,7 +86,7 @@ void options::load()
 		"WHERE  lang=?",locale_name,res;
 	row r;
 	while(res.next(r)) {
-		string v,n;
+		std::string v,n;
 		r>>v>>n;
 		if(n=="title")
 			local.title=v;

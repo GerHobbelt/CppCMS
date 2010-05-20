@@ -3,8 +3,6 @@
 
 #include "master.h"
 #include <string>
-using namespace cppcms;
-using namespace std;
 
 namespace content { 
 	class page;
@@ -20,25 +18,25 @@ class page : public master {
 	bool edit_on_post(content::edit_page &);
 	bool load_history(int,content::page_form &);
 protected:
-	string slug;
+	std::string slug;
 	void ini(content::page &);
-	void display(string slug);
-	void history(string slug,string page);
-	void display_ver(string slug,string sid);
-	void edit(string slug,string version);
-	void diff(string slug,string v1,string v2);
+	void display(std::string slug);
+	void history(std::string slug,std::string page);
+	void display_ver(std::string slug,std::string sid);
+	void edit(std::string slug,std::string version);
+	void diff(std::string slug,std::string v1,std::string v2);
 
-	string edit_url();
-	string edit_version_url(int ver);
-	string history_url(int n=0);
+	std::string edit_url();
+	std::string edit_version_url(int ver);
+	std::string history_url(int n=0);
 public:
 	page(wiki &w);
-	string diff_url(int v1,int v2,string lang="",string s="");
-	string page_url(string l="",string s="");
-	string page_version_url(int ver,string l="",string s="");
-	string default_page_url(string l="en",string s="main")
+	std::string diff_url(int v1,int v2,std::string lang="",std::string s="");
+	std::string page_url(std::string l="",std::string s="");
+	std::string page_version_url(int ver,std::string l="",std::string s="");
+	std::string default_page_url(std::string l="en",std::string s="main")
 		{ return page_url(l,s); }
-	void redirect(string locale="en",string slug="main");
+	void redirect(std::string locale="en",std::string slug="main");
 };
 
 }

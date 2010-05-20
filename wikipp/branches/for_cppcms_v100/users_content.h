@@ -5,36 +5,36 @@
 
 namespace content {
 
-struct login_form : public form {
-	wiki *w;
-	widgets::text username;
-	widgets::password password;
-	widgets::submit login;
-	login_form(wiki *);
+struct login_form : public cppcms::form {
+	apps::wiki *w;
+	cppcms::widgets::text username;
+	cppcms::widgets::password password;
+	cppcms::widgets::submit login;
+	login_form(apps::wiki *);
 	virtual bool validate();
 };
 
-struct new_user_form : public form {
-	wiki *w;
-	widgets::text username;
-	widgets::password password1;
-	widgets::password password2;
-	widgets::text captcha;
-	widgets::submit submit;
-	new_user_form(wiki *w);
+struct new_user_form : public cppcms::form {
+	apps::wiki *w;
+	cppcms::widgets::text username;
+	cppcms::widgets::password password1;
+	cppcms::widgets::password password2;
+	cppcms::widgets::text captcha;
+	cppcms::widgets::submit submit;
+	new_user_form(apps::wiki *w);
 	void generate_captcha();
 	bool virtual validate(); 
 };
 
 struct new_user : public master {
 	new_user_form form;
-	new_user(wiki *w) : form(w){};
+	new_user(apps::wiki *w) : form(w){};
 };
 
 struct login : public master {
 	login_form form;
-	string new_user;
-	login(wiki *w) : form(w){};
+	std::string new_user;
+	login(apps::wiki *w) : form(w){};
 };
 
 } // namespace content

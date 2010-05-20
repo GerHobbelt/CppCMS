@@ -17,21 +17,21 @@ index::index(wiki &w):
 	wi.dispatcher().assign("^/changes(/?|/(\\d+))$",&index::changes,this,2);
 }
 
-string index::index_url()
+std::string index::index_url()
 {
 	return wi.root()+"/index/";
 }
 
-string index::changes_url(int p)
+std::string index::changes_url(int p)
 {
 	if(p==0)
 		return wi.root()+"/changes/";
-	return wi.root()+(boost::format("/changes/%1%",std::locale::classic()) % p).str();
+	return wi.root()+(booster::locale::format("/changes/{1}") % p).str();
 }
 
-void index::changes(string page_no)
+void index::changes(std::string page_no)
 {
-	string key=locale_name+"_changes_"+page_no;
+	std::string key=locale_name+"_changes_"+page_no;
 	if(cache().fetch_page(key))
 		return;
 	int p;
@@ -55,7 +55,7 @@ void index::changes(string page_no)
 	int n;
 	for(n=0;rs.next(r);n++) {
 		content::recent_changes::element &d=c.content[n];
-		string lang,slug;
+		std::string lang,slug;
 		std::tm created;
 		r>>d.title>>d.version>>created>>d.author>>lang>>slug;
 		d.created = mktime(&created);
@@ -74,7 +74,7 @@ void index::changes(string page_no)
 
 void index::display_index()
 {
-	string key=locale_name+"_toc_index";
+	std::string key=locale_name+"_toc_index";
 	if(cache().fetch_page(key))
 		return;
 	content::toc c;
@@ -86,10 +86,10 @@ void index::display_index()
 	unsigned items=res.rows();
 	unsigned items_left=items/3;
 	unsigned items_mid=items*2/3;
-	string letter="";
+	std::string letter="";
 	row r;
 	for(unsigned i=0;res.next(r);i++) {
-		vector<content::toc::element> *v;
+		std::vector<content::toc::element> *v;
 		if(i<items_left)
 			v=&c.left_col;
 		else if(i<items_mid)
@@ -97,13 +97,13 @@ void index::display_index()
 		else 
 			v=&c.right_col;
 
-		string t,slug;
+		std::string t,slug;
 		r>>slug>>t;
 		if(!t.empty() && utf8::is_valid(t.begin(),t.end()))
 		{
 			std::string::iterator p=t.begin();
 			utf8::next(p,t.end());
-			string l(t.begin(),p);
+			std::string l(t.begin(),p);
 			if(letter!=l) {
 				content::toc::element e;
 				e.letter=l;

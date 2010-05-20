@@ -10,6 +10,6 @@ int main(int argc,char **argv)
 		app.run();
 	}
 	catch(std::exception const &e) {
-		cerr<<e.what()<<endl;
+		std::cerr<<e.what()<<std::endl;
 	}
 }

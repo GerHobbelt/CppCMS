@@ -36,7 +36,7 @@ wiki::wiki(cppcms::service &srv) :
 	}
 }
 
-string wiki::root(string l)
+std::string wiki::root(std::string l)
 {
 	if(l.empty()) l=locale_name;
 	return script+"/"+l;

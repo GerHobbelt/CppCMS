@@ -3,6 +3,7 @@
 #include "wiki.h"
 #include "diff.h"
 
+#include <booster/posix_time.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/cache_interface.h>
 
@@ -11,7 +12,7 @@ using namespace dbixx;
 
 namespace content { 
 // Page content
-page_form::page_form(wiki *_w):
+page_form::page_form(apps::wiki *_w):
 	w(_w)
 {
 	title.message(_("Title"));
@@ -59,45 +60,45 @@ page::page(wiki &w):
 	wi.dispatcher().assign("^/page/(\\w+)/diff/(\\d+)vs(\\d+)/?$",&page::diff,this,1,2,3);
 }
 
-string page::diff_url(int v1,int v2,string l,string s)
+std::string page::diff_url(int v1,int v2,std::string l,std::string s)
 {
 	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l) + 
-		(boost::format("/page/%1%/diff/%2%vs%3%") % s % v1 % v2).str();
+		(booster::locale::format("/page/{1}/diff/{2}vs{3}") % s % v1 % v2).str();
 }
 
-string page::page_url(string l,string s)
+std::string page::page_url(std::string l,std::string s)
 {
 	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l)+"/page/"+s;
 }
 
-string page::page_version_url(int ver,string l,string s)
+std::string page::page_version_url(int ver,std::string l,std::string s)
 {
 	if(l.empty()) l=locale_name;
 	if(s.empty()) s=slug;
 	return wi.root(l)+
-		(boost::format("/page/%1%/version/%2%") % s % ver).str();
+		(booster::locale::format("/page/{1}/version/{2}") % s % ver).str();
 }
-string page::edit_url()
+std::string page::edit_url()
 {
 	return wi.root()+"/page/"+slug+"/edit";
 }
-string page::edit_version_url(int ver)
+std::string page::edit_version_url(int ver)
 {
-	return (boost::format(edit_url()+"/version/%1%") % ver).str();
+	return (booster::locale::format(edit_url()+"/version/{1}") % ver).str();
 }
-string page::history_url(int n)
+std::string page::history_url(int n)
 {
-	string u=wi.root()+"/page/"+slug+"/history/";
+	std::string u=wi.root()+"/page/"+slug+"/history/";
 	if(n)
-		u+=(boost::format("%1%") % n).str();
+		u+=(booster::locale::format("{1}") % n).str();
 	return u;
 }
 
-void page::diff(string slug,string sv1,string sv2)
+void page::diff(std::string slug,std::string sv1,std::string sv2)
 {
 	int v1=atoi(sv1.c_str()), v2=atoi(sv2.c_str());
 	this->slug=slug;
@@ -117,7 +118,7 @@ void page::diff(string slug,string sv1,string sv2)
 		render("diff",c);
 		return;
 	}
-	string t1,c1,s1,t2,c2,s2;
+	std::string t1,c1,s1,t2,c2,s2;
 	row r;
 	while(rs.next(r)) {
 		int ver;
@@ -139,14 +140,14 @@ void page::diff(string slug,string sv1,string sv2)
 	}
 	if(c1!=c2) {
 		c.content_diff=true;
-		vector<string> X=split(c1);
-		vector<string> Y=split(c2);
+		std::vector<std::string> X=split(c1);
+		std::vector<std::string> Y=split(c2);
 		diff::diff(X,Y,c.content_diff_content);
 	}
 	if(s1!=s2) {
 		c.sidebar_diff=true;
-		vector<string> X=split(s1);
-		vector<string> Y=split(s2);
+		std::vector<std::string> X=split(s1);
+		std::vector<std::string> Y=split(s2);
 		diff::diff(X,Y,c.sidebar_diff_content);
 	}
 	if(t1==t2 && c1==c2 && s1==s2) 
@@ -155,7 +156,7 @@ void page::diff(string slug,string sv1,string sv2)
 	render("diff",c);
 }
 
-void page::history(string slug,string page)
+void page::history(std::string slug,std::string page)
 {
 	this->slug=slug;
 	unsigned const vers=10;
@@ -210,10 +211,10 @@ void page::history(string slug,string page)
 }
 
 
-void page::display(string slug)
+void page::display(std::string slug)
 {
 	this->slug=slug;
-	string key="article_"+locale_name+":"+slug;
+	std::string key="article_"+locale_name+":"+slug;
 	if(cache().fetch_page(key))
 		return;
 	content::page c;
@@ -222,7 +223,7 @@ void page::display(string slug)
 		locale_name,slug;
 	row r;
 	if(!sql.single(r)) {
-		string redirect=edit_url();
+		std::string redirect=edit_url();
 		std::cerr << " Page " << redirect << std::endl;
 		response().set_redirect_header(redirect);
 		return;
@@ -240,7 +241,7 @@ void page::ini(content::page &c)
 	c.history_link=history_url();
 }
 
-void page::edit(string slug,string version)
+void page::edit(std::string slug,std::string version)
 {
 	this->slug=slug;
 	content::edit_page c(&wi);
@@ -291,18 +292,15 @@ bool page::load(content::page_form &form)
 	return false;
 }
 
-void page::redirect(string loc,string slug)
+void page::redirect(std::string loc,std::string slug)
 {
-	string redirect=page_url(loc,slug);
+	std::string redirect=page_url(loc,slug);
 	response().set_redirect_header(redirect);
 }
 
 void page::save(int id,content::page_form &form)
 {
-	time_t now;
-	time(&now);
-	std::tm t;
-	localtime_r(&now,&t);
+	std::tm t = booster::ptime::local_time(booster::ptime::now());
 	wi.users.auth();
 	if(id!=-1) {
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
@@ -392,7 +390,7 @@ bool page::load_history(int ver,content::page_form &form)
 	return false;
 }
 
-void page::display_ver(string slug,string sid)
+void page::display_ver(std::string slug,std::string sid)
 {
 	this->slug=slug;
 	content::page_hist c;

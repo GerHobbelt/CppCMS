@@ -2,30 +2,27 @@
 #define MASTER_DATA_H
 #include <cppcms/view.h>
 #include <cppcms/form.h>
+#include <booster/function.h>
 #include <string>
 
 namespace apps { class wiki; }
 
 namespace content {
-using namespace std;
-using namespace cppcms;
-using apps::wiki;
-
 
 struct master : public cppcms::base_content {
-	string media;
-	string syntax_highlighter;
-	string cookie_prefix;
-	string main_link;
-	string main_local;
-	string login_link;
-	string toc;
-	string changes;
-	string edit_options;
-	string contact;
-	string wiki_title,about,copyright;
-	map<string,string> languages;
-	virtual string markdown(string);
+	std::string media;
+	std::string syntax_highlighter;
+	std::string cookie_prefix;
+	std::string main_link;
+	std::string main_local;
+	std::string login_link;
+	std::string toc;
+	std::string changes;
+	std::string edit_options;
+	std::string contact;
+	std::string wiki_title,about,copyright;
+	std::map<std::string,std::string> languages;
+	booster::function<std::string(std::string)> markdown;
 };
 
 }

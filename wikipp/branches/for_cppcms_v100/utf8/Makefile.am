@@ -1,3 +1,0 @@
-SUBDIRS=utf8
-
-EXTRA_DIST=README  utf8.h

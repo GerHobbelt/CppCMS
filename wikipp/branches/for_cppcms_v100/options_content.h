@@ -5,13 +5,13 @@
 
 namespace content {
 
-struct options_form : form {
-	widgets::checkbox users_only;
-	widgets::text contact_mail;
-	widgets::text wiki_title;
-	widgets::textarea about;
-	widgets::text copyright;
-	widgets::submit submit;
+struct options_form : cppcms::form {
+	cppcms::widgets::checkbox users_only;
+	cppcms::widgets::text contact_mail;
+	cppcms::widgets::text wiki_title;
+	cppcms::widgets::textarea about;
+	cppcms::widgets::text copyright;
+	cppcms::widgets::submit submit;
 	options_form();
 };
 
