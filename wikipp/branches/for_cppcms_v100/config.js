@@ -28,14 +28,14 @@
 	"service" : {
 		//"worker_processes" : 1,
 		"worker_threads" : 5,
-		//"api" : "http",
-		"api" : "scgi",
-		//"port" : 8080
-		"socket" : "/tmp/wikipp.sock"
+		"api" : "http",
+		//"api" : "scgi",
+		"port" : 8080
+		//"socket" : "/tmp/wikipp.sock"
 	},
 	"session" : {
 		"expire" : "renew",
-		//"location" : "client",
+		"location" : "client",
 		"cookies" :  {
 			"prefix" : "wikipp"
 		},
@@ -46,8 +46,9 @@
 	},
 	"views" : {
 		//"default_skin" : "view",
-		"paths" : [ "./templates/.libs"] ,
-		"skins" : [ "view" ]
+		"paths" : [ "./stage"] ,
+		"skins" : [ "view" ] ,
+		//"auto_reload" : true
 	},
 	"file_server" : {
 		"enable": true,
@@ -56,7 +57,7 @@
 	"localization" : {
 		"encoding" : "UTF-8",
 		"messages" : { 
-			"paths" : [ "./locale"],
+			"paths" : [ "./stage/locale"],
 			"domains" :  [ "wikipp" ]
 		},
 		"locales" : [ "he_IL" , "en_US" ]

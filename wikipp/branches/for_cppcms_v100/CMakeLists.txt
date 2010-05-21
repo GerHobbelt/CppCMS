@@ -71,9 +71,9 @@ if(USE_STATIC_VIEW)
 else()
 	add_executable(wikipp ${SRC})
 	add_library(view SHARED ${CMAKE_CURRENT_BINARY_DIR}/view.cpp)
-	target_link_libraries(view booster cppcms)
+	target_link_libraries(view ${BOOSTER} ${CPPCMS})
 endif()
 
 
-target_link_libraries(wikipp booster cppcms dbixx)
+target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX})
 

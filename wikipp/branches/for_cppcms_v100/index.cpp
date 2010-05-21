@@ -1,7 +1,6 @@
 #include "index.h"
 #include "index_content.h"
 #include "wiki.h"
-#include "utf8/utf8.h"
 
 #include <cppcms/cache_interface.h>
 #include <cppcms/url_dispatcher.h>
@@ -88,33 +87,25 @@ void index::display_index()
 	unsigned items_mid=items*2/3;
 	std::string letter="";
 	row r;
-	for(unsigned i=0;res.next(r);i++) {
-		std::vector<content::toc::element> *v;
-		if(i<items_left)
-			v=&c.left_col;
-		else if(i<items_mid)
-			v=&c.middle_col;
-		else 
-			v=&c.right_col;
+	typedef std::multimap<std::string,std::string,std::locale> mapping_type;
+	mapping_type mapping(context().locale());
+	while(res.next(r)) {
+		std::string slug,t;
+		r >> slug >> t;
+		mapping.insert(std::pair<std::string,std::string>(t,slug));
+	}
 
-		std::string t,slug;
-		r>>slug>>t;
-		if(!t.empty() && utf8::is_valid(t.begin(),t.end()))
-		{
-			std::string::iterator p=t.begin();
-			utf8::next(p,t.end());
-			std::string l(t.begin(),p);
-			if(letter!=l) {
-				content::toc::element e;
-				e.letter=l;
-				v->push_back(e);
-				letter=l;
-			}
-			content::toc::element e;
-			e.title=t;
-			e.url=wi.page.page_url(locale_name,slug);
-			v->push_back(e);
-		}
+	mapping_type::iterator p=mapping.begin();
+	int rows_no = (mapping.size() +2)/3;
+	c.table.resize(rows_no,std::vector<content::toc::element>(3));
+	for(unsigned i=0;p!=mapping.end();i++,++p) {
+
+		int col = i / rows_no;
+		int row = i % rows_no;
+
+		content::toc::element &e = c.table.at(row).at(col);
+		e.title = p->first;
+		e.url=wi.page.page_url(locale_name,p->second);
 	}
 	render("toc",c);
 	cache().store_page(key,30);

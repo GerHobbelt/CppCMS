@@ -69,7 +69,7 @@
 	<% include page::navigation() %>
 <% end template %>
 <% template main() %>
-<div view="published"><% gt "(version {1}, from {2,date=s})" using version, date %></div>
+<div class="published"><% gt "(version {1}, from {2,date=s})" using version, date %></div>
 <% include page::main() %>
 <% end template %>
 <% end view %>
@@ -86,7 +86,7 @@
 <table style="width:100%" >
 	<% foreach r in content %>
 	<% item %>
-	<tr view="<% if (r.first<0) %>d_del<% elif (r.first>0) %>d_add<% else %>d_no<% end %>" >
+	<tr class="<% if (r.first<0) %>d_del<% elif (r.first>0) %>d_add<% else %>d_no<% end %>" >
 		<td><code><% r.second %></code></td>
 	</tr>
 	<% end %>

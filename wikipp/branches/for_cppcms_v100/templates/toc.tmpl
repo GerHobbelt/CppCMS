@@ -2,29 +2,24 @@
 <% skin view %>
 <% view toc uses content::toc extends master %>
 <% template title() %><% gt "Index of Articles" %><% end %>
-<% template column(content::toc::column_t &col) %>
-<% foreach row in col %>
-<td>
-	<dl>
-	<% item %>
-	<% if not empty row.letter %>
-	<dt>&mdash; <b><% row.letter %></b></dt>
-	<% else %>
-	<dd><a href="<% row.url %>"><% row.title %></a></dd>
-	<% end %>
-	<% end item %>
-	</dl>
-</td>
-<% end foreach %>
-<% end template %>
 <% template main() %>
-<table style="width:100%">
-<tr>
-	<% include column(left_col) %>
-	<% include column(middle_col) %>
-	<% include column(right_col) %>
-</tr>
+<% foreach row in table %>
+<table id="toc_table">
+	<% item %>
+	<tr>
+		<% foreach cell in row %>
+		<% item %>
+			<% if not empty cell.title %>
+				<td><a href="<% cell.url %>"><% cell.title %></a>
+			<% else %>
+				<td>&nbsp;</td>
+			<% end %>
+		<% end item %>
+		<% end %>
+	</tr>
+	<% end item %>
 </table>
+<% end foreach %>
 <% end template %>
 <% end view %>
 <% view recent_changes uses content::recent_changes extends master %>

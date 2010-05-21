@@ -226,6 +226,10 @@ a:hover {
 	margin-top:15px;
 } 
 
+/*#toc_table {
+	text-padding : 5px 5px 5px 5px;
+}*/
+
 h1.categorytitle {
 	text-align:center;
 	text-decoration:none;

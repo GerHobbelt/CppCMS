@@ -44,7 +44,7 @@ master::master(wiki &_w) :
 	}
 	media=settings().get<std::string>("wikipp.media");
 	syntax_highlighter=settings().get("wikipp.syntax_highlighter","");
-	cookie_prefix=settings().get("session.cookies_prefix","cppcms_session")+"_";
+	cookie_prefix=settings().get("session.cookies.prefix","cppcms_session")+"_";
 }
 
 void master::ini(content::master &c)

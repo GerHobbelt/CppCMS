@@ -7,12 +7,11 @@ namespace content {
 
 struct toc : public master {
 	struct element {
-		std::string letter;
 		std::string title;
 		std::string url;
 	};
-	typedef std::vector<element> column_t;
-	column_t left_col,right_col,middle_col;
+	typedef std::vector<std::vector<element> > table_type;
+	table_type table;
 };
 
 struct recent_changes : public master {

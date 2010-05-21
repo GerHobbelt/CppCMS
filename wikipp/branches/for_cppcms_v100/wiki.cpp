@@ -1,6 +1,5 @@
 #include "wiki.h"
 #include <booster/regex.h>
-#include "utf8/utf8.h"
 
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/http_context.h>
