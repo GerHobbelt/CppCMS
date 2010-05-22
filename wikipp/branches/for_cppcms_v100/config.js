@@ -48,7 +48,7 @@
 	"views" : {
 		//"default_skin" : "view",
 		"paths" : [ "./stage"] ,
-		"skins" : [ "view" ] ,
+		//"skins" : [ "view" ] ,
 		//"auto_reload" : true
 	},
 	"file_server" : {

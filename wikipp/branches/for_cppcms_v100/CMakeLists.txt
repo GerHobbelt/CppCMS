@@ -128,5 +128,4 @@ foreach(LOCALE ${LOCALES})
 endforeach()
 
 add_custom_target(create-po ALL DEPENDS ${MO_FILES})
-message("${UPDATE_PO_LIST}")
 
