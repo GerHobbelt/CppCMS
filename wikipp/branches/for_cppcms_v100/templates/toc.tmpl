@@ -29,7 +29,7 @@
 	<ul>
 	<% item %>
 	<li><a href="<% c.url %>"><% c.title %></a> &mdash; 
-		<% gt "version {1}, at {2,date=s}, by {3}" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
+		<% gt "version {1,num}, at {2,dt=s}, by {3}" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
 			<a href="<% c.diff_url %>"><% gt "Diff to previous" %></a><% end %>
 
 	</li>

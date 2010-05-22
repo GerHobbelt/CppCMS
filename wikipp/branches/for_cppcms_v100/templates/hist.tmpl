@@ -11,7 +11,7 @@
 	<ul>
 	<% item %>
 	<li>
-		<% gt "Version {1,num}, changed at {2,date=s}, by {3}" using row.version, row.update, row.author %>,
+		<% gt "Version {1,num}, changed at {2,dt=s}, by {3}" using row.version, row.update, row.author %>,
 		<a href="<% row.show_url %>"><% gt "Show" %></a>,
 		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a><% if not empty row.diff_url %>, 
 			<a href="<% row.diff_url %>"><% gt "Diff to previous" %></a>

@@ -6,7 +6,8 @@
 		"disable_registration" : false,
 		"languages" : {
 			"en" : "en_US" ,
-			"he" : "he_IL"
+			"he" : "he_IL" ,
+			"ru" : "ru_RU" 
 		},
 
 		"sql" : {
