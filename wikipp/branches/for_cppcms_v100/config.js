@@ -29,10 +29,10 @@
 	"service" : {
 		//"worker_processes" : 1,
 		"worker_threads" : 5,
-		"api" : "http",
-		//"api" : "scgi",
-		"port" : 8080
-		//"socket" : "/tmp/wikipp.sock"
+		//"api" : "http",
+		"api" : "fastcgi",
+		//"port" : 8080
+		"socket" : "/tmp/wikipp.sock"
 	},
 	"session" : {
 		"expire" : "renew",

@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-21 16:41+0300\n"
-"PO-Revision-Date: 2010-05-21 16:46+0300\n"
+"POT-Creation-Date: 2010-05-22 15:15+0300\n"
+"PO-Revision-Date: 2010-05-22 15:17+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,44 +20,43 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/master.cpp:38
+#: master.cpp:38
 msgid "LANG"
 msgstr "עברית"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:13
+#: options.cpp:13
 msgid "Users Only"
 msgstr "משתמשים בלבד"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:14
+#: options.cpp:14
 msgid "Contact e-mail"
 msgstr "דוא\"ל ליצירת־קשר"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:15
+#: options.cpp:15
 msgid "Wiki Title"
 msgstr "כותרת הויקי"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:16
+#: options.cpp:16
 msgid "About Wiki"
 msgstr "אודות ויקי"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:17
+#: options.cpp:17
 msgid "Copyright String"
 msgstr "זכויות היוצרים"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:18
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:44
+#: options.cpp:18 users.cpp:44
 msgid "Submit"
 msgstr "שלח"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:26
+#: options.cpp:26
 msgid "Disable creation of new articles by visitors"
 msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:99
+#: options.cpp:99
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:102
+#: options.cpp:102
 msgid ""
 "## About\n"
 "\n"
@@ -69,68 +68,66 @@ msgstr ""
 "ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf."
 "net/)\n"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:107
+#: options.cpp:107
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:18
+#: page.cpp:18
 msgid "Title"
 msgstr "כותרת"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:19
+#: page.cpp:19
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:110
 msgid "Content"
 msgstr "תוכן"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:20
+#: page.cpp:20
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:114
 msgid "Sidebar"
 msgstr "סרגל־צד"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:21
+#: page.cpp:21
 msgid "Save"
 msgstr "שמור"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:22
+#: page.cpp:22
 msgid "Save and Continue"
 msgstr "שמור והמשך"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:23
+#: page.cpp:23
 msgid "Preview"
 msgstr "תצוגה מקדימה"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:28
+#: page.cpp:28
 msgid "Disable editing by visitors"
 msgstr "בטל עריכה למבקרים"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:29
+#: page.cpp:29
 msgid "Please Login"
 msgstr "אנא התחבר"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:18
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:40
+#: users.cpp:18 users.cpp:40
 msgid "Username"
 msgstr "שם משתמש"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:19
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:41
+#: users.cpp:19 users.cpp:41
 msgid "Password"
 msgstr "ססמה"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:20
+#: users.cpp:20
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:65
 msgid "Login"
 msgstr "התחברות"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:42
+#: users.cpp:42
 msgid "Confirm"
 msgstr "אמת"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:43
+#: users.cpp:43
 msgid "Solve"
 msgstr "פתור"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:74
+#: users.cpp:74
 msgid "This user exists"
 msgstr "המשתמש קיים"
 
@@ -214,8 +211,8 @@ msgid "Edit this version (rollback)"
 msgstr "ערוך גרסה זו (שחזור)"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:72
-msgid "(version {1}, from {2,date=s})"
-msgstr "(גרסה {1}, ב־{2,date=s})"
+msgid "(version {1,num}, from {2,dt=s})"
+msgstr "(גרסה {1}, ב־{2,dt=s})"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:77
 msgid "Difference \"{1}\" ver. {2} versus ver. {3}"
@@ -223,8 +220,8 @@ msgstr "השוואה של \"{1}\", גרסה {2}, גרסה {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:79
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:81
-msgid "Edit version {1}"
-msgstr "ערוך גרסה {1}"
+msgid "Edit version {1,num}"
+msgstr "ערוך גרסה {1,num}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:98
 msgid "No such page or version exist"
@@ -247,8 +244,8 @@ msgid "WikiPP :: History"
 msgstr "ויקי++ :: היסטוריה"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:14
-msgid "Version {1,num}, changed at {2,date=s}, by {3}"
-msgstr "גרסה {,num1}, עודכנה ב־{2,date=s} ע\"י {3}"
+msgid "Version {1,num}, changed at {2,dt=s}, by {3}"
+msgstr "גרסה {,num1}, עודכנה ב־{2,dt=s} ע\"י {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:15
 msgid "Show"
@@ -296,8 +293,8 @@ msgid "Recent Changes"
 msgstr "שינויים אחרונים"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:32
-msgid "version {1}, at {2,date=s}, by {3}"
-msgstr "גרסה {1}, ב־{2,date=s}, ע\"י {3}"
+msgid "version {1,num}, at {2,dt=s}, by {3}"
+msgstr "גרסה {1}, ב־{2,dt=s}, ע\"י {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:38
 msgid "Next Page"

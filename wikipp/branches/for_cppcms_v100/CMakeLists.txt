@@ -85,9 +85,26 @@ target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX})
 
 set(LOCALES he ru)
 
-add_custom_target(update-pot)
-
 set(MO_FILES)
+set(UPDATE_PO_LIST)
+set(POT_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/po/wikipp.pot")
+
+add_custom_command(
+	OUTPUT ${POT_TEMPLATE}
+	COMMAND 
+		${XGETTEXT} 
+		--keyword=translate:1,1t
+		--keyword=translate:1,2,3t
+		--keyword=_
+		--keyword=N_
+		${SRC}
+		${CMAKE_CURRENT_BINARY_DIR}/view.cpp
+		--output=${POT_TEMPLATE}
+	DEPENDS ${SRC} ${CMAKE_CURRENT_BINARY_DIR}/view.cpp
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+
+add_custom_target(update-po)
 
 foreach(LOCALE ${LOCALES})
 	set(MODIR "${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES")
@@ -100,32 +117,16 @@ foreach(LOCALE ${LOCALES})
 		COMMAND ${MSGFMT} ${POFILE} -o ${MOFILE}
 		DEPENDS ${POFILE})
 	
-	add_custom_target(update-pot-${LOCALE} 
-		COMMAND ${MSGMERGE} -U ${POFILE} ${CMAKE_CURRENT_SOURCE_DIR}/po/wikipp.pot )
+	add_custom_target(update-po-${LOCALE}
+		COMMAND ${MSGMERGE} -U ${POFILE} ${CMAKE_CURRENT_SOURCE_DIR}/po/wikipp.pot 
+		DEPENDS ${POT_TEMPLATE}
+		)
+	add_dependencies(update-po update-po-${LOCALE})
 
 	set(MO_FILES ${MO_FILES} ${MOFILE})
-
-	add_dependencies(update-pot update-pot-${LOCALE})
+	set(UPDATE_PO_LIST ${UPDATE_PO_LIST} update-po-${LOCALE})
 endforeach()
 
 add_custom_target(create-po ALL DEPENDS ${MO_FILES})
+message("${UPDATE_PO_LIST}")
 
-
-set(REAL_SRC)
-foreach(SFILE ${SRC})
-	set(REAL_SRC ${REAL_SRC} ${CMAKE_CURRENT_SOURCE_DIR}/${SFILE})
-endforeach()
-
-add_custom_target(extract-pot
-	COMMAND 
-		${XGETTEXT} 
-		--keyword=translate:1,1t
-		--keyword=translate:1,2,3t
-		--keyword=_
-		--keyword=N_
-		${REAL_SRC}
-		${CMAKE_CURRENT_BINARY_DIR}/view.cpp
-		--output=${CMAKE_CURRENT_SOURCE_DIR}/po/wikipp.pot
-	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/view.cpp)
-
-add_dependencies(update-pot create-pot)

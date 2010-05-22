@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-21 16:41+0300\n"
-"PO-Revision-Date: 2010-05-22 14:43+0300\n"
+"POT-Creation-Date: 2010-05-22 15:15+0300\n"
+"PO-Revision-Date: 2010-05-22 15:18+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,44 +22,43 @@ msgstr ""
 "X-Poedit-Language: Russian\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/master.cpp:38
+#: master.cpp:38
 msgid "LANG"
 msgstr "Русский"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:13
+#: options.cpp:13
 msgid "Users Only"
 msgstr "Только для пользователей"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:14
+#: options.cpp:14
 msgid "Contact e-mail"
 msgstr "Контактный e-mail"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:15
+#: options.cpp:15
 msgid "Wiki Title"
 msgstr "Wiki Заголовок"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:16
+#: options.cpp:16
 msgid "About Wiki"
 msgstr "О Wiki"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:17
+#: options.cpp:17
 msgid "Copyright String"
 msgstr "Строка копирайта"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:18
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:44
+#: options.cpp:18 users.cpp:44
 msgid "Submit"
 msgstr "Отправить"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:26
+#: options.cpp:26
 msgid "Disable creation of new articles by visitors"
 msgstr "Отключить создание новых статей посетителями"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:99
+#: options.cpp:99
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "Wiki++ &mdash; CppCMS Wiki"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:102
+#: options.cpp:102
 msgid ""
 "## About\n"
 "\n"
@@ -71,68 +70,66 @@ msgstr ""
 "Wiki++ - это wiki-движок, основанный на\n"
 "[CppCMS](http://cppcms.sf.net/) фрэймворке веб-разработки.\n"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/options.cpp:107
+#: options.cpp:107
 msgid "&copy; All Rights Reserverd"
 msgstr "&copy; Все права защищены"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:18
+#: page.cpp:18
 msgid "Title"
 msgstr "Заголовок"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:19
+#: page.cpp:19
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:110
 msgid "Content"
 msgstr "Содержимое"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:20
+#: page.cpp:20
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:114
 msgid "Sidebar"
 msgstr "Панель"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:21
+#: page.cpp:21
 msgid "Save"
 msgstr "Сохранить"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:22
+#: page.cpp:22
 msgid "Save and Continue"
 msgstr "Сохранить и продолжить"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:23
+#: page.cpp:23
 msgid "Preview"
 msgstr "Просмотр"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:28
+#: page.cpp:28
 msgid "Disable editing by visitors"
 msgstr "Отключить правку посетителями"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/page.cpp:29
+#: page.cpp:29
 msgid "Please Login"
 msgstr "Войдите пожалуйста"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:18
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:40
+#: users.cpp:18 users.cpp:40
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:19
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:41
+#: users.cpp:19 users.cpp:41
 msgid "Password"
 msgstr "Пароль"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:20
+#: users.cpp:20
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:65
 msgid "Login"
 msgstr "Логин"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:42
+#: users.cpp:42
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:43
+#: users.cpp:43
 msgid "Solve"
 msgstr "Решить"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/users.cpp:74
+#: users.cpp:74
 msgid "This user exists"
 msgstr "Такой пользователь существует"
 
@@ -216,8 +213,8 @@ msgid "Edit this version (rollback)"
 msgstr "Редактировать это версию (откат)"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:72
-msgid "(version {1}, from {2,date=s})"
-msgstr "(версия {1}, из {2,date=s})"
+msgid "(version {1,num}, from {2,dt=s})"
+msgstr "(версия {1,num}, от {2,dt=s})"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:77
 msgid "Difference \"{1}\" ver. {2} versus ver. {3}"
@@ -225,8 +222,8 @@ msgstr "Отличия \"{1}\" вер. {2} сравн. вер. {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:79
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:81
-msgid "Edit version {1}"
-msgstr "Правка версии {1}"
+msgid "Edit version {1,num}"
+msgstr "Правка версии {1,num}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:98
 msgid "No such page or version exist"
@@ -249,8 +246,8 @@ msgid "WikiPP :: History"
 msgstr "WikiPP :: История"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:14
-msgid "Version {1,num}, changed at {2,date=s}, by {3}"
-msgstr "Версия {1}, изменена в {2,date=s}, {3}"
+msgid "Version {1,num}, changed at {2,dt=s}, by {3}"
+msgstr "Версия {1,num}, изменена {2,dt=s}, {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:15
 msgid "Show"
@@ -298,8 +295,8 @@ msgid "Recent Changes"
 msgstr "Последние Изменения"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:32
-msgid "version {1}, at {2,date=s}, by {3}"
-msgstr "версия {1}, в {2,date=s}, {3}"
+msgid "version {1,num}, at {2,dt=s}, by {3}"
+msgstr "версия {1,num}, от {2,dt=s}, {3}"
 
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:38
 msgid "Next Page"
