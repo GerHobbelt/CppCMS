@@ -137,6 +137,11 @@ Tested compilers and platforms:
 
 - ICU Versions: 3.6, 3.8, 4.2, 4.4
 
+
+Notes: MSVC 2005 was reported as working as well
+but it is not tested by library's author.
+
+
 ========================================
 Full list of tested platforms/compilers:
 ========================================

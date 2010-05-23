@@ -1,3 +1,4 @@
+-------------
 Known Issues:
 -------------
 
@@ -26,10 +27,12 @@ Known Issues:
        std::locale::global(your_created_locale)
 
 
-- ICU Specific issue: In some cases ICU fails to recognize
+- ICU Specific issue:  test_icu_vs_os_timezone fails
+
+  In some cases ICU fails to recognize
   time zone correctly and map it into internal time-zone,
   So you may get mismatch between boost::locale local time
-  and system local time in when daylight time-savings are
+  and system local time when daylight time-savings are
   active.
 
   Unfortunately this is pure ICU issue that can't be fixed
@@ -37,9 +40,7 @@ Known Issues:
 
   WORKAROUND:
 
-  1. Use ICU version that works well on your system. 
-     For my knowledge ICU-4.2 gives best results on most of them in time zone 
-     recognition.
+  1. Use ICU version that recognizes well on your system.
   
   2. Specify time-zone manually
     

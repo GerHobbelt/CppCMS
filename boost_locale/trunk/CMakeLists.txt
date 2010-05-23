@@ -151,6 +151,7 @@ set(LOCALE_TESTS
 		test_ios_prop
 		test_date_time
 		test_generator
+		test_icu_vs_os_timezone
 		)
 set(LOCALE_EXAMPLES 	hello
 			whello
