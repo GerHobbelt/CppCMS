@@ -679,6 +679,15 @@ may reduce all unused parameters.
         implementations available as well.
     3.  A good translation program like [Poedit](http://www.poedit.net/) or [KBabel](http://kbabel.kde.org/).
     
+-   Why doesn't Boost.Locale implement tools for extracting and management of message catalogs. Why should
+    I use GPL-ed software? Are my programs or message catalogs affected by its license?
+
+    1.  Boost.Locale does not link or use any of GNU Gettext code, so you should not worry about your code as
+        the runtime library is fully reimplemented.
+    2.  You may freely use GPL-ed software for extracting and management catalogs in same was as you free to use
+        GPL-ed editor. It does not affect your message catalogs or your code.
+    3.  I see no reason to reimplement well debugged, working tools like `xgettext`, `msgfmt`, `msgmerge` that
+        do very fine job, especially that they are freely available for download and support almost any platform.
 
 -   Is there any reason to prefer Boost.Locale implementation to original GNU Gettext runtime library?
     In any case I would probably need some of GNU tools.
