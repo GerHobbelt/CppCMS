@@ -527,32 +527,30 @@ For more detailed information please refer to GNU Gettext: [11.2.6 Additional fu
 
 ### Adding context information
 
-The GNU Gettext model assumes that same source messages are translated to exactly same localized messages, but this
-may be wrong. For example a button label "open" is translated to "öffnen" in context of "opening file" or to 
-"aufbauen" in context of opening internet connection in German.
+In many cases it is not enough to provide only original English string to get correct translation.
+you need to provide some context informationt. For example a button label "open" is translated to 
+"öffnen" in context of "opening file" or to "aufbauen" in context of opening internet connection in German.
 
-Is such cases it is useful to add some context information to the original string by adding a comment.
+Is such cases it is required to add some context information to the original string by adding a comment.
 
-    button->setLabel(translate("#File#open"));
+    button->setLabel(translate("File","open"));
 
-The comment is placed between first and the following hash symbol -- '#'. The comment is always extracted from
-the original string and not displayed, however it is a part of string identification. Translator should 
-discard such comment and translate only "open" string.
+The context information is provided as first parameter of `boost::locale::translate` function in both
+single and plural forms. The translator would see this context information and would be able to translate "open" string
+correctly
 
 For example, this how `po` file is expected to look like:
     
-    msgid "#File#open"
+    msgctxt "File"
+    msgid "open"
     msgstr "öffnen"
     
-    msgid "#Internet Connection#open"
+    msgctxt "Internet Connection"
+    msgid "open"
     msgstr "aufbauen"
 
-In order to insert '#' as fist symbol you may just use double hash string, for example:
-
-    cout<< translate("$ - Dollar symbol") << endl
-        << translate("## - Hash symbol") << endl;
-
-**Note:** Hash based comments are extension of the GNU Gettext library.
+**Note:** Context information requires using latest gettext tools (>=0.15) for extracting strings and
+formatting message catalogs.
 
 
 ### Working with multiple messages domains
@@ -572,6 +570,44 @@ There are two ways of using non-default domains:
 
         std::wstring foo_msg = translate("Hello World").str<wchar_t>("foo");
         std::wstring bar_msg = translate("Hello World").str<wchar_t>("bar");
+
+### Direct translation
+
+Many applications do not write a messages directly to output stream or use only one locale in the process, so
+calling `translate("Hello World").str<wchar_t>()` for single message would be annoying. Thus Boost.Locale provides
+GNU Gettext like localization functions for direct translation of the messages. However unlike GNU Gettext functions
+Boost.Locale translation functions provide and additional optional parameter - locale and support wide, u16 and u32 strings.
+
+The GNU Gettext like functions have following prototypes:
+
+
+- Ordinary translation of message and plural form
+
+        std::string gettext(char const *message,std::locale const &l=std::locale());
+        std::string ngettext(char const *signle,char const *plural,std::locale const &l=std::locale());
+
+- Message translation with context information
+
+        std::string pgettext(char const *context,char const *message,std::locale const &l=std::locale());
+        std::string npgettext(char const *context,char const *signle,char const *plural,std::locale const &l=std::locale());
+
+- Message translation in specific domain
+
+        std::string dgettext(char const *domain,char const *message,std::locale const &l=std::locale());
+        std::string dngettext(char const *domain,char const *signle,char const *plural,std::locale const &l=std::locale());
+
+- Message translation in specific domain with context information
+
+        std::string dgettext(char const *domain,char const *context,char const *message,std::locale const &l=std::locale());
+        std::string dngettext(char const *domain,char const *context,,char const *signle,char const *plural,std::locale const &l=std::locale());
+
+
+Also all these function receive a prefix `w`, `u16` or `u32` to return `std::wstring`, C++0x `std::u16string` 
+or C++0x `std::u32string`. For example:
+
+    MessageBoxW(0,wpgettext("File Dialog","Open?").c_str(),wgettext("Question").c_str(),MB_YESNO);
+
+
 
 ### Extracting messages from the source code
 
@@ -607,7 +643,26 @@ We had used `--keyword` parameter of `xgettext` in order to make it suitable for
 source localized with Boost.Locale -- search for `translate()` function calls instead of default `gettext()` and `ngettext()` ones.
 First parameter `--keyword=translate:1,1t` parameters provides template for basic message: `translate` function that called with 1 
 argument (1t) and first message is taken as key. The second one `--keyword=translate:1,2,3t` -- is used for plural forms. 
-It tells `xgettext` to use `translate()` function call with 3 parameters (3t) and take 1st and 2nd parameter as keys.
+It tells `xgettext` to use `translate()` function call with 3 parameters (3t) and take 1st and 2nd parameter as keys. An 
+additional marker `Nc` can be used to mark context information.
+
+The full set of xgettext parameters suitable for Boost.Locale is:
+
+    xgettext --keyword=translate:1,1t --keyword=translate:1c,2,2t       \
+             --keyword=translate:1,2,3t --keyword=translate:1c,2,3,4t   \
+             --keyword=gettext:1 --keyword=pgettext:1c,2                \
+             --keyword=ngettext:1,2 --keyword=npgettext:1c,2,3          \
+             --keyword=wgettext:1 --keyword=wpgettext:1c,2              \
+             --keyword=wngettext:1,2 --keyword=wnpgettext:1c,2,3        \
+             --keyword=u16gettext:1 --keyword=u16pgettext:1c,2          \
+             --keyword=u16ngettext:1,2 --keyword=u16npgettext:1c,2,3    \
+             --keyword=u32gettext:1 --keyword=u32pgettext:1c,2          \
+             --keyword=u32ngettext:1,2 --keyword=u32npgettext:1c,2,3    \
+             source_file_1.cpp ... source_file_N.cpp
+
+Of course of you do not use "gettext" like translation, or you do not use wide or C++0x u16/u32 strings you
+may reduce all unused parameters.
+
 
 ### Questions and Answers
 
@@ -1012,9 +1067,11 @@ So, UTF-16 can be used for dealing with Unicode, in-facet ICU and may other appl
 you should be very careful and never assume one-code-point == one-utf16-character.
 
 
-# Design Rationale 
+# Appendix
 
-**Why is it needed?**
+## Design Rationale 
+
+### Why is it needed?
 
 Why do we need localization library, standard C++ facets (should) provide most of required functionality:
 
@@ -1071,7 +1128,7 @@ Also many features are not really supported by `std::locale` at all: timezones m
 others. So it is clear that standard C++ locales are very problematic for real-world applications of internationalization and localization.
 
 
-**Why to use ICU wrapper instead of ICU?**
+### Why to use ICU wrapper instead of ICU?
 
 ICU is very good localization library but it has several serious flaws:
 
@@ -1085,7 +1142,22 @@ For example: Boost.Locale provides direct integration with `iostream` allowing m
 
     cout << "You have "<<as::currency << 134.45 << " at your account at "<<as::datetime << std::time(0) << endl;
 
-**Why the ICU API is not exposed to user?**
+
+### Why ICU wrapper and not implementation-from-scratch?
+
+
+ICU is one of the best localization/Unicode libraries available. It consists of about half a million lines of well tested,
+production proved source code that today provide state-of-the art localization tools.
+
+Reimplementing of even a small part of ICU abilities is quite unfeasible project which would require many man-years. So the
+question is not if you need reimplement the Unicode and localization algorithm from the scratch, but the question
+is: "Do we need good localization library in Boost?"
+
+Thus Boost.Locale wraps ICU with modern C++ interface allowing future reimplementation of parts with better alternatives,
+but it brings localization support to Boost today and not in "not-so-near-if-at-all-future."
+
+
+### Why the ICU API is not exposed to user?
 
 It is true, all ICU API is hidden behind opaque pointers and user have no access to it. This is done for several reasons:
 
@@ -1094,8 +1166,11 @@ It is true, all ICU API is hidden behind opaque pointers and user have no access
 system API or use some other toolkits like GLib or Qt that provide similar functionality.
 - Not all localization is done withing ICU. For example, message formatting uses GNU Gettext message catalogs. In future more functionality
 may be taken from ICU and reimplemented directly in the Boost.Locale library.
+- Boost.Locale was designed with ABI stability in mind as this library is not developed for Boost only but also
+it is required for [CppCMS framework](http://cppcms.sourceforge.net/) needs.
 
-**Why to use GNU Gettext catalogs for message formatting?**
+
+### Why to use GNU Gettext catalogs for message formatting?
 
 There are many available localization formats, most popular so far are: OASIS XLIFF, GNU gettext po/mo files, POSIX catalogs, Qt ts/tm files, Java properties, Windows resources. However, the last three are popular each one in its specific area, POSIX catalogs are too simple and limited so there are two quite reasonable options:
 
@@ -1124,7 +1199,7 @@ So, even thou GNU Gettext mo catalogs format is not officially approved file for
 reimplements tool for reading and using mo-files, getting rid of current biggest GNU Gettext flaw -- thread safety
 when using multiple locales.
 
-**Why a plain number is used for representation of date-time instead of Boost.DateTime date of Boost.DateTime ptime?**
+### Why a plain number is used for representation of date-time instead of Boost.DateTime date of Boost.DateTime ptime?
 
 There are several reasons:
 
@@ -1152,7 +1227,7 @@ There are several reasons:
 
 Thus, at this point, `ptime` is not supported for formatting localized date and time.
 
-# Appendix
+
 
 ## Glossary
 
