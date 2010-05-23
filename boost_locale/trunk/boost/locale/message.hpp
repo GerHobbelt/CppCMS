@@ -600,21 +600,21 @@ namespace boost {
         ///
         /// Translate message \a id according to locale \a loc
         ///
-        inline std::u32string u16gettext(char const *id,std::locale const &loc=std::locale())
+        inline std::u32string u32gettext(char const *id,std::locale const &loc=std::locale())
         {
             return message(id).str<char32_t>(loc);
         }
         ///
         /// Translate plural form according to locale \a loc
         ///
-        inline std::u32string u16ngettext(char const *s,char const *p,int n,std::locale const &loc=std::locale())
+        inline std::u32string u32ngettext(char const *s,char const *p,int n,std::locale const &loc=std::locale())
         {
             return message(s,p,n).str<char32_t>(loc);
         }
         ///
         /// Translate message \a id according to locale \a loc in domain \a domain
         ///
-        inline std::u32string u16dgettext(char const *domain,char const *id,std::locale const &loc=std::locale())
+        inline std::u32string u32dgettext(char const *domain,char const *id,std::locale const &loc=std::locale())
         {
             return message(id).str<char32_t>(loc,domain);
         }
@@ -622,35 +622,35 @@ namespace boost {
         ///
         /// Translate plural form according to locale \a loc in domain \a domain
         ///
-        inline std::u32string u16dngettext(char const *domain,char const *s,char const *p,int n,std::locale const &loc=std::locale())
+        inline std::u32string u32dngettext(char const *domain,char const *s,char const *p,int n,std::locale const &loc=std::locale())
         {
             return message(s,p,n).str<char32_t>(loc,domain);
         }
         ///
         /// Translate message \a id according to locale \a loc in context \a context
         ///
-        inline std::u32string u16pgettext(char const *context,char const *id,std::locale const &loc=std::locale())
+        inline std::u32string u32pgettext(char const *context,char const *id,std::locale const &loc=std::locale())
         {
             return message(context,id).str<char32_t>(loc);
         }
         ///
         /// Translate plural form according to locale \a loc in context \a context
         ///
-        inline std::u32string u16npgettext(char const *context,char const *s,char const *p,int n,std::locale const &loc=std::locale())
+        inline std::u32string u32npgettext(char const *context,char const *s,char const *p,int n,std::locale const &loc=std::locale())
         {
             return message(context,s,p,n).str<char32_t>(loc);
         }
         ///
         /// Translate message \a id according to locale \a loc in domain \a domain in context \a context
         ///
-        inline std::u32string u16dpgettext(char const *domain,char const *context,char const *id,std::locale const &loc=std::locale())
+        inline std::u32string u32dpgettext(char const *domain,char const *context,char const *id,std::locale const &loc=std::locale())
         {
             return message(context,id).str<char32_t>(loc,domain);
         }
         ///
         /// Translate plural form according to locale \a loc in domain \a domain in context \a context
         ///
-        inline std::u32string u16dnpgettext(char const *domain,char const *context,char const *s,char const *p,int n,std::locale const &loc=std::locale())
+        inline std::u32string u32dnpgettext(char const *domain,char const *context,char const *s,char const *p,int n,std::locale const &loc=std::locale())
         {
             return message(context,s,p,n).str<char32_t>(loc,domain);
         }

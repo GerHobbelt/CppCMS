@@ -88,6 +88,17 @@ Notes for MSVC Users:
    because MSVC project is all in one you may accidentally find yourself
    mixing incompatible libraries.
 
+Notes to users of Intel Compiler on Linux
+-----------------------------------------
+
+If build fails with:
+
+   libboost_locale.so: undefined reference to `__sync_fetch_and_add_4'
+
+Then you probably work with broken stdc++ library try switching library
+version by passing CMake parameter -DCMAKE_CXX_FLAGS:STRING=-gxx-name=g++-4.1
+(of course you need gcc-4.1 installed)
+
 
 ==================
 Build Boost.Locale
@@ -147,11 +158,11 @@ Full list of tested platforms/compilers:
 ========================================
 
 - Linux:
-  - Debian GNU/Linux 2.6.18, x86, GCC 4.1.2, ICU 3.6.1
   - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 3.8.1
-  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 4.4
   - Debian GNU/Linux 2.6.26, x86_64, GCC 4.4 -std=c++0x, ICU 3.8.1 
-           (Some faults on char16_t/char32_t support due to compiler issues)
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.4 -std=c++0x, with char16_t, char32_t, ICU 3.8.1 
+      (Note BOOST_HAS_CHAR(16|32)_T and BOOST_NO_CHAR(16|32)_T_CODECVT were define
+       manually, faults observerd on char16_t/char32_t support due to compiler issues)
   - Debian GNU/Linux 2.6.26, x86_64, Intel Compiler 11.0, ICU 3.8.1
 
 - FreeBSD
@@ -162,9 +173,24 @@ Full list of tested platforms/compilers:
   - SunOS OpenSolaris 5.11, i386; GCC 3.4.3, ICU 4.2
 
 - Windows XP/SP2
-  - Cygwin 1.5, GCC 4.3, ICU 4.2
-  - Cygwin 1.5, GCC 3.4, ICU 3.8
+  - Cygwin 1.7, GCC 4.3, ICU 3.8
   - Windows XP/SP2, GCC 4.4, ICU 4.2 (Static build only)
   - Windows XP/SP2, MSVC9 (2008)
+
+
+Additiona Platforms (not tested recently)
+
+- Linux:
+  - Debian GNU/Linux 2.6.18, x86, GCC 4.1.2, ICU 3.6.1
+  - Debian GNU/Linux 2.6.26, x86_64, GCC 4.3.2, ICU 4.4
+
+- Windows XP/SP2
+
+  - Cygwin 1.5, GCC 3.4, ICU 3.8
+  - MSVC 2005, ICU-4.0
+
+- Mac OS X
+  - GCC 4.2
+
 
 
