@@ -169,12 +169,12 @@ Full list of tested platforms/compilers:
   - FreeBSD 8.0, i386, GCC 4.2.1, ICU 3.8.1
 
 - OpenSolaris:
-  - SunOS OpenSolaris 5.11, i386; Sun Studio 12, with STLPort, ICU 4.2
+  - SunOS OpenSolaris 5.11, i386; Sun Studio 12.1, SunCC 5.10, with STLPort, ICU 4.2
   - SunOS OpenSolaris 5.11, i386; GCC 3.4.3, ICU 4.2
 
 - Windows XP/SP2
   - Cygwin 1.7, GCC 4.3, ICU 3.8
-  - Windows XP/SP2, GCC 4.4, ICU 4.2 (Static build only)
+  - Windows XP/SP2, GCC 4.4, ICU 4.2 (Static build only!)
   - Windows XP/SP2, MSVC9 (2008)
 
 
