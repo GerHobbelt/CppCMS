@@ -31,14 +31,19 @@
 		"worker_threads" : 5,
 		//"api" : "http",
 		"api" : "fastcgi",
-		//"port" : 8080
-		"socket" : "/tmp/wikipp.sock"
+		//"port" : 8081
+		//"socket" : "/tmp/wikipp.sock"
+		"socket" : "stdin"
 	},
 	"session" : {
 		"expire" : "renew",
 		"location" : "client",
+		"timeout" : 100000,
 		"cookies" :  {
 			"prefix" : "wikipp"
+		},
+		"server" : {
+			"storage" : "files" 
 		},
 		"client" : {
 			"encryptor" : "aes",
@@ -47,8 +52,8 @@
 	},
 	"views" : {
 		//"default_skin" : "view",
-		"paths" : [ "./stage"] ,
-		//"skins" : [ "view" ] ,
+		"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage"] ,
+		"skins" : [ "view" ] ,
 		//"auto_reload" : true
 	},
 	"file_server" : {
@@ -58,16 +63,24 @@
 	"localization" : {
 		"encoding" : "UTF-8",
 		"messages" : { 
-			"paths" : [ "./stage/locale"],
+			"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage/locale"],
 			"domains" :  [ "wikipp" ]
 		},
 		"locales" : [ "he_IL" , "en_US" ]
 	},
 	"http" : {
-		"script_names" : [ "/wikipp" ]
+		//"script_names" : [ "/wikipp" ]
 	},
 	"logging" : {
-		//"level" : "debug" 
+		"level" : "info",
+		"syslog" : {
+			"enable": true,
+			"id" : "WikiPP"
+		},
+		"file" : {
+			"name" : "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/wikipp.log",
+			"append" : true
+		}
 	},
 	"cache" : {
 		"backend" : "thread_shared", 

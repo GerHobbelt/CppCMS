@@ -1,5 +1,6 @@
 #include <cppcms/service.h>
 #include <cppcms/applications_pool.h>
+#include <booster/log.h>
 #include "wiki.h"
 
 int main(int argc,char **argv)
@@ -10,6 +11,9 @@ int main(int argc,char **argv)
 		app.run();
 	}
 	catch(std::exception const &e) {
+		BOOSTER_ERROR("wikipp") << e.what() ;
 		std::cerr<<e.what()<<std::endl;
+		return 1;
 	}
+	return 0;
 }
