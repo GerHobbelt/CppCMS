@@ -1,22 +1,20 @@
 #include "wiki.h"
 #include "master.h"
 #include "master_content.h"
-#include "cxxmarkdown/markdowncxx.h"
+#include "markdown.h"
 #include <cppcms/localization.h>
 #include <cppcms/service.h>
 
 #define _(X) ::cppcms::locale::translate(X)
 #define N_(S,P,N)  ::cppcms::locale::translate(S,P,N)
 
-namespace {
-
-std::string markdown(std::string s)
+std::string mymarkdown(std::string const &s)
 {
-	std::string tmp;
-	markdown2html(s,tmp);
-	return tmp;
-}
-
+	int flags = mkd::no_pants;
+	if(s.compare(0,10,"<!--toc-->")==0) {
+		flags |= mkd::toc;
+	}
+	return markdown_format_for_highlighting(markdown_to_html(s.c_str(),s.size(),flags),"cpp");
 }
 
 namespace apps {
@@ -50,7 +48,7 @@ master::master(wiki &_w) :
 void master::ini(content::master &c)
 {
 	wi.options.load();
-	c.markdown = markdown;
+	c.markdown = mymarkdown;
 	c.media=media;
 	c.syntax_highlighter=syntax_highlighter;
 	c.cookie_prefix=cookie_prefix;

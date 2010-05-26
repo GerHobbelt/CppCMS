@@ -22,7 +22,7 @@ struct master : public cppcms::base_content {
 	std::string contact;
 	std::string wiki_title,about,copyright;
 	std::map<std::string,std::string> languages;
-	booster::function<std::string(std::string)> markdown;
+	booster::function<std::string(std::string const &)> markdown;
 };
 
 }

@@ -29,11 +29,11 @@
 	"service" : {
 		//"worker_processes" : 1,
 		"worker_threads" : 5,
-		//"api" : "http",
-		"api" : "fastcgi",
-		//"port" : 8081
+		"api" : "http",
+		//"api" : "fastcgi",
+		"port" : 8080
 		//"socket" : "/tmp/wikipp.sock"
-		"socket" : "stdin"
+		//"socket" : "stdin"
 	},
 	"session" : {
 		"expire" : "renew",
@@ -53,7 +53,7 @@
 	"views" : {
 		//"default_skin" : "view",
 		"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage"] ,
-		"skins" : [ "view" ] ,
+		//"skins" : [ "view" ] ,
 		//"auto_reload" : true
 	},
 	"file_server" : {
@@ -69,7 +69,7 @@
 		"locales" : [ "he_IL" , "en_US" ]
 	},
 	"http" : {
-		//"script_names" : [ "/wikipp" ]
+		"script_names" : [ "/wikipp" ]
 	},
 	"logging" : {
 		"level" : "info",

@@ -14,14 +14,24 @@ option(USE_STATIC_VIEW "Compile view statically into wikipp" OFF)
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
 find_library(DBIXX dbixx)
+find_library(DISCOUNT markdown)
 
 find_path(CPPCMS_INC cppcms/application.h)
 find_path(BOOSTER_INC booster/shared_ptr.h)
 find_path(DBIXX_INC dbixx/dbixx.h)
+find_path(DISCOUNT_INC mkdio.h)
+
+if(NOT DISCOUNT_INC OR NOT DISCOUNT)
+	message(FATAL 	"-- Discount markdown library was not found, please download it from \n"
+			"   http://www.pell.portland.or.us/~orc/Code/discount/ and install it\n"
+			"   By extracting it and running ./configure.sh && make CFLAGS=-O2\n")
+endif()
+
 
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 include_directories(${DBIXX_INC})
+include_directories(${DISCOUNT_INC})
 include_directories(.)
 
 find_program(TMPLCC cppcms_tmpl_cc)
@@ -50,14 +60,7 @@ set(SRC
 	page.cpp
 	users.cpp
 	wiki.cpp
-	cxxmarkdown/docheader.c
-	cxxmarkdown/dumptree.c
-	cxxmarkdown/generate.c
-	cxxmarkdown/markdown.c
-	cxxmarkdown/markdowncxx.cpp
-	cxxmarkdown/mkdio.c
-	cxxmarkdown/resource.c  
-	cxxmarkdown/version.c
+	markdown.cpp
 )
 
 add_custom_command(
@@ -78,7 +81,7 @@ else()
 endif()
 
 
-target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX})
+target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX} ${DISCOUNT})
 
 #  Localization
 
