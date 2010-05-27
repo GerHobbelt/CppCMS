@@ -1,8 +1,4 @@
-ifeq ($(host),cygwin)
-   LIBS=-lcppcms -lcppcms_boost -lgcrypt -lz -licuuc -licudata -licui18n -lws2_32 -lwsock32 -liconv
-else
-   LIBS=-lcppcms
-endif
+LIBS=-lcppcms -lbooster
 
 all: clean hello.fcgi locale/he/LC_MESSAGES/hello.mo
 
