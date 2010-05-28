@@ -1,16 +1,3 @@
-#if defined __linux || defined __CYGWIN__
-#  define HAS_FOPENCOOKIE
-#  define HAS_OPEN_MEMSTREAM
-#elif defined(__FreeBSD__) || defined(__APPLE__)
-#  define HAS_FWOPEN
-#endif
-
-#if defined HAS_FOPENCOOKIE || defined HAS_OPEN_MEMSTREAM
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -20,43 +7,6 @@
 extern "C" {
 	#include <mkdio.h>
 }
-
-
-extern "C" ssize_t fopencookie_write(void *cp,char const *buf,size_t size)
-{
-	try {
-		reinterpret_cast<std::string *>(cp)->append(buf,size);
-	}
-	catch(std::bad_alloc const &e) { 
-		return -1; 
-	}
-	return size;
-}
-
-extern "C" int fwopen_write(void *cp,char const *buf,int size)
-{
-	try {
-		reinterpret_cast<std::string *>(cp)->append(buf,size);
-	}
-	catch(std::bad_alloc const &e) {
-		return -1; 
-	}
-	return size;
-}
-
-
-FILE *fopen_std_string(std::string &output)
-{
-	#if defined HAS_FOPENCOOKIE
-	cookie_io_functions_t io = { 0 , fopencookie_write, 0 , 0 };
-	return fopencookie(reinterpret_cast<void *>(&output),"w",io);
-	#elif defined HAS_FWOPEN
-	return fwopen(reinterpret_cast<void *>(&output),fwopen_write);
-	#else
-	return 0;
-	#endif
-}
-
 
 std::string markdown_to_html(char const *str,int len,int flags)
 {
@@ -70,41 +20,20 @@ std::string markdown_to_html(char const *str,int len,int flags)
 	mkd_compile(doc,flags);
 	
 	std::string result;
+	result.reserve(len);
+	char *content_ptr = 0;
+	int content_size = 0;
+	char *toc_ptr = 0;
+	int toc_size = 0;
 
-	#if defined HAS_FOPENCOOKIE || defined HAS_FWOPEN
-		FILE *output = fopen_std_string(result);
-	#elif defined HAS_OPEN_MEMSTREAM
-		char *buf=0;
-		size_t buf_len = 0;
-		FILE *output = open_memstream(&buf,&buf_len);
-	#else
-		FILE *output = tmpfile();
-	#endif
-
-	if(!output) {
-		mkd_cleanup(doc);
-		throw std::runtime_error("Failed to create output stream");
+	content_size = mkd_document(doc,&content_ptr);
+	if(flags & mkd::toc) {
+		toc_size = mkd_toc(doc,&toc_ptr);
+		result.assign(toc_ptr,toc_size);
 	}
-
-	mkd_generatetoc(doc,output);
-	mkd_generatehtml(doc,output);
+	result.append(content_ptr,content_size);
+	free(toc_ptr);
 	mkd_cleanup(doc);
-	
-	#if defined HAS_FOPENCOOKIE || defined HAS_FWOPEN
-		fclose(output);
-	#elif defined(HAS_OPEN_MEMSTREAM)
-		fclose(output);
-		result.assign(buf,buf_len);
-		free(buf);
-	#else // Fall back to temporary file
-		fseek(output,0,SEEK_END);
-		long size = ftell(output);
-		std::vector<char> v(size+1,0);
-		size = fread(&v,1,size,output);
-		v.resize(size+1,0);
-		result = &v.front();
-		fclose(output);
-	#endif
 
 	return result;
 }
