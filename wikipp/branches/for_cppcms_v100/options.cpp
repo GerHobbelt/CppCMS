@@ -4,6 +4,7 @@
 #include <cppcms/localization.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/cache_interface.h>
+#include <cppcms/serialization.h>
 
 #define _(X) ::cppcms::locale::translate(X)
 
@@ -32,6 +33,17 @@ namespace apps {
 
 using namespace dbixx;
 
+void global_options::serialize(cppcms::archive &a)
+{
+	a & users_only_edit & contact;
+}
+
+void locale_options::serialize(cppcms::archive &a)
+{
+	a & title & about & copyright ;
+}
+
+
 options::options(wiki &w):
 	master(w)
 {
@@ -58,8 +70,7 @@ void options::load()
 	local.about.clear();
 	local.title.clear();
 	local.copyright.clear();
-	// FIXME
-	//if(cache().fetch_frame("global_ops",tmp)) 
+	if(!cache().fetch_data("global_ops",global)) 
 	{
 		result res;
 		sql<<	"SELECT name,value FROM options "
@@ -75,12 +86,10 @@ void options::load()
 		}
 		if(global.contact.empty())
 			global.contact="no@mail";
-		// FIXME
-		//cache.store_content("global_ops",global);
+		cache().store_data("global_ops",global);
 	}
-	// FIXME
-	//if(cache.fetch_content("local_ops:"+locale,local))
-	//	return;
+	if(cache().fetch_data("local_ops:"+locale_name,local))
+		return;
 	result res;
 	sql<<	"SELECT value,name FROM options "
 		"WHERE  lang=?",locale_name,res;
@@ -96,17 +105,16 @@ void options::load()
 			local.copyright=v;
 	}
 	if(local.title.empty())
-		local.title=cppcms::locale::translate("Wiki++ &mdash; CppCMS Wiki").str<char>(context().locale());;
+		local.title=cppcms::locale::gettext("Wiki++ &mdash; CppCMS Wiki",context().locale());;
 	if(local.about.empty())
 		local.about=
-			cppcms::locale::translate("## About\n"
+			cppcms::locale::gettext("## About\n"
 				"\n"
 				"Wiki++ is a wiki engine powered by\n"
-				"[CppCMS](http://cppcms.sf.net/) web development framework.\n").str<char>(context().locale());
+				"[CppCMS](http://cppcms.sf.net/) web development framework.\n",context().locale());
 	if(local.copyright.empty())
-		local.copyright=cppcms::locale::translate("&copy; All Rights Reserverd").str<char>(context().locale());
-	// FIXME
-	//cache.store_content("local_ops:"+locale,local);
+		local.copyright=cppcms::locale::gettext("&copy; All Rights Reserverd",context().locale());
+	cache().store_data("local_ops:"+locale_name,local);
 	loaded=true;
 }
 
