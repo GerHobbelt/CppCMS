@@ -202,7 +202,7 @@ namespace boost {
             template<>
             BOOST_LOCALE_DECL std::string from_utf(char const *begin,char const *end,std::string const &charset,method_type how);
 
-            #ifndef BOOST_NO_STD_WSTRING
+            #if !defined(BOOST_NO_STD_WSTRING) || defined(BOOST_WINDOWS)
             template<>
             BOOST_LOCALE_DECL std::basic_string<wchar_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how);
 

@@ -646,7 +646,7 @@ namespace locale {
             return from_utf_impl<char>(begin,end,charset,how);
         }
 
-        #ifndef BOOST_NO_STD_WSTRING
+        #if !defined(BOOST_NO_STD_WSTRING) || defined(BOOST_WINDOWS)
         template<>
         BOOST_LOCALE_DECL std::basic_string<wchar_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)
         {

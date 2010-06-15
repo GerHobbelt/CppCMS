@@ -10,6 +10,7 @@
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/locale/codepage.hpp>
 #if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
 #else
@@ -21,7 +22,7 @@
 #include "mo_hash.hpp"
 #include "mo_lambda.hpp"
 
-#include <fstream>
+#include <stdio.h>
 #include <iostream>
 
 #include <string.h>
@@ -104,34 +105,61 @@ namespace boost {
             private:
                 void load_file_direct(std::string file_name)
                 {
-                    std::ifstream file(file_name.c_str(),std::ios::binary);
+                    FILE *file = 0;
+                    #if defined(BOOST_WINDOWS)
+                        /// Under windows we have to use "_wfopen" to get
+                        /// access to path's with Unicode in them
+                        ///
+                        /// As not all standard C++ libraries support nonstandard std::istream::open(wchar_t const *)
+                        /// we would use old and good stdio and _wfopen CRTL functions
+                        ///
+
+                        if(file_name.compare(0,3,"\xEF\xBB\xBF")==0)
+                        {
+                            std::wstring wfile_name = conv::to_utf<wchar_t>(file_name.substr(3),"UTF-8");
+                            file = _wfopen(wfile_name.c_str(),L"rb");
+                        }
+                        else {
+                            file = fopen(file_name.c_str(),"rb");
+                        }
+
+                    #else // POSIX systems do not have all this Wide API crap
+
+                        file = fopen(file_name.c_str(),"rb");
+
+                    #endif
                     if(!file)
                         throw std::runtime_error("No such file");
-                    //
-                    // Check file format
-                    //
-                    
-                    uint32_t magic=0;
-                    file.read(reinterpret_cast<char *>(&magic),sizeof(magic));
-                    
-                    if(magic == 0x950412de)
-                        native_byteorder_ = true;
-                    else if(magic == 0xde120495)
-                        native_byteorder_ = false;
-                    else
-                        throw std::runtime_error("Invalid file format");
-                    
 
-                    // load image of file to memory
-                    file.seekg(0, std::ios::end);
-                    int len=file.tellg();
-                    file.seekg(0, std::ios::beg);
-                    vdata_.resize(len,0);
-                    file.read(&vdata_.front(),len);
-                    if(file.gcount()!=len)
-                        throw std::runtime_error("Failed to read file");
-                    data_ = &vdata_[0];
-                    file_size_ = vdata_.size();
+                    try {
+                        uint32_t magic=0;
+                        fread(&magic,4,1,file);
+                        
+                        if(magic == 0x950412de)
+                            native_byteorder_ = true;
+                        else if(magic == 0xde120495)
+                            native_byteorder_ = false;
+                        else
+                            throw std::runtime_error("Invalid file format");
+                        
+                        fseek(file,0,SEEK_END);
+                        long len=ftell(file);
+                        if(len < 0) {
+                            throw std::runtime_error("Wrong file object");
+                        }
+                        fseek(file,0,SEEK_SET);
+                        vdata_.resize(len+1,0); // +1 to make sure the vector is not empty
+                        if(fread(&vdata_.front(),1,len,file)!=unsigned(len))
+                            throw std::runtime_error("Failed to read file");
+                        data_ = &vdata_[0];
+                        file_size_ = len;
+                    }
+                    catch(...) {
+                        if(file)
+                            fclose(file);
+                        throw;
+                    }
+                    fclose(file);
                 }
                 
                 void load_file(std::string file_name)
