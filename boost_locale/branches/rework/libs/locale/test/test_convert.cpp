@@ -16,9 +16,10 @@
 template<typename Char>
 void test_normc(std::basic_string<Char> orig,std::basic_string<Char> normal,boost::locale::norm_type type)
 {
-    TEST(normalize(orig,type)==normal);
-    TEST(normalize(orig.c_str(),type)==normal);
-    TEST(normalize(orig.c_str(),orig.c_str()+orig.size(),type)==normal);
+    std::locale l = boost::locale::generator().get("en_US.UTF-8");
+    TEST(normalize(orig,type,l)==normal);
+    TEST(normalize(orig.c_str(),type,l)==normal);
+    TEST(normalize(orig.c_str(),orig.c_str()+orig.size(),type,l)==normal);
 }
 
 void test_norm(std::string orig,std::string normal,boost::locale::norm_type type)

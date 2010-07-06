@@ -17,38 +17,8 @@
 #include <boost/cstdint.hpp>
 #include <stdexcept>
 
-
-
 namespace boost {
     namespace locale {
-
-        ///
-        /// This function creates std::codecvt facet suitable for embedding in locale class for codepage conversion.
-        ///
-        /// Usually never called directly, generator class is used instead
-        ///
-        template<typename CharType>
-        std::codecvt<CharType,char,mbstate_t> *create_codecvt(info const &inf);
-        
-        /// \cond INTERNAL 
-        template<>
-        BOOST_LOCALE_DECL std::codecvt<char,char,mbstate_t> *create_codecvt(info const &inf);
-
-        #ifndef BOOST_NO_STD_WSTRING
-        template<>
-        BOOST_LOCALE_DECL std::codecvt<wchar_t,char,mbstate_t> *create_codecvt(info const &inf);
-        #endif
-
-        #ifdef BOOST_HAS_CHAR16_T
-        template<>
-        BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(info const &inf);
-        #endif
-
-        #ifdef BOOST_HAS_CHAR32_T
-        template<>
-        BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(info const &inf);
-        #endif
-        /// \endcond
 
         ///
         /// \brief Namespace that contains all functions related to character set conversion

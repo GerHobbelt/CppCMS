@@ -5,7 +5,6 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#define BOOST_LOCALE_SOURCE
 #include <boost/locale/collator.hpp>
 #include <boost/locale/info.hpp>
 #include <vector>
@@ -112,38 +111,6 @@ namespace boost {
             };
 
         } /// impl
-
-        template<>
-        BOOST_LOCALE_DECL collator<char> *collator<char>::create(info const &inf)
-        {
-            return new impl::collate_impl<char>(inf.impl()->locale,inf.impl()->encoding);
-        }
-        #ifndef BOOST_NO_STD_WSTRING
-        template<>
-        BOOST_LOCALE_DECL collator<wchar_t> *collator<wchar_t>::create(info const &inf)
-        {
-            return new impl::collate_impl<wchar_t>(inf.impl()->locale,inf.impl()->encoding);
-        }
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR16_T
-        template<>
-        BOOST_LOCALE_DECL collator<char16_t> *collator<char16_t>::create(info const &inf)
-        {
-            return new impl::collate_impl<char16_t>(inf.impl()->locale,inf.impl()->encoding);
-        }
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR32_T
-        template<>
-        BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf)
-        {
-            return new impl::collate_impl<char32_t>(inf.impl()->locale,inf.impl()->encoding);
-        }
-        #endif
-
-
-
 
     } // locale
 } // boost

@@ -5,7 +5,6 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#define BOOST_LOCALE_SOURCE
 #include <boost/locale/boundary.hpp>
 #include <boost/locale/info.hpp>
 #include <unicode/uversion.h>
@@ -98,9 +97,8 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
     return indx;
 }
 
-std::auto_ptr<icu::BreakIterator> get_iterator(boundary_type t,std::locale const &l)
+std::auto_ptr<icu::BreakIterator> get_iterator(boundary_type t,icu::Locale const &loc)
 {
-    icu::Locale const &loc=std::use_facet<info>(l).impl()->locale;
     UErrorCode err=U_ZERO_ERROR;
     std::auto_ptr<icu::BreakIterator> bi;
     switch(t) {
@@ -127,15 +125,14 @@ std::auto_ptr<icu::BreakIterator> get_iterator(boundary_type t,std::locale const
 
 
 template<typename CharType>
-index_type do_map(boundary_type t,CharType const *begin,CharType const *end,std::locale const &loc)
+index_type do_map(boundary_type t,CharType const *begin,CharType const *end,icu::Locale const &loc,std::string const &encoding)
 {
     index_type indx;
-    info const &inf=std::use_facet<info>(loc);
     std::auto_ptr<icu::BreakIterator> bi(get_iterator(t,loc));
    
 #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 306
     UErrorCode err=U_ZERO_ERROR;
-    if(sizeof(CharType) == 2 || (sizeof(CharType)==1 && inf.utf8()))
+    if(sizeof(CharType) == 2 || (sizeof(CharType)==1 && encoding=="UTF-8"))
     {
         UText *ut=0;
         try {
@@ -162,7 +159,7 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,std:
     else 
 #endif
     {
-        impl::icu_std_converter<CharType> cvt(inf.encoding());
+        impl::icu_std_converter<CharType> cvt(encoding);
         icu::UnicodeString str=cvt.icu(begin,end);
         bi->setText(str);
         index_type indirect = map_direct(t,bi.get(),str.length());
@@ -177,41 +174,25 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,std:
     return indx;
 } // do_map
 
-
-template<>
-BOOST_LOCALE_DECL index_type 
-map(boundary_type t,char const *begin,char const *end,std::locale const &loc)
-{
-    return do_map(t,begin,end,loc);
-}
-
-#ifndef BOOST_NO_STD_WSTRING
-template<>
-BOOST_LOCALE_DECL index_type 
-map(boundary_type t,wchar_t const *begin,wchar_t const *end,std::locale const &loc)
-{
-    return do_map(t,begin,end,loc);
-}
-#endif
-
-#ifdef BOOST_HAS_CHAR16_T
-template<>
-BOOST_LOCALE_DECL index_type 
-map(boundary_type t,char16_t const *begin,char16_t const *end,std::locale const &loc)
-{
-    return do_map(t,begin,end,loc);
-}
-#endif
-
-#ifdef BOOST_HAS_CHAR32_T
-template<>
-BOOST_LOCALE_DECL index_type 
-map(boundary_type t,char32_t const *begin,char32_t const *end,std::locale const &loc)
-{
-    return do_map(t,begin,end,loc);
-}
-#endif
 } // impl
+
+template<typename CharType>
+class boundary_indexing_impl : public boundary_indexing<CharType> {
+public:
+    boundary_indexing_impl(icu::Locale const &l,std::string const &e) :
+        locale_(l),
+        encoding_(e)
+    {
+    }
+    index_type map(boundary_type t,CharType const *begin,CharType const *end) const 
+    {
+        return impl::do_map<CharType>(t,begin,end,locale_,encoding_);
+    }
+private:
+    icu::Locale locale_;
+    std::string encoding_;
+};
+
 } // boundary
 } // locale
 } // boost

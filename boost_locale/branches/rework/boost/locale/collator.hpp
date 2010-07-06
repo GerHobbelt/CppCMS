@@ -118,11 +118,6 @@ namespace locale {
         {
             return do_transform(level,s.data(),s.data()+s.size());
         }
-
-        ///
-        /// A static member used for creation of collator instances, generally called by a generator class.
-        /// 
-        static collator<CharType> *create(info const &inf);
         
     protected:
 
@@ -180,26 +175,6 @@ namespace locale {
 
 
     };
-
-    /// \cond INTERNAL 
-
-    template<>
-    BOOST_LOCALE_DECL collator<char> *collator<char>::create(info const &inf);
-    #ifndef BOOST_NO_STD_WSTRING
-    template<>
-    BOOST_LOCALE_DECL collator<wchar_t> *collator<wchar_t>::create(info const &inf);
-    #endif
-    
-    #ifdef BOOST_HAS_CHAR16_T
-    template<>
-    BOOST_LOCALE_DECL collator<char16_t> *collator<char16_t>::create(info const &inf);
-    #endif
-    
-    #ifdef BOOST_HAS_CHAR32_T
-    template<>
-    BOOST_LOCALE_DECL collator<char32_t> *collator<char32_t>::create(info const &inf);
-    #endif
-    /// \endcond
 
     ///
     /// \brief This class can be used in STL algorithms and containers for comparison of strings

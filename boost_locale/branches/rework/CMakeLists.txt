@@ -96,11 +96,8 @@ include_directories(.)
 
 set(BOOST_LOCALE_SRC 
 	libs/locale/src/generator.cpp
-	libs/locale/src/boundary.cpp
 	libs/locale/src/time_zone.cpp
-	libs/locale/src/collator.cpp
 	libs/locale/src/codepage.cpp
-	libs/locale/src/conversion.cpp
 	libs/locale/src/formatter.cpp 
 	libs/locale/src/formatting.cpp 
 	libs/locale/src/info.cpp 
@@ -108,6 +105,7 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/message.cpp 
 	libs/locale/src/mo_lambda.cpp
 	libs/locale/src/date_time.cpp
+	libs/locale/src/shared/ids.cpp
 	)
 
 if(DISABLE_SHARED AND DISABLE_STATIC)

@@ -12,6 +12,10 @@
 #include <boost/locale/message.hpp>
 #include <boost/locale/codepage.hpp>
 #include "numeric.hpp"
+#include "conversion.hpp"
+#include "collator.hpp"
+#include "codepage.hpp"
+#include "boundary.hpp"
 
 namespace boost {
     namespace locale {
@@ -166,11 +170,19 @@ namespace boost {
         {
             std::locale result=source;
             info const &inf=std::use_facet<info>(source);
+            icu::Locale l=inf.impl()->locale;
+            std::string encoding=inf.impl()->encoding;
             if(d->cats & collation_facet)
-                result=std::locale(result,collator<CharType>::create(inf));
+                result=std::locale(result,new impl::collate_impl<CharType>(l,encoding));
             if(d->cats & formatting_facet) {
                 result=std::locale(result,new num_format<CharType>());
                 result=std::locale(result,new num_parse<CharType>());
+            }
+            if(d->cats & boundary_facet) {
+                result=std::locale(result,new boundary::boundary_indexing_impl<CharType>(l,encoding));
+            }
+            if(d->cats & convert_facet) {
+                result=std::locale(result,new converter_impl<CharType>(l,encoding));
             }
             if(d->cats & message_facet) {
                 if(!d->default_domain.empty() && !d->paths.empty()) {
