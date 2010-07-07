@@ -15,7 +15,6 @@
 #include <unicode/rbbi.h>
 
 #include "icu_util.hpp"
-#include "info_impl.hpp"
 #include "uconv.hpp"
 
 namespace boost {

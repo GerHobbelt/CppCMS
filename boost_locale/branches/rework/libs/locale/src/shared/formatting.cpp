@@ -8,130 +8,167 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/formatting.hpp>
 #include <typeinfo>
-#include "formatting_info.hpp"
 #include "ios_prop.hpp"
 
 namespace boost {
     namespace locale {
 
+        ios_info::string_set::string_set() : 
+            type(0),
+            size(0),
+            ptr(0)
+        {
+        }
+        ios_info::string_set::~string_set()
+        {
+            delete [] ptr;
+        }
+        ios_info::string_set::string_set(string_set const &other)
+        {
+            if(other.ptr!=0) {
+                ptr=new char[other.size];
+                size=other.size;
+                type=other.type;
+                memcpy(ptr,other.ptr,size);
+            }
+            else {
+                ptr=0;
+                size=0;
+                type=0;
+            }
+        }
+        
+        ios_info::string_set const &ios_info::string_set::operator=(string_set const &other)
+        {
+            if(this!=&other) {
+                delete [] ptr;
+                ptr = 0;
+                size = 0;
+                type = 0;
+                if(other.ptr!=0) {
+                    ptr=new char[other.size];
+                    size=other.size;
+                    type=other.type;
+                    memcpy(ptr,other.ptr,size);
+                }
+            }
+            return *this;
+        }
+
+        struct ios_info::data {};
+
+        ios_info::ios_info() : flags_(0),domain_id_(0),d(0)
+        {
+        }
+        ios_info::~ios_info()
+        {
+        }
+        
+        ios_info::ios_info(ios_info const &other)
+        {
+            flags_ = other.flags_;
+            domain_id_ = other.domain_id_;
+            time_zone_ = other.time_zone_;
+            datetime_ = other.datetime_;
+        }
+
+
+        ios_info const &ios_info::operator=(ios_info const &other)
+        {
+            if(this!=&other) {
+                flags_ = other.flags_;
+                domain_id_ = other.domain_id_;
+                time_zone_ = other.time_zone_;
+                datetime_ = other.datetime_;
+            }
+            return *this;
+        }
+
+        void ios_info::display_flags(uint64_t f) 
+        {
+            flags_ = (flags_ & ~uint64_t(flags::display_flags_mask)) | f;
+        }
+        void ios_info::currency_flags(uint64_t f) 
+        {
+            flags_ = (flags_ & ~uint64_t(flags::currency_flags_mask)) | f;
+        }
+        void ios_info::date_flags(uint64_t f) 
+        {
+            flags_ = (flags_ & ~uint64_t(flags::date_flags_mask)) | f;
+        }
+        void ios_info::time_flags(uint64_t f) 
+        {
+            flags_ = (flags_ & ~uint64_t(flags::time_flags_mask)) | f;
+        }
+        
+        void ios_info::domain_id(int id)
+        {
+            domain_id_ = id;
+        }
+
+        void ios_info::time_zone(std::string const &tz)
+        {
+            time_zone_ = tz;
+        }
+
+        uint64_t ios_info::display_flags() const
+        {
+            return flags_ & flags::display_flags_mask;
+        }
+
+        uint64_t ios_info::currency_flags() const
+        {
+            return flags_ & flags::currency_flags_mask;
+        }
+
+        uint64_t ios_info::date_flags() const
+        {
+            return flags_ & flags::date_flags_mask;
+        }
+        
+        uint64_t ios_info::time_flags() const
+        {
+            return flags_ & flags::time_flags_mask;
+        }
+
+        int ios_info::domain_id() const
+        {
+            return domain_id_;
+        }
+
+        std::string ios_info::time_zone() const
+        {
+            return time_zone_;
+        }
+
+        ios_info::string_set const &ios_info::date_time_pattern_set() const
+        {
+            return datetime_;
+        }
+
+        
+        ios_info::string_set &ios_info::date_time_pattern_set()
+        {
+            return datetime_;
+        }
+
+        ios_info &ios_info::get(std::ios_base &ios)
+        {
+            return impl::ios_prop<ios_info>::get(ios);
+        }
+
+        void ios_info::on_imbue()
+        {
+        }
+
         namespace {
-            impl::ios_info &info(std::ios_base &ios)
-            {
-                return impl::ios_prop<impl::ios_info>::get(ios);
-            }
-
-            template<typename Char>
-            void do_ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::basic_string<Char> const &pattern)
-            {
-                switch(pattern_id) {
-                case flags::datetime_pattern:
-                    info(ios).datetime(pattern);
-                    break;
-                default:
-                    throw std::bad_cast();
+            struct initializer {
+                initializer() {
+                    impl::ios_prop<ios_info>::global_init();
                 }
-            }
-            
-            template<typename Char>
-            std::basic_string<Char> do_ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
-            {
-                switch(pattern_id) {
-                case flags::datetime_pattern:
-                    return info(ios).datetime<Char>();
-                default:
-                    throw std::bad_cast();
-                }
-            }
-        }
+            } initializer_instance;
+        } // namespace
 
-        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &ios)
-        {
-            return info(ios).flags();
-        }
-        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &ios,flags::display_flags_type mask)
-        {
-            return info(ios).flags() & mask;
-        }
-        
-        BOOST_LOCALE_DECL void ext_setf(std::ios_base &ios,flags::display_flags_type flags,flags::display_flags_type mask)
-        {
-            impl::ios_info &inf=info(ios);
-            inf.flags((inf.flags() & ~(uint64_t(mask))) | flags);
-        }
-        
-        BOOST_LOCALE_DECL int ext_value(std::ios_base &ios,flags::value_type id)
-        {
-            impl::ios_info &inf=info(ios);
-            return inf.value(id);
-        }
-        BOOST_LOCALE_DECL void ext_value(std::ios_base &ios,flags::value_type id,int value)
-        {
-            impl::ios_info &inf=info(ios);
-            inf.value(id,value);
-        }
-
-
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::string const &pattern)
-        {
-            if(pattern_id == flags::time_zone_id)
-                info(ios).timezone(pattern);
-            else
-                do_ext_pattern(ios,pattern_id,pattern);
-        }
-        
-        template<>
-        BOOST_LOCALE_DECL std::string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
-        {
-            if(pattern_id == flags::time_zone_id)
-                return info(ios).timezone();
-            else
-                return do_ext_pattern<char>(ios,pattern_id);
-        }
-
-        #ifndef BOOST_NO_STD_WSTRING
-        
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::wstring const &pattern)
-        {
-            do_ext_pattern(ios,pattern_id,pattern);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::wstring ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
-        {
-            return do_ext_pattern<wchar_t>(ios,pattern_id);
-        }
-
-        #endif // BOOST_NO_STD_WSTRING
-
-        #ifdef BOOST_HAS_CHAR16_T
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u16string const &pattern)
-        {
-            do_ext_pattern(ios,pattern_id,pattern);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::u16string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
-        {
-            return do_ext_pattern<char16_t>(ios,pattern_id);
-        }
-        #endif // char16_t, u16string
-
-        #ifdef BOOST_HAS_CHAR32_T
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id, std::u32string const &pattern)
-        {
-            do_ext_pattern(ios,pattern_id,pattern);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::u32string ext_pattern(std::ios_base &ios,flags::pattern_type pattern_id)
-        {
-            return do_ext_pattern<char32_t>(ios,pattern_id);
-        }
-        #endif // char32_t, u32string
     } // locale
 } // boost
 

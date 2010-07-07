@@ -29,6 +29,77 @@ namespace boost {
             ///
             /// @{
 
+
+            template<typename FromChar,typename ToChar>
+            class codepage_converter {
+                codepage_converter(codepage_converter const &);
+                void operator=(codepage_converter const &);
+            public:
+                virtual int write(FromChar const *fromt,int len) = 0;
+                virtual int read(ToChar *to,int len) = 0;
+                virtual std::codecvt_base::result status() = 0;
+                virtual codepage_converter()
+                {
+                }
+            };
+            
+            template<typename CharType>
+            class codepage_facet : public std::codecvt<CharType,char,mbstate_t> {
+            public:
+                codepage_facet(size_t refs) : std::codecvt<CharType,char,mbstate_t> 
+                {
+                }
+
+                codepage_converter<CharType,char> *to_internal(std::string const &from_encoding) const
+                {
+                    return do_to_internal(from_encoding);
+                }
+
+                codepage_converter<char,CharType> *from_internal(std::string const &from_encoding) const
+                {
+                    return do_from_internal(from_encoding);
+                }
+
+            protected:
+
+                virtual codepage_converter<CharType,char> *do_to_internal(std::string const &from_encoding) const = 0;
+
+                virtual codepage_converter<char,CharType> *do_from_internal(std::string const &from_encoding) const = 0;
+
+                virtual int do_encoding() const throw() = 0;
+                
+                virtual int do_max_length() const throw() = 0;
+                
+                virtual bool do_always_noconv() const throw() = 0;
+                
+                virtual std::codecvt_base::result do_unshift(std::mbstate_t &s,char *from,char *to,char *&next) const = 0;
+                
+                virtual std::codecvt_base::result 
+                do_in(  std::mbstate_t &state,
+                    char const *from,
+                    char const *from_end,
+                    char const *&from_next,
+                    CharType *uto,
+                    CharType *uto_end,
+                    CharType *&uto_next) const = 0;
+                
+                virtual int
+                do_length(  std::mbstate_t &state,
+                        char const *from,
+                        char const *from_end,
+                        size_t max) const = 0;
+                
+                virtual std::codecvt_base::result 
+                do_out( std::mbstate_t &state,
+                        uchar const *ufrom,
+                        uchar const *ufrom_end,
+                        uchar const *&ufrom_next,
+                        char *to,
+                        char *to_end,
+                        char *&to_next) const = 0;
+ 
+            };
+
             ///
             /// \brief The excepton that is thrown in case of conversion error
             ///

@@ -18,6 +18,7 @@
 #endif
 
 
+#include "message.hpp"
 #include "mo_hash.hpp"
 #include "mo_lambda.hpp"
 
@@ -28,8 +29,6 @@
 
 namespace boost {
     namespace locale {
-
-
         namespace impl {
             class mo_file {
             public:
@@ -250,16 +249,14 @@ namespace boost {
                     return p->second;
                 }
 
-                mo_message(info const &inf,std::vector<std::string> const &domains,std::vector<std::string> const &search_paths)
+                mo_message(messages_info<CharType> &inf)
                 {
-                    std::string encoding = inf.encoding();
+                    catalogs_.resize(inf.domains.size());
+                    mo_catalogs_.resize(inf.domains.size());
+                    plural_forms_.resize(inf.domains.size());
 
-                    catalogs_.resize(domains.size());
-                    mo_catalogs_.resize(domains.size());
-                    plural_forms_.resize(domains.size());
-
-                    for(unsigned id=0;id<domains.size();id++) {
-                        std::string domain=domains[id];
+                    for(unsigned id=0;id<inf.domains.size();id++) {
+                        std::string domain=inf.domains[id];
                         domains_[domain]=id;
                         //
                         // List of fallbacks: en_US@euro, en@euro, en_US, en. 
@@ -267,18 +264,18 @@ namespace boost {
                         static const unsigned paths_no = 4;
 
                         std::string paths[paths_no] = {
-                            std::string(inf.language()) + "_" + inf.country() + "@" + inf.variant(),
-                            std::string(inf.language()) + "@" + inf.variant(),
-                            std::string(inf.language()) + "_" + inf.country(),
-                            std::string(inf.language()),
+                            std::string(inf.language) + "_" + inf.country + "@" + inf.variant,
+                            std::string(inf.language) + "@" + inf.variant,
+                            std::string(inf.language) + "_" + inf.country,
+                            std::string(inf.language),
                         };
 
                         bool found=false; 
                         for(unsigned j=0;!found && j<paths_no;j++) {
-                            for(unsigned i=0;!found && i<search_paths.size();i++) {
-                                std::string full_path = search_paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
+                            for(unsigned i=0;!found && i<inf.paths.size();i++) {
+                                std::string full_path = inf.paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
 
-                                found = load_file(full_path,encoding,id);
+                                found = load_file(full_path,inf,id);
                             }
                         }
                     }
@@ -290,7 +287,7 @@ namespace boost {
 
             private:
 
-                bool load_file(std::string file_name,std::string encoding,int id)
+                bool load_file(std::string file_name,messages_info<CharType> &inf,int id)
                 {
                     try {
                         std::auto_ptr<mo_file> mo(new mo_file(file_name));
@@ -304,16 +301,18 @@ namespace boost {
                             plural_forms_[id] = ptr;
                         }
                         if( sizeof(CharType) == 1
-                            && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
+                            && compare_encodings(mo_encoding,inf.encoding) == 0
                             && mo->has_hash())
                         {
                             mo_catalogs_[id]=mo;
                         }
                         else {
-                            converter cvt(encoding,mo_encoding);
+                            if(!inf.set_encoding(mo_encoding)) {
+                                throw std::runtime_error("Invalid mo encoding");
+                            }
                             for(unsigned i=0;i<mo->size();i++) {
                                 mo_file::pair_type tmp = mo->value(i);
-                                catalogs_[id][mo->key(i)]=cvt(tmp.first,tmp.second);
+                                catalogs_[id][mo->key(i)]=inf.convert(tmp.first,tmp.second);
                             }
                         }
                         return true;
@@ -328,6 +327,26 @@ namespace boost {
 
                 }
 
+                int compare_encodings(std::string const &left,std::string const &right)
+                {
+                    return convert_encoding_name(left).compare(convert_encoding_name(right)); 
+                }
+                std::string convert_encoding_name(std::string const &in)
+                {
+                    std::string result;
+                    for(unsigned i=0;i<in.size();i++) {
+                        char c=in[i];
+                        if('A' <= c && c<='Z')
+                            c=c-'A' + 'a';
+                        else if(('a' <= c && c<='z') || ('0' <= c && c<='9'))
+                            ;
+                        else
+                            continue;
+                        result+=c;
+                    }
+                    return result;
+                }
+
                 static std::string extract(std::string const &meta,std::string const &key,char const *separator)
                 {
                     size_t pos=meta.find(key);
@@ -337,26 +356,6 @@ namespace boost {
                     size_t end_pos = meta.find_first_of(separator,pos);
                     return meta.substr(pos,end_pos - pos);
                 }
-
-
-                class converter {
-                public:
-                    converter(std::string out_enc,std::string in_enc) :
-                        out_(out_enc),
-                        in_(in_enc)
-                    {
-                    }
-
-                    std::basic_string<CharType> operator()(char const *begin,char const *end)
-                    {
-                        return out_.std(in_.icu(begin,end));
-                    }
-
-                private:
-                    icu_std_converter<CharType> out_;
-                    icu_std_converter<char> in_;
-                };
-
 
                 pair_type get_string(int domain_id,char const *context,char const *in_id) const
                 {
@@ -405,22 +404,18 @@ namespace boost {
         std::locale::id base_message_format<char>::id;
 
         template<>
-        message_format<char> *message_format<char>::create( info const &inf,
-                                                            std::vector<std::string> const &domains,
-                                                            std::vector<std::string> const &paths)
+        message_format<char> *create_messages_facet(messages_info<char> &info)
         {
-            return new impl::mo_message<char>(inf,domains,paths);
+            return new impl::mo_message<char>(info);
         }
 
         #ifndef BOOST_NO_STD_WSTRING
         std::locale::id base_message_format<wchar_t>::id;
         
         template<>
-        message_format<wchar_t> *message_format<wchar_t>::create(   info const &inf,
-                                                                    std::vector<std::string> const &domains,
-                                                                    std::vector<std::string> const &paths)
+        message_format<wchar_t> *create_messages_facet(messages_info<wchar_t> &info)
         {
-            return new impl::mo_message<wchar_t>(inf,domains,paths);
+            return new impl::mo_message<wchar_t>(info);
         }
         #endif
         
@@ -428,11 +423,9 @@ namespace boost {
         std::locale::id base_message_format<char16_t>::id;
 
         template<>
-        message_format<char16_t> *message_format<char16_t>::create( info const &inf,
-                                                                    std::vector<std::string> const &domains,
-                                                                    std::vector<std::string> const &paths)
+        message_format<char16_t> *create_messages_facet(messages_info<char16_t> &info)
         {
-            return new impl::mo_message<char16_t>(inf,domains,paths);
+            return new impl::mo_message<char16_t>(info);
         }
         #endif
         
@@ -440,11 +433,9 @@ namespace boost {
         std::locale::id base_message_format<char32_t>::id;
 
         template<>
-        message_format<char32_t> *message_format<char32_t>::create( info const &inf,
-                                                                    std::vector<std::string> const &domains,
-                                                                    std::vector<std::string> const &paths)
+        message_format<char32_t> *create_messages_facet(messages_info<char32_t> &info)
         {
-            return new impl::mo_message<char32_t>(inf,domains,paths);
+            return new impl::mo_message<char32_t>(info);
         }
         #endif
 

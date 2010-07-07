@@ -32,11 +32,6 @@ namespace boost {
         /// @{
         /// 
 
-        class info;
-
-        ///
-        /// \cond INTERNAL
-        ///
         template<typename CharType>
         struct base_message_format: public std::locale::facet
         {
@@ -63,16 +58,12 @@ namespace boost {
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
             std::locale::id& __get_id (void) const { return id; }
 #endif
-            static message_format<CharType> *create(info const &,std::vector<std::string> const &paths,std::vector<std::string> const &domains);
-
         protected:
             virtual ~message_format()
             {
             }
 
         };
-
-        /// \endcond
 
         ///
         /// \brief This class represents a message that can be converted to specific locale message
@@ -673,10 +664,6 @@ namespace boost {
             static std::locale::id id;
         };
         
-        template<>
-        BOOST_LOCALE_DECL message_format<char> *message_format<char>::create(   info const &,
-                                                                                std::vector<std::string> const &domains,
-                                                                                std::vector<std::string> const &paths);
         #ifndef BOOST_NO_STD_WSTRING
         
         template<>
@@ -687,11 +674,6 @@ namespace boost {
             }
             static std::locale::id id;
         };
-        template<>
-        BOOST_LOCALE_DECL message_format<wchar_t> *message_format<wchar_t>::create( info const &,
-                                                                                    std::vector<std::string> const &domains,
-                                                                                    std::vector<std::string> const &paths);
-
         #endif
 
         #ifdef BOOST_HAS_CHAR16_T
@@ -704,10 +686,6 @@ namespace boost {
             }
             static std::locale::id id;
         };
-        template<>
-        BOOST_LOCALE_DECL message_format<char16_t> *message_format<char16_t>::create(   info const &,
-                                                                                        std::vector<std::string> const &domains,
-                                                                                        std::vector<std::string> const &paths);
 
         #endif
 
@@ -722,11 +700,6 @@ namespace boost {
             static std::locale::id id;
         };
         
-        template<>
-        BOOST_LOCALE_DECL message_format<char32_t> *message_format<char32_t>::create(   info const &,
-                                                                                        std::vector<std::string> const &domains,
-                                                                                        std::vector<std::string> const &paths);
-
         #endif
 
         /// \endcond
@@ -745,7 +718,7 @@ namespace boost {
                 std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out, set_domain const &dom)
                 {
                     int id = std::use_facet<message_format<CharType> >(out.getloc()).domain(dom.domain_id);
-                    ext_value(out,flags::domain_id,id);
+                    ios_info::get(out).domain_id(id);
                     return out;
                 }
             } // details

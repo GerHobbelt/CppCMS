@@ -18,6 +18,8 @@
 #include <ostream>
 #include <istream>
 #include <string>
+#include <string.h>
+#include <typeinfo>
 
 namespace boost {
     namespace locale {
@@ -74,35 +76,18 @@ namespace boost {
 
         /// \cond INTERNAL
 
-        class ios_info {
+        class BOOST_LOCALE_DECL ios_info {
         public:
-
-            class cached_info {
-                cached_info(cached_info const &);
-                void operator=(cached_info const &);
-            public:
-                cached_info(){}
-                virtual ~cached_info(){}
-                virtual cached_info *clone() = 0;
-            };
-
             ios_info();
             ios_info(ios_info const &);
-            void operator=(ios_info const &);
+            ios_info const &operator=(ios_info const &);
             ~ios_info();
-
-            void cache(cached_info *info);
-            cached_info *cache(std::typeinfo const &) const;
-
-            template<typename T>
-            T *cache() const
-            {
-                return dynamic_cast<T>(cache(typeid(T)));
-            }
 
             static ios_info &get(std::ios_base &ios);
 
             void display_flags(uint64_t flags);
+            
+            void currency_flags(uint64_t flags);
             
             void date_flags(uint64_t flags);
             
@@ -123,6 +108,8 @@ namespace boost {
 
             uint64_t display_flags() const;
             
+            uint64_t currency_flags() const;
+
             uint64_t date_flags() const;
             
             uint64_t time_flags() const;
@@ -139,62 +126,21 @@ namespace boost {
                 return date_time_pattern_set().get<CharType>();
             }
 
+            void on_imbue();
             
         private:
+
+            class string_set;
 
             string_set const &date_time_pattern_set() const;
             string_set &date_time_pattern_set();
             
-            class string_set {
+            class BOOST_LOCALE_DECL string_set {
             public:
-                string_set() : 
-                    type(0),
-                    size(0),
-                    ptr(0)
-                {
-                    string_.nothing_=0;
-                }
-
-                ~string_set()
-                {
-                    delete [] ptr;
-                }
-                string_set(string_set const &other)
-                {
-                    if(other.ptr!=0) {
-                        ptr=new char[other.size](0);
-                        size=other.size;
-                        type=other.type;
-                        memcpy(ptr,other.ptr,size);
-                    }
-                    else {
-                        ptr=0;
-                        size=0;
-                        type=0;
-                    }
-                }
-                string_set const &operator=(string_set const &other)
-                {
-                    if(this!=&other) {
-                        delete [] ptr;
-                        ptr = 0;
-                        size = 0;
-                        type = 0;
-                        if(other.ptr!=0) {
-                            ptr=new char[other.size](0);
-                            size=other.size;
-                            type=other.type;
-                            memcpy(ptr,other.ptr,size);
-                        }
-                    }
-                    return *this;
-                }
-
-                template<typename Char>
-                void set(std::basic_string<Char> const &s)
-                {
-                    set<Char>(s.c_str());
-                }
+                string_set(); 
+                ~string_set();
+                string_set(string_set const &other);
+                string_set const &operator=(string_set const &other);
                 
                 template<typename Char>
                 void set(Char const *s)
@@ -204,10 +150,11 @@ namespace boost {
                     type=&typeid(Char);
                     Char *end = s;
                     while(*end!=0) end++;
-                    size = sizeof(Char)*(end - s+1)
-                    ptr = new char[size](0);
+                    size = sizeof(Char)*(end - s+1);
+                    ptr = new char[size];
                     memcpy(ptr,s,size);
                 }
+
                 template<typename Char>
                 std::basic_string<Char> get() const
                 {
@@ -217,14 +164,8 @@ namespace boost {
                     return result;
                 }
 
-                template<>
-                void set<char>(std::string const &s)
-                {
-                    clear();
-                }
-
             private:
-                std::typeinfo const *type;
+                std::type_info const *type;
                 size_t size;
                 char *ptr;
             };
@@ -235,7 +176,7 @@ namespace boost {
             string_set datetime_;
 
             struct data;
-            data *d_;
+            data *d;
 
         };
 
@@ -257,7 +198,7 @@ namespace boost {
             
             inline std::ios_base & posix(std::ios_base & ios)
             {
-                ios_base::get(ios).display_flags(flags::posix);
+                ios_info::get(ios).display_flags(flags::posix);
                 return ios;
             }
 
@@ -267,7 +208,7 @@ namespace boost {
             ///
             inline std::ios_base & number(std::ios_base & ios)
             {
-                ios_base::get(ios).display_flags(flags::number);
+                ios_info::get(ios).display_flags(flags::number);
                 return ios;
             }
             
@@ -276,7 +217,7 @@ namespace boost {
             ///
             inline std::ios_base & currency(std::ios_base & ios)
             {
-                ios_base::get(ios).display_flags(flags::currency);
+                ios_info::get(ios).display_flags(flags::currency);
                 return ios;
             }
             
@@ -285,7 +226,7 @@ namespace boost {
             ///
             inline std::ios_base & percent(std::ios_base & ios)
             {
-                ios_base::get(ios).display_flags(flags::percent);
+                ios_info::get(ios).display_flags(flags::percent);
                 return ios;
             }
             
@@ -294,7 +235,7 @@ namespace boost {
             ///
             inline std::ios_base & date(std::ios_base & ios)
             {
-                ios_base::get(ios).display_flags(flags::date);
+                ios_info::get(ios).display_flags(flags::date);
                 return ios;
             }
 
@@ -303,7 +244,7 @@ namespace boost {
             ///
             inline std::ios_base & time(std::ios_base & ios)
             {
-                ios_base::get(ios)->display_flags(flags::time);
+                ios_info::get(ios).display_flags(flags::time);
                 return ios;
             }
 
@@ -312,7 +253,7 @@ namespace boost {
             ///
             inline std::ios_base & datetime(std::ios_base & ios)
             {
-                ext_setf(ios, flags::datetime, flags::display_flags_mask);
+                ios_info::get(ios).display_flags(flags::datetime);
                 return ios;
             }
 
@@ -322,7 +263,7 @@ namespace boost {
             ///
             inline std::ios_base & strftime(std::ios_base & ios)
             {
-                ext_setf(ios, flags::strftime, flags::display_flags_mask);
+                ios_info::get(ios).display_flags(flags::strftime);
                 return ios;
             }
             
@@ -331,7 +272,7 @@ namespace boost {
             ///
             inline std::ios_base & spellout(std::ios_base & ios)
             {
-                ext_setf(ios, flags::spellout, flags::display_flags_mask);
+                ios_info::get(ios).display_flags(flags::spellout);
                 return ios;
             }
             
@@ -340,7 +281,7 @@ namespace boost {
             ///
             inline std::ios_base & ordinal(std::ios_base & ios)
             {
-                ext_setf(ios, flags::ordinal, flags::display_flags_mask);
+                ios_info::get(ios).display_flags(flags::ordinal);
                 return ios;
             }
 
@@ -349,7 +290,7 @@ namespace boost {
             ///
             inline std::ios_base & currency_default(std::ios_base & ios)
             {
-                ext_setf(ios, flags::currency_default, flags::currency_flags_mask);
+                ios_info::get(ios).currency_flags(flags::currency_default);
                 return ios;
             }
 
@@ -358,7 +299,7 @@ namespace boost {
             ///
             inline std::ios_base & currency_iso(std::ios_base & ios)
             {
-                ext_setf(ios, flags::currency_iso, flags::currency_flags_mask);
+                ios_info::get(ios).currency_flags(flags::currency_iso);
                 return ios;
             }
 
@@ -367,7 +308,7 @@ namespace boost {
             ///
             inline std::ios_base & currency_national(std::ios_base & ios)
             {
-                ext_setf(ios, flags::currency_national, flags::currency_flags_mask);
+                ios_info::get(ios).currency_flags(flags::currency_national);
                 return ios;
             }
 
@@ -376,7 +317,7 @@ namespace boost {
             ///
             inline std::ios_base & time_default(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time_default, flags::time_flags_mask);
+                ios_info::get(ios).time_flags(flags::time_default);
                 return ios;
             }
 
@@ -385,7 +326,7 @@ namespace boost {
             ///
             inline std::ios_base & time_short(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time_short, flags::time_flags_mask);
+                ios_info::get(ios).time_flags(flags::time_short);
                 return ios;
             }
 
@@ -394,7 +335,7 @@ namespace boost {
             ///
             inline std::ios_base & time_medium(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time_medium, flags::time_flags_mask);
+                ios_info::get(ios).time_flags(flags::time_medium);
                 return ios;
             }
 
@@ -403,7 +344,7 @@ namespace boost {
             ///
             inline std::ios_base & time_long(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time_long, flags::time_flags_mask);
+                ios_info::get(ios).time_flags(flags::time_long);
                 return ios;
             }
 
@@ -412,7 +353,7 @@ namespace boost {
             ///
             inline std::ios_base & time_full(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time_full, flags::time_flags_mask);
+                ios_info::get(ios).time_flags(flags::time_full);
                 return ios;
             }
 
@@ -421,7 +362,7 @@ namespace boost {
             ///
             inline std::ios_base & date_default(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date_default, flags::date_flags_mask);
+                ios_info::get(ios).date_flags(flags::date_default);
                 return ios;
             }
 
@@ -430,7 +371,7 @@ namespace boost {
             ///
             inline std::ios_base & date_short(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date_short, flags::date_flags_mask);
+                ios_info::get(ios).date_flags(flags::date_short);
                 return ios;
             }
 
@@ -439,7 +380,7 @@ namespace boost {
             ///
             inline std::ios_base & date_medium(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date_medium, flags::date_flags_mask);
+                ios_info::get(ios).date_flags(flags::date_medium);
                 return ios;
             }
 
@@ -448,7 +389,7 @@ namespace boost {
             ///
             inline std::ios_base & date_long(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date_long, flags::date_flags_mask);
+                ios_info::get(ios).date_flags(flags::date_long);
                 return ios;
             }
 
@@ -457,7 +398,7 @@ namespace boost {
             ///
             inline std::ios_base & date_full(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date_full, flags::date_flags_mask);
+                ios_info::get(ios).date_flags(flags::date_full);
                 return ios;
             }            
             
@@ -471,7 +412,7 @@ namespace boost {
 
                     void apply(std::basic_ios<CharType> &ios) const
                     {
-                        ext_pattern(ios,flags::datetime_pattern,ftime);
+                        ios_info::get(ios).date_time_pattern(ftime);
                         as::strftime(ios);
                     }
 
@@ -557,14 +498,14 @@ namespace boost {
                 template<typename CharType>
                 std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,set_timezone const &fmt)
                 {
-                    ext_pattern(out,flags::time_zone_id,fmt.id);
+                    ios_info::get(out).time_zone(fmt.id);
                     return out;
                 }
                 
                 template<typename CharType>
                 std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,set_timezone const &fmt)
                 {
-                    ext_pattern(in,flags::time_zone_id,fmt.id);
+                    ios_info::get(in).time_zone(fmt.id);
                     return in;
                 }
             }
@@ -575,7 +516,7 @@ namespace boost {
             /// 
             inline std::ios_base &gmt(std::ios_base &ios)
             {
-                ext_pattern<char>(ios,flags::time_zone_id,"GMT");
+                ios_info::get(ios).time_zone("GMT");
                 return ios;
             }
 
@@ -584,7 +525,7 @@ namespace boost {
             ///
             inline std::ios_base &local_time(std::ios_base &ios)
             {
-                ext_pattern(ios,flags::time_zone_id,std::string());
+                ios_info::get(ios).time_zone(std::string());
                 return ios;
             }
 

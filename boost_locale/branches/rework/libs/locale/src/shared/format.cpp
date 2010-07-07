@@ -21,7 +21,7 @@ namespace boost {
                 unsigned position;
                 std::streamsize precision;
                 std::ios_base::fmtflags flags;
-                impl::ios_info info;
+                ios_info info;
                 std::locale saved_locale;
                 bool restore_locale;
             };
@@ -32,7 +32,7 @@ namespace boost {
             {
                 d->position=std::numeric_limits<unsigned>::max();
                 d->precision=ios.precision();
-                d->info=impl::ios_prop<impl::ios_info>::get(ios);
+                d->info=ios_info::get(ios);
                 d->saved_locale = ios.getloc();
                 d->restore_locale=false;
             }
@@ -43,7 +43,7 @@ namespace boost {
 
             void format_parser::restore()
             {
-                impl::ios_prop<impl::ios_info>::set(d->info,ios_);
+                ios_info::get(ios_) = d->info;
                 ios_.width(0);
                 if(d->restore_locale)
                     ios_.imbue(d->saved_locale);
@@ -146,7 +146,7 @@ namespace boost {
                 else if(key=="local")
                     as::local_time(ios_);
                 else if(key=="timezone" || key=="tz")
-                    ext_pattern(ios_,flags::time_zone_id,value);
+                    ios_info::get(ios_).time_zone(value);
                 else if(key=="w" || key=="width")
                     ios_.width(atoi(value.c_str()));
                 else if(key=="p" || key=="precision")
