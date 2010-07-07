@@ -74,54 +74,171 @@ namespace boost {
 
         /// \cond INTERNAL
 
-        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &);
-        BOOST_LOCALE_DECL uint64_t ext_flags(std::ios_base &,flags::display_flags_type mask);
-        BOOST_LOCALE_DECL void ext_setf(std::ios_base &,flags::display_flags_type flags,flags::display_flags_type mask);
-        
-        BOOST_LOCALE_DECL int ext_value(std::ios_base &,flags::value_type id);
-        BOOST_LOCALE_DECL void ext_value(std::ios_base &,flags::value_type id,int value);
-       
-        template<typename CharType>
-        void ext_pattern(std::ios_base &,flags::pattern_type pat,std::basic_string<CharType> const &);
+        class ios_info {
+        public:
 
-        template<typename CharType>
-        std::basic_string<CharType> ext_pattern(std::ios_base &,flags::pattern_type pattern);
+            class cached_info {
+                cached_info(cached_info const &);
+                void operator=(cached_info const &);
+            public:
+                cached_info(){}
+                virtual ~cached_info(){}
+                virtual cached_info *clone() = 0;
+            };
 
-        /// Specializations
+            ios_info();
+            ios_info(ios_info const &);
+            void operator=(ios_info const &);
+            ~ios_info();
 
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::string const &pattern);
-        
-        template<>
-        BOOST_LOCALE_DECL std::string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+            void cache(cached_info *info);
+            cached_info *cache(std::typeinfo const &) const;
 
-        #ifndef BOOST_NO_STD_WSTRING
-        
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::wstring const &pattern);
+            template<typename T>
+            T *cache() const
+            {
+                return dynamic_cast<T>(cache(typeid(T)));
+            }
 
-        template<>
-        BOOST_LOCALE_DECL std::wstring ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
+            static ios_info &get(std::ios_base &ios);
 
-        #endif // BOOST_NO_STD_WSTRING
+            void display_flags(uint64_t flags);
+            
+            void date_flags(uint64_t flags);
+            
+            void time_flags(uint64_t flags);
+            
+            void datetime_flags(uint64_t flags);
+            
+            void domain_id(int);
+            
+            void time_zone(std::string const &);
+            
+            template<typename CharType>
+            void date_time_pattern(std::basic_string<CharType> const &str)
+            {
+                date_time_pattern_set().set<CharType>(str.c_str());
+            }
 
-        #ifdef BOOST_HAS_CHAR16_T
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u16string const &pattern);
 
-        template<>
-        BOOST_LOCALE_DECL std::u16string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
-        #endif // char16_t, u16string
+            uint64_t display_flags() const;
+            
+            uint64_t date_flags() const;
+            
+            uint64_t time_flags() const;
+            
+            uint64_t datetime_flags() const;
+            
+            int domain_id() const;
+            
+            std::string time_zone() const;
+            
+            template<typename CharType>
+            std::basic_string<CharType> date_time_pattern() const
+            {
+                return date_time_pattern_set().get<CharType>();
+            }
 
-        #ifdef BOOST_HAS_CHAR32_T
-        template<>
-        BOOST_LOCALE_DECL void ext_pattern(std::ios_base &,flags::pattern_type pattern_id, std::u32string const &pattern);
+            
+        private:
 
-        template<>
-        BOOST_LOCALE_DECL std::u32string ext_pattern(std::ios_base &,flags::pattern_type pattern_id);
-        #endif // char32_t, u32string
+            string_set const &date_time_pattern_set() const;
+            string_set &date_time_pattern_set();
+            
+            class string_set {
+            public:
+                string_set() : 
+                    type(0),
+                    size(0),
+                    ptr(0)
+                {
+                    string_.nothing_=0;
+                }
 
-        /// \endcond
+                ~string_set()
+                {
+                    delete [] ptr;
+                }
+                string_set(string_set const &other)
+                {
+                    if(other.ptr!=0) {
+                        ptr=new char[other.size](0);
+                        size=other.size;
+                        type=other.type;
+                        memcpy(ptr,other.ptr,size);
+                    }
+                    else {
+                        ptr=0;
+                        size=0;
+                        type=0;
+                    }
+                }
+                string_set const &operator=(string_set const &other)
+                {
+                    if(this!=&other) {
+                        delete [] ptr;
+                        ptr = 0;
+                        size = 0;
+                        type = 0;
+                        if(other.ptr!=0) {
+                            ptr=new char[other.size](0);
+                            size=other.size;
+                            type=other.type;
+                            memcpy(ptr,other.ptr,size);
+                        }
+                    }
+                    return *this;
+                }
+
+                template<typename Char>
+                void set(std::basic_string<Char> const &s)
+                {
+                    set<Char>(s.c_str());
+                }
+                
+                template<typename Char>
+                void set(Char const *s)
+                {
+                    delete [] ptr;
+                    ptr = 0;
+                    type=&typeid(Char);
+                    Char *end = s;
+                    while(*end!=0) end++;
+                    size = sizeof(Char)*(end - s+1)
+                    ptr = new char[size](0);
+                    memcpy(ptr,s,size);
+                }
+                template<typename Char>
+                std::basic_string<Char> get() const
+                {
+                    if(type==0 || *type!=typeid(Char))
+                        throw std::bad_cast();
+                    std::basic_string<Char> result = reinterpret_cast<Char const *>(ptr);
+                    return result;
+                }
+
+                template<>
+                void set<char>(std::string const &s)
+                {
+                    clear();
+                }
+
+            private:
+                std::typeinfo const *type;
+                size_t size;
+                char *ptr;
+            };
+
+            uint64_t flags_;
+            int domain_id_;
+            std::string time_zone_;
+            string_set datetime_;
+
+            struct data;
+            data *d_;
+
+        };
+
 
         ///
         /// \brief This namespace includes all manipulators that can be used on IO streams
@@ -140,7 +257,7 @@ namespace boost {
             
             inline std::ios_base & posix(std::ios_base & ios)
             {
-                ext_setf(ios, flags::posix, flags::display_flags_mask);
+                ios_base::get(ios).display_flags(flags::posix);
                 return ios;
             }
 
@@ -150,7 +267,7 @@ namespace boost {
             ///
             inline std::ios_base & number(std::ios_base & ios)
             {
-                ext_setf(ios, flags::number, flags::display_flags_mask);
+                ios_base::get(ios).display_flags(flags::number);
                 return ios;
             }
             
@@ -159,7 +276,7 @@ namespace boost {
             ///
             inline std::ios_base & currency(std::ios_base & ios)
             {
-                ext_setf(ios, flags::currency, flags::display_flags_mask);
+                ios_base::get(ios).display_flags(flags::currency);
                 return ios;
             }
             
@@ -168,7 +285,7 @@ namespace boost {
             ///
             inline std::ios_base & percent(std::ios_base & ios)
             {
-                ext_setf(ios, flags::percent, flags::display_flags_mask);
+                ios_base::get(ios).display_flags(flags::percent);
                 return ios;
             }
             
@@ -177,7 +294,7 @@ namespace boost {
             ///
             inline std::ios_base & date(std::ios_base & ios)
             {
-                ext_setf(ios, flags::date, flags::display_flags_mask);
+                ios_base::get(ios).display_flags(flags::date);
                 return ios;
             }
 
@@ -186,7 +303,7 @@ namespace boost {
             ///
             inline std::ios_base & time(std::ios_base & ios)
             {
-                ext_setf(ios, flags::time, flags::display_flags_mask);
+                ios_base::get(ios)->display_flags(flags::time);
                 return ios;
             }
 

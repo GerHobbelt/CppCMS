@@ -41,9 +41,10 @@ namespace boost {
             convert_facet   = 1 << 0,   ///< Generate convertsion facets
             collation_facet = 1 << 1,   ///< Generate collation facets
             formatting_facet= 1 << 2,   ///< Generate numbers, currency, date-time formatting facets
-            message_facet   = 1 << 3,   ///< Generate message facets
-            codepage_facet  = 1 << 4,   ///< Generate codepage conversion facets (derived from std::codecvt)
-            boundary_facet  = 1 << 5,   ///< Generate boundary analysis facet
+            parsing_facet   = 1 << 3,   ///< Generate numbers, currency, date-time formatting facets
+            message_facet   = 1 << 4,   ///< Generate message facets
+            codepage_facet  = 1 << 5,   ///< Generate codepage conversion facets (derived from std::codecvt)
+            boundary_facet  = 1 << 6,   ///< Generate boundary analysis facet
             
             all_categories  = 0xFFFFFFFFu   ///< Generate all of them
         } locale_category_type;

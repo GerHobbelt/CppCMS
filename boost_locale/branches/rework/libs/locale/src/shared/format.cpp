@@ -10,7 +10,6 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>
 #include <limits>
-#include "formatting_info.hpp"
 #include <stdlib.h>
 
 #include <iostream>
