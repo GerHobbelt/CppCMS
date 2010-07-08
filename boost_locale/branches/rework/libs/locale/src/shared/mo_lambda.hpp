@@ -12,7 +12,7 @@
 
 namespace boost {
     namespace locale {
-        namespace impl {
+        namespace gnu_gettext {
             namespace lambda {
                 
                 struct plural {
@@ -29,7 +29,7 @@ namespace boost {
                 plural_ptr compile(char const *c_expression);
 
             } // lambda 
-        } // impl 
+        } // gnu_gettext
      } // locale 
 } // boost
 

@@ -11,7 +11,7 @@
 
 namespace boost {
 namespace locale {
-namespace impl {
+namespace gnu_gettext {
 namespace lambda {
 
     struct identity : public plural {
@@ -411,8 +411,7 @@ namespace lambda {
 
 
 } // lambda
-
-} // impl
+} // gnu_gettext
 } // locale
 } // boost
 

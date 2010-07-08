@@ -7,7 +7,7 @@
 //
 namespace boost {
     namespace locale {
-        namespace impl {
+        namespace gnu_gettext {
 
             inline uint32_t pj_winberger_hash_function(char const *ptr)
             {

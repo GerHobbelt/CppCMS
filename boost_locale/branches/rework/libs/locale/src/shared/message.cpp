@@ -9,8 +9,8 @@
 #include <boost/config.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/gnu_gettext.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/locale/codepage.hpp>
 #if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
 #else
@@ -18,7 +18,6 @@
 #endif
 
 
-#include "message.hpp"
 #include "mo_hash.hpp"
 #include "mo_lambda.hpp"
 
@@ -29,9 +28,11 @@
 
 namespace boost {
     namespace locale {
-        namespace impl {
+        namespace gnu_gettext {
+
             class mo_file {
             public:
+
                 typedef std::pair<char const *,char const *> pair_type;
                 
                 mo_file(std::string file_name) :
@@ -273,7 +274,7 @@ namespace boost {
                         bool found=false; 
                         for(unsigned j=0;!found && j<paths_no;j++) {
                             for(unsigned i=0;!found && i<inf.paths.size();i++) {
-                                std::string full_path = inf.paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
+                                std::string full_path = inf.paths[i]+"/"+paths[j]+"/" + inf.locale_category + "/"+domain+".mo";
 
                                 found = load_file(full_path,inf,id);
                             }
@@ -394,52 +395,43 @@ namespace boost {
 
                 
             };
-        } /// impl
 
         
-        //
-        // facet IDs and specializations
-        //
+            template<>
+            message_format<char> *create_messages_facet(messages_info<char> &info)
+            {
+                return new mo_message<char>(info);
+            }
 
-        std::locale::id base_message_format<char>::id;
+            #ifndef BOOST_NO_STD_WSTRING
+            
+            template<>
+            message_format<wchar_t> *create_messages_facet(messages_info<wchar_t> &info)
+            {
+                return new mo_message<wchar_t>(info);
+            }
+            #endif
+            
+            #ifdef BOOST_HAS_CHAR16_T
 
-        template<>
-        message_format<char> *create_messages_facet(messages_info<char> &info)
-        {
-            return new impl::mo_message<char>(info);
-        }
+            template<>
+            message_format<char16_t> *create_messages_facet(messages_info<char16_t> &info)
+            {
+                return new mo_message<char16_t>(info);
+            }
+            #endif
+            
+            #ifdef BOOST_HAS_CHAR32_T
 
-        #ifndef BOOST_NO_STD_WSTRING
-        std::locale::id base_message_format<wchar_t>::id;
-        
-        template<>
-        message_format<wchar_t> *create_messages_facet(messages_info<wchar_t> &info)
-        {
-            return new impl::mo_message<wchar_t>(info);
-        }
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR16_T
-        std::locale::id base_message_format<char16_t>::id;
-
-        template<>
-        message_format<char16_t> *create_messages_facet(messages_info<char16_t> &info)
-        {
-            return new impl::mo_message<char16_t>(info);
-        }
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR32_T
-        std::locale::id base_message_format<char32_t>::id;
-
-        template<>
-        message_format<char32_t> *create_messages_facet(messages_info<char32_t> &info)
-        {
-            return new impl::mo_message<char32_t>(info);
-        }
-        #endif
-
-    }
-}
+            template<>
+            message_format<char32_t> *create_messages_facet(messages_info<char32_t> &info)
+            {
+                return new mo_message<char32_t>(info);
+            }
+            #endif
+            
+        } /// gnu_gettext
+    } // locale
+} // boost
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 

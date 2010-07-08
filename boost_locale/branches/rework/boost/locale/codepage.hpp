@@ -16,6 +16,7 @@
 #include <boost/locale/info.hpp>
 #include <boost/cstdint.hpp>
 #include <stdexcept>
+#include <iosfwd>
 
 namespace boost {
     namespace locale {
@@ -30,19 +31,51 @@ namespace boost {
             /// @{
 
 
+            ///
+            /// enum that defines conversion policy
+            ///
+            typedef enum {
+                stop            = 0,    ///< Stop conversion and report error
+                skip            = 1,    ///< Skip illegal/unconvertable characters
+                substitute      = 2,    ///< Substitute illegal/unconvertable characters with some default one
+            } method_type;
+
+            
+            ///
+            /// \brief this class is created by the locale facet to convert one encoding to enother.
+            ///
+            /// It has two connected stream buffers - input stream buffer for consuming input text
+            /// and output stream buffer for reading converted data.
+            ///
             template<typename FromChar,typename ToChar>
             class codepage_converter {
                 codepage_converter(codepage_converter const &);
                 void operator=(codepage_converter const &);
             public:
-                virtual int write(FromChar const *fromt,int len) = 0;
-                virtual int read(ToChar *to,int len) = 0;
+
+                typedef FromChar from_char_type;
+                typedef ToChar to_char_type;
+
+                typedef std::basic_streambuf<FromChar> from_streambuf_type;
+                typedef std::basic_streambuf<FromChar> to_streambuf_type;
+
+                void in_method(method_type m) = 0;
+
+                void out_method(method_type m) = 0;
+
+                
+                from_streambuf_type *in() = 0; 
+
+                to_streambuf_type *out() = 0;
+                
                 virtual std::codecvt_base::result status() = 0;
+
                 virtual codepage_converter()
                 {
                 }
             };
-            
+
+
             template<typename CharType>
             class codepage_facet : public std::codecvt<CharType,char,mbstate_t> {
             public:
@@ -50,12 +83,12 @@ namespace boost {
                 {
                 }
 
-                codepage_converter<CharType,char> *to_internal(std::string const &from_encoding) const
+                codepage_converter<CharType,char> *from_internal(std::string const &external_encoding) const
                 {
                     return do_to_internal(from_encoding);
                 }
 
-                codepage_converter<char,CharType> *from_internal(std::string const &from_encoding) const
+                codepage_converter<char,CharType> *to_internal(std::string const &external_encoding) const
                 {
                     return do_from_internal(from_encoding);
                 }
@@ -107,16 +140,7 @@ namespace boost {
             public:
                 conversion_error() : std::runtime_error("Conversion failed") {}
             };
-            
 
-            ///
-            /// enum that defines conversion policy
-            ///
-            typedef enum {
-                skip            = 0,    ///< Skip illegal/unconvertable characters
-                stop            = 1,    ///< Stop conversion and throw conversion_error
-                default_method  = skip  ///< Default method - skip
-            } method_type;
 
             ///
             /// convert string to UTF string from text in range [begin,end) encoded with \a charset according to policy \a how

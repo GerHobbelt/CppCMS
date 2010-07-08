@@ -45,7 +45,9 @@ namespace boost {
 
             std::vector<std::string> paths;
             std::set<std::string> domains;
-            std::string default_domain;
+
+            std::map<std::string,std::vector<std::string> > options;
+
         };
 
         generator::generator() :

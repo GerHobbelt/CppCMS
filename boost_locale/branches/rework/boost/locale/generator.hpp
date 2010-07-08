@@ -26,6 +26,7 @@ namespace boost {
         /// a enum type that specifies the character type that locales can be generated for
         /// 
         typedef enum {
+            nochar_facet    = 0,        ///< Unspecified character category for character independed facets
             char_facet      = 1 << 0,   ///< 8-bit character facets
             wchar_t_facet   = 1 << 1,   ///< wide character facets
             char16_t_facet  = 1 << 2,   ///< C++0x char16_t facets
@@ -45,6 +46,7 @@ namespace boost {
             message_facet   = 1 << 4,   ///< Generate message facets
             codepage_facet  = 1 << 5,   ///< Generate codepage conversion facets (derived from std::codecvt)
             boundary_facet  = 1 << 6,   ///< Generate boundary analysis facet
+            calendar_facet  = 1 << 7,   ///< Generate boundary analysis facet
             
             all_categories  = 0xFFFFFFFFu   ///< Generate all of them
         } locale_category_type;
@@ -193,6 +195,20 @@ namespace boost {
             {
                 return get(id,encoding);
             }
+
+            ///
+            /// Set backend specific option
+            ///
+            void set_option(std::string const &name,std::string const &value);
+            ///
+            /// Set backend specific options list
+            ///
+            void set_option(std::string const &name,std::vector<std::string> const &value);
+
+            ///
+            /// Clear backend specific options
+            ///
+            void clear_options();
 
         private:
 
