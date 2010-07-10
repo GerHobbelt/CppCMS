@@ -8,13 +8,14 @@
 #ifndef BOOST_LOCALE_LOCALIZATION_BACKEND_HPP
 #define BOOST_LOCALE_LOCALIZATION_BACKEND_HPP
 #include <boost/locale/config.hpp>
+#include <boost/locale/generator.hpp>
 #ifdef BOOST_MSVC
 #  pragma warning(push)
 #  pragma warning(disable : 4275 4251 4231 4660)
 #endif
 #include <string>
 #include <locale>
-#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace boost {
     namespace locale {
@@ -45,17 +46,12 @@ namespace boost {
             localization_backend()
             {
             }
+            
+            virtual ~localization_backend()
+            {
+            }
 
             virtual localization_backend *clone() const = 0;
-
-            ///
-            /// Get backend name, for example "icu", "std" or "Qt"
-            ///
-            virtual std::string name() const = 0;
-            ///
-            /// Get a priority for the backend 
-            ///
-            virtual int priority() const = 0;
 
             ///
             /// Set option for backend, for example "locale" or "encoding"
@@ -65,58 +61,45 @@ namespace boost {
             ///
             /// Clear all options
             ///
-            virtual void clear_options();
+            virtual void clear_options() = 0;
 
             ///
             /// Create a facet for category \a category and character type \a type 
             ///
             virtual std::locale::facet *create(locale_category_type category,character_facet_type type = nochar_facet) = 0;
 
-            virtual ~localization_backend()
-            {
-            }
+        }; // localization_backend 
 
-        };
-
-        class BOOST_LOCALE_DECL localization_backends_manager {
-
-            localization_backends_manager();
-            ~localization_backends_manager();
-            localization_backends_manager(localization_backends_manager const &);
-            void operator = (localization_backends_manager const &);
-
+        class BOOST_LOCALE_DECL localization_backend_manager {
         public:
-            static localization_backends_manager &instance();
+            localization_backend_manager();
+            localization_backend_manager(localization_backend_manager const &);
+            localization_backend_manager const &operator=(localization_backend_manager const &);
+            ~localization_backend_manager();
 
-            bool register_backend(std::auto_ptr<localization_backend> backend);
-            void unregister_backend(std::string const &s);
+            std::auto_ptr<localization_backend> get() const;
 
-            std::multimap<int,std::string> all_backends() const;
-
-            std::auto_ptr<localization_backend> get_backend(locale_category_type category) const;
-            std::auto_ptr<localization_backend> get_backend(std::string const &name) const;
-
-            void set_default(std::string const &name,locale_category_type category = all_categories);
-
+            void add_backend(std::string const &name,std::auto_ptr<localization_backend> backend);
+            void remove_all_backends();
+            
+            std::vector<std::string> get_all_backends() const;
+            
+            void select(std::string const &backend_name,locale_category_type category = all_categories);
+            
+            static localization_backend_manager global(localization_backend_manager const &);
+            static localization_backend_manager global();
         private:
-            std::multimap<int priority,boost::shared_ptr<localization_backend> > backends_;
-            boost::shared_ptr<localization_backend> current_backend_;
+            class impl;
+            std::auto_ptr<impl> pimpl_;
         };
 
-    }
-}
-
-
-
-
-
-
+    } // locale
+} // boost
 
 
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
-
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 
