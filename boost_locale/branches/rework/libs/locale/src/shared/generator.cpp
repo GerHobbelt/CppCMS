@@ -6,23 +6,21 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
-#include <boost/locale/info.hpp>
 #include <boost/locale/generator.hpp>
-#include <boost/locale/collator.hpp>
-#include <boost/locale/message.hpp>
-#include <boost/locale/codepage.hpp>
-#include "numeric.hpp"
-#include "conversion.hpp"
-#include "collator.hpp"
-#include "codepage.hpp"
-#include "boundary.hpp"
+#include <boost/locale/localization_backend.hpp>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 namespace boost {
     namespace locale {
         struct generator::data {
-            data() {
-                cats = all_categories;
-                chars = all_characters;
+            data(localization_backend_manager const &mgr)  :
+                cats(all_categories),
+                chars(all_characters),
+                backend_manager(mgr)
+            {
             }
 
             typedef std::map<std::string,std::locale> cached_type;
@@ -36,11 +34,16 @@ namespace boost {
 
             std::map<std::string,std::vector<std::string> > options;
 
+            localization_backend_manager backend_manager;
 
         };
 
+        generator::generator(localization_backend_manager const &mgr) :
+            d(new generator::data(mgr))
+        {
+        }
         generator::generator() :
-            d(new generator::data())
+            d(new generator::data(localization_backend_manager::global()))
         {
         }
         generator::~generator()
@@ -116,13 +119,7 @@ namespace boost {
 
         std::locale generator::generate(std::locale const &base,std::string const &id) const
         {
-            boost::shared_ptr<localization_backend> backend;
-            
-            if(!d->backend_manager.get()) 
-                backend=d->backend_manager.get();
-            else
-                backend=localization_backend_manager::global().get();
-
+            shared_ptr<localization_backend> backend(d->backend_manager.get());
             set_all_options(backend,id);
 
             std::locale result = base;
@@ -135,22 +132,18 @@ namespace boost {
                 for(unsigned ch = character_first_facet ; ch<=character_last_facet;ch <<=1) {
                     if(!(ch & chars))
                         continue;
-                    std::locale::facet *new_facet = backend->create(facet,ch);
-                    if(new_facet)
-                        result = std::locale(result,new_facet);
+                    result = backend->install(result,facet,ch);
                 }
             }
             for(unsigned facet = non_character_facet_first; facet <= non_character_facet_last && facet!=0; facet <<=1) {
                 if(!(facets & facet))
                     continue;
-                std::locale::facet *new_facet = backend->create(facet);
-                if(new_facet)
-                    result = std::locale(result,new_facet);
+                result = backend->install(result,facet);
             }
             return result;
         }
         
-        void generator::set_all_options(boost::shared_ptr<localization_backend> backend,std::string const &id)
+        void generator::set_all_options(shared_ptr<localization_backend> backend,std::string const &id) const
         {
             backend->set_option("locale",id);
             for(unsigned i=0;i<d->domains.size();i++)
@@ -159,35 +152,6 @@ namespace boost {
                 backend->set_option("message_path",d->paths[i]);
         }
         
-        namespace details {
-            struct initializer_class {
-                template<typename CharType>
-                static void preload()
-                {
-                    std::locale l;
-                    std::has_facet<info>(l);
-                    std::has_facet<num_format<CharType> >(l);
-                    std::has_facet<num_parse<CharType> >(l);
-                    std::has_facet<collator<CharType> >(l);
-                    std::has_facet<std::codecvt<CharType,char,mbstate_t> >(l);
-                    std::has_facet<message_format<CharType> >(l);
-                }
-                initializer_class()
-                {
-                    preload<char>();
-                    #ifndef BOOST_NO_STD_WSTRING
-                    preload<wchar_t>();
-                    #endif
-                    #ifdef BOOST_HAS_CHAR16_T
-                    preload<char16_t>();
-                    #endif
-                    #ifdef BOOST_HAS_CHAR32_T
-                    preload<char32_t>();
-                    #endif
-                }
-            } the_initializer;
-        } // details
-
     } // locale
 } // boost
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 

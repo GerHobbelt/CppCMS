@@ -16,7 +16,7 @@
 
 namespace boost {
 namespace locale {
-namespace impl {
+namespace impl_icu {
 
     typedef enum {
         cvt_skip,
@@ -237,7 +237,7 @@ namespace impl {
         icu_std_converter(std::string charset,cpcvt_type unused=cvt_skip) {}
 
     };
-} /// impl
+} /// impl_icu
 } //  locale
 } // boost
 

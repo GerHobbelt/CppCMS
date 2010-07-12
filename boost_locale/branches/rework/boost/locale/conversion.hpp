@@ -48,6 +48,9 @@ namespace boost {
             {
             }
             virtual std::string convert(conversion_type how,char const *begin,char const *end,int flags = 0) const = 0;
+#if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+            std::locale::id& __get_id (void) const { return id; }
+#endif
         };
 
         #ifndef BOOST_NO_STD_WSTRING
@@ -59,6 +62,9 @@ namespace boost {
             {
             }
             virtual std::wstring convert(conversion_type how,wchar_t const *begin,wchar_t const *end,int flags = 0) const = 0;
+#if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+            std::locale::id& __get_id (void) const { return id; }
+#endif
         };
         #endif
 
@@ -71,6 +77,9 @@ namespace boost {
             {
             }
             virtual std::u16string convert(conversion_type how,char16_t const *begin,char16_t const *end,int flags = 0) const = 0; 
+#if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+            std::locale::id& __get_id (void) const { return id; }
+#endif
         };
         #endif
 
@@ -83,6 +92,9 @@ namespace boost {
             {
             }
             virtual std::u32string convert(conversion_type how,char32_t const *begin,char32_t const *end,int flags = 0) const = 0;
+#if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+            std::locale::id& __get_id (void) const { return id; }
+#endif
         };
         #endif
 

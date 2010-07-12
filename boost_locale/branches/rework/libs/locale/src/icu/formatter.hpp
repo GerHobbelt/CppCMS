@@ -103,18 +103,7 @@ namespace boost {
             ///
             /// Would create new spelling formatter only once.
             ///
-            static formatter const *get(std::ios_base &ios);
-
-            ///
-            /// Create formatter for current state of ios_base -- flags and locale,
-            /// auto_ptr may hold NULL pointer if the formatting is not supported by locale
-            /// or invalid combination of flags was given. User must check if auto_ptr::get
-            /// returns non-zero. Otherwise it should fallback to standard C++ methods.
-            ///
-            /// Note: returning NULL is **not** a error. If no locale specific flags are given
-            /// no formatter would be generated! 
-            ///
-            static std::auto_ptr<formatter> create(std::ios_base &ios);
+            static boost::shared_ptr<formatter> get(std::ios_base &ios);
 
             virtual ~formatter()
             {

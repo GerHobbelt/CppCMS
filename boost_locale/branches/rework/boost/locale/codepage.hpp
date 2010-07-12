@@ -40,7 +40,6 @@ namespace boost {
             typedef enum {
                 stop            = 0,    ///< Stop conversion and report error
                 skip            = 1,    ///< Skip illegal/unconvertable characters
-                substitute      = 2,    ///< Substitute illegal/unconvertable characters with some default one
                 default_method  = stop  ///< Default is stop conversion
             } method_type;
 
@@ -63,14 +62,14 @@ namespace boost {
                 typedef std::basic_streambuf<FromChar> from_streambuf_type;
                 typedef std::basic_streambuf<FromChar> to_streambuf_type;
 
-                void in_method(method_type m) = 0;
+                virtual void in_method(method_type m) = 0;
 
-                void out_method(method_type m) = 0;
+                virtual void out_method(method_type m) = 0;
 
                 
-                from_streambuf_type *in() = 0; 
+                virtual from_streambuf_type *in() = 0; 
 
-                to_streambuf_type *out() = 0;
+                virtual to_streambuf_type *out() = 0;
                 
                 virtual std::codecvt_base::result status() = 0;
 
@@ -182,7 +181,7 @@ namespace boost {
                 void init(converter_type *cvt)
                 {
                     if(!cvt) {
-                        throw std::illegal_argumet("Invalid or unsupported encoding");
+                        throw std::invalid_argument("Invalid or unsupported encoding");
                     }
                     converter_ = cvt;
                     istream_type::init(converter_->in());
@@ -195,7 +194,7 @@ namespace boost {
 
 
             template<typename FromChar,typename ToChar>
-            class conversion_stream;
+            class basic_conversion_stream;
 
             template<typename FromChar>
             class basic_conversion_stream<FromChar,char> : public conversion_stream_base<FromChar,char>
@@ -223,11 +222,11 @@ namespace boost {
             public:
                 basic_conversion_stream(std::string source_encoding,std::locale const &target_locale)
                 {
-                    init(std::use_facet<codepage_facet<ToChar> >(target_locale).to_iternal(source_encoding));
+                    init(std::use_facet<codepage_facet<char> >(target_locale).to_internal(source_encoding));
                 }
                 basic_conversion_stream(std::locale const &source_locale,std::string target_encoding)
                 {
-                    init(std::use_facet<codepage_facet<ToChar> >(source_locale).from_iternal(target_encoding));
+                    init(std::use_facet<codepage_facet<char> >(source_locale).from_internal(target_encoding));
                 }
             };
 

@@ -5,20 +5,22 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
+#define BOOST_LOCALE_SOURCE
 #include <boost/locale/collator.hpp>
-#include <boost/locale/info.hpp>
+#include <boost/locale/generator.hpp>
 #include <vector>
 #include <limits>
 
-#include "info_impl.hpp"
+#include "cdata.hpp"
+#include "all_generator.hpp"
 #include "uconv.hpp"
-#include "mo_hash.hpp"
+#include "../shared/mo_hash.hpp"
 
 #include <unicode/coll.h>
 
 namespace boost {
     namespace locale {
-        namespace impl {
+        namespace impl_icu {
             template<typename CharType>
             class collate_impl : public collator<CharType> 
             {
@@ -76,10 +78,10 @@ namespace boost {
                 {
                     std::vector<uint8_t> tmp = do_basic_transform(level,b,e);
                     tmp.push_back(0);
-                    return pj_winberger_hash_function(reinterpret_cast<char *>(&tmp.front()));
+                    return gnu_gettext::pj_winberger_hash_function(reinterpret_cast<char *>(&tmp.front()));
                 }
 
-                collate_impl(icu::Locale const &locale,std::string encoding) : cvt_(encoding)
+                collate_impl(cdata const &d) : cvt_(d.encoding)
                 {
                 
                     static const icu::Collator::ECollationStrength levels[level_count] = 
@@ -95,7 +97,7 @@ namespace boost {
 
                         UErrorCode status=U_ZERO_ERROR;
 
-                        collates_[i].reset(icu::Collator::createInstance(locale,status));
+                        collates_[i].reset(icu::Collator::createInstance(d.locale,status));
 
                         if(U_FAILURE(status))
                             throw std::runtime_error(std::string("Creation of collate failed:") + u_errorName(status));
@@ -109,8 +111,30 @@ namespace boost {
                 icu_std_converter<CharType>  cvt_;
                 std::auto_ptr<icu::Collator> collates_[level_count];
             };
+        
+            std::locale create_collate(std::locale const &in,cdata const &cd,character_facet_type type)
+            {
+                switch(type) {
+                case char_facet:
+                    return std::locale(in,new collate_impl<char>(cd));
+                #ifndef BOOST_NO_STD_WSTRING
+                case wchar_t_facet:
+                    return std::locale(in,new collate_impl<wchar_t>(cd));
+                #endif
+                #ifdef BOOST_HAS_CHAR16_T
+                case char16_t_facet:
+                    return std::locale(in,new collate_impl<char16_t>(cd));
+                #endif
+                #ifdef BOOST_HAS_CHAR32_T
+                case char32_t_facet:
+                    return std::locale(in,new collate_impl<char32_t>(cd));
+                #endif
+                default:
+                    return in;
+                }
+            }
 
-        } /// impl
+        } /// impl_icu
 
     } // locale
 } // boost

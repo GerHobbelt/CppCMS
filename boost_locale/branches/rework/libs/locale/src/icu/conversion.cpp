@@ -5,34 +5,35 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
+#define BOOST_LOCALE_SOURCE
 #include <boost/locale/conversion.hpp>
-#include <boost/locale/info.hpp>
+#include <boost/locale/generator.hpp>
 #include <unicode/normlzr.h>
 #include <unicode/ustring.h>
 
-#include "info_impl.hpp"
+#include "cdata.hpp"
 #include "uconv.hpp"
 
 
 namespace boost {
 namespace locale {
-
+namespace impl_icu {
     template<typename CharType>
     class converter_impl : public converter<CharType> {
     public:
         typedef CharType char_type;
         typedef std::basic_string<char_type> string_type;
 
-        converter_impl(icu::Locale const &loc,std::string const &encoding) :
-            locale_(loc),
-            encoding_(encoding)
+        converter_impl(cdata const &d) :
+            locale_(d.locale),
+            encoding_(d.encoding)
         {
         }
 
 
         virtual string_type convert(converter_base::conversion_type how,char_type const *begin,char_type const *end,int flags = 0) const
         {
-            impl::icu_std_converter<char_type> cvt(encoding_);
+            icu_std_converter<char_type> cvt(encoding_);
             icu::UnicodeString str=cvt.icu(begin,end);
             switch(how) {
             case converter_base::normalization:
@@ -79,7 +80,7 @@ namespace locale {
             icu::UnicodeString tmp;
             icu::Normalizer::normalize(str,mode,0,tmp,code);
 
-            impl::check_and_throw_icu_error(code);
+            check_and_throw_icu_error(code);
 
             str=tmp;
         }
@@ -88,6 +89,30 @@ namespace locale {
         std::string encoding_;
     }; // converter_impl
 
+    std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)
+    {
+        switch(type) {
+        case char_facet:
+            return std::locale(in,new converter_impl<char>(cd));
+        #ifndef BOOST_NO_STD_WSTRING
+        case wchar_t_facet:
+            return std::locale(in,new converter_impl<wchar_t>(cd));
+        #endif
+        #ifdef BOOST_HAS_CHAR16_T
+        case char16_t_facet:
+            return std::locale(in,new converter_impl<char16_t>(cd));
+        #endif
+        #ifdef BOOST_HAS_CHAR32_T
+        case char32_t_facet:
+            return std::locale(in,new converter_impl<char32_t>(cd));
+        #endif
+        default:
+            return in;
+        }
+    }
+    
+
+} // impl_icu
 } // locale
 } // boost
 

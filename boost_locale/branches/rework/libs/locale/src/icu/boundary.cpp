@@ -6,7 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #include <boost/locale/boundary.hpp>
-#include <boost/locale/info.hpp>
+#include <boost/locale/generator.hpp>
 #include <unicode/uversion.h>
 #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 306
 #include <unicode/utext.h>
@@ -14,15 +14,17 @@
 #include <unicode/brkiter.h>
 #include <unicode/rbbi.h>
 
+#include "cdata.hpp"
+#include "all_generator.hpp"
 #include "icu_util.hpp"
 #include "uconv.hpp"
 
 namespace boost {
 namespace locale {
 namespace boundary {
-namespace impl {
+namespace impl_icu {
 
-using namespace boost::locale::impl;
+using namespace boost::locale::impl_icu;
 
 index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
 {
@@ -54,7 +56,7 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
                 n = rbbi->getRuleStatusVec(buf,buffer.size(),err);
             }
 
-            impl::check_and_throw_icu_error(err);
+            check_and_throw_icu_error(err);
 
             for(int i=0;i<n;i++) {
                 switch(t) {
@@ -158,7 +160,7 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,icu:
     else 
 #endif
     {
-        impl::icu_std_converter<CharType> cvt(encoding);
+        icu_std_converter<CharType> cvt(encoding);
         icu::UnicodeString str=cvt.icu(begin,end);
         bi->setText(str);
         index_type indirect = map_direct(t,bi.get(),str.length());
@@ -173,26 +175,53 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,icu:
     return indx;
 } // do_map
 
-} // impl
-
 template<typename CharType>
 class boundary_indexing_impl : public boundary_indexing<CharType> {
 public:
-    boundary_indexing_impl(icu::Locale const &l,std::string const &e) :
-        locale_(l),
-        encoding_(e)
+    boundary_indexing_impl(cdata const &data) :
+        locale_(data.locale),
+        encoding_(data.encoding)
     {
     }
     index_type map(boundary_type t,CharType const *begin,CharType const *end) const 
     {
-        return impl::do_map<CharType>(t,begin,end,locale_,encoding_);
+        return do_map<CharType>(t,begin,end,locale_,encoding_);
     }
 private:
     icu::Locale locale_;
     std::string encoding_;
 };
 
+
+
+} // impl_icu
 } // boundary
+
+namespace impl_icu {
+    std::locale create_boundary(std::locale const &in,cdata const &cd,character_facet_type type)
+    {
+        using namespace boost::locale::boundary::impl_icu;
+        switch(type) {
+        case char_facet:
+            return std::locale(in,new boundary_indexing_impl<char>(cd));
+        #ifndef BOOST_NO_STD_WSTRING
+        case wchar_t_facet:
+            return std::locale(in,new boundary_indexing_impl<wchar_t>(cd));
+        #endif
+        #ifdef BOOST_HAS_CHAR16_T
+        case char16_t_facet:
+            return std::locale(in,new boundary_indexing_impl<char16_t>(cd));
+        #endif
+        #ifdef BOOST_HAS_CHAR32_T
+        case char32_t_facet:
+            return std::locale(in,new boundary_indexing_impl<char32_t>(cd));
+        #endif
+        default:
+            return in;
+        }
+    }
+} // impl_icu
+
 } // locale
 } // boost
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

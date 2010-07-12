@@ -66,7 +66,7 @@ namespace boost {
             ///
             /// Create a facet for category \a category and character type \a type 
             ///
-            virtual std::locale::facet *create(locale_category_type category,character_facet_type type = nochar_facet) = 0;
+            virtual std::locale install(std::locale const &base,locale_category_type category,character_facet_type type = nochar_facet) = 0;
 
         }; // localization_backend 
 

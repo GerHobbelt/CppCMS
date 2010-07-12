@@ -147,6 +147,9 @@ namespace boost {
                 }
                 virtual index_type map(boundary_type t,char const *begin,char const *end) const = 0;
                 static std::locale::id id;
+                #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+                std::locale::id& __get_id (void) const { return id; }
+                #endif
             };
             
             #ifndef BOOST_NO_STD_WSTRING
@@ -159,6 +162,9 @@ namespace boost {
                 virtual index_type map(boundary_type t,wchar_t const *begin,wchar_t const *end) const = 0;
 
                 static std::locale::id id;
+                #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+                std::locale::id& __get_id (void) const { return id; }
+                #endif
             };
             #endif
             
@@ -171,6 +177,9 @@ namespace boost {
                 }
                 virtual index_type map(boundary_type t,char16_t const *begin,char16_t const *end) const = 0;
                 static std::locale::id id;
+                #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+                std::locale::id& __get_id (void) const { return id; }
+                #endif
             };
             #endif
             
@@ -183,6 +192,9 @@ namespace boost {
                 }
                 virtual index_type map(boundary_type t,char32_t const *begin,char32_t const *end) const = 0;
                 static std::locale::id id;
+                #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
+                std::locale::id& __get_id (void) const { return id; }
+                #endif
             };
             #endif
 

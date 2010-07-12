@@ -12,7 +12,7 @@
 
 namespace boost {
 namespace locale {
-namespace impl {
+namespace impl_icu {
 
     inline void throw_icu_error(UErrorCode err)
     {

@@ -17,51 +17,50 @@
 #include <memory>
 
 namespace boost {
+
+    template<typename Type>
+    class shared_ptr;
+
     ///
     /// \brief This is the main namespace that encloses all localization classes 
     ///
     namespace locale {
 
-        ///
-        /// a enum type that specifies the character type that locales can be generated for
-        /// 
-        typedef enum {
-            nochar_facet    = 0,        ///< Unspecified character category for character independed facets
-            char_facet      = 1 << 0,   ///< 8-bit character facets
-            wchar_t_facet   = 1 << 1,   ///< wide character facets
-            char16_t_facet  = 1 << 2,   ///< C++0x char16_t facets
-            char32_t_facet  = 1 << 3,   ///< C++0x char32_t facets
+        class localization_backend;
+        class localization_backend_manager;
 
-            character_first_facet = char_facet,
-            character_last_facet = char32_t_facet,
+        static const unsigned nochar_facet    = 0;        ///< Unspecified character category for character independed facets
+        static const unsigned char_facet      = 1 << 0;   ///< 8-bit character facets
+        static const unsigned wchar_t_facet   = 1 << 1;   ///< wide character facets
+        static const unsigned char16_t_facet  = 1 << 2;   ///< C++0x char16_t facets
+        static const unsigned char32_t_facet  = 1 << 3;   ///< C++0x char32_t facets
 
-            all_characters = 0xFFFF     ///< Special mask -- generate all
-        } character_facet_type;
+        static const unsigned character_first_facet = char_facet;
+        static const unsigned character_last_facet = char32_t_facet;
+        static const unsigned all_characters = 0xFFFF;     ///< Special mask -- generate all
+        
+        typedef unsigned character_facet_type; ///<type that specifies the character type that locales can be generated for
 
-        ///
-        /// a special enum used for more fine grained generation of facets
-        ///
-        typedef enum {
-            convert_facet   = 1 << 0,   ///< Generate convertsion facets
-            collation_facet = 1 << 1,   ///< Generate collation facets
-            formatting_facet= 1 << 2,   ///< Generate numbers, currency, date-time formatting facets
-            parsing_facet   = 1 << 3,   ///< Generate numbers, currency, date-time formatting facets
-            message_facet   = 1 << 4,   ///< Generate message facets
-            codepage_facet  = 1 << 5,   ///< Generate codepage conversion facets (derived from std::codecvt)
-            boundary_facet  = 1 << 6,   ///< Generate boundary analysis facet
+        static const unsigned     convert_facet   = 1 << 0;   ///< Generate convertsion facets
+        static const unsigned     collation_facet = 1 << 1;   ///< Generate collation facets
+        static const unsigned     formatting_facet= 1 << 2;   ///< Generate numbers, currency, date-time formatting facets
+        static const unsigned     parsing_facet   = 1 << 3;   ///< Generate numbers, currency, date-time formatting facets
+        static const unsigned     message_facet   = 1 << 4;   ///< Generate message facets
+        static const unsigned     codepage_facet  = 1 << 5;   ///< Generate codepage conversion facets (derived from std::codecvt)
+        static const unsigned     boundary_facet  = 1 << 6;   ///< Generate boundary analysis facet
             
-            per_character_facet_first = convert_facet,
-            per_character_facet_last = boundary_facet,
+        static const unsigned     per_character_facet_first = convert_facet;
+        static const unsigned     per_character_facet_last = boundary_facet;
 
-            calendar_facet  = 1 << 16,   ///< Generate boundary analysis facet
-            information_facet  
-                            = 1 << 17,   ///< Generate general locale information facet
+        static const unsigned     calendar_facet  = 1 << 16;   ///< Generate boundary analysis facet
+        static const unsigned     information_facet = 1 << 17;   ///< Generate general locale information facet
 
-            non_character_facet_first = calendar_facet,
-            non_character_facet_last = information_facet
+        static const unsigned    non_character_facet_first = calendar_facet;
+        static const unsigned    non_character_facet_last = information_facet;
             
-            all_categories  = 0xFFFFFFFFu   ///< Generate all of them
-        } locale_category_type;
+        static const unsigned    all_categories  = 0xFFFFFFFFu;   ///< Generate all of them
+        
+        typedef unsigned locale_category_type; ///< a type used for more fine grained generation of facets
 
         ///
         /// \brief the major class used for locale generation
@@ -74,6 +73,7 @@ namespace boost {
         public:
 
             generator();
+            generator(localization_backend_manager const &);
             ~generator();
 
             ///
@@ -172,6 +172,8 @@ namespace boost {
             void clear_options();
 
         private:
+
+            void set_all_options(shared_ptr<localization_backend> backend,std::string const &id) const;
 
             generator(generator const &);
             void operator=(generator const &);

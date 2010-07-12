@@ -105,7 +105,7 @@ namespace boost {
                     for(unsigned i=0;i<backends_.size();i++)
                         backends_[i]->clear_options();
                 }
-                virtual std::locale::facet *create(locale_category_type category,character_facet_type type = nochar_facet)
+                virtual std::locale install(std::locale const &l,locale_category_type category,character_facet_type type = nochar_facet)
                 {
                     int id;
                     unsigned v;
@@ -114,12 +114,12 @@ namespace boost {
                             break;
                     }
                     if(v==0)
-                        return 0;
+                        return l;
                     if(unsigned(id) >= backends_.size())
-                        return 0;
+                        return l;
                     if(index_[id]==-1) 
-                        return 0;
-                    return backends_[index_[id]]->create(category,type);
+                        return l;
+                    return backends_[index_[id]]->install(l,category,type);
                 }
             private:
                 std::vector<boost::shared_ptr<localization_backend> > backends_;
