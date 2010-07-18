@@ -9,10 +9,7 @@
 #include <boost/locale/formatting.hpp>
 #include "formatter.hpp"
 #include <boost/locale/info.hpp>
-#include "ios_prop.hpp"
-#include "formatting_info.hpp"
 #include "uconv.hpp"
-#include "info_impl.hpp"
 
 
 #include <unicode/numfmt.h>
@@ -32,20 +29,8 @@
 
 namespace boost {
 namespace locale {
-    namespace impl {
+    namespace impl_icu {
         
-        typedef ios_prop<ios_info> ios_prop_info_type;
-
-        namespace {
-            struct  initializer {
-                initializer()
-                {
-                    /// make sure xalloc called
-                    ios_prop_info_type::global_init();
-                }
-            } init;
-        }
-
         template<typename CharType>
         class number_format : public formatter<CharType> {
         public:
@@ -412,23 +397,21 @@ namespace locale {
         }
         
         template<typename CharType>
-        std::auto_ptr<formatter<CharType> > generate_formatter(std::ios_base &ios)
+        std::auto_ptr<formatter<CharType> > generate_formatter(
+                    std::ios_base &ios,
+                    icu::Locale const &locale,
+                    std::string const &encoding)
         {
             using namespace boost::locale::flags;
 
             std::auto_ptr<formatter<CharType> > fmt;
-            ios_info &info=ios_prop<ios_info>::get(ios);
-            uint64_t disp = info.flags() &  flags::display_flags_mask;
+            ios_info &info=ios_info::get(ios);
+            uint64_t disp = info.display_flags();
 
 
             if(disp == posix)
                 return fmt;
            
-            boost::locale::info const &locale_info = std::use_facet<boost::locale::info>(ios.getloc());
-            icu::Locale const &locale = locale_info.impl()->locale;
-            std::string encoding = locale_info.impl()->encoding;
-
-
             UErrorCode err=U_ZERO_ERROR;
             
             switch(disp) {
@@ -460,7 +443,7 @@ namespace locale {
                     // ICU 4.2 has special ISO currency style
                     //
                     
-                    uint64_t curr = info.flags() & currency_flags_mask;
+                    uint64_t curr = info.currency_flags();
 
                     if(curr == currency_default || curr == currency_national)
                         nf.reset(icu::NumberFormat::createInstance(locale,icu::NumberFormat::kCurrencyStyle,err));
@@ -521,13 +504,13 @@ namespace locale {
                     icu::DateFormat::EStyle dstyle = icu::DateFormat::kDefault,tstyle = icu::DateFormat::kDefault;
                     std::auto_ptr<icu::DateFormat> df;
                     
-                    switch(info.flags() & time_flags_mask) {
+                    switch(info.time_flags()) {
                     case time_short:    tstyle=icu::DateFormat::kShort; break;
                     case time_medium:   tstyle=icu::DateFormat::kMedium; break;
                     case time_long:     tstyle=icu::DateFormat::kLong; break;
                     case time_full:     tstyle=icu::DateFormat::kFull; break;
                     }
-                    switch(info.flags() & date_flags_mask) {
+                    switch(info.date_flags()) {
                     case date_short:    dstyle=icu::DateFormat::kShort; break;
                     case date_medium:   dstyle=icu::DateFormat::kMedium; break;
                     case date_long:     dstyle=icu::DateFormat::kLong; break;
@@ -542,7 +525,7 @@ namespace locale {
                         df.reset(icu::DateFormat::createDateTimeInstance(dstyle,tstyle,locale));
                     else {// strftime
                         icu_std_converter<CharType> cvt_(encoding);
-                        std::basic_string<CharType> const &f=info.datetime<CharType>();
+                        std::basic_string<CharType> const &f=info.date_time_pattern<CharType>();
                         icu::UnicodeString fmt = strftime_to_icu(cvt_.icu(f.data(),f.data()+f.size()),locale);
                         df.reset(new icu::SimpleDateFormat(fmt,locale,err));
                     }
@@ -550,8 +533,8 @@ namespace locale {
                         return fmt;
                     if(U_FAILURE(err))
                         return fmt;
-                    if(!info.timezone().empty())
-                        df->adoptTimeZone(icu::TimeZone::createTimeZone(info.timezone().c_str()));
+                    if(!info.time_zone().empty())
+                        df->adoptTimeZone(icu::TimeZone::createTimeZone(info.time_zone().c_str()));
                         
                     fmt.reset(new date_format<CharType>(df,encoding));
                 }
@@ -561,67 +544,42 @@ namespace locale {
             return fmt;
         }
 
-        template<typename Char>
-        formatter<Char> const *get_cached_formatter(std::ios_base &ios)
-        {
-            return ios_prop<ios_info>::get(ios).formatter<Char>(ios);
-        }
 
-
-    } // impl
 
     template<>
-    std::auto_ptr<formatter<char> > formatter<char>::create(std::ios_base &ios)
+    std::auto_ptr<formatter<char> > formatter<char>::create(std::ios_base &ios,icu::Locale const &l,std::string const &e)
     {
-        return impl::generate_formatter<char>(ios);
+        return generate_formatter<char>(ios,l,e);
     }
 
-    template<>
-    formatter<char> const *formatter<char>::get(std::ios_base &ios)
-    {
-        return impl::get_cached_formatter<char>(ios);
-    }
     #ifndef BOOST_NO_STD_WSTRING
     template<>
-    std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios)
+    std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios,icu::Locale const &l,std::string const &e)
     {
-        return impl::generate_formatter<wchar_t>(ios);
+        return generate_formatter<wchar_t>(ios,l,e);
     }
 
-    template<>
-    formatter<wchar_t> const *formatter<wchar_t>::get(std::ios_base &ios)
-    {
-        return impl::get_cached_formatter<wchar_t>(ios);
-    }
     #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    std::auto_ptr<formatter<char16_t> > formatter<char16_t>::create(std::ios_base &ios)
+    std::auto_ptr<formatter<char16_t> > formatter<char16_t>::create(std::ios_base &ios,icu::Locale const &l,std::string const &e)
     {
-        return impl::generate_formatter<char16_t>(ios);
+        return generate_formatter<char16_t>(ios,l,e);
     }
 
-    template<>
-    formatter<char16_t> const *formatter<char16_t>::get(std::ios_base &ios)
-    {
-        return impl::get_cached_formatter<char16_t>(ios);
-    }
     #endif
 
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    std::auto_ptr<formatter<char32_t> > formatter<char32_t>::create(std::ios_base &ios)
+    std::auto_ptr<formatter<char32_t> > formatter<char32_t>::create(std::ios_base &ios,icu::Locale const &l,std::string const &e)
     {
-        return impl::generate_formatter<char32_t>(ios);
+        return generate_formatter<char32_t>(ios,l,e);
     }
 
-    template<>
-    formatter<char32_t> const *formatter<char32_t>::get(std::ios_base &ios)
-    {
-        return impl::get_cached_formatter<char32_t>(ios);
-    }
     #endif
+    
+} // impl_icu
 
 } // locale
 } // boost
