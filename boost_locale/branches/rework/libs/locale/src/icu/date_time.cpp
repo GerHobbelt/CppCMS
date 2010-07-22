@@ -6,6 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
+#include <boost/locale/date_time_facet.hpp>
 #include <boost/locale/date_time.hpp>
 #include <boost/locale/formatting.hpp>
 #include <unicode/calendar.h>
@@ -16,6 +17,38 @@
 
 namespace boost {
 namespace locale {
+namespace impl_icu {
+
+    class calendar_impl : public abstract_calendar {
+    public:
+        calendar_impl(icu::Locale const &loc)
+        {
+            UErrorCode err=U_ZERO_ERROR;
+            calendar_.reset(loc,icu::Calendar::createInstance(err));
+            check_and_throw(err);
+        }
+        void set_value(period::period_type p,int value)
+        {
+            calendar_->set(to_icu(p),int32_t(value));
+        }
+        int get_value(period::period_type p,value_type type) const
+        {
+            UErrorCode err=U_ZERO_ERROR;
+            int v=0;
+            switch(p) {
+            case first_day_of_week:
+                v=calendar_->getFirstDayOfWeek(err);
+                break;
+            default:
+                switch(type) {
+                case abso
+                };
+                
+            };
+        }
+    private:
+        hold_ptr<icu::Calendar> calendar_;
+    };
 
 /// UTILITY
 

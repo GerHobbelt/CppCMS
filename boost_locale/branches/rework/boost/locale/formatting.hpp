@@ -13,7 +13,6 @@
 #  pragma warning(push)
 #  pragma warning(disable : 4275 4251 4231 4660)
 #endif
-#include <boost/locale/time_zone.hpp>
 #include <boost/cstdint.hpp>
 #include <ostream>
 #include <istream>
@@ -546,16 +545,6 @@ namespace boost {
             {
                 details::set_timezone tz;
                 tz.id=id;
-                return tz;
-            }
-
-            ///
-            /// Set time zone using time_zone class \a id
-            ///
-            inline details::set_timezone time_zone(boost::locale::time_zone const &id) 
-            {
-                details::set_timezone tz;
-                tz.id=id.id();
                 return tz;
             }
 

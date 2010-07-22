@@ -89,6 +89,49 @@ namespace impl_icu {
         std::string encoding_;
     }; // converter_impl
 
+
+    class utf8_converter_impl : public converter<char> {
+    public:
+        
+        converter_impl(cdata const &d) :
+            locale_(d.locale),
+        {
+        }
+
+
+        virtual string_type convert(converter_base::conversion_type how,char const *begin,cha const *end,int flags = 0) const
+        {
+            
+            if(how == converter_base::normalization)
+                return do_normalize(begin,end,flags);
+
+            std::vector<char> buf((end-begin+1)*11/10,0);
+            UCaseMap *csm= // TODO
+            case converter_base::upper_case:
+                str.toUpper(locale_);
+                break;
+            case converter_base::lower_case:
+                str.toLower(locale_);
+                break;
+            case converter_base::title_case:
+                str.toTitle(0,locale_);
+                break;
+            case converter_base::case_folding:
+                str.foldCase();
+                break;
+            default:
+                ;
+            }
+            return cvt.std(str);
+        }
+    
+    private:
+
+        icu::Locale locale_;
+    }; // converter_impl
+
+
+
     std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)
     {
         switch(type) {

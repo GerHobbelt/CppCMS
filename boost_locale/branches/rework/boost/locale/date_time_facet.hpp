@@ -1,5 +1,21 @@
+//
+//  Copyright (c) 2009-2010 Artyom Beilis (Tonkikh)
+//
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+//
+#ifndef BOOST_LOCALE_DATE_TIME_FACET_HPP_INCLUDED
+#define BOOST_LOCALE_DATE_TIME_FACET_HPP_INCLUDED
+
+#include <boost/locale/config.hpp>
+#include <locale>
+
 namespace boost {
     namespace locale {
+        ///
+        /// \brief Namespace that contains a enum that defines various periods like years, days
+        ///
         namespace period {
             ///
             ///
@@ -24,10 +40,18 @@ namespace boost {
                 second,                     ///< second [0..59]
                 week_of_year,               ///< The week number in the year
                 week_of_month,              ///< The week number withing current month
+                first_day_of_week,          ///< For example Sunday in US, Monday in France
             } period_type;
-        } // period
 
-        class calendar_impl {
+        } // namespace period
+
+        struct posix_time {
+            int64_t seconds;
+            uint32_t nanoseconds;
+        };
+
+
+        class abstract_calendar {
         public:
             typedef enum {
                 absolute_minimum,
@@ -48,56 +72,41 @@ namespace boost {
                 is_gregorian,
             } calendar_option_type;
 
-            struct posix_time {
-                int64_t seconds;
-                uint32_t nanoseconds;
-            };
+            virtual abstract_calendar *clone() const = 0;
 
-
-            virtual calendar_impl *clone() const = 0;
-
-            virtual void set_current_value(period::period_type p,int value) = 0;
+            virtual void set_value(period::period_type p,int value) = 0;
             virtual int get_value(period::period_type p,value_type v) const = 0;
 
-            virtual void set_time(posix const &p)  = 0;
-            virtual posix get_time() const  = 0;
+            virtual void set_time(posix_time const &p)  = 0;
+            virtual posix_time get_time() const  = 0;
 
-            virtual void set_option(calendar_option_type opt,int v) const = 0;
+            virtual void set_option(calendar_option_type opt,int v) = 0;
             virtual int get_option(calendar_option_type opt) const = 0;
 
             virtual void adjust_value(period::period_type p,update_type u,int difference) = 0;
 
-            virtual int compare(calendar_impl const *other) const = 0;
-            virtual int difference(calendar_impl const *other,period::period_type p) const = 0;
+            virtual int compare(abstract_calendar const *other) const = 0;
+            virtual int difference(abstract_calendar const *other,period::period_type p) const = 0;
 
             virtual void set_timezone(std::string const &tz) = 0;
             virtual std::string get_timezone() const = 0;
+            virtual bool same(abstract_calendar const *other) const = 0;
 
         };
-
 
         class BOOST_LOCALE_DECL calendar_facet : public std::locale::facet {
         public:
             calendar_facet(size_t refs = 0) : std::locale::facet(refs) 
             {
             }
-            virtual calendar_impl *create_calendar(how_type how) const = 0;
-            static std::locale::id id;
-        };
-
-        class BOOST_LOCALE_DECL time_zone_facet : public std::locale::facet {
-        public:
-            time_zone_facet(size_t refs = 0) : std::locale::facet(refs)
-            {
-            }
-            virtual int offset_from_gmt(std::string const &id,int64_t posix_time_point) const = 0;
-            virtual bool in_daylight_savings(std::string const &id) const = 0;
-            virtual bool has_daylight_savings(std::string const &id,int64_t posix_time_point) const = 0;
+            virtual abstract_calendar *create_calendar() const = 0;
 
             static std::locale::id id;
         };
 
     } // locale
 } // boost
+
+#endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
