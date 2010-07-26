@@ -89,7 +89,7 @@ namespace impl_icu {
         std::string encoding_;
     }; // converter_impl
 
-
+    /*
     class utf8_converter_impl : public converter<char> {
     public:
         
@@ -129,7 +129,7 @@ namespace impl_icu {
 
         icu::Locale locale_;
     }; // converter_impl
-
+*/
 
 
     std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)

@@ -17,7 +17,6 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>
 #include <boost/locale/message.hpp>
-#include <boost/locale/time_zone.hpp>
 #include <boost/locale/date_time.hpp>
 
 #endif

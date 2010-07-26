@@ -11,8 +11,6 @@
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 
-#include "codepage.hpp"
-
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
 #endif
