@@ -89,7 +89,6 @@ namespace impl_icu {
         std::string encoding_;
     }; // converter_impl
 
-    /*
     class utf8_converter_impl : public converter<char> {
     public:
         
@@ -98,38 +97,67 @@ namespace impl_icu {
         {
         }
 
+        std::string do_normalize(char const *begin,cha const *end,int flags)
+        {
+        }
 
-        virtual string_type convert(converter_base::conversion_type how,char const *begin,cha const *end,int flags = 0) const
+        template<typename Conv>
+        std::string do_real_convert(UCaseMap *map,Conv func,char const *begin,cha const *end) const
+        {
+                std::vector<char> buf((end-begin)*11/10+1);
+                UErrorCode err=U_ZERO_ERROR;
+                int size = func(map,&buf.front(),buf.size(),begin,end-begin,&err);
+                check_and_throw_icu_error(err);
+                if(size > int(buf.size())) {
+                    buf.resize(size+1);
+                    size = func(map,&buf.front(),buf.size(),begin,end-begin,&err);
+                    check_and_throw_icu_error(err);
+                }
+                return std::string(&buf.front(),size);
+        }
+
+        virtual std::string convert(converter_base::conversion_type how,char const *begin,cha const *end,int flags = 0) const
         {
             
             if(how == converter_base::normalization)
                 return do_normalize(begin,end,flags);
 
-            std::vector<char> buf((end-begin+1)*11/10,0);
-            UCaseMap *csm= // TODO
-            case converter_base::upper_case:
-                str.toUpper(locale_);
-                break;
-            case converter_base::lower_case:
-                str.toLower(locale_);
-                break;
-            case converter_base::title_case:
-                str.toTitle(0,locale_);
-                break;
-            case converter_base::case_folding:
-                str.foldCase();
-                break;
-            default:
-                ;
+            UErrorCode err=U_ZERO_ERROR;
+            UCaseMap *map = 0;
+            std::string res;
+            
+            try {
+                map = ucasemap_open(locale_.c_str(),0,&err);
+                check_and_throw_icu_error(err);
+                assert(map);
+                case converter_base::upper_case:
+                    res = do_real_convert(map,ucasemap_utf8ToUpper,begin,end);
+                    break;
+                case converter_base::lower_case:
+                    res =  do_real_convert(map,ucasemap_utf8ToLower,begin,end);
+                    break;
+                case converter_base::title_case:
+                    res = do_real_convert(map,ucasemap_utf8ToTitle,begin,end);
+                    break;
+                case converter_base::case_folding:
+                    res = do_real_convert(map,ucasemap_utf8FoldCase,begin,end);
+                    break;
+                default:
+                    throw std::illegal_argument();
+                }
             }
-            return cvt.std(str);
+            catch(...) {
+                if(map)
+                        ucasemap_close(map);
+                throw;
+            }
+            if(map)
+                ucasemap_close(map);
         }
     
     private:
-
-        icu::Locale locale_;
+        std::string locale_;
     }; // converter_impl
-*/
 
 
     std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)

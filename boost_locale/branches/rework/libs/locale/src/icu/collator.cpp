@@ -17,6 +17,9 @@
 #include "../shared/mo_hash.hpp"
 
 #include <unicode/coll.h>
+#if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
+#  include <unicode/stringpiece.h>
+#endif
 
 namespace boost {
     namespace locale {
@@ -34,16 +37,51 @@ namespace boost {
                         level = static_cast<level_type>(level_count - 1);
                     return level;
                 }
+
+                #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
+                int do_utf8_compare(    std::auto_ptr<icu::Collator> collate,
+                                        level_type level,
+                                        char const *b1,char const *e1,
+                                        char const *b2,char const *e2,
+                                        UErrorCode &status) const
+                {
+                    icu::StringPiece left (b1,e1-b1);
+                    icu::StringPiece right(b2,e2-b2);
+                    return collate->compareUTF8(left,right,status);
+
+                }
+                #endif
+        
+                int do_ustring_compare( std::auto_ptr<icu::Collator> collate,
+                                        level_type level,
+                                        CharType const *b1,CharType const *e1,
+                                        CharType const *b2,CharType const *e2,
+                                        UErrorCode &status) const
+                {
+                    icu::UnicodeString left=cvt_.icu(b1,e1);
+                    icu::UnicodeString right=cvt_.icu(b2,e2);
+                    return collate->compare(left,right,status);
+                }
                 
+		int do_real_compare(std::auto_ptr<icu::Collator> collate,
+                                    level_type level,
+                                    CharType const *b1,CharType const *e1,
+                                    CharType const *b2,CharType const *e2,
+                                    UErrorCode &status) const
+                {
+                    return do_ustring_compare(collate,level,b1,e1,b2,e2,status);
+                }
+
                 virtual int do_compare( level_type level,
                                         CharType const *b1,CharType const *e1,
                                         CharType const *b2,CharType const *e2) const
                 {
-                    icu::UnicodeString left=cvt_.icu(b1,e1);
-                    icu::UnicodeString right=cvt_.icu(b2,e2);
                     UErrorCode status=U_ZERO_ERROR;
+                    
                     std::auto_ptr<icu::Collator> collate(collates_[limit(level)]->safeClone());
-                    int res = collate->compare(left,right,status);
+		    
+		    int res = do_real_compare(collate,level,b1,e1,b2,e2,status);
+                    
                     if(U_FAILURE(status))
                             throw std::runtime_error(std::string("Collation failed:") + u_errorName(status));
                     if(res < 0)
@@ -81,7 +119,7 @@ namespace boost {
                     return gnu_gettext::pj_winberger_hash_function(reinterpret_cast<char *>(&tmp.front()));
                 }
 
-                collate_impl(cdata const &d) : cvt_(d.encoding)
+                collate_impl(cdata const &d) : cvt_(d.encoding),is_utf8_(d.utf8)
                 {
                 
                     static const icu::Collator::ECollationStrength levels[level_count] = 
@@ -110,7 +148,25 @@ namespace boost {
                 static const int level_count = 5;
                 icu_std_converter<CharType>  cvt_;
                 std::auto_ptr<icu::Collator> collates_[level_count];
+                bool is_utf8_;
             };
+
+
+            #if U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 402
+            template<>
+            int collate_impl<char>::do_real_compare(    
+                                    std::auto_ptr<icu::Collator> collate,
+                                    level_type level,
+                                    char const *b1,char const *e1,
+                                    char const *b2,char const *e2,
+                                    UErrorCode &status) const
+            {
+                if(is_utf8_)
+                    return do_utf8_compare(collate,level,b1,e1,b2,e2,status);
+                else
+                    return do_ustring_compare(collate,level,b1,e1,b2,e2,status);
+            }
+            #endif
         
             std::locale create_collate(std::locale const &in,cdata const &cd,character_facet_type type)
             {
