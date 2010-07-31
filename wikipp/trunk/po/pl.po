@@ -1,0 +1,292 @@
+# Translation of Wiki++ to Polish.
+# Copyright (C) 2010 Michał Fita
+# This file is distributed under the same license as the Wiki++ package.
+# Michal Fita <michal.fita@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pl\n"
+"Report-Msgid-Bugs-To: artyomtnk@yahoo.com\n"
+"POT-Creation-Date: 2010-05-18 22:25+0200\n"
+"PO-Revision-Date: 2010-07-19 17:27+0200\n"
+"Last-Translator: Michal Fita <michal.fita@gmail.com>\n"
+"Language-Team: Polish <polish@none>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: users.cpp:14 users.cpp:37
+msgid "Username"
+msgstr "Nazwa użytkownika"
+
+#: users.cpp:15 users.cpp:38
+msgid "Password"
+msgstr "Hasło"
+
+#: users.cpp:16 main.tmpl:65
+msgid "Login"
+msgstr "Logowanie"
+
+#: users.cpp:39
+msgid "Confirm"
+msgstr "Potwierdź"
+
+#: users.cpp:40
+msgid "Solve"
+msgstr ""
+
+#: users.cpp:41 options.cpp:13
+msgid "Submit"
+msgstr "Wyślij"
+
+#: users.cpp:72
+msgid "This user exists"
+msgstr "Taki użytkownik istnieje"
+
+#: page.cpp:15
+msgid "Title"
+msgstr "Tytuł"
+
+#: page.cpp:16 page.tmpl:110
+msgid "Content"
+msgstr "Zawartość"
+
+#: page.cpp:17 page.tmpl:114
+msgid "Sidebar"
+msgstr ""
+
+#: page.cpp:18
+msgid "Save"
+msgstr "Zapisz"
+
+#: page.cpp:19
+msgid "Save and Continue"
+msgstr "Zapisz i kontynuuj"
+
+#: page.cpp:20
+msgid "Preview"
+msgstr "Podgląd"
+
+#: page.cpp:26
+msgid "Disable editing by visitors"
+msgstr "Wyłącz edycję przez gości"
+
+#: page.cpp:27
+msgid "Please Login"
+msgstr "Proszę się zalogować"
+
+#: master.cpp:52
+msgid "LANG"
+msgstr "Polski"
+
+#: options.cpp:8
+msgid "Users Only"
+msgstr ""
+
+#: options.cpp:9
+msgid "Contact e-mail"
+msgstr "Adres kontaktowy"
+
+#: options.cpp:10
+msgid "Wiki Title"
+msgstr "Tytuł wiki"
+
+#: options.cpp:11
+msgid "About Wiki"
+msgstr "O wiki"
+
+#: options.cpp:12
+msgid "Copyright String"
+msgstr ""
+
+#: options.cpp:22
+msgid "Disable creation of new articles by visitors"
+msgstr "Wyłącza tworzenie nowych artykułów przez gości"
+
+#: options.cpp:110
+msgid "Wiki++ &mdash; CppCMS Wiki"
+msgstr ""
+
+#: options.cpp:113
+msgid ""
+"## About\n"
+"\n"
+"Wiki++ is a wiki engine powered by\n"
+"[CppCMS](http://cppcms.sf.net/) web development framework.\n"
+msgstr ""
+"## O\n"
+"\n"
+"Wiki++ jest silnikiem wiki napędzanym\n"
+"szkieletem [CppCMS](http://cppcms.sf.net/) dla aplikacji web.\n" 
+
+#: options.cpp:118
+msgid "&copy; All Rights Reserverd"
+msgstr "&copy; Wszelkie prawa zastrzeżone"
+
+#: main.tmpl:5
+msgid "Wellcome to WikiPP"
+msgstr "Zapraszamy do WikiPP"
+
+#: main.tmpl:9
+msgid " Users Area"
+msgstr " Obszar użytkownika"
+
+#: main.tmpl:14
+msgid "Navigation"
+msgstr "Nawigacja"
+
+#: main.tmpl:16
+msgid "Index"
+msgstr "Indeks"
+
+#: main.tmpl:17
+msgid "Changes"
+msgstr "Zmiany"
+
+#: main.tmpl:20
+msgid "Main Page"
+msgstr "Strona główna"
+
+#: main.tmpl:42
+msgid "LTR"
+msgstr ""
+
+#: main.tmpl:68
+msgid "Logout "
+msgstr "Wyloguj "
+
+#: main.tmpl:78
+msgid "Main"
+msgstr "Główna"
+
+#: main.tmpl:90
+msgid "Valid CSS"
+msgstr "Poprawny CSS"
+
+#: main.tmpl:91
+msgid "Valid XHTML 1.0"
+msgstr "Poprawny XTML 1.0"
+
+#: main.tmpl:96
+msgid ""
+"Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+"Projekt wzorca bazuja na <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+
+#: main.tmpl:99
+msgid "Contact"
+msgstr "Kontakt"
+
+#: page.tmpl:14 page.tmpl:26
+msgid "Edit"
+msgstr "Edycja"
+
+#: page.tmpl:16 page.tmpl:31
+msgid "History"
+msgstr "Histora"
+
+#: page.tmpl:26
+msgid "New Article"
+msgstr "Nowy artykuł"
+
+#: page.tmpl:29 hist.tmpl:5
+msgid "Back to page"
+msgstr "Powrót do strony"
+
+#: page.tmpl:67
+msgid "Edit this version (rollback)"
+msgstr "Edycja tej wersji (przywrócenie)"
+
+#: page.tmpl:72
+msgid "(version %1%, from %2%)"
+msgstr "(wersja %1%m, z %2%)"
+
+#: page.tmpl:77
+msgid "Difference \"%1%\" ver. %2% versus ver. %3%"
+msgstr "Różnica \"%1%\" w. %2% w stosunku do w. %3%"
+
+#: page.tmpl:79 page.tmpl:81
+msgid "Edit version %1%"
+msgstr "Edycja wersji %1%"
+
+#: page.tmpl:98
+msgid "No such page or version exist"
+msgstr "Wybrana strona lub wersja nie istnieje"
+
+#: page.tmpl:100
+msgid "No difference between these versions"
+msgstr "Brak różnic między tymi wersjami"
+
+#: page.tmpl:103
+msgid "Titles"
+msgstr "Tytuły"
+
+#: page.tmpl:105
+msgid "Version %1%"
+msgstr "Wersja %1%"
+
+#: hist.tmpl:3
+msgid "WikiPP :: History"
+msgstr "WikiPP :: Historia"
+
+#: hist.tmpl:14
+msgid "Version %1%, changed at %2%, by %3%"
+msgstr "Wersja %1%, zmieniona %2%, przez %3%"
+
+#: hist.tmpl:15
+msgid "Show"
+msgstr "Pokaż"
+
+#: hist.tmpl:16
+msgid "Edit (rollback)"
+msgstr "Edytuj (przywróć)"
+
+#: hist.tmpl:17 toc.tmpl:38
+msgid "Diff to previous"
+msgstr "Różnice z poprzednią"
+
+#: hist.tmpl:23
+msgid "History is empty"
+msgstr "Historia jest pusta"
+
+#: hist.tmpl:25
+msgid "Next page"
+msgstr "Następna strona"
+
+#: admin.tmpl:3
+msgid "WikiPP :: Login"
+msgstr "WikiPP :: Logowanie"
+
+#: admin.tmpl:11
+msgid "Register as new user"
+msgstr "Rejestracja jako nowy użytkownik"
+
+#: admin.tmpl:16
+msgid "WikiPP :: Register"
+msgstr "WikiPP :: Rejestracja"
+
+#: admin.tmpl:37
+msgid "WikiPP :: Edit Options"
+msgstr "WikiPP :: Edycja opcji"
+
+#: toc.tmpl:4
+msgid "Index of Articles"
+msgstr "Index artykułów"
+
+#: toc.tmpl:31
+msgid "Recent Changes"
+msgstr "Ostatnie zmiany"
+
+#: toc.tmpl:37
+msgid "version %1%, at %2%, by %3%"
+msgstr "wersja %1%, z %2%, przez %3%"
+
+#: toc.tmpl:43
+msgid "Next Page"
+msgstr "Następna strona"
+
+#: toc.tmpl:45
+msgid "No more changes"
+msgstr "Nie ma więcej zmian"

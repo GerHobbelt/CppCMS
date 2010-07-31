@@ -8,11 +8,12 @@ wikipp.disable_registration=0
 # CppCMS System Settings
 
 # Server
+#server.api="scgi"
 server.api="fastcgi"
 server.mod="thread"
 server.threads = 5
 server.buffer = 100
-server.socket = "/tmp/wikipp.socket"
+server.socket = "/tmp/wikipp.sock"
 #server.socket = "0.0.0.0:8080"
 
 #
@@ -26,7 +27,7 @@ session.cookies_key = "9bc6dbda707cb72ea1205dd5b1c90464"
 # Localization
 locale.dir = "./locale"
 # locale.dir = "/usr/local/share/locale"
-locale.lang_list = { "he" "en" "ru" }
+locale.lang_list = { "he" "en" "ru" "pl" }
 locale.lang_default = "en"
 locale.domain_list = { "wikipp" }
 
