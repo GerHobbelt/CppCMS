@@ -67,7 +67,7 @@
 			"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage/locale"],
 			"domains" :  [ "wikipp" ]
 		},
-		"locales" : [ "he_IL" , "en_US" ]
+		"locales" : [ "he_IL" , "en_US", "ru_RU", "pl_PL" ]
 	},
 	"http" : {
 		"script_names" : [ "/wikipp" ]
