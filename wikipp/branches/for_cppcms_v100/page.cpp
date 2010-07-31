@@ -196,8 +196,15 @@ void page::history(std::string slug,std::string page)
 
 	for(unsigned i=0;rs.next(r) && i<vers;i++) {
 		int ver;
-		std::tm update;
+		std::tm update = std::tm();
 		r>> update >> ver >> c.hist[i].author ;
+		char buf[256];
+		strftime(buf,sizeof(buf),"%c\n",&update);
+		time_t t2=mktime(&update);
+		std::tm u2=*localtime(&t2);
+		std::cerr << buf << " --- ";
+		strftime(buf,sizeof(buf),"%c\n",&u2);
+		std::cerr << buf << std::endl;
 		c.hist[i].update = mktime(&update);
 		c.hist[i].version=ver;
 		c.hist[i].show_url=page_version_url(ver);

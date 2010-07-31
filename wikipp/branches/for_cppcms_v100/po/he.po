@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: he\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-22 15:15+0300\n"
+"POT-Creation-Date: 2010-07-31 08:20+0300\n"
 "PO-Revision-Date: 2010-05-22 15:17+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
@@ -20,43 +20,43 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 
-#: master.cpp:38
+#: master.cpp:36
 msgid "LANG"
 msgstr "עברית"
 
-#: options.cpp:13
+#: options.cpp:14
 msgid "Users Only"
 msgstr "משתמשים בלבד"
 
-#: options.cpp:14
+#: options.cpp:15
 msgid "Contact e-mail"
 msgstr "דוא\"ל ליצירת־קשר"
 
-#: options.cpp:15
+#: options.cpp:16
 msgid "Wiki Title"
 msgstr "כותרת הויקי"
 
-#: options.cpp:16
+#: options.cpp:17
 msgid "About Wiki"
 msgstr "אודות ויקי"
 
-#: options.cpp:17
+#: options.cpp:18
 msgid "Copyright String"
 msgstr "זכויות היוצרים"
 
-#: options.cpp:18 users.cpp:44
+#: options.cpp:19 users.cpp:44
 msgid "Submit"
 msgstr "שלח"
 
-#: options.cpp:26
+#: options.cpp:27
 msgid "Disable creation of new articles by visitors"
 msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
 
-#: options.cpp:99
+#: options.cpp:108
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
 
-#: options.cpp:102
+#: options.cpp:111
 msgid ""
 "## About\n"
 "\n"
@@ -68,7 +68,7 @@ msgstr ""
 "ויקי++ זה מנוע ויקי מבוסס על תשתית פיתוח אינטרנט [CppCMS](http://cppcms.sf."
 "net/)\n"
 
-#: options.cpp:107
+#: options.cpp:116
 msgid "&copy; All Rights Reserverd"
 msgstr "‏&copy; כל הזכויות שמורות"
 
@@ -303,4 +303,3 @@ msgstr "עמוד הבא"
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:40
 msgid "No more changes"
 msgstr "אין יותר שינויים"
-

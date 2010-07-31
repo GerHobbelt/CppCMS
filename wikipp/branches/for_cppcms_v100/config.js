@@ -7,7 +7,8 @@
 		"languages" : {
 			"en" : "en_US" ,
 			"he" : "he_IL" ,
-			"ru" : "ru_RU" 
+			"ru" : "ru_RU" ,
+			"pl" : "pl_PL"
 		},
 
 		"sql" : {

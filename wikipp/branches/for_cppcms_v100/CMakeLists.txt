@@ -86,7 +86,7 @@ target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX} ${DISCOUNT})
 #  Localization
 
 
-set(LOCALES he ru)
+set(LOCALES he ru pl)
 
 set(MO_FILES)
 set(UPDATE_PO_LIST)

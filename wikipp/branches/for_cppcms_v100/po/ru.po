@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-22 15:15+0300\n"
+"POT-Creation-Date: 2010-07-31 08:20+0300\n"
 "PO-Revision-Date: 2010-05-22 15:18+0300\n"
 "Last-Translator: artik <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <en@li.org>\n"
@@ -22,43 +22,43 @@ msgstr ""
 "X-Poedit-Language: Russian\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 
-#: master.cpp:38
+#: master.cpp:36
 msgid "LANG"
 msgstr "Русский"
 
-#: options.cpp:13
+#: options.cpp:14
 msgid "Users Only"
 msgstr "Только для пользователей"
 
-#: options.cpp:14
+#: options.cpp:15
 msgid "Contact e-mail"
 msgstr "Контактный e-mail"
 
-#: options.cpp:15
+#: options.cpp:16
 msgid "Wiki Title"
 msgstr "Wiki Заголовок"
 
-#: options.cpp:16
+#: options.cpp:17
 msgid "About Wiki"
 msgstr "О Wiki"
 
-#: options.cpp:17
+#: options.cpp:18
 msgid "Copyright String"
 msgstr "Строка копирайта"
 
-#: options.cpp:18 users.cpp:44
+#: options.cpp:19 users.cpp:44
 msgid "Submit"
 msgstr "Отправить"
 
-#: options.cpp:26
+#: options.cpp:27
 msgid "Disable creation of new articles by visitors"
 msgstr "Отключить создание новых статей посетителями"
 
-#: options.cpp:99
+#: options.cpp:108
 msgid "Wiki++ &mdash; CppCMS Wiki"
 msgstr "Wiki++ &mdash; CppCMS Wiki"
 
-#: options.cpp:102
+#: options.cpp:111
 msgid ""
 "## About\n"
 "\n"
@@ -70,7 +70,7 @@ msgstr ""
 "Wiki++ - это wiki-движок, основанный на\n"
 "[CppCMS](http://cppcms.sf.net/) фрэймворке веб-разработки.\n"
 
-#: options.cpp:107
+#: options.cpp:116
 msgid "&copy; All Rights Reserverd"
 msgstr "&copy; Все права защищены"
 
@@ -305,4 +305,3 @@ msgstr "Следующая страница"
 #: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:40
 msgid "No more changes"
 msgstr "Больше нет изменений"
-
