@@ -85,7 +85,6 @@ namespace boost {
 
             virtual void adjust_value(period::period_type p,update_type u,int difference) = 0;
 
-            virtual int compare(abstract_calendar const *other) const = 0;
             virtual int difference(abstract_calendar const *other,period::period_type p) const = 0;
 
             virtual void set_timezone(std::string const &tz) = 0;

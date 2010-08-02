@@ -89,15 +89,16 @@ namespace impl_icu {
         std::string encoding_;
     }; // converter_impl
 
+    /*
     class utf8_converter_impl : public converter<char> {
     public:
         
-        converter_impl(cdata const &d) :
+        utf8_converter_impl(cdata const &d) :
             locale_(d.locale),
         {
         }
 
-        std::string do_normalize(char const *begin,cha const *end,int flags)
+        std::string do_normalize(char const *begin,char const *end,int flags)
         {
         }
 
@@ -158,6 +159,7 @@ namespace impl_icu {
     private:
         std::string locale_;
     }; // converter_impl
+    */
 
 
     std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)

@@ -345,9 +345,24 @@ void date_time::time(double v)
     impl_->set_time(ptime);
 }
 
+namespace {
+    int compare(posix_time const &left,posix_time const &right)
+    {
+        if(left.seconds < right.seconds)
+            return -1;
+        if(left.seconds > right.seconds)
+            return 1;
+        if(left.nanoseconds < right.nanoseconds)
+            return -1;
+        if(left.nanoseconds > right.nanoseconds)
+            return 1;
+        return 0;
+    }
+}
+
 bool date_time::operator==(date_time const &other) const
 {
-    return impl_->compare(other.impl_.get()) == 0;
+    return compare(impl_->get_time(),other.impl_->get_time()) == 0;
 }
 
 bool date_time::operator!=(date_time const &other) const
@@ -357,7 +372,7 @@ bool date_time::operator!=(date_time const &other) const
 
 bool date_time::operator<(date_time const &other) const
 {
-    return impl_->compare(other.impl_.get()) < 0;
+    return compare(impl_->get_time(),other.impl_->get_time()) < 0;
 }
 
 bool date_time::operator>=(date_time const &other) const
@@ -367,7 +382,7 @@ bool date_time::operator>=(date_time const &other) const
 
 bool date_time::operator>(date_time const &other) const
 {
-    return impl_->compare(other.impl_.get()) > 0;
+    return compare(impl_->get_time(),other.impl_->get_time()) > 0;
 }
 
 bool date_time::operator<=(date_time const &other) const
