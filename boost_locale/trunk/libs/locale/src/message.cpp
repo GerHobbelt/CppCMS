@@ -32,15 +32,84 @@ namespace boost {
 
 
         namespace impl {
+            
+            class c_file {
+                c_file(c_file const &);
+                void operator=(c_file const &);
+            public:
+                
+                FILE *file;
+
+                c_file() : 
+                    file(0)
+                {
+                }
+                ~c_file()
+                {
+                    close();
+                }
+
+                void close()
+                {
+                    if(file) {
+                        fclose(file);
+                        file=0;
+                    }
+                }
+
+                #if defined(BOOST_WINDOWS)
+
+                bool open(std::string const &file_name)
+                {
+                    close();
+
+                    /// Under windows we have to use "_wfopen" to get
+                    /// access to path's with Unicode in them
+                    ///
+                    /// As not all standard C++ libraries support nonstandard std::istream::open(wchar_t const *)
+                    /// we would use old and good stdio and _wfopen CRTL functions
+                    ///
+
+                    ///
+                    /// So in order to distinguish between local encoding and UTF encoding we use BOM
+                    ///
+
+                    if(file_name.compare(0,3,"\xEF\xBB\xBF")==0)
+                    {
+                        std::wstring wfile_name = conv::to_utf<wchar_t>(file_name.substr(3),"UTF-8");
+                        file = _wfopen(wfile_name.c_str(),L"rb");
+                    }
+                    else {
+                        file = fopen(file_name.c_str(),"rb");
+                    }
+
+                    return file!=0;
+                }
+
+                #else // POSIX systems do not have all this Wide API crap, as native codepages are UTF-8
+                
+                bool open(std::string const &file_name)
+                {
+                    close();
+
+                    file = fopen(file_name.c_str(),"rb");
+
+                    return file!=0;
+                }
+
+                #endif
+
+            };
+
             class mo_file {
             public:
                 typedef std::pair<char const *,char const *> pair_type;
                 
-                mo_file(std::string file_name) :
+                mo_file(FILE *file) :
                     native_byteorder_(true),
                     size_(0)
                 {
-                    load_file(file_name);
+                    load_file(file);
                     // Read all format sizes
                     size_=get(8);
                     keys_offset_=get(12);
@@ -103,68 +172,34 @@ namespace boost {
                 }
 
             private:
-                void load_file_direct(std::string file_name)
+                void load_file_direct(FILE *file)
                 {
-                    FILE *file = 0;
-                    #if defined(BOOST_WINDOWS)
-                        /// Under windows we have to use "_wfopen" to get
-                        /// access to path's with Unicode in them
-                        ///
-                        /// As not all standard C++ libraries support nonstandard std::istream::open(wchar_t const *)
-                        /// we would use old and good stdio and _wfopen CRTL functions
-                        ///
-
-                        if(file_name.compare(0,3,"\xEF\xBB\xBF")==0)
-                        {
-                            std::wstring wfile_name = conv::to_utf<wchar_t>(file_name.substr(3),"UTF-8");
-                            file = _wfopen(wfile_name.c_str(),L"rb");
-                        }
-                        else {
-                            file = fopen(file_name.c_str(),"rb");
-                        }
-
-                    #else // POSIX systems do not have all this Wide API crap
-
-                        file = fopen(file_name.c_str(),"rb");
-
-                    #endif
-                    if(!file)
-                        throw std::runtime_error("No such file");
-
-                    try {
-                        uint32_t magic=0;
-                        fread(&magic,4,1,file);
-                        
-                        if(magic == 0x950412de)
-                            native_byteorder_ = true;
-                        else if(magic == 0xde120495)
-                            native_byteorder_ = false;
-                        else
-                            throw std::runtime_error("Invalid file format");
-                        
-                        fseek(file,0,SEEK_END);
-                        long len=ftell(file);
-                        if(len < 0) {
-                            throw std::runtime_error("Wrong file object");
-                        }
-                        fseek(file,0,SEEK_SET);
-                        vdata_.resize(len+1,0); // +1 to make sure the vector is not empty
-                        if(fread(&vdata_.front(),1,len,file)!=unsigned(len))
-                            throw std::runtime_error("Failed to read file");
-                        data_ = &vdata_[0];
-                        file_size_ = len;
+                    uint32_t magic=0;
+                    fread(&magic,4,1,file);
+                    
+                    if(magic == 0x950412de)
+                        native_byteorder_ = true;
+                    else if(magic == 0xde120495)
+                        native_byteorder_ = false;
+                    else
+                        throw std::runtime_error("Invalid file format");
+                    
+                    fseek(file,0,SEEK_END);
+                    long len=ftell(file);
+                    if(len < 0) {
+                        throw std::runtime_error("Wrong file object");
                     }
-                    catch(...) {
-                        if(file)
-                            fclose(file);
-                        throw;
-                    }
-                    fclose(file);
+                    fseek(file,0,SEEK_SET);
+                    vdata_.resize(len+1,0); // +1 to make sure the vector is not empty
+                    if(fread(&vdata_.front(),1,len,file)!=unsigned(len))
+                        throw std::runtime_error("Failed to read file");
+                    data_ = &vdata_[0];
+                    file_size_ = len;
                 }
                 
-                void load_file(std::string file_name)
+                void load_file(FILE *file)
                 {
-                   load_file_direct(file_name);
+                   load_file_direct(file);
                 }
 
                 uint32_t get(unsigned offset) const
@@ -253,29 +288,40 @@ namespace boost {
 
                 mo_message(info const &inf,std::vector<std::string> const &domains,std::vector<std::string> const &search_paths)
                 {
+                    std::string language = inf.language();
+                    std::string variant = inf.variant();
+                    std::string country = inf.country();
                     std::string encoding = inf.encoding();
+                    
+                    //
+                    // List of fallbacks: en_US@euro, en@euro, en_US, en. 
+                    //
+                    std::vector<std::string> paths;
+
+
+                    if(!variant.empty() && !country.empty()) 
+                        paths.push_back(language + "_" + country + "@" + variant);
+
+                    if(!variant.empty()) 
+                        paths.push_back(language + "@" + variant);
+
+                    if(!country.empty())
+                        paths.push_back(language + "_" + country);
+
+                    paths.push_back(language);
 
                     catalogs_.resize(domains.size());
                     mo_catalogs_.resize(domains.size());
                     plural_forms_.resize(domains.size());
 
+
                     for(unsigned id=0;id<domains.size();id++) {
                         std::string domain=domains[id];
                         domains_[domain]=id;
-                        //
-                        // List of fallbacks: en_US@euro, en@euro, en_US, en. 
-                        //
-                        static const unsigned paths_no = 4;
 
-                        std::string paths[paths_no] = {
-                            std::string(inf.language()) + "_" + inf.country() + "@" + inf.variant(),
-                            std::string(inf.language()) + "@" + inf.variant(),
-                            std::string(inf.language()) + "_" + inf.country(),
-                            std::string(inf.language()),
-                        };
 
                         bool found=false; 
-                        for(unsigned j=0;!found && j<paths_no;j++) {
+                        for(unsigned j=0;!found && j<paths.size();j++) {
                             for(unsigned i=0;!found && i<search_paths.size();i++) {
                                 std::string full_path = search_paths[i]+"/"+paths[j]+"/LC_MESSAGES/"+domain+".mo";
 
@@ -293,39 +339,43 @@ namespace boost {
 
                 bool load_file(std::string file_name,std::string encoding,int id)
                 {
-                    try {
-                        std::auto_ptr<mo_file> mo(new mo_file(file_name));
+                    c_file the_file;
 
-                        std::string plural = extract(mo->value(0).first,"plural=","\r\n;");
-                        std::string mo_encoding = extract(mo->value(0).first,"charset="," \r\n;");
-                        if(mo_encoding.empty())
-                            throw std::runtime_error("Invalid mo-format, encoding is not specified");
-                        if(!plural.empty()) {
-                            std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
-                            plural_forms_[id] = ptr;
-                        }
-                        if( sizeof(CharType) == 1
-                            && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
-                            && mo->has_hash())
-                        {
-                            mo_catalogs_[id]=mo;
-                        }
-                        else {
-                            converter cvt(encoding,mo_encoding);
-                            for(unsigned i=0;i<mo->size();i++) {
-                                mo_file::pair_type tmp = mo->value(i);
-                                catalogs_[id][mo->key(i)]=cvt(tmp.first,tmp.second);
-                            }
-                        }
-                        return true;
+                    the_file.open(file_name);
 
-                    }
-                    catch(std::exception const &/*err*/)
-                    {
-                        plural_forms_[id].reset();
-                        catalogs_[id].clear();
+                    if(!the_file.file)
                         return false;
+
+                    std::auto_ptr<mo_file> mo(new mo_file(the_file.file));
+
+                    the_file.close();
+                    
+                    std::string plural = extract(mo->value(0).first,"plural=","\r\n;");
+
+                    std::string mo_encoding = extract(mo->value(0).first,"charset="," \r\n;");
+
+                    if(mo_encoding.empty())
+                        throw std::runtime_error("Invalid mo-format, encoding is not specified");
+
+                    if(!plural.empty()) {
+                        std::auto_ptr<lambda::plural> ptr=lambda::compile(plural.c_str());
+                        plural_forms_[id] = ptr;
                     }
+
+                    if( sizeof(CharType) == 1
+                        && ucnv_compareNames(mo_encoding.c_str(),encoding.c_str()) == 0
+                        && mo->has_hash())
+                    {
+                        mo_catalogs_[id]=mo;
+                    }
+                    else {
+                        converter cvt(encoding,mo_encoding);
+                        for(unsigned i=0;i<mo->size();i++) {
+                            mo_file::pair_type tmp = mo->value(i);
+                            catalogs_[id][mo->key(i)]=cvt(tmp.first,tmp.second);
+                        }
+                    }
+                    return true;
 
                 }
 
