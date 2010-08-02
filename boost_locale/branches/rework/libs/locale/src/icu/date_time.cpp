@@ -9,6 +9,7 @@
 #include <boost/locale/date_time_facet.hpp>
 #include <boost/locale/date_time.hpp>
 #include <boost/locale/formatting.hpp>
+#include <boost/thread/mutex.hpp>
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 #include <unicode/utypes.h>
@@ -68,6 +69,16 @@ namespace impl_icu {
             check_and_throw_dt(err);
             encoding_ = dat.encoding;
         }
+        calendar_impl(calendar_impl const &other)
+        {
+            calendar_.reset(other.calendar_->clone());
+            encoding_ = other.encoding_;
+        }
+
+        calendar_impl *clone() const
+        {
+            return new calendar_impl(*this);
+        }
 
         void set_value(period::period_type p,int value)
         {
@@ -78,33 +89,34 @@ namespace impl_icu {
         {
             UErrorCode err=U_ZERO_ERROR;
             int v=0;
-            std::auto_ptr<icu::Calendar> cal(calendar_->clone());
             if(p==period::first_day_of_week) {
+                guard l(lock_);
                 v=calendar_->getFirstDayOfWeek(err);
             }
             else {
                 UCalendarDateFields uper=to_icu(p);
+                guard l(lock_);
                 switch(type) {
                 case absolute_minimum:
-                    v=cal->getMinimum(uper);
+                    v=calendar_->getMinimum(uper);
                     break;
                 case actual_minimum:
-                    v=cal->getActualMinimum(uper,err);
+                    v=calendar_->getActualMinimum(uper,err);
                     break;
                 case greatest_minimum:
-                    v=cal->getGreatestMinimum(uper);
+                    v=calendar_->getGreatestMinimum(uper);
                     break;
                 case current:
-                    v=cal->get(uper,err);
+                    v=calendar_->get(uper,err);
                     break;
                 case least_maximum:
-                    v=cal->getLeastMaximum(uper);
+                    v=calendar_->getLeastMaximum(uper);
                     break;
                 case actual_maximum:
-                    v=cal->getActualMaximum(uper,err);
+                    v=calendar_->getActualMaximum(uper,err);
                     break;
                 case absolute_maximum:
-                    v=cal->getMaximum(uper);
+                    v=calendar_->getMaximum(uper);
                     break;
                 }
             }
@@ -121,9 +133,13 @@ namespace impl_icu {
         }
         virtual posix_time get_time() const
         {
-            std::auto_ptr<icu::Calendar> cal(calendar_->clone());
+            
             UErrorCode code=U_ZERO_ERROR;
-            double rtime = cal->getTime(code);
+            double rtime = 0;
+            {
+                guard l(lock_);
+                rtime = calendar_->getTime(code);
+            }
             check_and_throw_dt(code);
             rtime/=1000.0;
             double secs = floor(rtime);
@@ -162,9 +178,18 @@ namespace impl_icu {
             calendar_impl const &other_cal=dynamic_cast<calendar_impl const &>(*other_ptr);
             std::auto_ptr<icu::Calendar> self(calendar_->clone()),other(other_cal.calendar_->clone());
             UErrorCode err=U_ZERO_ERROR;
-            double other_time = other->getTime(err);
+            double other_time = 0;
+            {
+                guard l(other_cal.lock_);
+                other_time = other->getTime(err);
+            }
             check_and_throw_dt(err);
-            int diff = self->fieldDifference(other_time,to_icu(p),err);
+            int diff = 0;
+            
+            {
+                guard l(lock_);
+                diff = self->fieldDifference(other_time,to_icu(p),err);
+            }
             check_and_throw_dt(err);
             return diff;
         }
@@ -190,6 +215,8 @@ namespace impl_icu {
         }
 
     private:
+        typedef boost::unique_lock<boost::mutex> guard;
+        mutable boost::mutex lock_;
         std::string encoding_;
         hold_ptr<icu::Calendar> calendar_;
     };
