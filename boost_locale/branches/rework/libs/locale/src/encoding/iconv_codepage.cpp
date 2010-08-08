@@ -8,10 +8,10 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/codepage.hpp>
 #include <iconv.h>
+#include <errno.h>
 #include "conv.h"
 #include <assert.h>
 #include <iostream>
-
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
 #endif
@@ -141,16 +141,26 @@ public:
 
         char const *begin = reinterpret_cast<char const *>(ubegin);
         char const *end = reinterpret_cast<char const *>(uend);
+        
+        enum { normal , unshifting , done } state = normal;
 
-        for(;;) {
+        while(state!=done) {
 
             size_t in_left = end - begin;
             size_t out_left = result.size();
             
             char *out_ptr = out_start;
+            size_t res = 0;
+            if(in_left == 0)
+                state = unshifting;
 
-            size_t res = conv(&begin,&in_left,&out_ptr,&out_left);
+            if(state == normal) 
+                res = conv(&begin,&in_left,&out_ptr,&out_left);
+            else
+                res = conv(0,0,&out_ptr,&out_left);
+
             int err = errno;
+            
             sresult.append(&result[0],out_ptr - out_start);
 
             if(res == (size_t)(-1)) {
@@ -168,10 +178,12 @@ public:
                 else if (err==E2BIG) {
                     continue;
                 }
+                else {
+                    break;
+                }
             }
-            else {
-                break;
-            }
+            if(state == unshifting)
+                state = done;
         }
         return sresult;
     }
@@ -203,15 +215,25 @@ public:
         string_type sresult;
         std::vector<char_type> result((end-begin)+10,char_type());
         char *out_start = reinterpret_cast<char *>(&result[0]);
+        
+        enum { normal , unshifting , done } state = normal;
 
-        for(;;) {
+        while(state!=done) {
 
             size_t in_left = end - begin;
             size_t out_left = result.size() * sizeof(char_type);
             
             char *out_ptr = out_start;
 
-            size_t res = conv(&begin,&in_left,&out_ptr,&out_left);
+            size_t res = 0;
+            if(in_left == 0)
+                state = unshifting;
+
+            if(state == normal) 
+                conv(&begin,&in_left,&out_ptr,&out_left);
+            else
+                conv(0,0,&out_ptr,&out_left);
+
             int err = errno;
             sresult.append(&result[0],(out_ptr - out_start)/sizeof(char_type));
 
@@ -230,10 +252,12 @@ public:
                 else if (err==E2BIG) {
                     continue;
                 }
+                else {
+                    break;
+                }
             }
-            else {
-                break;
-            }
+            if(state == unshifting)
+                state = done;
         }
         return sresult;
     }
