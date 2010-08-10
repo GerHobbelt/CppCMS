@@ -1,10 +1,15 @@
+#include <boost/config.hpp>
+
 #include "iconv_codepage.hpp"
 #include "uconv_codepage.hpp"
+#ifdef BOOST_WINDOWS
 #include "wconv_codepage.hpp"
+#endif
 
+#include <iostream>
 #include <fstream>
 #include <memory>
-
+#include <assert.h>
 int main(int argc,char **argv)
 {
 	std::string utf8;
@@ -45,11 +50,13 @@ int main(int argc,char **argv)
 		to_utf16.reset(new uconv_to_utf<wchar_t>());
 		from_utf16.reset(new uconv_from_utf<wchar_t>());
 	}
+#ifdef BOOST_WINDOWS
 	else if(c1=='w') {
 		between.reset(new wconv_between());
 		to_utf16.reset(new wconv_to_utf<wchar_t>());
 		from_utf16.reset(new wconv_from_utf<wchar_t>());
 	}
+#endif
 	else {
 		assert(0);
 	}

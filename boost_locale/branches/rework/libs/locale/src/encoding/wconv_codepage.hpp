@@ -11,6 +11,7 @@
 
 
 #include <boost/locale/codepage.hpp>
+#include <algorithm>
 #include "conv.hpp"
 
 #ifndef NOMINMAX
@@ -24,6 +25,51 @@ namespace boost {
 namespace locale {
 namespace conv {
 namespace impl {
+    
+    struct windows_encoding {
+        char const *name;
+        unsigned codepage;
+    };
+
+    bool operator<(windows_encoding const &l,windows_encoding const &r)
+    {
+        return strcmp(l.name,r.name) < 0;
+    }
+
+    windows_encoding all_windows_encodings[] = {
+        { "big5",       950 },
+        { "eucjp",      20932 },
+        { "euckr",      51949 },
+        { "gb18030",    54936 },
+        { "gb2312",     936 },
+        { "iso2022jp",  50220 },
+        { "iso2022kr",  50225 },
+        { "iso88591",   28591 },
+        { "iso885913",  28603 },
+        { "iso885915",  28605 },
+        { "iso88592",   28592 },
+        { "iso88593",   28593 },
+        { "iso88594",   28594 },
+        { "iso88595",   28595 },
+        { "iso88596",   28596 },
+        { "iso88597",   28597 },
+        { "iso88598",   28598 },
+        { "iso88599",   28599 },
+        { "koi8r",      20866 },
+        { "koi8u",      21866 },
+        { "shiftjis",   932 },
+        { "sjis",       932 },
+        { "utf8",       65001 },
+        { "windows1250",        1250 },
+        { "windows1251",        1251 },
+        { "windows1252",        1252 },
+        { "windows1253",        1253 },
+        { "windows1254",        1254 },
+        { "windows1255",        1255 },
+        { "windows1256",        1256 },
+        { "windows1257",        1257 },
+        { "windows874", 874 },
+    };
 
     int encoding_to_windows_codepage(char const *ccharset)
     {
@@ -38,12 +84,14 @@ namespace impl {
             else if('A' <=c && c <='Z')
                 charset+=char(c-'A'+'a');
         }
-        if(charset == "windows1255" || charset=="cp1255")
-            return 1255;
-        if(charset=="utf8")
-            return 65001;
-        if(charset == "iso88598")
-            return 28598;
+        windows_encoding ref;
+        ref.name = charset.c_str();
+        size_t n = sizeof(all_windows_encodings)/sizeof(all_windows_encodings[0]);
+        windows_encoding *begin = all_windows_encodings;
+        windows_encoding *end = all_windows_encodings + n;
+        windows_encoding *ptr = std::lower_bound(begin,end,ref);
+        if(ptr!=end && strcmp(ptr->name,charset.c_str())==0)
+            return ptr->codepage;
         return -1;
     }
 
@@ -83,6 +131,8 @@ namespace impl {
         virtual std::string convert(char const *begin,char const *end)
         {
             DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
+            if(50220 <= from_code_page_ && from_code_page_ <= 50229)
+                flags = 0;
             
             int n = MultiByteToWideChar(from_code_page_,flags,begin,end-begin,0,0);
             if(n == 0)
@@ -161,6 +211,8 @@ namespace impl {
         virtual string_type convert(char const *begin,char const *end) 
         {
             DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
+            if(50220 <= code_page_ && code_page_ <= 50229)
+                flags = 0;
             
             int n = MultiByteToWideChar(code_page_,flags,begin,end-begin,0,0);
             if(n == 0) {
@@ -252,6 +304,8 @@ namespace impl {
         virtual string_type convert(char const *begin,char const *end) 
         {
             DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
+            if(50220 <= code_page_ && code_page_ <= 50229)
+                flags = 0;
             
             int n = MultiByteToWideChar(code_page_,flags,begin,end-begin,0,0);
             if(n == 0) {
