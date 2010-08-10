@@ -39,6 +39,14 @@ namespace boost {
                 conversion_error() : std::runtime_error("Conversion failed") {}
             };
             
+            class invalid_charset_error : public std::runtime_error {
+            public:
+                invalid_charset_error(std::string charset) : 
+                    std::runtime_error("Invalid or unsupported charset:" + charset)
+                {
+                }
+            };
+            
 
             ///
             /// enum that defines conversion policy

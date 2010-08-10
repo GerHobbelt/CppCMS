@@ -5,24 +5,21 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#define BOOST_LOCALE_SOURCE
+
+#ifndef BOOST_LOCALE_IMPL_WCONV_CODEPAGE_HPP
+#define BOOST_LOCALE_IMPL_WCONV_CODEPAGE_HPP
+
+
 #include <boost/locale/codepage.hpp>
-#include "conv.h"
-
-#include <assert.h>
-#include <iostream>
-
-#ifdef BOOST_MSVC
-#  pragma warning(disable : 4244) // loose data 
-#endif
+#include "conv.hpp"
 
 #ifndef NOMINMAX
 # define NOMINMAX
 #endif
-
 #include <windows.h>
-
 #include <vector>
+
+
 namespace boost {
 namespace locale {
 namespace conv {
@@ -366,71 +363,5 @@ namespace impl {
 } // locale 
 } // boost
 
-int main()
-{
-    try {
-    using namespace boost::locale::conv;
-    using namespace boost::locale::conv::impl;
-    std::string shalom_utf8="שלום";
-    std::string shalom_pease_utf8="\xFF\xFFשלום Мир world";
-    std::wstring shalom_wchar_t=L"שלום";
-
-    std::string shalom_1255="\xf9\xec\xe5\xed";
-
-    {
-        wconv_from_utf<char> utfc;
-        wconv_from_utf<wchar_t> wcharc;
-        assert(utfc.open("windows-1255",stop));
-        assert(wcharc.open("windows-1255",stop));
-        assert(utfc.convert(shalom_utf8.c_str(),shalom_utf8.c_str()+shalom_utf8.size()) == shalom_1255);
-        assert(wcharc.convert(shalom_wchar_t.c_str(),shalom_wchar_t.c_str()+shalom_wchar_t.size()) == shalom_1255);
-        assert(wcharc.open("utf-8",stop));
-        assert(wcharc.convert(shalom_wchar_t.c_str(),shalom_wchar_t.c_str()+shalom_wchar_t.size()) == shalom_utf8);
-        assert(utfc.open("windows-1255",skip));
-        assert(utfc.convert(shalom_pease_utf8.c_str(),shalom_pease_utf8.c_str()+shalom_pease_utf8.size()) == shalom_1255+" ??? world");
-    }
-
-    std::cerr << "From Ok" << std::endl;
-
-    {
-        wconv_to_utf<char> utfc;
-        wconv_to_utf<wchar_t> wcharc;
-        assert(utfc.open("windows-1255",stop));
-        assert(wcharc.open("windows-1255",stop));
-        assert(utfc.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_utf8);
-        assert(wcharc.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_wchar_t);
-    }
-    
-    std::cerr << "To Ok" << std::endl;
-    {
-        wconv_between cvt;
-        assert(cvt.open("utf-8","windows-1255",stop));
-        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_utf8);
-        assert(cvt.open("windows-1255","iso-8859-8",stop));
-        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_1255);
-
-    }
-    
-    std::cerr << "Between Ok" << std::endl;
-    {
-        std::basic_string<uint32_t> utf32;
-        
-        utf32+=uint32_t(0x2008A);
-        utf32+=uint32_t(0x5e9);
-        utf32+=uint32_t(0x61);
-
-        std::string utf8="\xf0\xa0\x82\x8a\xd7\xa9\x61";
-        wconv_to_utf<uint32_t> to;
-        assert(to.open("UTF-8",stop));
-        wconv_from_utf<uint32_t> from;
-        assert(from.open("UTF-8",stop));
-        assert(to.convert(utf8.c_str(),utf8.c_str()+utf8.size()) == utf32);
-        assert(from.convert(utf32.c_str(),utf32.c_str()+utf32.size()) == utf8);
-    }
-    std::cerr << "UTF-32 Ok" << std::endl;
-    }
-    catch(std::exception const &e) {
-        std::cerr << e.what() << std::endl;
-    }
-}
+#endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

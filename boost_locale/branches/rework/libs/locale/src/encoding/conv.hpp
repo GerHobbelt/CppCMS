@@ -6,6 +6,9 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef BOOST_LOCALE_CONV_IMPL_HPP
+#define BOOST_LOCALE_CONV_IMPL_HPP
+
 namespace boost {
     namespace locale {
         namespace conv {
@@ -57,10 +60,10 @@ namespace boost {
                     {
                     }
                 };
-
-
             }
         }
     }
 }
+
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+#endif
