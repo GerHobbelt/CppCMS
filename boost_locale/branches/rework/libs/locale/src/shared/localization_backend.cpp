@@ -33,7 +33,7 @@ namespace boost {
             }
             void add_backend(std::string const &name,std::auto_ptr<localization_backend> backend_ptr)
             {
-                boost::shared_ptr<localization_backend> sptr = backend_ptr;
+                boost::shared_ptr<localization_backend> sptr(backend_ptr);
                 if(all_backends_.empty()) {
                     all_backends_.push_back(std::make_pair(name,sptr));
                     for(unsigned i=0;i<default_backends_.size();i++)

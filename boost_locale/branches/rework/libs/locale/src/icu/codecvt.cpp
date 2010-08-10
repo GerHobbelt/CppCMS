@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/codepage.hpp>
+#include "codecvt.hpp"
 #include "uconv.hpp"
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
@@ -19,6 +20,7 @@
 #include <vector>
 namespace boost {
 namespace locale {
+namespace impl_icu {
     namespace details {
         class converter {
         public:
@@ -235,16 +237,16 @@ namespace locale {
                 UErrorCode err=U_ZERO_ERROR;
                 cvt_ = ucnv_open(encoding.c_str(),&err);
                 if(!cvt_)
-                    impl::throw_icu_error(err);
+                    throw_icu_error(err);
                 
                 err=U_ZERO_ERROR;
 
                 ucnv_setFromUCallBack(cvt_,UCNV_FROM_U_CALLBACK_STOP,0,0,0,&err);
-                impl::check_and_throw_icu_error(err);
+                check_and_throw_icu_error(err);
                 
                 err=U_ZERO_ERROR;
                 ucnv_setToUCallBack(cvt_,UCNV_TO_U_CALLBACK_STOP,0,0,0,&err);
-                impl::check_and_throw_icu_error(err);
+                check_and_throw_icu_error(err);
                 
                 max_len_ = ucnv_getMaxCharSize(cvt_);
             }
@@ -288,8 +290,7 @@ namespace locale {
             return olen;
         }
 
-    } /// details
-
+    } // details 
     ///
     /// \brief this class reimplements standard C++ codecvt facet. It is rarely used directly however it can be
     /// useful for code page conversions
@@ -298,15 +299,15 @@ namespace locale {
     class code_converter : public std::codecvt<CharType,char,mbstate_t> 
     {
     public:
-        static std::codecvt<CharType,char,mbstate_t> *create(info const &inf)
+        static std::codecvt<CharType,char,mbstate_t> *create(std::string const &encoding)
         {
-            return new code_converter<CharType>(inf);
+            return new code_converter<CharType>(encoding);
         }
     protected:
         typedef CharType uchar;
-        code_converter(info const &inf,size_t refs=0) : 
+        code_converter(std::string const &encoding,size_t refs=0) : 
             std::codecvt<CharType,char,mbstate_t>(refs),
-            encoding_(inf.encoding())
+            encoding_(encoding)
         {
             details::converter cvt(encoding_);
             max_len_ = cvt.max_len(); 
@@ -507,8 +508,7 @@ namespace locale {
             return r;
         }
 
-        //
-        // Implementation for UTF-16
+        //encoding// Implementation for UTF-16
         //
         std::codecvt_base::result
         do_real_out(std::mbstate_t &state,
@@ -560,7 +560,7 @@ namespace locale {
     class code_converter<char>
     {
     public:
-        static std::codecvt<char,char,mbstate_t> *create(info const &inf)
+        static std::codecvt<char,char,mbstate_t> *create(std::string const &encoding)
         {
             return new std::codecvt<char,char,mbstate_t>();
         }
@@ -568,128 +568,44 @@ namespace locale {
 
 
     template<>
-    BOOST_LOCALE_DECL std::codecvt<char,char,mbstate_t> *create_codecvt(info const &inf)
+    BOOST_LOCALE_DECL std::codecvt<char,char,mbstate_t> *create_codecvt(std::string const &encoding)
     {
-        return code_converter<char>::create(inf);
+        return code_converter<char>::create(encoding);
     }
 
     #ifndef BOOST_NO_STD_WSTRING
     template<>
-    BOOST_LOCALE_DECL std::codecvt<wchar_t,char,mbstate_t> *create_codecvt(info const &inf)
+    BOOST_LOCALE_DECL std::codecvt<wchar_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
     {
-        return code_converter<wchar_t>::create(inf);
+        return code_converter<wchar_t>::create(encoding);
     }
     #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(info const &inf)
+    BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
     {
         #ifdef BOOST_NO_CHAR16_T_CODECVT
         throw std::runtime_error("std::codecvt<char16_t,char,mbstate_t> is not supported by this compiler");
         #else
-        return code_converter<char16_t>::create(inf);
+        return code_converter<char16_t>::create(encoding);
         #endif
     }
     #endif
 
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(info const &inf)
+    BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
     {
         #ifdef BOOST_NO_CHAR32_T_CODECVT
         throw std::runtime_error("std::codecvt<char32_t,char,mbstate_t> is not supported by this compiler");
         #else
-        return code_converter<char32_t>::create(inf);
+        return code_converter<char32_t>::create(encoding);
         #endif
     }
     #endif
 
-
-
-    namespace conv {
-        template<typename CharType>
-        std::basic_string<CharType> to_utf_impl(char const *begin,char const *end,std::string const &charset,method_type how=default_method)
-        {
-            impl::icu_std_converter<char> cvt_from(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
-            impl::icu_std_converter<CharType> cvt_to("UTF-8",how == skip ? impl::cvt_skip : impl::cvt_stop);
-            try {
-                return cvt_to.std(cvt_from.icu(begin,end));
-            }
-            catch(std::exception const &/*e*/) {
-                throw conversion_error();
-            }
-        }
-
-        template<typename CharType>
-        std::string from_utf_impl(CharType const *begin,CharType const *end,std::string const &charset,method_type how=default_method)
-        {
-            impl::icu_std_converter<CharType> cvt_from("UTF-8",how == skip ? impl::cvt_skip : impl::cvt_stop);
-            impl::icu_std_converter<char> cvt_to(charset,how == skip ? impl::cvt_skip : impl::cvt_stop);
-            try {
-                return cvt_to.std(cvt_from.icu(begin,end));
-            }
-            catch(std::exception const &/*e*/) {
-                throw conversion_error();
-            }
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::basic_string<char> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)
-        {
-            return to_utf_impl<char>(begin,end,charset,how);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::string from_utf(char const *begin,char const *end,std::string const &charset,method_type how)
-        {
-            return from_utf_impl<char>(begin,end,charset,how);
-        }
-
-        #if !defined(BOOST_NO_STD_WSTRING) || defined(BOOST_WINDOWS)
-        template<>
-        BOOST_LOCALE_DECL std::basic_string<wchar_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)
-        {
-            return to_utf_impl<wchar_t>(begin,end,charset,how);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::string from_utf(wchar_t const *begin,wchar_t const *end,std::string const &charset,method_type how)
-        {
-            return from_utf_impl<wchar_t>(begin,end,charset,how);
-        }
-        #endif
-
-        #ifdef BOOST_HAS_CHAR16_T
-        template<>
-        BOOST_LOCALE_DECL std::basic_string<char16_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)
-        {
-            return to_utf_impl<char16_t>(begin,end,charset,how);
-        }
-
-
-        template<>
-        BOOST_LOCALE_DECL std::string from_utf(char16_t const *begin,char16_t const *end,std::string const &charset,method_type how)
-        {
-            return from_utf_impl<char16_t>(begin,end,charset,how);
-        }
-        #endif
-
-        #ifdef BOOST_HAS_CHAR32_T
-        template<>
-        BOOST_LOCALE_DECL std::basic_string<char32_t> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)
-        {
-            return to_utf_impl<char32_t>(begin,end,charset,how);
-        }
-
-        template<>
-        BOOST_LOCALE_DECL std::string from_utf(char32_t const *begin,char32_t const *end,std::string const &charset,method_type how)
-        {
-            return from_utf_impl<char32_t>(begin,end,charset,how);
-        }
-        #endif
-    } // conv
-
+} // impl_icu
 } // locale 
 } // boost
 
