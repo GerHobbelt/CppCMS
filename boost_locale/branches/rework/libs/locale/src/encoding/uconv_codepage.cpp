@@ -114,6 +114,49 @@ namespace impl {
         std::auto_ptr<to_type> cvt_to_;
 
     };
+
+    class uconv_between : public converter_between {
+    public:
+        virtual bool open(char const *to_charset,char const *from_charset,method_type how)
+        {
+            close();
+            try {
+                cvt_from_.reset(new from_type(from_charset,how == skip ? impl_icu::cvt_skip : impl_icu::cvt_stop));
+                cvt_to_.reset(new to_type(to_charset,how == skip ? impl_icu::cvt_skip : impl_icu::cvt_stop));
+            }
+            catch(std::exception const &/*e*/) {
+                close();
+                return false;
+            }
+            return true;
+        }
+        void close()
+        {
+            cvt_from_.reset();
+            cvt_to_.reset();
+        }
+
+        virtual std::string convert(char const *begin,char const *end) 
+        {
+            try {
+                return cvt_to_->std(cvt_from_->icu(begin,end));
+            }
+            catch(std::exception const &/*e*/) {
+                throw conversion_error();
+            }
+        }
+
+    private:
+
+        typedef impl_icu::icu_std_converter<char> from_type;
+        typedef impl_icu::icu_std_converter<char> to_type;
+
+        std::auto_ptr<from_type> cvt_from_;
+        std::auto_ptr<to_type> cvt_to_;
+
+    };
+
+
 } // impl
 } // conv
 } // locale 
@@ -153,5 +196,15 @@ int main()
     }
     
     std::cerr << "To Ok" << std::endl;
+    {
+        uconv_between cvt;
+        assert(cvt.open("utf-8","windows-1255",stop));
+        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_utf8);
+        assert(cvt.open("windows-1255","iso-8859-8",stop));
+        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_1255);
+
+    }
+    
+    std::cerr << "Between Ok" << std::endl;
 }
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

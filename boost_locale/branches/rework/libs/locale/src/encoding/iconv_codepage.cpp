@@ -129,8 +129,12 @@ public:
     {
         if(!iconverter_base::open(charset,utf_name<CharType>()))
             return false;
-        how_ = how;
+        method(how);
         return true;
+    }
+    void method(method_type how)
+    {
+        how_ = how;
     }
 
     virtual std::string convert(char_type const *ubegin,char_type const *uend)
@@ -191,6 +195,22 @@ public:
 private:
     method_type how_;
 
+};
+
+class iconv_between: public iconv_from_utf<char>, public converter_between
+{
+public:
+    virtual bool open(char const *to_charset,char const *from_charset,method_type how)
+    {
+        if(!iconverter_base::open(to_charset,from_charset))
+            return false;
+        method(how);
+        return true;
+    }
+    virtual std::string convert(char const *begin,char const *end)
+    {
+        return iconv_from_utf<char>::convert(begin,end);
+    }
 };
 
 
@@ -309,6 +329,17 @@ int main()
     }
     
     std::cerr << "To Ok" << std::endl;
+    
+    {
+        iconv_between cvt;
+        assert(cvt.open("utf-8","windows-1255",stop));
+        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_utf8);
+        assert(cvt.open("windows-1255","iso-8859-8",stop));
+        assert(cvt.convert(shalom_1255.c_str(),shalom_1255.c_str()+shalom_1255.size())==shalom_1255);
+
+    }
+    
+    std::cerr << "Between Ok" << std::endl;
 }
 
 

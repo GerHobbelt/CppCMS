@@ -11,6 +11,21 @@ namespace boost {
         namespace conv {
             namespace impl {
 
+                class converter_between {
+                public:
+                    typedef char char_type;
+
+                    typedef std::string string_type;
+                    
+                    virtual bool open(char const *to_charset,char const *from_charset,method_type how) = 0;
+                    
+                    virtual std::string convert(char const *begin,char const *end) = 0;
+                    
+                    virtual ~converter_between()
+                    {
+                    }
+                };
+
                 template<typename CharType>
                 class converter_from_utf {
                 public:
@@ -26,6 +41,7 @@ namespace boost {
                     {
                     }
                 };
+
                 template<typename CharType>
                 class converter_to_utf {
                 public:
