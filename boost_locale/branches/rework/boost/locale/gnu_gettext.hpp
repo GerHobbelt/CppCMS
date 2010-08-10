@@ -23,13 +23,13 @@ namespace gnu_gettext {
     /// so this structure not useful for wide characters without subclassing and it will also
     /// ignore gettext catalogs that use charset different from \a encoding.
     ///
-    template<typename CharType>
     struct messages_info {
         messages_info() :
             language("C"),
             locale_category("LC_MESSAGES")
         {
         }
+
         std::string language;   ///< The language we load the catalog for, like "ru", "en", "de" 
         std::string country;    ///< The country wel load the catalog for, like "US", "IL"
         std::string variant;    ///< Language variant, like "euro" so it would look for catalog like de_DE@euro
@@ -41,30 +41,6 @@ namespace gnu_gettext {
         std::vector<std::string> paths;     ///< Paths to seach files in. 
                                             ///< For Unicode Path under windows, encode the string as UTF-8 and add BOM.
 
-        ///
-        /// Set encoding that characters are converted from. Return false if this encoding is not supported. 
-        ///
-        virtual bool set_encoding(std::string const &/*input_encoding*/) 
-        {
-            return false;
-        }
-
-        ///
-        /// Convert string from encoding that was previously set by call set_encoding to the required target
-        /// encoding \a encoding or to UTF-16/UTF-32 in case of wide characters.
-        ///
-
-        virtual std::basic_string<CharType> convert(char const * /*begin*/ ,char const * /*end*/)
-        {
-            throw std::runtime_error("Conversion is not supported");
-        }
-
-        ///
-        /// Destructor where subclasses may cleanup all data.
-        ///
-        virtual ~messages_info()
-        {
-        }
     };
 
     ///
@@ -73,27 +49,27 @@ namespace gnu_gettext {
     ///
 
     template<typename CharType>
-    message_format<CharType> *create_messages_facet(messages_info<CharType> &info);
+    message_format<CharType> *create_messages_facet(messages_info &info);
 
     /// \cond INTERNAL
     
     template<>
-    BOOST_LOCALE_DECL message_format<char> *create_messages_facet(messages_info<char> &info);
+    BOOST_LOCALE_DECL message_format<char> *create_messages_facet(messages_info &info);
     
 
     #ifndef BOOST_NO_STD_WSTRING
     template<>
-    BOOST_LOCALE_DECL message_format<wchar_t> *create_messages_facet(messages_info<wchar_t> &info);
+    BOOST_LOCALE_DECL message_format<wchar_t> *create_messages_facet(messages_info &info);
     #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    BOOST_LOCALE_DECL message_format<char16_t> *create_messages_facet(messages_info<char16_t> &info);
+    BOOST_LOCALE_DECL message_format<char16_t> *create_messages_facet(messages_info &info);
     #endif
     
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    BOOST_LOCALE_DECL message_format<char32_t> *create_messages_facet(messages_info<char32_t> &info);
+    BOOST_LOCALE_DECL message_format<char32_t> *create_messages_facet(messages_info &info);
     #endif
 
     /// \endcond

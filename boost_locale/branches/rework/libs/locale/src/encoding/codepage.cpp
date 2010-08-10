@@ -112,6 +112,12 @@ namespace boost {
             } // impl 
 
             using namespace impl;
+            
+            std::string between(char const *begin,char const *end,
+                                std::string const &to_charset,std::string const &from_charset,method_type how)
+            {
+                return convert_between(begin,end,to_charset.c_str(),from_charset.c_str(),how);
+            }
 
             template<>
             std::basic_string<char> to_utf(char const *begin,char const *end,std::string const &charset,method_type how)

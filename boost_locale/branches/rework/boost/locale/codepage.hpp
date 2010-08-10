@@ -172,6 +172,47 @@ namespace boost {
                 return from_utf(text,text_end,loc,how);
             }
 
+
+            ///
+            /// Convert a text in range [begin,end) to \a to_encoding from \a from_encoding
+            ///
+            
+            BOOST_LOCALE_DECL
+            std::string between(char const *begin,
+                                char const *end,
+                                std::string const &to_encoding,
+                                std::string const &from_encoding,
+                                method_type how=default_method);
+
+            ///
+            /// Convert a \a text to \a to_encoding from \a from_encoding
+            ///
+            
+            inline
+            std::string between(char const *text,
+                                std::string const &to_encoding,
+                                std::string const &from_encoding,
+                                method_type how=default_method)
+            {
+                char const *end=text;
+                while(*end)
+                    end++;
+                return between(text,end,to_encoding,from_encoding,how);
+            }
+
+            ///
+            /// Convert a \a text to \a to_encoding from \a from_encoding
+            ///
+            inline
+            std::string between(std::string const &text,
+                                std::string const &to_encoding,
+                                std::string const &from_encoding,
+                                method_type how=default_method)
+            {
+                return between(text.c_str(),text.c_str()+text.size(),to_encoding,from_encoding,how);
+            }
+
+
             /// @}
 
             /// \cond INTERNAL
