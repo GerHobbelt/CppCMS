@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/codepage.hpp>
+#include "all_generator.hpp"
 #include "codecvt.hpp"
 #include "uconv.hpp"
 #include <unicode/ucnv.h>
@@ -567,43 +568,27 @@ namespace impl_icu {
     };
 
 
-    template<>
-    BOOST_LOCALE_DECL std::codecvt<char,char,mbstate_t> *create_codecvt(std::string const &encoding)
+    std::locale create_codecvt(std::locale const &in,std::string const &encoding,character_facet_type type)
     {
-        return code_converter<char>::create(encoding);
-    }
-
-    #ifndef BOOST_NO_STD_WSTRING
-    template<>
-    BOOST_LOCALE_DECL std::codecvt<wchar_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
-    {
-        return code_converter<wchar_t>::create(encoding);
-    }
-    #endif
-
-    #ifdef BOOST_HAS_CHAR16_T
-    template<>
-    BOOST_LOCALE_DECL std::codecvt<char16_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
-    {
-        #ifdef BOOST_NO_CHAR16_T_CODECVT
-        throw std::runtime_error("std::codecvt<char16_t,char,mbstate_t> is not supported by this compiler");
-        #else
-        return code_converter<char16_t>::create(encoding);
+        switch(type) {
+        case char_facet:
+            return std::locale(in,code_converter<char>::create(encoding));
+        #ifndef BOOST_NO_STD_WSTRING
+        case wchar_t_facet:
+            return std::locale(in,code_converter<wchar_t>::create(encoding));
         #endif
-    }
-    #endif
-
-    #ifdef BOOST_HAS_CHAR32_T
-    template<>
-    BOOST_LOCALE_DECL std::codecvt<char32_t,char,mbstate_t> *create_codecvt(std::string const &encoding)
-    {
-        #ifdef BOOST_NO_CHAR32_T_CODECVT
-        throw std::runtime_error("std::codecvt<char32_t,char,mbstate_t> is not supported by this compiler");
-        #else
-        return code_converter<char32_t>::create(encoding);
+        #if defined(BOOST_HAS_CHAR16_T) && !defined(BOOST_NO_CHAR16_T_CODECVT)
+        case char16_t_facet:
+            return std::locale(in,code_converter<char16_t>::create(encoding));
         #endif
+        #if defined(BOOST_HAS_CHAR32_T) && !defined(BOOST_NO_CHAR32_T_CODECVT)
+        case char32_t_facet:
+            return std::locale(in,code_converter<char32_t>::create(encoding));
+        #endif
+        default:
+            return in;
+        }
     }
-    #endif
 
 } // impl_icu
 } // locale 

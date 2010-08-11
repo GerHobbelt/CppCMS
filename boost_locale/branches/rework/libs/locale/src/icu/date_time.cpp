@@ -9,6 +9,8 @@
 #include <boost/locale/date_time_facet.hpp>
 #include <boost/locale/date_time.hpp>
 #include <boost/locale/formatting.hpp>
+#include "all_generator.hpp"
+
 #include <boost/thread/mutex.hpp>
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
@@ -220,6 +222,26 @@ namespace impl_icu {
         std::string encoding_;
         hold_ptr<icu::Calendar> calendar_;
     };
+    
+    class icu_calendar_facet : public calendar_facet  {
+    public:
+        icu_calendar_facet(cdata const &d,size_t refs = 0) : 
+            calendar_facet(refs),
+            data_(d)
+        {
+        }
+        virtual abstract_calendar *create_calendar() const
+        {
+            return new calendar_impl(data_);
+        }
+    private:
+        cdata data_;
+    };
+    
+    std::locale create_calendar(std::locale const &in,cdata const &d)
+    {
+        return std::locale(in,new icu_calendar_facet(d));
+    }
 
 } // impl_icu
 } // locale

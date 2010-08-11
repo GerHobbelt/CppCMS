@@ -7,10 +7,10 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/conversion.hpp>
-#include <boost/locale/generator.hpp>
+#include "all_generator.hpp"
 #include <unicode/normlzr.h>
 #include <unicode/ustring.h>
-
+#include <unicode/locid.h>
 #include "cdata.hpp"
 #include "uconv.hpp"
 
