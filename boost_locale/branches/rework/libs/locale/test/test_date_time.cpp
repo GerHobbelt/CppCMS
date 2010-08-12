@@ -57,13 +57,13 @@ int main()
         std::ostringstream ss;
         ss.imbue(loc);
         ss<<boost::locale::as::time_zone(tz);
-
-
+        
         date_time time_point;
         
         time_point=year * 1970 + february + 5 * day;
 
         ss << as::date << time_point;
+
         TEST(ss.str() == "Feb 5, 1970");
         time_point = 3 * hour_12 + 1 * am_pm + 33 * minute + 13 * second; 
         ss.str("");

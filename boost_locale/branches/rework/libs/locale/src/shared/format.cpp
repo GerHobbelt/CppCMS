@@ -24,9 +24,11 @@ namespace boost {
                 ios_info info;
                 std::locale saved_locale;
                 bool restore_locale;
+                void *cookie;
+                void (*imbuer)(void *,std::locale const &);
             };
 
-            format_parser::format_parser(std::ios_base &ios) : 
+            format_parser::format_parser(std::ios_base &ios,void *cookie,void (*imbuer)(void *,std::locale const &)) : 
                 ios_(ios),
                 d(new data)
             {
@@ -35,6 +37,13 @@ namespace boost {
                 d->info=ios_info::get(ios);
                 d->saved_locale = ios.getloc();
                 d->restore_locale=false;
+                d->cookie = cookie;
+                d->imbuer = imbuer;
+            }
+
+            void format_parser::imbue(std::locale const &l)
+            {
+                d->imbuer(d->cookie,l);
             }
 
             format_parser::~format_parser()
@@ -46,7 +55,7 @@ namespace boost {
                 ios_info::get(ios_) = d->info;
                 ios_.width(0);
                 if(d->restore_locale)
-                    ios_.imbue(d->saved_locale);
+                    imbue(d->saved_locale);
             }
 
             unsigned format_parser::get_posision()
@@ -167,27 +176,7 @@ namespace boost {
                     else
                         new_loc = gen(value);
 
-                    if(dynamic_cast<std::ostream*>(&ios_)) {
-                        dynamic_cast<std::ostream&>(ios_).imbue(gen(value + "." +  encoding));
-                    }
-                    #ifndef BOOST_NO_STD_WSTRING
-                    else if(dynamic_cast<std::basic_ostream<wchar_t>*>(&ios_)) {
-                        dynamic_cast<std::basic_ostream<wchar_t>&>(ios_).imbue(gen(value + "." +  encoding));
-                    }
-                    #endif
-                    #ifdef BOOST_HAS_CHAR16_T
-                    else if(dynamic_cast<std::basic_ostream<char16_t>*>(&ios_)) {
-                        dynamic_cast<std::basic_ostream<char16_t>&>(ios_).imbue(gen(value + "." +  encoding));
-                    }
-                    #endif
-                    #ifdef BOOST_HAS_CHAR32_T
-                    else if(dynamic_cast<std::basic_ostream<char32_t>*>(&ios_)) {
-                        dynamic_cast<std::basic_ostream<char32_t>&>(ios_).imbue(gen(value + "." +  encoding));
-                    }
-                    #endif
-                    else {
-                        ios_.imbue(new_loc);
-                    }
+                    imbue(new_loc);
                 }
 
             }

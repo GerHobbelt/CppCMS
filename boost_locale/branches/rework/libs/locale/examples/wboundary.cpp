@@ -48,10 +48,8 @@ int main(int argc,char **argv)
     locale loc;
     if(argc == 1)
         loc=gen(""); 
-    else if(argc == 2)
+    else 
         loc=gen(argv[1]);
-    else
-        loc=gen(argv[1],argv[2]);
 
     // Create system default locale
 

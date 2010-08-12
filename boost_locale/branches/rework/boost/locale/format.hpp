@@ -98,7 +98,7 @@ namespace boost {
     
             class BOOST_LOCALE_DECL format_parser  {
             public:
-                format_parser(std::ios_base &ios);
+                format_parser(std::ios_base &ios,void *,void (*imbuer)(void *,std::locale const &));
                 ~format_parser();
                 
                 unsigned get_posision();
@@ -115,6 +115,7 @@ namespace boost {
                 }
                 void restore();
             private:
+                void imbue(std::locale const &);
                 format_parser(format_parser const &);
                 void operator=(format_parser const &);
 
@@ -284,7 +285,7 @@ namespace boost {
                     }
                     pos++;
                   
-                    details::format_parser fmt(out);
+                    details::format_parser fmt(out,reinterpret_cast<void *>(&out),&basic_format::imbue_locale);
 
                     while(pos < size) { 
                         std::string key;
@@ -380,6 +381,11 @@ namespace boost {
                     return ext_params_[id - base_params_];
                 else
                     return parameters_[id];
+            }
+
+            static void imbue_locale(void *ptr,std::locale const &l)
+            {
+                reinterpret_cast<stream_type *>(ptr)->imbue(l);
             }
 
 

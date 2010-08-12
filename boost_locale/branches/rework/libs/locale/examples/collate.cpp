@@ -16,7 +16,7 @@ using namespace boost::locale;
 
 int main(int argc,char **argv)
 {
-     if(argc!=1) {
+     if(argc!=2) {
           cerr<<"Usage collate locale_id.encoding "<<endl;
           return 1;
      }

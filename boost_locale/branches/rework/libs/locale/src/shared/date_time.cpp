@@ -46,10 +46,10 @@ calendar::calendar(std::locale const &l) :
 
 calendar::calendar(std::ios_base &ios) :
     locale_(ios.getloc()),
+    tz_(ios_info::get(ios).time_zone()),
     impl_(std::use_facet<calendar_facet>(locale_).create_calendar())
 {
-    std::string id = ios_info::get(ios).time_zone();
-    impl_->set_timezone(id);
+    impl_->set_timezone(tz_);
     
 }
 
@@ -138,6 +138,7 @@ bool calendar::operator!=(calendar const &other) const
 date_time::date_time() :
     impl_(std::use_facet<calendar_facet>(std::locale()).create_calendar())
 {
+    impl_->set_timezone(time_zone::global());
 }
 
 date_time::date_time(date_time const &other)
@@ -168,6 +169,7 @@ date_time::~date_time()
 date_time::date_time(double t) :
     impl_(std::use_facet<calendar_facet>(std::locale()).create_calendar())
 {
+    impl_->set_timezone(time_zone::global());
     time(t);
 }
 
@@ -187,6 +189,7 @@ date_time::date_time(calendar const &cal) :
 date_time::date_time(date_time_period_set const &s) :
     impl_(std::use_facet<calendar_facet>(std::locale()).create_calendar())
 {
+    impl_->set_timezone(time_zone::global());
     for(unsigned i=0;i<s.size();i++)
         set(s[i].type,s[i].value);
 }
