@@ -7,7 +7,7 @@
 //
 
 #include "test_locale.hpp"
-#include "../src/ios_prop.hpp"
+#include "../src/shared/ios_prop.hpp"
 #include <sstream>
 #include <locale>
 

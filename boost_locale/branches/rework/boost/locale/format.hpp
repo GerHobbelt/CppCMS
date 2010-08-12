@@ -17,7 +17,6 @@
 #include <boost/locale/formatting.hpp>
 
 #include <sstream>
-#include <iostream>
 
 
 namespace boost {
@@ -111,7 +110,7 @@ namespace boost {
                 {
                     if(key=="ftime" || key=="strftime") {
                         as::strftime(ios_);
-                        ext_pattern(ios_,flags::datetime_pattern,value);
+                        ios_info::get(ios_).date_time_pattern(value);
                     }
                 }
                 void restore();
@@ -243,7 +242,7 @@ namespace boost {
             {
                 string_type format;
                 if(translate_)
-                    format = message_.str<CharType>(out.getloc(),ext_value(out,flags::domain_id));
+                    format = message_.str<CharType>(out.getloc(),ios_info::get(out).domain_id());
                 else
                     format = format_;
                
@@ -284,8 +283,7 @@ namespace boost {
                         continue;
                     }
                     pos++;
-                   
-                    
+                  
                     details::format_parser fmt(out);
 
                     while(pos < size) { 
@@ -333,8 +331,9 @@ namespace boost {
                             }
                         }
 
-                        if(use_svalue)
+                        if(use_svalue) {
                             fmt.set_one_flag(key,svalue);
+                        }
                         else 
                             fmt.set_flag_with_str(key,value);
                         

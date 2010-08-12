@@ -12,7 +12,7 @@
 
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/format.hpp>
-#include <boost/locale/time_zone.hpp>
+#include <boost/locale/date_time.hpp>
 #include <boost/locale/generator.hpp>
 #include "test_locale.hpp"
 #include "test_locale_tools.hpp"
@@ -337,7 +337,7 @@ void test_format(std::string charset="UTF-8")
 int main()
 {
     try {
-        boost::locale::time_zone::global(boost::locale::time_zone("GMT+4:00"));
+        boost::locale::time_zone::global("GMT+4:00");
         std::cout << "Testing char, UTF-8" << std::endl;
         test_manip<char>();
         test_format<char>();

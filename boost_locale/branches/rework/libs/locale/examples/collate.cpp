@@ -16,14 +16,14 @@ using namespace boost::locale;
 
 int main(int argc,char **argv)
 {
-     if(argc!=3) {
-          cerr<<"Usage collate Locale-ID Encoding"<<endl;
+     if(argc!=1) {
+          cerr<<"Usage collate locale_id.encoding "<<endl;
           return 1;
      }
      generator gen;
 
      /// Set global locale to requested
-     std::locale::global(gen.generate(argv[1],argv[2]));
+     std::locale::global(gen.generate(argv[1]));
 
      /// Create a set that includes all strings sorted with primary collation level
      typedef std::set<std::string,comparator<char> > set_type;

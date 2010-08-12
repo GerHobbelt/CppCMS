@@ -30,6 +30,24 @@ namespace boost {
         {
         public:
             static std::locale::id id; ///< This member defines uniquely this facet, required by STL 
+
+            ///
+            /// String information about the locale
+            ///
+            typedef enum {
+                language_property,
+                country_property,
+                variant_property,
+                encoding_property
+            } string_propery;
+
+            ///
+            /// Integer information about locale
+            ///
+            typedef enum {
+                utf8_property
+            } integer_property;
+
            
             info(size_t refs = 0) : std::locale::facet(refs)
             {
@@ -37,28 +55,46 @@ namespace boost {
             ///
             /// Get language name
             ///
-            virtual std::string language() const = 0;
+            std::string language() const 
+            {
+                return get_string_property(language_property);
+            }
             ///
             /// Get country name
             ///
-            virtual std::string country() const = 0;
+            std::string country() const
+            {
+                return get_string_property(country_property);
+            }
             ///
             /// Get locale variant
             ///
-            virtual std::string variant() const = 0;
+            virtual std::string variant() const
+            {
+                return get_string_property(variant_property);
+            }
             ///
             /// Get encoding
             ///
-            virtual std::string encoding() const = 0;
+            virtual std::string encoding() const
+            {
+                return get_string_property(encoding_property);
+            }
 
             ///
             /// Is underlying encoding is UTF-8 (for char streams and strings)
             ///
-            virtual bool utf8() const = 0;
+            virtual bool utf8() const
+            {
+                return get_ineger_property(utf8_property) != 0;
+            }
             
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
             std::locale::id& __get_id (void) const { return id; }
 #endif
+        protected:
+            virtual std::string get_string_property(string_propery v) const = 0;
+            virtual int get_ineger_property(integer_property v) const = 0;
         };
 
     }

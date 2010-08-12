@@ -533,8 +533,9 @@ namespace locale {
                         return fmt;
                     if(U_FAILURE(err))
                         return fmt;
-                    if(!info.time_zone().empty())
+                    if(!info.time_zone().empty()) {
                         df->adoptTimeZone(icu::TimeZone::createTimeZone(info.time_zone().c_str()));
+                    }
                         
                     fmt.reset(new date_format<CharType>(df,encoding));
                 }

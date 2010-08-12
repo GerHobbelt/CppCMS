@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 namespace boost {
     namespace locale {
@@ -19,15 +20,19 @@ namespace boost {
             data(localization_backend_manager const &mgr)  :
                 cats(all_categories),
                 chars(all_characters),
+                caching_enabled(false),
                 backend_manager(mgr)
             {
             }
 
             typedef std::map<std::string,std::locale> cached_type;
-            cached_type cached;
+            mutable cached_type cached;
+            mutable boost::mutex cached_lock;
 
             unsigned cats;
             unsigned chars;
+
+            bool caching_enabled;
 
             std::vector<std::string> paths;
             std::vector<std::string> domains;
@@ -119,6 +124,13 @@ namespace boost {
 
         std::locale generator::generate(std::locale const &base,std::string const &id) const
         {
+            if(d->caching_enabled) {
+                boost::unique_lock<boost::mutex> guard(d->cached_lock);
+                data::cached_type::const_iterator p = d->cached.find(id);
+                if(p!=d->cached.end()) {
+                    return p->second;
+                }
+            }
             shared_ptr<localization_backend> backend(d->backend_manager.get());
             set_all_options(backend,id);
 
@@ -126,7 +138,7 @@ namespace boost {
             unsigned facets = d->cats;
             unsigned chars = d->chars;
 
-            for(unsigned facet = per_character_facet_last; facet <= per_character_facet_last && facet!=0; facet <<=1) {
+            for(unsigned facet = per_character_facet_first; facet <= per_character_facet_last && facet!=0; facet <<=1) {
                 if(!(facets & facet))
                     continue;
                 for(unsigned ch = character_first_facet ; ch<=character_last_facet;ch <<=1) {
@@ -140,7 +152,23 @@ namespace boost {
                     continue;
                 result = backend->install(result,facet);
             }
+            if(d->caching_enabled) {
+                boost::unique_lock<boost::mutex> guard(d->cached_lock);
+                data::cached_type::const_iterator p = d->cached.find(id);
+                if(p==d->cached.end()) {
+                    d->cached[id] = result;
+                }
+            }
             return result;
+        }
+
+        bool generator::locale_cache_enabled() const
+        {
+            return d->caching_enabled;
+        }
+        void generator::locale_cache_enabled(bool enabled) 
+        {
+            d->caching_enabled = enabled;
         }
         
         void generator::set_all_options(shared_ptr<localization_backend> backend,std::string const &id) const

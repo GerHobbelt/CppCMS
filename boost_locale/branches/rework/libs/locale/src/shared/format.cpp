@@ -160,7 +160,34 @@ namespace boost {
                     std::string encoding=std::use_facet<info>(d->saved_locale).encoding();
                     generator gen;
                     gen.categories(formatting_facet);
-                    ios_.imbue(gen(value));
+                   
+                    std::locale new_loc;
+                    if(value.find('.')==std::string::npos) 
+                        new_loc = gen(value + "." +  encoding);
+                    else
+                        new_loc = gen(value);
+
+                    if(dynamic_cast<std::ostream*>(&ios_)) {
+                        dynamic_cast<std::ostream&>(ios_).imbue(gen(value + "." +  encoding));
+                    }
+                    #ifndef BOOST_NO_STD_WSTRING
+                    else if(dynamic_cast<std::basic_ostream<wchar_t>*>(&ios_)) {
+                        dynamic_cast<std::basic_ostream<wchar_t>&>(ios_).imbue(gen(value + "." +  encoding));
+                    }
+                    #endif
+                    #ifdef BOOST_HAS_CHAR16_T
+                    else if(dynamic_cast<std::basic_ostream<char16_t>*>(&ios_)) {
+                        dynamic_cast<std::basic_ostream<char16_t>&>(ios_).imbue(gen(value + "." +  encoding));
+                    }
+                    #endif
+                    #ifdef BOOST_HAS_CHAR32_T
+                    else if(dynamic_cast<std::basic_ostream<char32_t>*>(&ios_)) {
+                        dynamic_cast<std::basic_ostream<char32_t>&>(ios_).imbue(gen(value + "." +  encoding));
+                    }
+                    #endif
+                    else {
+                        ios_.imbue(new_loc);
+                    }
                 }
 
             }

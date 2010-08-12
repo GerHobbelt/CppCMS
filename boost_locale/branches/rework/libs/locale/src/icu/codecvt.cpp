@@ -8,7 +8,6 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/codepage.hpp>
 #include "all_generator.hpp"
-#include "codecvt.hpp"
 #include "uconv.hpp"
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>

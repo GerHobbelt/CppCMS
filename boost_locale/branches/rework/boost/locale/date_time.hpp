@@ -982,7 +982,24 @@ namespace boost {
             return date_time_duration(earlier,later);
         }
 
+
+        ///
+        /// \brief namespace that holds function for operating global time zone identifier
+        ///
+        namespace time_zone {
+            ///
+            /// Get global time zone identifier. If empty, system time zone is used
+            ///
+            BOOST_LOCALE_DECL std::string global();
+            ///
+            /// Set global time zone identifier returing pervious one. If empty, system time zone is used
+            ///
+            BOOST_LOCALE_DECL std::string global(std::string const &new_tz);
+        }
+
         /// @}
+
+
 
     } // locale
 } // boost

@@ -248,11 +248,12 @@ public:
                 state = unshifting;
 
             if(state == normal) 
-                conv(&begin,&in_left,&out_ptr,&out_left);
+                res = conv(&begin,&in_left,&out_ptr,&out_left);
             else
-                conv(0,0,&out_ptr,&out_left);
+                res = conv(0,0,&out_ptr,&out_left);
 
             int err = errno;
+
             sresult.append(&result[0],(out_ptr - out_start)/sizeof(char_type));
 
             if(res == (size_t)(-1)) {

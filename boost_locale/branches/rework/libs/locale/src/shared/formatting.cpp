@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/formatting.hpp>
+#include <boost/locale/date_time.hpp>
 #include <typeinfo>
 #include "ios_prop.hpp"
 
@@ -57,8 +58,12 @@ namespace boost {
 
         struct ios_info::data {};
 
-        ios_info::ios_info() : flags_(0),domain_id_(0),d(0)
+        ios_info::ios_info() : 
+            flags_(0),
+            domain_id_(0),
+            d(0)
         {
+            time_zone_ = time_zone::global();
         }
         ios_info::~ios_info()
         {

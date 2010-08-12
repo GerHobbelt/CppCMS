@@ -1,10 +1,16 @@
 #define BOOST_LOCALE_SOURCE
-#include <boost/locale.hpp>
+#include <boost/locale/boundary.hpp>
+#include <boost/locale/collator.hpp>
+#include <boost/locale/conversion.hpp>
+#include <boost/locale/date_time_facet.hpp>
+#include <boost/locale/message.hpp>
+#include <boost/locale/info.hpp>
 
 namespace boost {
     namespace locale {
 
         std::locale::id info::id;
+        std::locale::id calendar_facet::id;
 
         std::locale::id converter<char>::id;
         std::locale::id base_message_format<char>::id;
@@ -64,6 +70,7 @@ namespace boost {
                     #endif
 
                     std::has_facet<info>(l);
+                    std::has_facet<calendar_facet>(l);
                 }
                 template<typename Char>
                 void install_by()

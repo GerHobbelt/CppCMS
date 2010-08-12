@@ -14,6 +14,7 @@
 #  pragma warning(disable : 4275 4251 4231 4660)
 #endif
 #include <boost/cstdint.hpp>
+#include <boost/locale/date_time.hpp>
 #include <ostream>
 #include <istream>
 #include <string>
@@ -147,7 +148,7 @@ namespace boost {
                     delete [] ptr;
                     ptr = 0;
                     type=&typeid(Char);
-                    Char *end = s;
+                    Char const *end = s;
                     while(*end!=0) end++;
                     size = sizeof(Char)*(end - s+1);
                     ptr = new char[size];
@@ -524,7 +525,7 @@ namespace boost {
             ///
             inline std::ios_base &local_time(std::ios_base &ios)
             {
-                ios_info::get(ios).time_zone(std::string());
+                ios_info::get(ios).time_zone(time_zone::global());
                 return ios;
             }
 

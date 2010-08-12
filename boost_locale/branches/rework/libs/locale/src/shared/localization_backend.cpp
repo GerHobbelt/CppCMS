@@ -3,6 +3,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <vector>
+#ifdef BOOST_LOCALE_WITH_ICU
+#include "../icu/icu_backend.hpp"
+#endif
 
 namespace boost {
     namespace locale {
@@ -115,7 +118,7 @@ namespace boost {
                     }
                     if(v==0)
                         return l;
-                    if(unsigned(id) >= backends_.size())
+                    if(unsigned(id) >= index_.size())
                         return l;
                     if(index_[id]==-1) 
                         return l;
@@ -192,7 +195,15 @@ namespace boost {
             }
 
             struct init {
-                init() { localization_backend_manager::global(); }
+                init() { 
+                    localization_backend_manager mgr;
+                    std::auto_ptr<localization_backend> backend;
+                    #ifdef BOOST_LOCALE_WITH_ICU
+                    backend.reset(impl_icu::create_localization_backend());
+                    mgr.add_backend("icu",backend);
+                    #endif
+                    localization_backend_manager::global(mgr);
+                }
             } do_init;
         }
 

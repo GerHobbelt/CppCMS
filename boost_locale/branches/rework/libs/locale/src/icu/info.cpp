@@ -7,89 +7,67 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/info.hpp>
-#include <unicode/locid.h>
-#include <unicode/ucnv.h>
+#include "cdata.hpp"
+#include "all_generator.hpp"
 
-#include "info_impl.hpp"
 
 namespace boost {
     namespace locale {
+        namespace impl_icu {
 
-        std::locale::id info::id;
-
-        info::~info()
-        {
-        }
-
-        info::info(std::string posix_id,size_t refs) : 
-            std::locale::facet(refs)
-        {
-            impl_.reset(new info_impl());
-
-            if(posix_id.empty()) {
-                impl_->encoding = ucnv_getDefaultName();
-            }
-            else {
-                impl_->locale = icu::Locale::createCanonical(posix_id.c_str());
-                size_t n = posix_id.find('.');
-                if(n!=std::string::npos) {
-                    size_t e = posix_id.find('@',n);
-                    if(e == std::string::npos)
-                        impl_->encoding = posix_id.substr(n+1);
-                    else
-                        impl_->encoding = posix_id.substr(n+1,e-n-1);
+            class icu_info : public info {
+            public:
+                icu_info(cdata const &d, size_t refs = 0) : 
+                    info(refs)
+                {
+                    language_ = d.locale.getLanguage();
+                    country_ = d.locale.getCountry();
+                    variant_ = d.locale.getVariant();
+                    encoding_ = d.encoding;
+                    utf8_ = d.utf8;
                 }
-                else
-                    impl_->encoding = ucnv_getDefaultName();
+
+                virtual std::string get_string_property(string_propery v) const
+                {
+                    switch(v) {
+                    case language_property:
+                        return language_;
+                    case country_property:
+                        return country_;
+                    case variant_property:
+                        return variant_;
+                    case encoding_property:
+                        return encoding_;
+                    default:
+                        return "";
+                    };
+                }
+
+                virtual int get_ineger_property(integer_property v) const
+                {
+                    switch(v) {
+                    case utf8_property:
+                        return utf8_;
+                    default:
+                        return 0;
+                    }
+                }
+            private:
+                std::string language_;
+                std::string country_;
+                std::string variant_;
+                std::string encoding_;
+                bool utf8_;
+            };
+
+            std::locale create_info(std::locale const &in,cdata const &d)
+            {
+                return std::locale(in, new icu_info(d));
             }
 
-            if(ucnv_compareNames(impl_->encoding.c_str(),"UTF8")==0)
-                utf8_=true;
-            else
-                utf8_=false;
-        }
 
-        info::info(std::string posix_id,std::string encoding,size_t refs) : 
-            std::locale::facet(refs)
-        {
-            impl_.reset(new info_impl());
-            size_t n = posix_id.find('.');
-            if(n!=std::string::npos) {
-                size_t e = posix_id.find('@',n);
-                if(e == std::string::npos)
-                    impl_->encoding = posix_id.substr(n+1);
-                else
-                    impl_->encoding = posix_id.substr(n+1,e-n-1);
-            }
-            else
-                impl_->encoding = encoding;
+        } // impl_icu
 
-            if(!posix_id.empty()) {
-                impl_->locale = icu::Locale::createCanonical(posix_id.c_str());
-            }
-            
-            if(ucnv_compareNames(impl_->encoding.c_str(),"UTF8")==0)
-                utf8_=true;
-            else
-                utf8_=false;
-        }
-
-        std::string info::encoding() const
-        {
-            return impl()->encoding;
-        }
-        std::string info::language() const
-        {
-            return impl()->locale.getLanguage();
-        }
-        std::string info::country() const
-        {
-            return impl()->locale.getCountry();
-        }
-        std::string info::variant() const
-        {
-            return impl()->locale.getVariant();
-        }
-    }
-}
+    } // locale
+} //boost
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

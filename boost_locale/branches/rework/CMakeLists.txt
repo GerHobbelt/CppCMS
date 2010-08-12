@@ -5,6 +5,13 @@ enable_testing()
 option(DISABLE_SHARED	"Disable shared libraries build" OFF)
 option(DISABLE_STATIC	"Disable static libraries build" OFF)
 
+if(WIN32 AND NOT CYGWIN)
+	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" ON)
+else()
+	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" OFF)
+endif()
+
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -24,6 +31,40 @@ find_library(ICU_DATA icudt NAMES icudata)
 find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
 find_path(ICU_INCLUDE_DIR unicode/unistr.h)
 
+if(ICU_UC AND ICU_DATA AND ICU_I18N AND ICU_INCLUDE_DIR)
+	set(BOOST_LOCALE_HAVE_ICU ON)
+	add_definitions(-DBOOST_LOCALE_WITH_ICU)
+else()
+	set(BOOST_LOCALE_HAVE_ICU OFF)
+endif()
+
+message("-- Looking for iconv")
+if(NOT DISABLE_ICONV) 
+	check_cxx_source_compiles(
+		"#include <iconv.h> 
+		 int main() { iconv_t v=iconv_open((char *)0,(char *)0); }"
+		 LIBC_ICONV)
+	if(NOT LIBC_ICONV)
+		find_path(ICONV_INCLUDE_DIR iconv.h)
+		find_library(ICONV_LIB iconv)
+		if(ICONV_LIB AND ICONV_INCLUDE_DIR)
+			set(BOOST_LOCALE_HAVE_ICONV 1)
+			include_directories(${ICONV_INCLUDE_DIR})
+		endif()
+	else()
+		set(BOOST_LOCALE_HAVE_ICONV 1)
+	endif()
+
+	if(BOOST_LOCALE_HAVE_ICONV)
+		add_definitions(-DBOOST_LOCALE_WITH_ICONV)
+	else()
+		add_definitions(-DBOOST_LOCALE_NO_ICONV)
+		message(STATUS "-- iconv not found, falling back to ICU")
+	endif()
+
+endif(NOT DISABLE_ICONV)
+
+
 message("-- Looking for Boost")
 find_path(BOOST_INCLUDE_DIR boost/shared_ptr.hpp)
 
@@ -32,17 +73,6 @@ include_directories(${ICU_INCLUDE_DIR})
 if(BOOST_INCLUDE_DIR)
 	include_directories(${BOOST_INCLUDE_DIR})
 endif()
-
-
-check_cxx_source_compiles(
-	"#include <unordered_map> 
-	int main() { std::unordered_map<int,int> m; }"
-	LOCALE_HAVE_STD_UNORDERED_MAP)
-
-check_cxx_source_compiles(
-	"#include <tr1/unordered_map> 
-	int main() { std::tr1::unordered_map<int,int> m; }"
-	LOCALE_HAVE_STD_TR1_UNORDERED_MAP)
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -95,17 +125,24 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 include_directories(.)
 
 set(BOOST_LOCALE_SRC 
-	libs/locale/src/generator.cpp
-	libs/locale/src/time_zone.cpp
-	libs/locale/src/codepage.cpp
-	libs/locale/src/formatter.cpp 
-	libs/locale/src/formatting.cpp 
-	libs/locale/src/info.cpp 
-	libs/locale/src/format.cpp 
-	libs/locale/src/message.cpp 
-	libs/locale/src/mo_lambda.cpp
-	libs/locale/src/date_time.cpp
+	libs/locale/src/encoding/codepage.cpp
+	libs/locale/src/icu/boundary.cpp
+	libs/locale/src/icu/codecvt.cpp
+	libs/locale/src/icu/collator.cpp
+	libs/locale/src/icu/conversion.cpp
+	libs/locale/src/icu/date_time.cpp
+	libs/locale/src/icu/formatter.cpp
+	libs/locale/src/icu/icu_backend.cpp
+	libs/locale/src/icu/info.cpp
+	libs/locale/src/icu/numeric.cpp
+	libs/locale/src/shared/date_time.cpp
+	libs/locale/src/shared/format.cpp
+	libs/locale/src/shared/formatting.cpp
+	libs/locale/src/shared/generator.cpp
 	libs/locale/src/shared/ids.cpp
+	libs/locale/src/shared/localization_backend.cpp
+	libs/locale/src/shared/message.cpp
+	libs/locale/src/shared/mo_lambda.cpp
 	)
 
 if(DISABLE_SHARED AND DISABLE_STATIC)
@@ -126,12 +163,18 @@ endif(DISABLE_SHARED)
 if(NOT DISABLE_SHARED)
 	add_library(boost_locale SHARED ${BOOST_LOCALE_SRC})
 	target_link_libraries(boost_locale ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	if(ICONV_LIB)
+		target_link_libraries(boost_locale ${ICONV_LIB})
+	endif()
 endif(NOT DISABLE_SHARED)
 
 
 if(NOT DISABLE_STATIC)
 	add_library(boost_locale-static STATIC ${BOOST_LOCALE_SRC})
 	target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	if(ICONV_LIB)
+		target_link_libraries(boost_locale-static ${ICONV_LIB})
+	endif()
 endif(NOT DISABLE_STATIC)
 
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
@@ -151,6 +194,8 @@ set(LOCALE_TESTS
 		test_generator
 		test_icu_vs_os_timezone
 		)
+
+
 set(LOCALE_EXAMPLES 	hello
 			whello
 			boundary

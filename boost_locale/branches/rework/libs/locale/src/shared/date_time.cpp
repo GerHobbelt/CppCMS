@@ -8,7 +8,7 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/date_time.hpp>
 #include <boost/locale/formatting.hpp>
-
+#include <boost/thread.hpp>
 #include <math.h>
 
 namespace boost {
@@ -38,8 +38,10 @@ calendar::calendar(std::string const &zone) :
 
 calendar::calendar(std::locale const &l) :
     locale_(l),
+    tz_(time_zone::global()),
     impl_(std::use_facet<calendar_facet>(l).create_calendar())
 {
+    impl_->set_timezone(tz_);
 }
 
 calendar::calendar(std::ios_base &ios) :
@@ -52,8 +54,10 @@ calendar::calendar(std::ios_base &ios) :
 }
 
 calendar::calendar() :
+    tz_(time_zone::global()),
     impl_(std::use_facet<calendar_facet>(std::locale()).create_calendar())
 {
+    impl_->set_timezone(tz_);
 }
 
 calendar::~calendar()
@@ -409,6 +413,33 @@ int date_time::minimum(period_type f) const
 {
     return impl_->get_value(f,abstract_calendar::actual_minimum);
 }
+
+namespace time_zone {
+    boost::mutex &tz_mutex()
+    {
+        static boost::mutex m;
+        return m;
+    }
+    std::string &tz_id()
+    {
+        static std::string id;
+        return id;
+    }
+    std::string global()
+    {
+        boost::unique_lock<boost::mutex> lock(tz_mutex());
+        std::string id = tz_id();
+        return id;
+    }
+    std::string global(std::string const &new_id)
+    {
+        boost::unique_lock<boost::mutex> lock(tz_mutex());
+        std::string id = tz_id();
+        tz_id() = new_id;
+        return id;
+    }
+}
+
 
 
 } // locale

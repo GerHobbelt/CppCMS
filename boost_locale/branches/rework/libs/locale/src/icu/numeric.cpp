@@ -258,7 +258,7 @@ private:
         formatter_ptr formatter;
         stream_type *stream_ptr = dynamic_cast<stream_type *>(&ios);
 
-        if(!stream_ptr || use_parent<ValueType>(ios) || (formatter = formatter_type::create(ios,loc_,enc_)).get()!=0) {
+        if(!stream_ptr || use_parent<ValueType>(ios) || (formatter = formatter_type::create(ios,loc_,enc_)).get()==0) {
             return std::num_get<CharType>::do_get(in,end,ios,err,val);
         }
 

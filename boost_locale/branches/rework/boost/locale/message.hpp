@@ -275,7 +275,7 @@ namespace boost {
             void write(std::basic_ostream<CharType> &out) const
             {
                 std::locale const &loc = out.getloc();
-                int id = ext_value(out,flags::domain_id);
+                int id = ios_info::get(out).domain_id();
                 std::basic_string<CharType> buffer;
                 out << write(loc,id,buffer);
             }

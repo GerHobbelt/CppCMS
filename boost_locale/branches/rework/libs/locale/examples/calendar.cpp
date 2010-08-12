@@ -6,6 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #include <boost/locale.hpp>
+#include <iostream>
 #include <iomanip>
 #include <ctime>
 
@@ -13,7 +14,6 @@ int main(int argc,char **argv)
 {
      using namespace boost::locale;
      generator gen;
-     gen.octet_encoding("UTF-8");
 
      // Setup environment
 
