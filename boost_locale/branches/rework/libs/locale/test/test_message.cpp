@@ -7,6 +7,7 @@
 //
 
 #include <boost/locale/generator.hpp>
+#include <boost/locale/localization_backend.hpp>
 #include <boost/locale/message.hpp>
 #include <boost/locale/codepage.hpp>
 #include "test_locale.hpp"
@@ -296,92 +297,100 @@ void test_wide_path(int argc,char **argv)
 int main(int argc,char **argv)
 {
     try {
-        #ifdef BOOST_WINDOWS
-        test_wide_path(argc,argv);
-        #endif
-
-        boost::locale::generator g;
-        g.add_messages_domain("default");
-        g.add_messages_domain("simple");
-        g.add_messages_domain("full");
-        g.add_messages_domain("fall");
-        if(argc==2)
-            g.add_messages_path(argv[1]);
-        else
-            g.add_messages_path("./");
-
-        
-        std::string locales[] = { "he_IL.UTF-8", "he_IL.ISO-8859-8" };
-
-        for(unsigned i=0;i<sizeof(locales)/sizeof(locales[0]);i++){
-            std::locale l=g(locales[i]);
+        std::string def[2] = { "icu" , "std" };
+        for(int type = 0 ; type < 2; type ++ ) {
+            boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
+            tmp_backend.select(def[type]);
+            boost::locale::localization_backend_manager::global(tmp_backend);
             
-            std::cout << "Testing "<<locales[i]<<std::endl;
-            std::cout << " single forms" << std::endl;
+            std::cout << "Testing for backend --------- " << def[type] << std::endl;
 
-            test_translate("hello","שלום",l,"default");
-            test_translate("hello","היי",l,"simple");
-            test_translate("hello","hello",l,"undefined");
-            test_translate("untranslated","untranslated",l,"default");
-            // Check removal of old "context" information
-            test_translate("#untranslated","#untranslated",l,"default");
-            test_translate("##untranslated","##untranslated",l,"default");
-            test_ctranslate("context","hello","שלום בהקשר אחר",l,"default");
-            test_translate("#hello","#שלום",l,"default");
+            #ifdef BOOST_WINDOWS
+            test_wide_path(argc,argv);
+            #endif
 
-            std::cout << " plural forms" << std::endl;
+            boost::locale::generator g;
+            g.add_messages_domain("default");
+            g.add_messages_domain("simple");
+            g.add_messages_domain("full");
+            g.add_messages_domain("fall");
+            if(argc==2)
+                g.add_messages_path(argv[1]);
+            else
+                g.add_messages_path("./");
 
-            {
-                test_ntranslate("x day","x days",0,"x ימים",l,"default");
-                test_ntranslate("x day","x days",1,"יום x",l,"default");
-                test_ntranslate("x day","x days",2,"יומיים",l,"default");
-                test_ntranslate("x day","x days",3,"x ימים",l,"default");
-                test_ntranslate("x day","x days",20,"x יום",l,"default");
+            
+            std::string locales[] = { "he_IL.UTF-8", "he_IL.ISO-8859-8" };
+
+            for(unsigned i=0;i<sizeof(locales)/sizeof(locales[0]);i++){
+                std::locale l=g(locales[i]);
                 
-                test_ntranslate("x day","x days",0,"x days",l,"undefined");
-                test_ntranslate("x day","x days",1,"x day",l,"undefined");
-                test_ntranslate("x day","x days",2,"x days",l,"undefined");
-                test_ntranslate("x day","x days",20,"x days",l,"undefined");
-            }
-            std::cout << " plural forms with context" << std::endl;
-            {
-                std::string inp = "context"; 
-                std::string out = "בהקשר "; 
+                std::cout << "Testing "<<locales[i]<<std::endl;
+                std::cout << " single forms" << std::endl;
 
-                test_cntranslate(inp,"x day",out+"x days",0,out+"x ימים",l,"default");
-                test_cntranslate(inp,"x day",out+"x days",1,out+"יום x",l,"default");
-                test_cntranslate(inp,"x day",out+"x days",2,out+"יומיים",l,"default");
-                test_cntranslate(inp,"x day",out+"x days",3,out+"x ימים",l,"default");
-                test_cntranslate(inp,"x day",out+"x days",20,out+"x יום",l,"default");
-                
-                test_cntranslate(inp,"x day","x days",0,"x days",l,"undefined");
-                test_cntranslate(inp,"x day","x days",1,"x day",l,"undefined");
-                test_cntranslate(inp,"x day","x days",2,"x days",l,"undefined");
-                test_cntranslate(inp,"x day","x days",20,"x days",l,"undefined");
+                test_translate("hello","שלום",l,"default");
+                test_translate("hello","היי",l,"simple");
+                test_translate("hello","hello",l,"undefined");
+                test_translate("untranslated","untranslated",l,"default");
+                // Check removal of old "context" information
+                test_translate("#untranslated","#untranslated",l,"default");
+                test_translate("##untranslated","##untranslated",l,"default");
+                test_ctranslate("context","hello","שלום בהקשר אחר",l,"default");
+                test_translate("#hello","#שלום",l,"default");
+
+                std::cout << " plural forms" << std::endl;
+
+                {
+                    test_ntranslate("x day","x days",0,"x ימים",l,"default");
+                    test_ntranslate("x day","x days",1,"יום x",l,"default");
+                    test_ntranslate("x day","x days",2,"יומיים",l,"default");
+                    test_ntranslate("x day","x days",3,"x ימים",l,"default");
+                    test_ntranslate("x day","x days",20,"x יום",l,"default");
+                    
+                    test_ntranslate("x day","x days",0,"x days",l,"undefined");
+                    test_ntranslate("x day","x days",1,"x day",l,"undefined");
+                    test_ntranslate("x day","x days",2,"x days",l,"undefined");
+                    test_ntranslate("x day","x days",20,"x days",l,"undefined");
+                }
+                std::cout << " plural forms with context" << std::endl;
+                {
+                    std::string inp = "context"; 
+                    std::string out = "בהקשר "; 
+
+                    test_cntranslate(inp,"x day",out+"x days",0,out+"x ימים",l,"default");
+                    test_cntranslate(inp,"x day",out+"x days",1,out+"יום x",l,"default");
+                    test_cntranslate(inp,"x day",out+"x days",2,out+"יומיים",l,"default");
+                    test_cntranslate(inp,"x day",out+"x days",3,out+"x ימים",l,"default");
+                    test_cntranslate(inp,"x day",out+"x days",20,out+"x יום",l,"default");
+                    
+                    test_cntranslate(inp,"x day","x days",0,"x days",l,"undefined");
+                    test_cntranslate(inp,"x day","x days",1,"x day",l,"undefined");
+                    test_cntranslate(inp,"x day","x days",2,"x days",l,"undefined");
+                    test_cntranslate(inp,"x day","x days",20,"x days",l,"undefined");
+                }
             }
+            std::cout << "Testing fallbacks" <<std::endl;
+            test_translate("test","he_IL",g("he_IL.UTF-8"),"full");
+            test_translate("test","he",g("he_IL.UTF-8"),"fall");
+            
+            std::cout << "Testing automatic conversions " << std::endl;
+            std::locale::global(g("he_IL.UTF-8"));
+
+
+            TEST(same_s(bl::translate("hello"))=="שלום");
+            #ifndef BOOST_NO_STD_WSTRING
+            TEST(same_w(bl::translate("hello"))==to<wchar_t>("שלום"));
+            #endif
+            
+            #ifdef BOOST_HAS_CHAR16_T
+            TEST(same_u16(bl::translate("hello"))==to<char16_t>("שלום"));
+            #endif
+            
+            #ifdef BOOST_HAS_CHAR32_T
+            TEST(same_u32(bl::translate("hello"))==to<char32_t>("שלום"));
+            #endif
+        
         }
-        std::cout << "Testing fallbacks" <<std::endl;
-        test_translate("test","he_IL",g("he_IL.UTF-8"),"full");
-        test_translate("test","he",g("he_IL.UTF-8"),"fall");
-        
-        std::cout << "Testing automatic conversions " << std::endl;
-        std::locale::global(g("he_IL.UTF-8"));
-
-
-        TEST(same_s(bl::translate("hello"))=="שלום");
-        #ifndef BOOST_NO_STD_WSTRING
-        TEST(same_w(bl::translate("hello"))==to<wchar_t>("שלום"));
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR16_T
-        TEST(same_u16(bl::translate("hello"))==to<char16_t>("שלום"));
-        #endif
-        
-        #ifdef BOOST_HAS_CHAR32_T
-        TEST(same_u32(bl::translate("hello"))==to<char32_t>("שלום"));
-        #endif
-        
-
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;

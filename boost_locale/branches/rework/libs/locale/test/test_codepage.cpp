@@ -8,9 +8,12 @@
 
 #include <boost/locale/codepage.hpp>
 #include <boost/locale/generator.hpp>
+#include <boost/locale/localization_backend.hpp>
 #include <boost/locale/info.hpp>
 #include <fstream>
 #include "test_locale.hpp"
+
+bool test_iso;
 
 template<typename Char>
 std::basic_string<Char> read_file(std::basic_istream<Char> &in)
@@ -95,11 +98,13 @@ void test_for_char()
         test_rfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
         test_wfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
     }
-    std::cout << "    ISO-8859-8" << std::endl;
-    test_ok<Char>("hello \xf9\xec\xe5\xed",g("en_US.ISO-8859-8"),to<Char>("hello שלום"));
-    std::cout << "    ISO-8859-1" << std::endl;
-    test_ok<Char>(to<char>("grüße\nn i"),g("en_US.ISO-8859-1"),to<Char>("grüße\nn i"));
-    test_wfail<Char>("grüßen שלום",g("en_US.ISO-8859-1"),7);
+    if(test_iso) {
+        std::cout << "    ISO-8859-8" << std::endl;
+        test_ok<Char>("hello \xf9\xec\xe5\xed",g("he_IL.ISO-8859-8"),to<Char>("hello שלום"));
+        std::cout << "    ISO-8859-1" << std::endl;
+        test_ok<Char>(to<char>("grüße\nn i"),g("en_US.ISO-8859-1"),to<Char>("grüße\nn i"));
+        test_wfail<Char>("grüßen שלום",g("en_US.ISO-8859-1"),7);
+    }
 }
 void test_wide_io()
 {
@@ -122,7 +127,7 @@ void test_pos(std::string source,std::basic_string<Char> target,std::string enco
 {
     using namespace boost::locale::conv;
     boost::locale::generator g;
-    std::locale l=g("en_US."+encoding);
+    std::locale l= encoding == "ISO-8859-8" ? g("he_IL."+encoding) : g("en_US."+encoding);
     TEST(to_utf<Char>(source,encoding)==target);
     TEST(to_utf<Char>(source.c_str(),encoding)==target);
     TEST(to_utf<Char>(source.c_str(),source.c_str()+source.size(),encoding)==target);
@@ -215,23 +220,47 @@ void test_to()
 int main()
 {
     try {
-        std::cout << "Testing wide I/O" << std::endl;
-        test_wide_io();
-        std::cout << "Testing charset to/from UTF conversion functions" << std::endl;
-        std::cout << "  char" << std::endl;
-        test_to<char>();
-        #ifndef BOOST_NO_STD_WSTRING
-        std::cout << "  wchar_t" << std::endl;
-        test_to<wchar_t>();
-        #endif
-        #ifdef BOOST_HAS_CHAR16_T
-        std::cout << "  char16_t" << std::endl;
-        test_to<char16_t>();
-        #endif
-        #ifdef BOOST_HAS_CHAR32_T
-        std::cout << "  char32_t" << std::endl;
-        test_to<char32_t>();
-        #endif
+        std::string def[2] = { "icu" , "std" };
+        for(int type = 0 ; type < 2; type ++ ) {
+            boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
+            tmp_backend.select(def[type]);
+            boost::locale::localization_backend_manager::global(tmp_backend);
+
+            std::cout << "Testing for backend " << def[type] << std::endl;
+
+            test_iso = true;
+            if(def[type]=="std") {
+                try {
+                    std::locale a("en_US.ISO-8859-1");
+                    std::locale b("he_IL.ISO-8859-8");
+                    test_iso = true;
+                }
+                catch(std::exception const &e){
+                    test_iso = false;
+                    std::cout << "No ISO locales availible, passing" << std::endl;
+                }
+            }
+            else
+                test_iso = true;
+
+            std::cout << "Testing wide I/O" << std::endl;
+            test_wide_io();
+            std::cout << "Testing charset to/from UTF conversion functions" << std::endl;
+            std::cout << "  char" << std::endl;
+            test_to<char>();
+            #ifndef BOOST_NO_STD_WSTRING
+            std::cout << "  wchar_t" << std::endl;
+            test_to<wchar_t>();
+            #endif
+            #ifdef BOOST_HAS_CHAR16_T
+            std::cout << "  char16_t" << std::endl;
+            test_to<char16_t>();
+            #endif
+            #ifdef BOOST_HAS_CHAR32_T
+            std::cout << "  char32_t" << std::endl;
+            test_to<char32_t>();
+            #endif
+        }
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;

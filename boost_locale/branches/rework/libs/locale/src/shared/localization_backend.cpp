@@ -7,6 +7,8 @@
 #include "../icu/icu_backend.hpp"
 #endif
 
+#include "../std/std_backend.hpp"
+
 namespace boost {
     namespace locale {
         class localization_backend_manager::impl {
@@ -202,6 +204,10 @@ namespace boost {
                     backend.reset(impl_icu::create_localization_backend());
                     mgr.add_backend("icu",backend);
                     #endif
+                    
+                    backend.reset(impl_std::create_localization_backend());
+                    mgr.add_backend("std",backend);
+
                     localization_backend_manager::global(mgr);
                 }
             } do_init;

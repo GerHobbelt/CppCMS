@@ -126,6 +126,7 @@ include_directories(.)
 
 set(BOOST_LOCALE_SRC 
 	libs/locale/src/encoding/codepage.cpp
+
 	libs/locale/src/icu/boundary.cpp
 	libs/locale/src/icu/codecvt.cpp
 	libs/locale/src/icu/collator.cpp
@@ -135,6 +136,7 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/icu/icu_backend.cpp
 	libs/locale/src/icu/info.cpp
 	libs/locale/src/icu/numeric.cpp
+
 	libs/locale/src/shared/date_time.cpp
 	libs/locale/src/shared/format.cpp
 	libs/locale/src/shared/formatting.cpp
@@ -143,6 +145,15 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/shared/localization_backend.cpp
 	libs/locale/src/shared/message.cpp
 	libs/locale/src/shared/mo_lambda.cpp
+
+	libs/locale/src/std/codecvt.cpp
+	libs/locale/src/std/collate.cpp
+	libs/locale/src/std/converter.cpp
+	libs/locale/src/std/info.cpp
+	libs/locale/src/std/numeric.cpp
+	libs/locale/src/std/std_backend.cpp
+	libs/locale/src/std/windows_locale_name.cpp
+
 	)
 
 if(DISABLE_SHARED AND DISABLE_STATIC)
