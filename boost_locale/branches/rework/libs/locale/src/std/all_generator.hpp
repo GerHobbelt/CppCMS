@@ -17,13 +17,14 @@ namespace boost {
             typedef enum {
                 utf8_none,
                 utf8_native,
+                utf8_native_with_wide,
                 utf8_from_wide
             } utf8_support;
 
             std::locale create_convert( std::locale const &in,
                                         std::string const &locale_name,
                                         character_facet_type type,
-                                        utf8_support = utf8_none);
+                                        utf8_support utf = utf8_none);
 
             std::locale create_collate( std::locale const &in,
                                         std::string const &locale_name,
@@ -41,7 +42,7 @@ namespace boost {
                                         utf8_support utf = utf8_none);
 
             std::locale create_codecvt( std::locale const &in,
-                                        std::locale const &loclae_name,
+                                        std::string const &locale_name,
                                         character_facet_type type,
                                         utf8_support utf = utf8_none); 
 

@@ -10,16 +10,17 @@
 #include <string>
 #include <ios>
 #include <boost/locale/codepage.hpp>
-#
+#include "all_generator.hpp"
 
 namespace boost {
 namespace locale {
 namespace impl_std {
 
-class utf8_collator : public std::collate<char> {
+#ifndef BOOST_NO_STD_WSTRING
+class utf8_collator_from_wide : public std::collate<char> {
 public:
     typedef std::collate<wchar_t> wfacet;
-    utf8_collator(std::locale const &base,size_t refs = 0) : 
+    utf8_collator_from_wide(std::locale const &base,size_t refs = 0) : 
         std::collate<char>(refs),
         base_(base)
     {
@@ -63,10 +64,46 @@ private:
     std::locale base_;
 };
 
+#endif
 
-std::locale create_collate(std::locale const &in)
+std::locale create_collate( std::locale const &in,
+                            std::string const &locale_name,
+                            character_facet_type type,
+                            utf8_support utf)
 {
-    return std::locale(in,new utf8_collator(in));
+    switch(type) {
+    case char_facet:
+        {
+            #ifndef BOOST_NO_STD_WSTRING
+            if(utf == utf8_native_with_wide || utf == utf8_from_wide) {
+                std::locale base=
+                    std::locale(std::locale::classic(),
+                                new std::collate_byname<wchar_t>(locale_name.c_str()));
+                return std::locale(in,new utf8_collator_from_wide(base));
+            }
+            else
+            #endif
+            {
+                return std::locale(in,new std::collate_byname<char>(locale_name.c_str()));
+            }
+        }
+    #ifndef BOOST_NO_STD_WSTRING
+    case wchar_t_facet:
+        return std::locale(in,new std::collate_byname<wchar_t>(locale_name.c_str()));
+    #endif
+
+    #ifdef BOOST_HAS_CHAR16_T
+    case wchar_t_facet:
+        return std::locale(in,new std::collate_byname<char16_t>(locale_name.c_str()));
+    #endif
+
+    #ifdef BOOST_HAS_CHAR32_T
+    case wchar_t_facet:
+        return std::locale(in,new std::collate_byname<char32_t>(locale_name.c_str()));
+    #endif
+    default:
+        return in;
+    }
 }
 
 

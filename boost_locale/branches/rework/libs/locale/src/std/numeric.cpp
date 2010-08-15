@@ -155,7 +155,7 @@ private:
             gmtime_r(&time,&tm);
             #endif
             
-            #if defined(__linux) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__CYGWIN__)
+            #if defined(__linux) || defined(__FreeBSD__) || defined(__APPLE__) 
             // These have extra fields to specify timezone
             if(gmtoff!=0) {
                 tm.tm_zone=tz.c_str();
@@ -280,7 +280,7 @@ private:
             }
         case flags::currency:
             {
-                long double ret_val;
+                long double ret_val = 0;
                 if(info.currency_flags()==flags::currency_default || info.currency_flags() == flags::currency_national)
                     in = parse_currency<false>(in,end,ios,err,ret_val);
                 else
@@ -610,7 +610,7 @@ std::locale create_formatting(  std::locale const &in,
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_format<char>());
                 }
-                else if(utf == utf8_native) {
+                else if(utf == utf8_native || utf == utf8_native_with_wide) {
                     std::locale tmp = std::locale(in,new std::time_put_byname<char>(locale_name.c_str()));
                     
                     tmp = std::locale(tmp,new utf8_numpunct(locale_name.c_str()));
@@ -676,7 +676,7 @@ std::locale create_parsing( std::locale const &in,
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_format<char>());
                 }
-                else if(utf == utf8_native) {
+                else if(utf == utf8_native || utf == utf8_native_with_wide) {
                     std::locale tmp = std::locale(in,new utf8_numpunct(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<true>(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<false>(locale_name.c_str()));

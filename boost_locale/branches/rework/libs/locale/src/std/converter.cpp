@@ -14,6 +14,8 @@
 #include <boost/locale/codepage.hpp>
 #include <vector>
 
+#include "all_generator.hpp"
+
 namespace boost {
 namespace locale {
 namespace impl_std {
@@ -95,29 +97,43 @@ private:
 };
 #endif
 
-std::locale create_conversion(std::locale const &in,character_facet_type type,bool utf8)
+std::locale create_convert( std::locale const &in,
+                            std::string const &locale_name,
+                            character_facet_type type,
+                            utf8_support utf)
 {
         switch(type) {
         case char_facet: 
             {
                 #ifndef BOOST_NO_STD_WSTRING
-                if(utf8) {
-                    return std::locale(in,new utf8_converter(in));
+                if(utf == utf8_native_with_wide || utf == utf8_from_wide) {
+                    std::locale base(std::locale::classic(),new std::ctype_byname<wchar_t>(locale_name.c_str()));
+                    return std::locale(in,new utf8_converter(base));
                 }
                 #endif
+                std::locale base(std::locale::classic(),new std::ctype_byname<char>(locale_name.c_str()));
                 return std::locale(in,new std_converter<char>(in));
             }
         #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
-            return std::locale(in,new std_converter<wchar_t>(in));
+            {
+                std::locale base(std::locale::classic(),new std::ctype_byname<wchar_t>(locale_name.c_str()));
+                return std::locale(in,new std_converter<wchar_t>(in));
+            }
         #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
-            return std::locale(in,new std_converter<char16_t>(in));
+            {
+                std::locale base(std::locale::classic(),new std::ctype_byname<char16_t>(locale_name.c_str()));
+                return std::locale(in,new std_converter<char16_t>(in));
+            }
         #endif
         #ifdef BOOST_HAS_CHAR32_T
         case char32_t_facet:
-            return std::locale(in,new std_converter<char32_t>(in));
+            {
+                std::locale base(std::locale::classic(),new std::ctype_byname<char32_t>(locale_name.c_str()));
+                return std::locale(in,new std_converter<char32_t>(in));
+            }
         #endif
         default:
             return in;
