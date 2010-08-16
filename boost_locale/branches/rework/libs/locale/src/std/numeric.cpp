@@ -13,7 +13,6 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/codepage.hpp>
 #include <sstream>
-#include <iostream>
 #include <stdlib.h>
 
 
@@ -327,6 +326,23 @@ private:
 
 };
 
+template<typename CharType>
+class time_put_from_base : public std::time_put<CharType> {
+public:
+    time_put_from_base(std::locale const &base, size_t refs = 0) : 
+        std::time_put<CharType>(refs),
+        base_(base)
+    {
+    }
+    typedef typename std::time_put<CharType>::iter_type iter_type;
+
+    virtual iter_type do_put(iter_type out,std::ios_base &ios,CharType fill,std::tm const *tm,CharType format,CharType modifier = 0) const
+    {
+        return std::use_facet<std::time_put<CharType> >(base_).put(out,ios,fill,tm,format,modifier);
+    }
+private:
+    std::locale base_;
+};
 
 #ifndef BOOST_NO_STD_WSTRING
 class utf8_time_put_from_wide : public std::time_put<char> {
@@ -357,15 +373,24 @@ public:
     {
         typedef std::numpunct<wchar_t> wfacet_type;
         wfacet_type const &wfacet = std::use_facet<wfacet_type>(base);
+        
         truename_ = conv::from_utf<wchar_t>(wfacet.truename(),"UTF-8");
         falsename_ = conv::from_utf<wchar_t>(wfacet.falsename(),"UTF-8");
+        
         wchar_t tmp_decimal_point = wfacet.decimal_point();
         wchar_t tmp_thousands_sep = wfacet.thousands_sep();
         std::string tmp_grouping = wfacet.grouping();
+        
         if( 32 <= tmp_thousands_sep && tmp_thousands_sep <=126 &&
             32 <= tmp_decimal_point && tmp_decimal_point <=126)
         {
             thousands_sep_ = static_cast<char>(tmp_thousands_sep);
+            decimal_point_ = static_cast<char>(tmp_decimal_point);
+            grouping_ = tmp_grouping;
+        }
+        else if(32 <= tmp_decimal_point && tmp_decimal_point <=126 && tmp_thousands_sep == 0xA0) {
+            // workaround common bug - substitute NBSP with ordinary space
+            thousands_sep_ = ' ';
             decimal_point_ = static_cast<char>(tmp_decimal_point);
             grouping_ = tmp_grouping;
         }
@@ -572,17 +597,20 @@ public:
 template<typename CharType>
 std::locale create_basic_parsing(std::locale const &in,std::string const &locale_name)
 {
-    std::locale base(locale_name.c_str());
-    std::locale tmp(in,base,std::locale::monetary);
-    tmp = std::locale(in,base,std::locale::numeric);
-    tmp = std::locale(in,base,std::locale::time);
+    std::locale tmp = std::locale(in,new std::numpunct_byname<CharType>(locale_name.c_str()));
+    tmp = std::locale(tmp,new std::moneypunct_byname<CharType,true>(locale_name.c_str()));
+    tmp = std::locale(tmp,new std::moneypunct_byname<CharType,false>(locale_name.c_str()));
+    tmp = std::locale(tmp,new std::ctype_byname<CharType>(locale_name.c_str()));
     return tmp;
 }
 
 template<typename CharType>
 std::locale create_basic_formatting(std::locale const &in,std::string const &locale_name)
 {
-    return create_basic_parsing<CharType>(in,locale_name);
+    std::locale tmp = create_basic_parsing<CharType>(in,locale_name);
+    std::locale base(locale_name.c_str());
+    tmp = std::locale(tmp,new time_put_from_base<CharType>(base));
+    return tmp;
 }
 
 
@@ -596,7 +624,7 @@ std::locale create_formatting(  std::locale const &in,
             {
                 #ifndef BOOST_NO_STD_WSTRING
                 if(utf == utf8_from_wide ) {
-                    std::locale base(locale_name.c_str());
+                    std::locale base = std::locale(locale_name.c_str());
                     
                     std::locale tmp = std::locale(in,new utf8_time_put_from_wide(base));
                     tmp = std::locale(tmp,new utf8_numpunct_from_wide(base));
@@ -604,13 +632,22 @@ std::locale create_formatting(  std::locale const &in,
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_format<char>());
                 }
-                else if(utf == utf8_native || utf == utf8_native_with_wide) {
-                    std::locale base(locale_name.c_str());
-                    std::locale tmp = std::locale(in,base,std::locale::time);
-                    
+                else if(utf == utf8_native) {
+                    std::locale base = std::locale(locale_name.c_str());
+
+                    std::locale tmp = std::locale(in,new time_put_from_base<char>(base));
                     tmp = std::locale(tmp,new utf8_numpunct(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<true>(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<false>(locale_name.c_str()));
+                    return std::locale(tmp,new num_format<char>());
+                }
+                else if(utf == utf8_native_with_wide) {
+                    std::locale base = std::locale(locale_name.c_str());
+
+                    std::locale tmp = std::locale(in,new time_put_from_base<char>(base));
+                    tmp = std::locale(tmp,new utf8_numpunct_from_wide(base));
+                    tmp = std::locale(tmp,new utf8_moneypunct_from_wide<true>(base));
+                    tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_format<char>());
                 }
                 else
@@ -671,10 +708,18 @@ std::locale create_parsing( std::locale const &in,
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_format<char>());
                 }
-                else if(utf == utf8_native || utf == utf8_native_with_wide) {
+                else if(utf == utf8_native) {
                     std::locale tmp = std::locale(in,new utf8_numpunct(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<true>(locale_name.c_str()));
                     tmp = std::locale(tmp,new utf8_moneypunct<false>(locale_name.c_str()));
+                    return std::locale(tmp,new num_parse<char>());
+                }
+                else if(utf == utf8_native_with_wide) {
+                    std::locale base = std::locale(locale_name.c_str());
+
+                    std::locale tmp = std::locale(in,new utf8_numpunct_from_wide(base));
+                    tmp = std::locale(tmp,new utf8_moneypunct_from_wide<true>(base));
+                    tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
                     return std::locale(tmp,new num_parse<char>());
                 }
                 else 

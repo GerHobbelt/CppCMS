@@ -61,12 +61,23 @@ namespace impl_std {
             if(!invalid_)
                 return;
             invalid_ = false;
-            data_.parse(locale_id_);
-            locale_name::subst_type tmp = locale_name::find(locale_id_);
+            std::string lid=locale_id_;
+            if(lid.empty()) {
+                try {
+                    std::locale l("");
+                    if(l.name()!="*" && l.name()!="POSIX" && l.name()!="C")
+                        lid=l.name();
+                    else
+                        lid="C";
+                }
+                catch(std::exception const &e) {
+                    lid="C";
+                }
+            }
+            data_.parse(lid);
+            locale_name::subst_type tmp = locale_name::find(lid);
             name_ = tmp.first;
             utf_mode_ = tmp.second;
-
-            std::cerr << tmp.first << " " << tmp.second << " " <<  data_.utf8 << std::endl;
         }
         
         virtual std::locale install(std::locale const &base,
