@@ -336,9 +336,11 @@ public:
     }
     typedef typename std::time_put<CharType>::iter_type iter_type;
 
-    virtual iter_type do_put(iter_type out,std::ios_base &ios,CharType fill,std::tm const *tm,CharType format,CharType modifier = 0) const
+    virtual iter_type do_put(iter_type out,std::ios_base &ios,CharType fill,std::tm const *tm,char format,char modifier) const
     {
-        return std::use_facet<std::time_put<CharType> >(base_).put(out,ios,fill,tm,format,modifier);
+        std::basic_stringstream<CharType> ss;
+        ss.imbue(base_);
+        return std::use_facet<std::time_put<CharType> >(base_).put(out,ss,fill,tm,format,modifier);
     }
 private:
     std::locale base_;
@@ -355,7 +357,8 @@ public:
     virtual iter_type do_put(iter_type out,std::ios_base &ios,char fill,std::tm const *tm,char format,char modifier = 0) const
     {
         std::basic_ostringstream<wchar_t> wtmps;
-        std::use_facet<std::time_put<wchar_t> >(base_).put(wtmps,ios,wchar_t(fill),tm,wchar_t(format),wchar_t(modifier));
+        wtmps.imbue(base_);
+        std::use_facet<std::time_put<wchar_t> >(base_).put(wtmps,wtmps,wchar_t(fill),tm,wchar_t(format),wchar_t(modifier));
         std::wstring wtmp=wtmps.str();
         std::string const tmp = conv::from_utf<wchar_t>(wtmp,"UTF-8");
         for(unsigned i=0;i<tmp.size();i++) {
