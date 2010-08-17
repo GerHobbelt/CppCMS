@@ -43,7 +43,10 @@ public:
         std::wstring wkey = 
             std::use_facet<wfacet>(base_).transform(tmp.c_str(),tmp.c_str()+tmp.size());
         std::string key;
-        key.reserve(wkey.size()*sizeof(wchar_t));
+        if(sizeof(wchar_t)==2)
+            key.reserve(wkey.size()*2);
+        else
+            key.reserve(wkey.size()*3);
         for(unsigned i=0;i<wkey.size();i++) {
             if(sizeof(wchar_t)==2) {
                 uint16_t tv = static_cast<uint16_t>(wkey[i]);
@@ -52,7 +55,7 @@ public:
             }
             else { // 4
                 uint32_t tv = static_cast<uint32_t>(wkey[i]);
-                key += char(tv >> 24);
+                // 21 bit
                 key += char((tv >> 16) & 0xFF);
                 key += char((tv >> 8) & 0xFF);
                 key += char(tv & 0xFF);
