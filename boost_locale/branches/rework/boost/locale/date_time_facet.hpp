@@ -91,6 +91,10 @@ namespace boost {
             virtual std::string get_timezone() const = 0;
             virtual bool same(abstract_calendar const *other) const = 0;
 
+            virtual ~abstract_calendar()
+            {
+            }
+
         };
 
         class BOOST_LOCALE_DECL calendar_facet : public std::locale::facet {
