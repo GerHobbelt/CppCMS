@@ -62,6 +62,7 @@ namespace impl_std {
                 return;
             invalid_ = false;
             std::string lid=locale_id_;
+            data_.parse(lid);
             if(lid.empty()) {
                 try {
                     std::locale l("");
@@ -74,7 +75,6 @@ namespace impl_std {
                     lid="C";
                 }
             }
-            data_.parse(lid);
             locale_name::subst_type tmp = locale_name::find(lid);
             name_ = tmp.first;
             utf_mode_ = tmp.second;
@@ -126,7 +126,7 @@ namespace impl_std {
                     }
                 }
             case information_facet:
-                return create_info(base,name_);
+                return create_info(base,locale_id_);
             default:
                 return base;
             }

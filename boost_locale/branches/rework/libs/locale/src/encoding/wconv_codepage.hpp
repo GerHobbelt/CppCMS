@@ -71,6 +71,21 @@ namespace impl {
         { "windows874", 874 },
     };
 
+    size_t remove_substitutions(std::vector<wchar_t> &v)
+    {
+        if(std::find(v.begin(),v.end(),wchar_t(0xFFFD)) == v.end()) {
+            return v.size();
+        }
+        std::vector<wchar_t> v2;
+        v2.reserve(v.size());
+        for(unsigned i=0;i<v.size();i++) {
+            if(v[i]!=0xFFFD)
+                v2.push_back(v[i]);
+        }
+        v.swap(v2);
+        return v.size()
+    }
+
     int encoding_to_windows_codepage(char const *ccharset)
     {
         std::string charset;
@@ -140,6 +155,7 @@ namespace impl {
             std::vector<wchar_t> buf(n);
             if(MultiByteToWideChar(from_code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0)
                 throw conversion_error();
+            remove_substitutions(buf);
             n = WideCharToMultiByte(to_code_page_,0,&buf[0],buf.size(),0,0,0,0);
             std::vector<char> cbuf(n);
             BOOL substitute = FALSE;
@@ -222,6 +238,7 @@ namespace impl {
             if(MultiByteToWideChar(code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0) {
                 throw conversion_error();
             }
+            remove_substitutions(buf);
             string_type res;
             res.assign(reinterpret_cast<char_type *>(&buf[0]),n);
             return res;
@@ -315,6 +332,7 @@ namespace impl {
             if(MultiByteToWideChar(code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0) {
                 throw conversion_error();
             }
+            n = remove_substitutions(buf);
             string_type res;
             res.reserve(n);
             for(int i=0;i<n;i++) {

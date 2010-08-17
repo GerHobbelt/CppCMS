@@ -12,8 +12,13 @@
 #include <boost/locale/info.hpp>
 #include <fstream>
 #include "test_locale.hpp"
+#include "test_locale_tools.hpp"
 
 bool test_iso;
+
+std::string he_il_8bit;
+std::string en_us_8bit;
+
 
 template<typename Char>
 std::basic_string<Char> read_file(std::basic_istream<Char> &in)
@@ -100,10 +105,10 @@ void test_for_char()
     }
     if(test_iso) {
         std::cout << "    ISO-8859-8" << std::endl;
-        test_ok<Char>("hello \xf9\xec\xe5\xed",g("he_IL.ISO-8859-8"),to<Char>("hello שלום"));
+        test_ok<Char>("hello \xf9\xec\xe5\xed",g(he_il_8bit),to<Char>("hello שלום"));
         std::cout << "    ISO-8859-1" << std::endl;
-        test_ok<Char>(to<char>("grüße\nn i"),g("en_US.ISO-8859-1"),to<Char>("grüße\nn i"));
-        test_wfail<Char>("grüßen שלום",g("en_US.ISO-8859-1"),7);
+        test_ok<Char>(to<char>("grüße\nn i"),g(en_us_8bit),to<Char>("grüße\nn i"));
+        test_wfail<Char>("grüßen שלום",g(en_us_8bit),7);
     }
 }
 void test_wide_io()
@@ -225,23 +230,23 @@ int main()
             boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
             tmp_backend.select(def[type]);
             boost::locale::localization_backend_manager::global(tmp_backend);
+            
+            if(def[type]=="std") {
+                en_us_8bit = get_std_name("en_US.ISO-8859-1");
+                he_il_8bit = get_std_name("he_IL.ISO-8859-8");
+            }
+            else {
+                en_us_8bit = "en_US.ISO-8859-1";
+                he_il_8bit = "he_IL.ISO-8859-8";
+            }
 
             std::cout << "Testing for backend " << def[type] << std::endl;
 
             test_iso = true;
-            if(def[type]=="std") {
-                try {
-                    std::locale a("en_US.ISO-8859-1");
-                    std::locale b("he_IL.ISO-8859-8");
-                    test_iso = true;
-                }
-                catch(std::exception const &e){
-                    test_iso = false;
-                    std::cout << "No ISO locales availible, passing" << std::endl;
-                }
+            if(def[type]=="std" && (he_il_8bit.empty() || en_us_8bit.empty())) {
+                std::cout << "No ISO locales availible, passing" << std::endl;
+                test_iso = false;
             }
-            else
-                test_iso = true;
 
             std::cout << "Testing wide I/O" << std::endl;
             test_wide_io();
