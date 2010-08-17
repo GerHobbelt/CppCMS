@@ -35,28 +35,46 @@ bool has_std_locale(std::string const &name)
     }
 }
 
-std::string get_std_name(std::string const &name)
+std::string get_std_name(std::string const &name,std::string *real_name = 0)
 {
-    if(has_std_locale(name))
+    if(has_std_locale(name)) {
+        if(real_name)
+            *real_name = name;
         return name;
-    
+    }
+
     #ifdef BOOST_WINDOWS
+    bool utf8=name.find("UTF-8")!=std::string::npos;
+
     if(name=="en_US.UTF-8" || name == "en_US.ISO-8859-1") {
-        if(has_std_locale("English_United States.1252"))
-            return name;
+        if(has_std_locale("English_United States.1252")) {
+            if(real_name) 
+                *real_name = "English_United States.1252";
+            return utf8 ? name : "en_US.windows-1252";
+        }
         return "";
     }
     else if(name=="he_IL.UTF-8" || name == "he_IL.ISO-8859-8")  {
-        if(has_std_locale("Hebrew_Israel.1255"))
+        if(has_std_locale("Hebrew_Israel.1255")) {
+            if(real_name) 
+                *real_name = "Hebrew_Israel.1255";
+            return utf8 ? name : "he_IL.windows-1255";
             return name;
+        }
     }
     else if(name=="ru_RU.UTF-8")  {
-        if(has_std_locale("Russian_Russia.1251"))
+        if(has_std_locale("Russian_Russia.1251")) {
+            if(real_name) 
+                *real_name = "Russian_Russia.1251";
             return name;
+        }
     }
     else if(name == "tr_TR.UTF-8") {
-        if(has_std_locale("Turkish_Turkey.1254"))
+        if(has_std_locale("Turkish_Turkey.1254")) {
+            if(real_name) 
+                *real_name = "Turkish_Turkey.1254";
             return name;
+        }
     }
     #endif
     return "";

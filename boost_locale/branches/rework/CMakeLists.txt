@@ -205,6 +205,7 @@ set(LOCALE_TESTS
 		test_generator
 		test_icu_vs_os_timezone
 		test_std_convert
+		test_std_formatting
 		)
 
 
