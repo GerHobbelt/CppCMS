@@ -4,11 +4,16 @@ enable_testing()
 
 option(DISABLE_SHARED	"Disable shared libraries build" OFF)
 option(DISABLE_STATIC	"Disable static libraries build" OFF)
+option(DISABLE_ICU	"Disable ICU library" OFF)
 
 if(WIN32 AND NOT CYGWIN)
 	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" ON)
 else()
 	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" OFF)
+endif()
+
+if(NOT WIN32 AND NOT CYGWIN AND DISABLE_ICONV AND DISABLE_ICU)
+	message(FATAL "Can't disable both ICU and iconv under POSIX platforms")
 endif()
 
 
@@ -24,12 +29,14 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	endif()
 endif()
 
-message("-- Looking for ICU libraries")
+if(NOT DISABLE_ICU)
+	message("-- Looking for ICU libraries")
 
-find_library(ICU_UC icuuc${ICU_SUFFIX})
-find_library(ICU_DATA icudt NAMES icudata)
-find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
-find_path(ICU_INCLUDE_DIR unicode/unistr.h)
+	find_library(ICU_UC icuuc${ICU_SUFFIX})
+	find_library(ICU_DATA icudt NAMES icudata)
+	find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
+	find_path(ICU_INCLUDE_DIR unicode/unistr.h)
+endif()
 
 add_definitions(-DBOOST_ALL_NO_LIB)
 
@@ -130,16 +137,6 @@ include_directories(.)
 set(BOOST_LOCALE_SRC 
 	libs/locale/src/encoding/codepage.cpp
 
-	libs/locale/src/icu/boundary.cpp
-	libs/locale/src/icu/codecvt.cpp
-	libs/locale/src/icu/collator.cpp
-	libs/locale/src/icu/conversion.cpp
-	libs/locale/src/icu/date_time.cpp
-	libs/locale/src/icu/formatter.cpp
-	libs/locale/src/icu/icu_backend.cpp
-	libs/locale/src/icu/info.cpp
-	libs/locale/src/icu/numeric.cpp
-
 	libs/locale/src/shared/date_time.cpp
 	libs/locale/src/shared/format.cpp
 	libs/locale/src/shared/formatting.cpp
@@ -159,6 +156,21 @@ set(BOOST_LOCALE_SRC
 
 	)
 
+if(BOOST_LOCALE_HAVE_ICU)
+	set(BOOST_LOCALE_SRC 
+		${BOOST_LOCALE_SRC}
+		libs/locale/src/icu/boundary.cpp
+		libs/locale/src/icu/codecvt.cpp
+		libs/locale/src/icu/collator.cpp
+		libs/locale/src/icu/conversion.cpp
+		libs/locale/src/icu/date_time.cpp
+		libs/locale/src/icu/formatter.cpp
+		libs/locale/src/icu/icu_backend.cpp
+		libs/locale/src/icu/info.cpp
+		libs/locale/src/icu/numeric.cpp)
+endif()
+
+
 if(DISABLE_SHARED AND DISABLE_STATIC)
 	message(FATAL " Can't build with both DISABLE_SHARED AND DISABLE_STATIC")
 endif(DISABLE_SHARED AND DISABLE_STATIC)
@@ -176,7 +188,9 @@ endif(DISABLE_SHARED)
 
 if(NOT DISABLE_SHARED)
 	add_library(boost_locale SHARED ${BOOST_LOCALE_SRC})
-	target_link_libraries(boost_locale ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	if(BOOST_LOCALE_HAVE_ICU)
+		target_link_libraries(boost_locale ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	endif()
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale ${ICONV_LIB})
 	endif()
@@ -186,6 +200,9 @@ endif(NOT DISABLE_SHARED)
 if(NOT DISABLE_STATIC)
 	add_library(boost_locale-static STATIC ${BOOST_LOCALE_SRC})
 	target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	if(BOOST_LOCALE_HAVE_ICU)
+		target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
+	endif()
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale-static ${ICONV_LIB})
 	endif()
@@ -197,20 +214,27 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale"
 
 
 set(LOCALE_TESTS
-		test_collate
-		test_convert
 		test_codepage
-		test_boundary
 		test_message
-		test_formatting
 		test_ios_prop
-		test_date_time
-		test_generator
-		test_icu_vs_os_timezone
 		test_std_convert
 		test_std_formatting
 		test_std_collate
 		)
+
+if(BOOST_LOCALE_HAVE_ICU)
+	set(LOCALE_TESTS
+			${LOCALE_TESTS}
+			test_collate
+			test_convert
+			test_boundary
+			test_formatting
+			test_date_time
+			test_generator
+			test_icu_vs_os_timezone
+			)
+endif()
+
 
 
 set(LOCALE_EXAMPLES 	hello
