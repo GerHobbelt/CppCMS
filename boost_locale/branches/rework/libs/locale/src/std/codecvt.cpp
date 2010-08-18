@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <locale>
+#include <boost/cstdint.hpp>
 #include "all_generator.hpp"
 #include <vector>
 namespace boost {

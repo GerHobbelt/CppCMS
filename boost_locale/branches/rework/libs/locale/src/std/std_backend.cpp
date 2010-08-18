@@ -13,8 +13,6 @@
 #include "locale_data.hpp"
 #include "std_backend.hpp"
 
-#include <iostream>
-
 namespace boost {
 namespace locale {
 namespace impl_std { 

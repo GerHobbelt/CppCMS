@@ -709,7 +709,7 @@ std::locale create_parsing( std::locale const &in,
                     std::locale tmp = std::locale(in,new utf8_numpunct_from_wide(base));
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<true>(base));
                     tmp = std::locale(tmp,new utf8_moneypunct_from_wide<false>(base));
-                    return std::locale(tmp,new num_format<char>());
+                    return std::locale(tmp,new num_parse<char>());
                 }
                 else if(utf == utf8_native) {
                     std::locale tmp = std::locale(in,new utf8_numpunct(locale_name.c_str()));

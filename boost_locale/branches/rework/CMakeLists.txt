@@ -31,6 +31,8 @@ find_library(ICU_DATA icudt NAMES icudata)
 find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
 find_path(ICU_INCLUDE_DIR unicode/unistr.h)
 
+add_definitions(-DBOOST_ALL_NO_LIB)
+
 if(ICU_UC AND ICU_DATA AND ICU_I18N AND ICU_INCLUDE_DIR)
 	set(BOOST_LOCALE_HAVE_ICU ON)
 	add_definitions(-DBOOST_LOCALE_WITH_ICU)
@@ -61,7 +63,8 @@ if(NOT DISABLE_ICONV)
 		add_definitions(-DBOOST_LOCALE_NO_ICONV)
 		message(STATUS "-- iconv not found, falling back to ICU")
 	endif()
-
+else()
+	add_definitions(-DBOOST_LOCALE_NO_ICONV)
 endif(NOT DISABLE_ICONV)
 
 

@@ -58,15 +58,24 @@ void test_char()
     else {
         std::cout << "- en_US.ISO-8859-1 is not supported, skipping" << std::endl;
     }
-    name = get_std_name("tr_TR.UTF-8");
+    #ifndef BOOST_NO_STD_WSTRING
+    std::string real_name;
+    name = get_std_name("tr_TR.UTF-8",&real_name);
     if(!name.empty()) {
         std::cout << "Testing " << name << std::endl;
-        std::locale l=gen(name);
-        test_one<CharType>(l,"i","i","İ");
+        if(std::use_facet<std::ctype<wchar_t> >(std::locale(real_name.c_str())).toupper(L'i')!=L'I') {
+            std::locale l=gen(name);
+            test_one<CharType>(l,"i","i","İ");
+        }
+        else {
+            std::cout << "Standard library does not support this locale's case conversion correctly" << std::endl;
+        }
     }
-    else {
+    else 
+    {
         std::cout << "- tr_TR.UTF-8 is not supported, skipping" << std::endl;
     }
+    #endif
 }
 
 

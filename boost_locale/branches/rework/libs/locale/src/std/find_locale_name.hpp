@@ -28,6 +28,7 @@ namespace boost {
                             return list[i];
                     #ifdef BOOST_WINDOWS
                     list = get_substitutions(name,to_windows_name(d));
+                    for(unsigned i=0;i<list.size();i++) 
                         if(loadable(list[i].first))
                             return list[i];
                     #endif
@@ -41,7 +42,7 @@ namespace boost {
                 
                 static locale_data to_windows_name(locale_data const &din)
                 {
-                    locale_data d;
+                    locale_data d = din;
                     d.variant.clear();
                     if(d.encoding.compare(0,2,"cp") == 0)
                         d.encoding=d.encoding.substr(2);

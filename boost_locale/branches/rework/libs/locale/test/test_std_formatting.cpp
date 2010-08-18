@@ -15,6 +15,8 @@
 #include "test_locale_tools.hpp"
 #include <iostream>
 
+//#define DEBUG_FMT
+
 
 template<typename C1,typename C2>
 bool equal(std::basic_string<C1> const &s1,std::basic_string<C2> const &s2)
@@ -60,6 +62,9 @@ void test_by_char(std::locale const &l,std::locale const &lreal)
         TEST(ss);
         TEST(n == 1045.45);
         TEST(ss.str()==to_correct_string<CharType>("1045.45",l));
+        #ifdef DEBUG_FMT
+        std::cout << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
+        #endif
     }
 
     {
@@ -81,38 +86,63 @@ void test_by_char(std::locale const &l,std::locale const &lreal)
         ss_ref << 1045.45;
 
         TEST(equal(ss.str(),ss_ref.str()));
+        #ifdef DEBUG_FMT
+        std::cout << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
+        std::cout << "[" << boost::locale::conv::from_utf(ss_ref.str(),"UTF-8") << "]\n" ;
+        #endif
     }
 
     {
-        std::cout << "- Testing as::currency" << std::endl;
+        std::cout << "- Testing as::currency national " << std::endl;
         ss_type ss;
         ss.imbue(l);
 
         ss << as::currency;
         ss << 1043.34;
-        ss << CharType(' ');
-        ss << as::currency_iso ;
-        ss << 1243.31;
         TEST(ss);
-        double v1,v2;
-        ss >> as::currency_national ;
+        double v1;
         ss >> v1;
         TEST(ss);
-        ss >> as::currency_iso ;
-        ss >> v2 ;
-        TEST(ss);
         TEST(v1==1043.34);
-        TEST(v2==1243.31);
 
         ss_ref_type ss_ref;
         ss_ref.imbue(lreal);
         ss_ref << std::showbase;
         std::use_facet<std::money_put<RefCharType> >(lreal).put(ss_ref,false,ss_ref,RefCharType(' '),104334);
-        ss_ref << RefCharType(' ');
-        std::use_facet<std::money_put<RefCharType> >(lreal).put(ss_ref,true,ss_ref,RefCharType(' '),124331);
 
         TEST(equal(ss.str(),ss_ref.str()));
+        #ifdef DEBUG_FMT
+        std::cout << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
+        std::cout << "[" << boost::locale::conv::from_utf(ss_ref.str(),"UTF-8") << "]\n" ;
+        #endif
     }
+
+    {
+        std::cout << "- Testing as::currency iso" << std::endl;
+        ss_type ss;
+        ss.imbue(l);
+
+        ss << as::currency << as::currency_iso;
+        ss << 1043.34;
+        TEST(ss);
+        double v1;
+        ss >> v1;
+        TEST(ss);
+        TEST(v1==1043.34);
+
+        ss_ref_type ss_ref;
+        ss_ref.imbue(lreal);
+        ss_ref << std::showbase;
+        std::use_facet<std::money_put<RefCharType> >(lreal).put(ss_ref,true,ss_ref,RefCharType(' '),104334);
+
+        TEST(equal(ss.str(),ss_ref.str()));
+        #ifdef DEBUG_FMT
+        std::cout << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
+        std::cout << "[" << boost::locale::conv::from_utf(ss_ref.str(),"UTF-8") << "]\n" ;
+        #endif
+    }
+    
+    
     {
         std::cout << "- Testing as::date/time" << std::endl;
         ss_type ss;
@@ -143,8 +173,10 @@ void test_by_char(std::locale const &l,std::locale const &lreal)
         std::use_facet<std::time_put<RefCharType> >(lreal).put(ss_ref,ss_ref,RefCharType(' '),&tm,rfmt.c_str(),rfmt.c_str()+rfmt.size());
 
         TEST(equal(ss.str(),ss_ref.str()));
-        //std::cerr << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
-        //std::cerr << "[" << boost::locale::conv::from_utf(ss_ref.str(),"UTF-8") << "]\n" ;
+        #ifdef DEBUG_FMT
+        std::cout << "[" << boost::locale::conv::from_utf(ss.str(),"UTF-8") << "]=\n" ;
+        std::cout << "[" << boost::locale::conv::from_utf(ss_ref.str(),"UTF-8") << "]\n" ;
+        #endif
     }
 
 }
@@ -217,11 +249,74 @@ int main()
             }
         }
         {
+            std::cout << "UTF locale" << std::endl;
+            std::string real_name;
+            std::string name = get_std_name("he_IL.UTF-8",&real_name);
+            if(name.empty()) {
+                std::cout << "he_IL.UTF-8 not supported" << std::endl;
+            }
+            else {
+                std::locale l1=gen(name),l2(real_name.c_str());
+                std::cout << "UTF-8" << std::endl;
+                if(name==real_name) 
+                    test_by_char<char,char>(l1,l2);
+                else
+                    #ifndef BOOST_NO_STD_WSTRING
+                    test_by_char<char,wchar_t>(l1,l2);
+                    #else
+                    std::cout << "UTF-8 Unsupported - no wide locale" << std::endl;
+                    #endif
+                
+                #ifndef BOOST_NO_STD_WSTRING
+                std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
+                test_by_char<wchar_t,wchar_t>(l1,l2);
+                #endif
+
+                #ifdef BOOST_HAS_CHAR16_T
+                std::cout << "char16 UTF-16" << std::endl;
+                test_by_char<char16_t,char16_t>(l1,l2);
+                #endif
+                #ifdef BOOST_HAS_CHAR32_T
+                std::cout << "char32 UTF-32" << std::endl;
+                test_by_char<char32_t,char32_t>(l1,l2);
+                #endif
+            }
+        }
+        {
+            std::cout << "ISO-8859-8 locale" << std::endl;
+            std::string real_name;
+            std::string name = get_std_name("he_IL.ISO-8859-8",&real_name);
+            if(name.empty()) {
+                std::cout << "he_IL.ISO-8859-8 not supported" << std::endl;
+            }
+            else {
+                std::cerr << name << " " <<real_name << std::endl;
+                std::locale l1=gen(name),l2(real_name.c_str());
+                test_by_char<char,char>(l1,l2);
+                #ifndef BOOST_NO_STD_WSTRING
+                std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
+                test_by_char<wchar_t,wchar_t>(l1,l2);
+                #endif
+
+                #ifdef BOOST_HAS_CHAR16_T
+                std::cout << "char16 UTF-16" << std::endl;
+                test_by_char<char16_t,char16_t>(l1,l2);
+                #endif
+                #ifdef BOOST_HAS_CHAR32_T
+                std::cout << "char32 UTF-32" << std::endl;
+                test_by_char<char32_t,char32_t>(l1,l2);
+                #endif
+            }
+        }
+        {
             std::cout << "Testing UTF-8 punct workaround" << std::endl;
             std::string real_name;
             std::string name = get_std_name("ru_RU.UTF-8",&real_name);
             if(name.empty()) {
                 std::cout << "- No russian locale" << std::endl;
+            }
+            else if(name != real_name) {
+                std::cout << "- Not having UTF-8 locale, no need for workaround" << std::endl;
             }
             else {
                 std::locale l1=gen(name),l2(real_name.c_str());

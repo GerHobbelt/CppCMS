@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/generator.hpp>
+#include <boost/locale/codepage.hpp>
 #include <boost/locale/localization_backend.hpp>
 #include <map>
 #include <vector>

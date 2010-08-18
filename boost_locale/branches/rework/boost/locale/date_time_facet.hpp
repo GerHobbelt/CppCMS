@@ -9,6 +9,7 @@
 #define BOOST_LOCALE_DATE_TIME_FACET_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
+#include <boost/cstdint.hpp>
 #include <locale>
 
 namespace boost {
