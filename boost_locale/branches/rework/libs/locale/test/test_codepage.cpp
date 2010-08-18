@@ -209,6 +209,15 @@ std::basic_string<char> utf(char const *s)
 }
 
 template<typename Char>
+void test_with_0()
+{
+    std::string a("abc\0\0 yz\0",3+2+3+1);
+    TEST(boost::locale::conv::from_utf<Char>(boost::locale::conv::to_utf<Char>(a,"UTF-8"),"UTF-8") == a);
+    TEST(boost::locale::conv::from_utf<Char>(boost::locale::conv::to_utf<Char>(a,"ISO-8859-1"),"ISO-8859-1") == a);
+}
+
+
+template<typename Char>
 void test_to()
 {
     test_pos<Char>(to<char>("grüßen"),utf<Char>("grüßen"),"ISO-8859-1");
@@ -218,15 +227,22 @@ void test_to()
     
     test_to_neg<Char>("g\xFFrüßen",utf<Char>("grüßen"),"UTF-8");
     test_from_neg<Char>(utf<Char>("hello שלום"),"hello ","ISO-8859-1");
+ 
+    test_with_0<Char>();
 }
-
 
 
 int main()
 {
     try {
         std::string def[2] = { "icu" , "std" };
-        for(int type = 0 ; type < 2; type ++ ) {
+        #ifdef BOOST_LOCALE_WITH_ICU
+        int start = 0;
+        #else
+        int start = 1;
+        #endif
+        
+        for(int type = start ; type < 2; type ++ ) {
             boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
             tmp_backend.select(def[type]);
             boost::locale::localization_backend_manager::global(tmp_backend);

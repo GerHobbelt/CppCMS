@@ -6,6 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
+#include <boost/config.hpp>
 #if (!defined(BOOST_WINDOWS) && !defined(BOOST_LOCALE_NO_ICONV))
 #  ifndef BOOST_LOCALE_WITH_ICONV
 #    define BOOST_LOCALE_WITH_ICONV
@@ -26,6 +27,10 @@
 #include "wconv_codepage.hpp"
 #endif
 
+#include <boost/locale/codepage.hpp>
+
+#include <string>
+#include <memory>
 
 namespace boost {
     namespace locale {

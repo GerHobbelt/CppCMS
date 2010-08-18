@@ -83,9 +83,89 @@ namespace impl {
                 v2.push_back(v[i]);
         }
         v.swap(v2);
-        return v.size()
+        return v.size();
     }
 
+    size_t remove_substitutions(std::vector<char> &v)
+    {
+        if(std::find(v.begin(),v.end(),0) == v.end()) {
+            return v.size();
+        }
+        std::vector<char> v2;
+        v2.reserve(v.size());
+        for(unsigned i=0;i<v.size();i++) {
+            if(v[i]!=0)
+                v2.push_back(v[i]);
+        }
+        v.swap(v2);
+        return v.size();
+    }
+
+    
+    void multibyte_to_wide(int codepage,char const *begin,char const *end,bool do_skip,std::vector<wchar_t> &buf)
+    {
+        if(begin==end)
+            return;
+        DWORD flags = do_skip ? 0 : MB_ERR_INVALID_CHARS;
+        if(50220 <= codepage && codepage <= 50229)
+            flags = 0;
+        
+        int n = MultiByteToWideChar(codepage,flags,begin,end-begin,0,0);
+        if(n == 0)
+            throw conversion_error();
+        buf.resize(n,0);
+        if(MultiByteToWideChar(codepage,flags,begin,end-begin,&buf.front(),buf.size())==0)
+            throw conversion_error();
+        if(do_skip)
+            remove_substitutions(buf);
+    }
+
+    void wide_to_multibyte_non_zero(int codepage,wchar_t const *begin,wchar_t const *end,bool do_skip,std::vector<char> &buf)
+    {
+        if(begin==end)
+            return;
+        BOOL substitute = FALSE;
+        BOOL *substitute_ptr = codepage == 65001 || codepage == 65000 ? 0 : &substitute;
+        char subst_char = 0;
+        char *subst_char_ptr = codepage == 65001 || codepage == 65000 ? 0 : &subst_char;
+        
+        int n = WideCharToMultiByte(codepage,0,begin,end-begin,0,0,subst_char_ptr,substitute_ptr);
+        buf.resize(n);
+        
+        if(WideCharToMultiByte(codepage,0,begin,end-begin,&buf[0],n,subst_char_ptr,substitute_ptr)==0)
+            throw conversion_error();
+        if(substitute) {
+            if(do_skip) 
+                remove_substitutions(buf);
+            else 
+                throw conversion_error();
+        }
+    }
+    
+    void wide_to_multibyte(int codepage,wchar_t const *begin,wchar_t const *end,bool do_skip,std::vector<char> &buf)
+    {
+        if(begin==end)
+            return;
+        buf.reserve(end-begin);
+        wchar_t const *e = std::find(begin,end,L'\0');
+        wchar_t const *b = begin;
+        for(;;) {
+            std::vector<char> tmp;
+            wide_to_multibyte_non_zero(codepage,b,e,do_skip,tmp);
+            size_t osize = buf.size();
+            buf.resize(osize+tmp.size());
+            std::copy(tmp.begin(),tmp.end(),buf.begin()+osize);
+            if(e!=end) {
+                buf.push_back('\0');
+                b=e+1;
+                e=std::find(b,end,L'0');
+            }
+            else 
+                break;
+        }
+    }
+
+    
     int encoding_to_windows_codepage(char const *ccharset)
     {
         std::string charset;
@@ -105,9 +185,11 @@ namespace impl {
         windows_encoding *begin = all_windows_encodings;
         windows_encoding *end = all_windows_encodings + n;
         windows_encoding *ptr = std::lower_bound(begin,end,ref);
-        if(ptr!=end && strcmp(ptr->name,charset.c_str())==0)
+        if(ptr!=end && strcmp(ptr->name,charset.c_str())==0) {
             return ptr->codepage;
+        }
         return -1;
+        
     }
 
     bool validate_utf16(uint16_t const *str,unsigned len)
@@ -137,6 +219,7 @@ namespace impl {
         }
         bool open(char const *to_charset,char const *from_charset,method_type how)
         {
+            how_ = how;
             to_code_page_ = encoding_to_windows_codepage(to_charset);
             from_code_page_ = encoding_to_windows_codepage(from_charset);
             if(to_code_page_ == -1 || from_code_page_ == -1)
@@ -145,26 +228,17 @@ namespace impl {
         }
         virtual std::string convert(char const *begin,char const *end)
         {
-            DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
-            if(50220 <= from_code_page_ && from_code_page_ <= 50229)
-                flags = 0;
-            
-            int n = MultiByteToWideChar(from_code_page_,flags,begin,end-begin,0,0);
-            if(n == 0)
-                throw conversion_error();
-            std::vector<wchar_t> buf(n);
-            if(MultiByteToWideChar(from_code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0)
-                throw conversion_error();
-            remove_substitutions(buf);
-            n = WideCharToMultiByte(to_code_page_,0,&buf[0],buf.size(),0,0,0,0);
-            std::vector<char> cbuf(n);
-            BOOL substitute = FALSE;
-            BOOL *substitute_ptr = to_code_page_ == 65001 || to_code_page_ == 65000 ? 0 : &substitute;
-            if(WideCharToMultiByte(to_code_page_,0,&buf[0],buf.size(),&cbuf[0],n,0,substitute_ptr)==0)
-                throw conversion_error();
-            if(how_ == stop && substitute)
-                throw conversion_error();
-            return std::string(&cbuf[0],n);
+            std::string res;
+            std::vector<wchar_t> tmp;
+            multibyte_to_wide(from_code_page_,begin,end,how_ == skip,tmp);
+            if(tmp.empty())
+                return res;
+            std::vector<char> ctmp;
+            wide_to_multibyte(to_code_page_,&tmp.front(),&tmp.front()+tmp.size(),how_ == skip,ctmp);
+            if(ctmp.empty())
+                return res;
+            res.assign(&ctmp.front(),ctmp.size());
+            return res;
         }
     private:
         method_type how_;
@@ -226,21 +300,11 @@ namespace impl {
 
         virtual string_type convert(char const *begin,char const *end) 
         {
-            DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
-            if(50220 <= code_page_ && code_page_ <= 50229)
-                flags = 0;
-            
-            int n = MultiByteToWideChar(code_page_,flags,begin,end-begin,0,0);
-            if(n == 0) {
-                throw conversion_error();
-            }
-            std::vector<wchar_t> buf(n);
-            if(MultiByteToWideChar(code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0) {
-                throw conversion_error();
-            }
-            remove_substitutions(buf);
+            std::vector<wchar_t> tmp;
+            multibyte_to_wide(code_page_,begin,end,how_ == skip,tmp);
             string_type res;
-            res.assign(reinterpret_cast<char_type *>(&buf[0]),n);
+            if(!tmp.empty())
+                res.assign(reinterpret_cast<char_type *>(&tmp.front()),tmp.size());
             return res;
         }
 
@@ -271,24 +335,18 @@ namespace impl {
 
         virtual std::string convert(CharType const *begin,CharType const *end) 
         {
+            if(begin==end)
+                return std::string();
             if(how_ == stop && !validate_utf16(reinterpret_cast<uint16_t const *>(begin),end-begin)) {
                 throw conversion_error();
             }
-
-            wchar_t const *ptr = reinterpret_cast<wchar_t const *>(begin);
-            int n = WideCharToMultiByte(code_page_,0,ptr,end-begin,0,0,0,0);
-            if(n==0)
-                throw conversion_error();
-            std::vector<char> cbuf(n);
-            BOOL substitute = FALSE;
-            BOOL *substitute_ptr = code_page_ == 65001 || code_page_ == 65000 ? 0 : &substitute;
-            if(WideCharToMultiByte(code_page_,0,ptr,end-begin,&cbuf[0],n,0,substitute_ptr)==0) {
-                throw conversion_error();
-            }
-            if(how_ == stop && substitute) {
-                throw conversion_error();
-            }
-            return std::string(&cbuf[0],n);
+            std::vector<char> ctmp;
+            wide_to_multibyte(code_page_,begin,end,how_ == skip,ctmp);
+            std::string res;
+            if(ctmp.empty())
+                return res;
+            res.assign(&ctmp.front(),ctmp.size());
+            return res;
         }
 
     private:
@@ -320,19 +378,11 @@ namespace impl {
 
         virtual string_type convert(char const *begin,char const *end) 
         {
-            DWORD flags = how_ == skip ? 0 : MB_ERR_INVALID_CHARS;
-            if(50220 <= code_page_ && code_page_ <= 50229)
-                flags = 0;
-            
-            int n = MultiByteToWideChar(code_page_,flags,begin,end-begin,0,0);
-            if(n == 0) {
-                throw conversion_error();
-            }
-            std::vector<wchar_t> buf(n);
-            if(MultiByteToWideChar(code_page_,flags,begin,end-begin,&buf.front(),buf.size())==0) {
-                throw conversion_error();
-            }
-            n = remove_substitutions(buf);
+            std::vector<wchar_t> buf;
+            multibyte_to_wide(code_page_,begin,end,how_ == skip,buf);
+            remove_substitutions(buf);
+
+            size_t n=buf.size();
             string_type res;
             res.reserve(n);
             for(int i=0;i<n;i++) {
@@ -406,19 +456,14 @@ namespace impl {
                 }
             }
 
-            int n = WideCharToMultiByte(code_page_,0,tmp.c_str(),tmp.size(),0,0,0,0);
-            if(n==0)
-                throw conversion_error();
-            std::vector<char> cbuf(n);
-            BOOL substitute = FALSE;
-            BOOL *substitute_ptr = code_page_ == 65001 || code_page_ == 65000 ? 0 : &substitute;
-            if(WideCharToMultiByte(code_page_,0,tmp.c_str(),tmp.size(),&cbuf[0],n,0,substitute_ptr)==0) {
-                throw conversion_error();
-            }
-            if(how_ == stop && substitute) {
-                throw conversion_error();
-            }
-            return std::string(&cbuf[0],n);
+            std::vector<char> ctmp;
+            wide_to_multibyte(code_page_,tmp.c_str(),tmp.c_str()+tmp.size(),how_ == skip,ctmp);
+            std::string res;
+            if(ctmp.empty())
+                return res;
+            res.assign(&ctmp.front(),ctmp.size());
+            return res;
+
         }
 
     private:
