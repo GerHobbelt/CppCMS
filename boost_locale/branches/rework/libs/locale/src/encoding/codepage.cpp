@@ -13,7 +13,7 @@
 #  endif
 #endif
 
-#ifdef BOOST_WINDOWS
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 #define BOOST_LOCALE_WITH_WCONV
 #endif
 
