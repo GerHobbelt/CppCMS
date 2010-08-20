@@ -63,7 +63,7 @@ namespace boost {
                     return collate->compare(left,right,status);
                 }
                 
-		int do_real_compare(std::auto_ptr<icu::Collator> collate,
+                int do_real_compare(std::auto_ptr<icu::Collator> collate,
                                     level_type level,
                                     CharType const *b1,CharType const *e1,
                                     CharType const *b2,CharType const *e2,
@@ -79,8 +79,8 @@ namespace boost {
                     UErrorCode status=U_ZERO_ERROR;
                     
                     std::auto_ptr<icu::Collator> collate(collates_[limit(level)]->safeClone());
-		    
-		    int res = do_real_compare(collate,level,b1,e1,b2,e2,status);
+            
+                    int res = do_real_compare(collate,level,b1,e1,b2,e2,status);
                     
                     if(U_FAILURE(status))
                             throw std::runtime_error(std::string("Collation failed:") + u_errorName(status));

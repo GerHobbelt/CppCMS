@@ -682,7 +682,7 @@ std::locale create_formatting(  std::locale const &in,
             {
                 std::locale tmp = create_basic_formatting<char32_t>(in,locale_name);
                 tmp = std::locale(tmp,new num_format<char32_t>());
-                return tmp
+                return tmp;
             }
         #endif
         default:

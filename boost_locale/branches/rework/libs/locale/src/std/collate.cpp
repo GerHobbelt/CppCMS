@@ -96,12 +96,12 @@ std::locale create_collate( std::locale const &in,
     #endif
 
     #ifdef BOOST_HAS_CHAR16_T
-    case wchar_t_facet:
+    case char16_t_facet:
         return std::locale(in,new std::collate_byname<char16_t>(locale_name.c_str()));
     #endif
 
     #ifdef BOOST_HAS_CHAR32_T
-    case wchar_t_facet:
+    case char32_t_facet:
         return std::locale(in,new std::collate_byname<char32_t>(locale_name.c_str()));
     #endif
     default:

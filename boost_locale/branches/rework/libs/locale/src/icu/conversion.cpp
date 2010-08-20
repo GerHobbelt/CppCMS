@@ -11,6 +11,12 @@
 #include <unicode/normlzr.h>
 #include <unicode/ustring.h>
 #include <unicode/locid.h>
+#include <unicode/uversion.h>
+#if U_ICU_VERSION_MAJOR_NUM*300 + U_ICU_VERSION_MINOR_NUM >= 308
+#include <unicode/ucasemap.h>
+#define WITH_CASE_MAPS
+#endif
+
 #include "cdata.hpp"
 #include "uconv.hpp"
 
@@ -18,48 +24,10 @@
 namespace boost {
 namespace locale {
 namespace impl_icu {
-    template<typename CharType>
-    class converter_impl : public converter<CharType> {
-    public:
-        typedef CharType char_type;
-        typedef std::basic_string<char_type> string_type;
-
-        converter_impl(cdata const &d) :
-            locale_(d.locale),
-            encoding_(d.encoding)
-        {
-        }
-
-
-        virtual string_type convert(converter_base::conversion_type how,char_type const *begin,char_type const *end,int flags = 0) const
-        {
-            icu_std_converter<char_type> cvt(encoding_);
-            icu::UnicodeString str=cvt.icu(begin,end);
-            switch(how) {
-            case converter_base::normalization:
-                do_normalize(str,flags);
-                break;
-            case converter_base::upper_case:
-                str.toUpper(locale_);
-                break;
-            case converter_base::lower_case:
-                str.toLower(locale_);
-                break;
-            case converter_base::title_case:
-                str.toTitle(0,locale_);
-                break;
-            case converter_base::case_folding:
-                str.foldCase();
-                break;
-            default:
-                ;
-            }
-            return cvt.std(str);
-        }
     
-    private:
-
-        void do_normalize(icu::UnicodeString &str,int flags) const
+    
+    namespace {
+        void normalize_string(icu::UnicodeString &str,int flags)
         {
             UErrorCode code=U_ZERO_ERROR;
             UNormalizationMode mode=UNORM_DEFAULT;
@@ -84,88 +52,140 @@ namespace impl_icu {
 
             str=tmp;
         }
+    }
 
+
+    template<typename CharType>
+    class converter_impl : public converter<CharType> {
+    public:
+        typedef CharType char_type;
+        typedef std::basic_string<char_type> string_type;
+
+        converter_impl(cdata const &d) :
+            locale_(d.locale),
+            encoding_(d.encoding)
+        {
+        }
+
+        virtual string_type convert(converter_base::conversion_type how,char_type const *begin,char_type const *end,int flags = 0) const
+        {
+            icu_std_converter<char_type> cvt(encoding_);
+            icu::UnicodeString str=cvt.icu(begin,end);
+            switch(how) {
+            case converter_base::normalization:
+                normalize_string(str,flags);
+                break;
+            case converter_base::upper_case:
+                str.toUpper(locale_);
+                break;
+            case converter_base::lower_case:
+                str.toLower(locale_);
+                break;
+            case converter_base::title_case:
+                str.toTitle(0,locale_);
+                break;
+            case converter_base::case_folding:
+                str.foldCase();
+                break;
+            default:
+                ;
+            }
+            return cvt.std(str);
+        }
+    
+    private:
         icu::Locale locale_;
         std::string encoding_;
     }; // converter_impl
 
-    /*
+    #ifdef WITH_CASE_MAPS
+    class raii_casemap {
+        raii_casemap(raii_casemap const &);
+        void operator = (raii_casemap const&);
+    public:
+        raii_casemap(std::string const &locale_id) :
+            map_(0)
+        {
+            UErrorCode err=U_ZERO_ERROR;
+            map_ = ucasemap_open(locale_id.c_str(),0,&err);
+            check_and_throw_icu_error(err);
+            if(!map_)
+                throw std::runtime_error("Failed to create UCaseMap");
+        }
+        template<typename Conv>
+        std::string convert(Conv func,char const *begin,char const *end) const
+        {
+                std::vector<char> buf((end-begin)*11/10+1);
+                UErrorCode err=U_ZERO_ERROR;
+                int size = func(map_,&buf.front(),buf.size(),begin,end-begin,&err);
+                if(err == U_BUFFER_OVERFLOW_ERROR) {
+                    err = U_ZERO_ERROR;
+                    buf.resize(size+1);
+                    size = func(map_,&buf.front(),buf.size(),begin,end-begin,&err);
+                }
+                check_and_throw_icu_error(err);
+                return std::string(&buf.front(),size);
+        }
+        ~raii_casemap()
+        {
+            ucasemap_close(map_);
+        }
+    private:
+        UCaseMap *map_;
+    };
+
     class utf8_converter_impl : public converter<char> {
     public:
         
         utf8_converter_impl(cdata const &d) :
-            locale_(d.locale),
+            locale_id_(d.locale.getName()),
+            map_(locale_id_)
         {
         }
 
-        std::string do_normalize(char const *begin,char const *end,int flags)
-        {
-        }
-
-        template<typename Conv>
-        std::string do_real_convert(UCaseMap *map,Conv func,char const *begin,cha const *end) const
-        {
-                std::vector<char> buf((end-begin)*11/10+1);
-                UErrorCode err=U_ZERO_ERROR;
-                int size = func(map,&buf.front(),buf.size(),begin,end-begin,&err);
-                check_and_throw_icu_error(err);
-                if(size > int(buf.size())) {
-                    buf.resize(size+1);
-                    size = func(map,&buf.front(),buf.size(),begin,end-begin,&err);
-                    check_and_throw_icu_error(err);
-                }
-                return std::string(&buf.front(),size);
-        }
-
-        virtual std::string convert(converter_base::conversion_type how,char const *begin,cha const *end,int flags = 0) const
+        virtual std::string convert(converter_base::conversion_type how,char const *begin,char const *end,int flags = 0) const
         {
             
-            if(how == converter_base::normalization)
-                return do_normalize(begin,end,flags);
-
-            UErrorCode err=U_ZERO_ERROR;
-            UCaseMap *map = 0;
-            std::string res;
+            if(how == converter_base::normalization) {
+                icu_std_converter<char> cvt("UTF-8");
+                icu::UnicodeString str=cvt.icu(begin,end);
+                normalize_string(str,flags);
+                return cvt.std(str);
+            }
             
-            try {
-                map = ucasemap_open(locale_.c_str(),0,&err);
-                check_and_throw_icu_error(err);
-                assert(map);
-                case converter_base::upper_case:
-                    res = do_real_convert(map,ucasemap_utf8ToUpper,begin,end);
-                    break;
-                case converter_base::lower_case:
-                    res =  do_real_convert(map,ucasemap_utf8ToLower,begin,end);
-                    break;
-                case converter_base::title_case:
-                    res = do_real_convert(map,ucasemap_utf8ToTitle,begin,end);
-                    break;
-                case converter_base::case_folding:
-                    res = do_real_convert(map,ucasemap_utf8FoldCase,begin,end);
-                    break;
-                default:
-                    throw std::illegal_argument();
+            switch(how) 
+            {
+            case converter_base::upper_case:
+                return map_.convert(ucasemap_utf8ToUpper,begin,end);
+            case converter_base::lower_case:
+                return map_.convert(ucasemap_utf8ToLower,begin,end);
+            case converter_base::title_case:
+                {
+                    // Non-const method, so need to create a separate map
+                    raii_casemap map(locale_id_);
+                    return map.convert(ucasemap_utf8ToTitle,begin,end);
                 }
+            case converter_base::case_folding:
+                return map_.convert(ucasemap_utf8FoldCase,begin,end);
+            default:
+                return std::string(begin,end-begin);
             }
-            catch(...) {
-                if(map)
-                        ucasemap_close(map);
-                throw;
-            }
-            if(map)
-                ucasemap_close(map);
         }
-    
     private:
-        std::string locale_;
+        std::string locale_id_;
+        raii_casemap map_;
     }; // converter_impl
-    */
 
+#endif // WITH_CASE_MAPS
 
     std::locale create_convert(std::locale const &in,cdata const &cd,character_facet_type type)
     {
         switch(type) {
         case char_facet:
+            #ifdef WITH_CASE_MAPS
+            if(cd.utf8)
+                return std::locale(in,new utf8_converter_impl(cd));
+            #endif
             return std::locale(in,new converter_impl<char>(cd));
         #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:

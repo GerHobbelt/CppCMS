@@ -52,7 +52,7 @@ public:
                 return string_type(lbegin,len);
             }
         default:
-            throw std::invalid_argument("Unsupported conversion type");
+            return string_type(begin,end-begin);
         }
     }
 private:
