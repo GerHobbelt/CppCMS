@@ -15,6 +15,7 @@
 #include "all_generator.hpp"
 #include "cdata.hpp"
 #include <algorithm>
+#include "predefined_formatters.hpp"
 
 namespace boost {
 namespace locale {
@@ -318,22 +319,43 @@ private:
 
 };
 
+
+template<typename CharType>
+std::locale install_formatting_facets(std::locale const &in,cdata const &cd)
+{
+    std::locale tmp=std::locale(in,new num_format<CharType>(cd));
+    if(!std::has_facet<icu_formatters_cache>(in)) {
+        tmp=std::locale(tmp,new icu_formatters_cache(cd.locale)); 
+    }
+    return tmp;
+}
+
+template<typename CharType>
+std::locale install_parsing_facets(std::locale const &in,cdata const &cd)
+{
+    std::locale tmp=std::locale(in,new num_parse<CharType>(cd));
+    if(!std::has_facet<icu_formatters_cache>(in)) {
+        tmp=std::locale(tmp,new icu_formatters_cache(cd.locale)); 
+    }
+    return tmp;
+}
+
 std::locale create_formatting(std::locale const &in,cdata const &cd,character_facet_type type)
 {
         switch(type) {
         case char_facet:
-            return std::locale(in,new num_format<char>(cd));
+            return install_formatting_facets<char>(in,cd);
         #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
-            return std::locale(in,new num_format<wchar_t>(cd));
+            return install_formatting_facets<wchar_t>(in,cd);
         #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
-            return std::locale(in,new num_format<char16_t>(cd));
+            return install_formatting_facets<char16_t>(in,cd);
         #endif
         #ifdef BOOST_HAS_CHAR32_T
         case char32_t_facet:
-            return std::locale(in,new num_format<char32_t>(cd));
+            return install_formatting_facets<char32_t>(in,cd);
         #endif
         default:
             return in;
@@ -344,18 +366,18 @@ std::locale create_parsing(std::locale const &in,cdata const &cd,character_facet
 {
         switch(type) {
         case char_facet:
-            return std::locale(in,new num_parse<char>(cd));
+            return install_parsing_facets<char>(in,cd);
         #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
-            return std::locale(in,new num_parse<wchar_t>(cd));
+            return install_parsing_facets<wchar_t>(in,cd);
         #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
-            return std::locale(in,new num_parse<char16_t>(cd));
+            return install_parsing_facets<char16_t>(in,cd);
         #endif
         #ifdef BOOST_HAS_CHAR32_T
         case char32_t_facet:
-            return std::locale(in,new num_parse<char32_t>(cd));
+            return install_parsing_facets<char32_t>(in,cd);
         #endif
         default:
             return in;
