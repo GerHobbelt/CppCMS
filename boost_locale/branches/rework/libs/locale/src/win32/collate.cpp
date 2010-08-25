@@ -12,6 +12,11 @@
 #include <boost/locale/codepage.hpp>
 #include "all_generator.hpp"
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace boost {
 namespace locale {
 namespace impl_win {

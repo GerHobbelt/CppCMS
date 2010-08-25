@@ -297,8 +297,8 @@ void test_wide_path(int argc,char **argv)
 int main(int argc,char **argv)
 {
     try {
-        std::string def[2] = { "icu" , "std" };
-        for(int type = 0 ; type < 2; type ++ ) {
+        std::string def[3] = { "icu" , "posix", "std" };
+        for(int type = 0 ; type < 3; type ++ ) {
             boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
             tmp_backend.select(def[type]);
             boost::locale::localization_backend_manager::global(tmp_backend);

@@ -4,7 +4,25 @@ enable_testing()
 
 option(DISABLE_SHARED	"Disable shared libraries build" OFF)
 option(DISABLE_STATIC	"Disable static libraries build" OFF)
-option(DISABLE_ICU	"Disable ICU library" OFF)
+
+option(DISABLE_ICU	"Disable ICU library/backend" OFF)
+
+option(DISABLE_STD_BACKEND	"Disable STD backend" OFF)
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR APPLE)
+	option(DISABLE_POSIX_BACKEND	"Disable POSIX backend" OFF)
+else()
+	option(DISABLE_POSIX_BACKEND	"Disable POSIX backend" ON)
+endif()
+
+if(DISABLE_STD_BACKEND) 
+	add_definitions(-DBOOST_LOCALE_NO_STD_BACKEND)
+endif()
+
+if(DISABLE_POSIX_BACKEND) 
+	add_definitions(-DBOOST_LOCALE_NO_POSIX_BACKEND)
+endif()
+
 
 if(WIN32 AND NOT CYGWIN)
 	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" ON)
@@ -144,17 +162,29 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/shared/ids.cpp
 	libs/locale/src/shared/localization_backend.cpp
 	libs/locale/src/shared/message.cpp
-	libs/locale/src/shared/mo_lambda.cpp
+	libs/locale/src/shared/mo_lambda.cpp)
 
-	libs/locale/src/std/codecvt.cpp
-	libs/locale/src/std/collate.cpp
-	libs/locale/src/std/converter.cpp
-	libs/locale/src/std/info.cpp
-	libs/locale/src/std/numeric.cpp
-	libs/locale/src/std/std_backend.cpp
-	libs/locale/src/std/windows_locale_name.cpp
-
+if(NOT DISABLE_STD_BACKEND)
+	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
+		libs/locale/src/std/codecvt.cpp
+		libs/locale/src/std/collate.cpp
+		libs/locale/src/std/converter.cpp
+		libs/locale/src/std/info.cpp
+		libs/locale/src/std/numeric.cpp
+		libs/locale/src/std/std_backend.cpp
+		libs/locale/src/std/windows_locale_name.cpp
 	)
+endif()
+
+if(NOT DISABLE_POSIX_BACKEND)
+	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
+		libs/locale/src/posix/collate.cpp
+		libs/locale/src/posix/converter.cpp
+		libs/locale/src/posix/info.cpp
+		libs/locale/src/posix/numeric.cpp
+		libs/locale/src/posix/posix_backend.cpp
+	)
+endif()
 
 if(BOOST_LOCALE_HAVE_ICU)
 	set(BOOST_LOCALE_SRC 
@@ -216,11 +246,23 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale"
 set(LOCALE_TESTS
 		test_codepage
 		test_message
-		test_ios_prop
+		test_ios_prop)
+
+if(NOT DISABLE_STD_BACKEND)
+	set(LOCALE_TESTS ${LOCALE_TESTS}
 		test_std_convert
 		test_std_formatting
 		test_std_collate
 		)
+endif()
+
+if(NOT DISABLE_POSIX_BACKEND) 
+	set(LOCALE_TESTS ${LOCALE_TESTS}
+		test_posix_collate
+		test_posix_convert
+		test_posix_formatting
+		)
+endif()
 
 if(BOOST_LOCALE_HAVE_ICU)
 	set(LOCALE_TESTS

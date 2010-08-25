@@ -3,11 +3,18 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <vector>
+
 #ifdef BOOST_LOCALE_WITH_ICU
 #include "../icu/icu_backend.hpp"
 #endif
 
+#ifndef BOOST_LOCALE_NO_POSIX_BACKEND
+#include "../posix/posix_backend.hpp"
+#endif
+
+#ifndef BOOST_LOCALE_NO_STD_BACKEND
 #include "../std/std_backend.hpp"
+#endif
 
 namespace boost {
     namespace locale {
@@ -204,9 +211,16 @@ namespace boost {
                     backend.reset(impl_icu::create_localization_backend());
                     mgr.add_backend("icu",backend);
                     #endif
+
+                    #ifndef BOOST_LOCALE_NO_POSIX_BACKEND
+                    backend.reset(impl_posix::create_localization_backend());
+                    mgr.add_backend("posix",backend);
+                    #endif
                     
+                    #ifndef BOOST_LOCALE_NO_STD_BACKEND
                     backend.reset(impl_std::create_localization_backend());
                     mgr.add_backend("std",backend);
+                    #endif
 
                     localization_backend_manager::global(mgr);
                 }

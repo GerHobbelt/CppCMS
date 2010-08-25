@@ -89,7 +89,7 @@ public:
                 return conv::from_utf<wchar_t>(lbegin,lbegin+len,"UTF-8");
             }
         default:
-            throw std::invalid_argument("Unsupported conversion type");
+            return std::string(begin,end-begin);
         }
     }
 private:
