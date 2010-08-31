@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include <langinfo.h>
 #include <monetary.h>
-
+#include "../util/numeric.hpp"
 #include "all_generator.hpp"
 
 #if defined(__linux) || defined(__APPLE__)
@@ -33,7 +33,7 @@ namespace locale {
 namespace impl_posix {
 
 template<typename CharType>
-class num_format : public std::num_put<CharType>
+class num_format : public util::base_num_format<CharType>
 {
 public:
     typedef typename std::num_put<CharType>::iter_type iter_type;
@@ -41,86 +41,13 @@ public:
     typedef CharType char_type;
 
     num_format(boost::shared_ptr<locale_t> lc,size_t refs = 0) : 
-        std::num_put<CharType>(refs),
+        util::base_num_format<CharType>(refs),
         lc_(lc)
     {
     }
 protected: 
-    
 
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, double val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long double val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    
-    #ifndef BOOST_NO_LONG_LONG 
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, long long val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    virtual iter_type do_put (iter_type out, std::ios_base &ios, char_type fill, unsigned long long val) const
-    {
-        return do_real_put(out,ios,fill,val);
-    }
-    #endif
-
-
-private:
-
-
-
-    template<typename ValueType>
-    iter_type do_real_put (iter_type out, std::ios_base &ios, char_type fill, ValueType val) const
-    {
-        typedef std::num_put<char_type> super;
-
-        ios_info &info=ios_info::get(ios);
-
-        switch(info.display_flags()) {
-        case flags::posix:
-            {
-                std::stringstream ss;
-                ss.imbue(std::locale::classic());
-                return super::do_put(out,ss,fill,val);
-            }
-        case flags::date:
-            return format_time(out,ios,fill,static_cast<time_t>(val),'x');
-        case flags::time:
-            return format_time(out,ios,fill,static_cast<time_t>(val),'X');
-        case flags::datetime:
-            return format_time(out,ios,fill,static_cast<time_t>(val),'c');
-        case flags::strftime:
-            return format_time(out,ios,fill,static_cast<time_t>(val),info.date_time_pattern<char_type>());
-        case flags::currency:
-            {
-                if(info.currency_flags()==flags::currency_default || info.currency_flags() == flags::currency_national)
-                    return format_currency(false,out,ios,fill,static_cast<long double>(val));
-                else
-                    return format_currency(true,out,ios,fill,static_cast<long double>(val));
-            }
-
-        case flags::number:
-        case flags::percent:
-        case flags::spellout:
-        case flags::ordinal:
-        default:
-            return super::do_put(out,ios,fill,val);
-        }
-    }
-
-    iter_type format_currency(bool intl,iter_type out,std::ios_base &ios,char_type fill,long double val) const
+    virtual iter_type do_format_currency(bool intl,iter_type out,std::ios_base &ios,char_type fill,long double val) const
     {
         char buf[64];
         char const *format = intl ? "%i" : "%n";
@@ -149,182 +76,11 @@ private:
             *out++ = tmp[i];
         return out;
     }
-
-    iter_type format_time(iter_type out,std::ios_base &ios,char_type fill,time_t time,char c) const
-    {
-        string_type fmt;
-        fmt+=char_type('%');
-        fmt+=char_type(c);
-        return format_time(out,ios,fill,time,fmt);
-    }
-
-    iter_type format_time(iter_type out,std::ios_base &ios,char_type fill,time_t time,string_type const &format) const
-    {
-        std::string tz = ios_info::get(ios).time_zone();
-        std::tm tm;
-        if(tz.empty()) {
-            #ifdef BOOST_WINDOWS
-            /// Windows uses TLS
-            tm = *localtime(&time);
-            #else
-            localtime_r(&time,&tm);
-            #endif
-        }
-        else  {
-            int gmtoff = parse_tz(tz);
-            time+=gmtoff;
-            #ifdef BOOST_WINDOWS
-            /// Windows uses TLS
-            tm = *gmtime(&time);
-            #else
-            gmtime_r(&time,&tm);
-            #endif
-            
-            #if defined(__linux) || defined(__FreeBSD__) || defined(__APPLE__) 
-            // These have extra fields to specify timezone
-            if(gmtoff!=0) {
-                tm.tm_zone=tz.c_str();
-                tm.tm_gmtoff = gmtoff;
-            }
-            #endif
-        }
-        return std::use_facet<std::time_put<char_type> >(ios.getloc()).put(out,ios,fill,&tm,format.c_str(),format.c_str()+format.size());
-    }
-
-    int parse_tz(std::string const &tz) const
-    {
-        int gmtoff = 0;
-        std::string ltz;
-        for(unsigned i=0;i<tz.size();i++) {
-            if('a' <= tz[i] && tz[i] <= 'z')
-                ltz += tz[i]-'a' + 'A';
-            else if(tz[i]==' ')
-                ;
-            else
-                ltz+=tz[i];
-        }
-        if(ltz.compare(0,3,"GMT")!=0 && ltz.compare(0,3,"UTC")!=0)
-            return 0;
-        if(ltz.size()<=3)
-            return 0;
-        char const *begin = ltz.c_str()+3;
-        char *end=0;
-        int hours = strtol(begin,&end,10);
-        if(end != begin) {
-            gmtoff+=hours * 3600;
-        }
-        if(*end==':') {
-            begin=end+1;
-            int minutes = strtol(begin,&end,10);
-            if(end!=begin)
-                gmtoff+=minutes * 60;
-        }
-        return gmtoff;
-    }
 private:
+
     boost::shared_ptr<locale_t> lc_;
 
 };  /// num_format
-
-
-template<typename CharType>
-class num_parse : public std::num_get<CharType>
-{
-public:
-    num_parse(size_t refs = 0) : 
-        std::num_get<CharType>(refs)
-    {
-    }
-protected: 
-    typedef typename std::num_get<CharType>::iter_type iter_type;
-    typedef std::basic_string<CharType> string_type;
-    typedef CharType char_type;
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned short &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned int &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned long &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,float &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get(iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,double &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long double &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    #ifndef BOOST_NO_LONG_LONG 
-    virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,long long &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    virtual iter_type do_get (iter_type in, iter_type end, std::ios_base &ios,std::ios_base::iostate &err,unsigned long long &val) const
-    {
-        return do_real_get(in,end,ios,err,val);
-    }
-
-    #endif
-
-private:
-    
-    template<typename ValueType>
-    iter_type do_real_get(iter_type in,iter_type end,std::ios_base &ios,std::ios_base::iostate &err,ValueType &val) const
-    {
-        typedef std::num_get<char_type> super;
-
-        ios_info &info=ios_info::get(ios);
-
-        switch(info.display_flags()) {
-        case flags::posix:
-            {
-                std::stringstream ss;
-                ss.imbue(std::locale::classic());
-                return super::do_get(in,end,ss,err,val);
-            }
-        // date-time parsing is not supported
-        // due to buggy standard
-        case flags::date:
-        case flags::time:
-        case flags::datetime:
-        case flags::strftime:
-
-        case flags::number:
-        case flags::percent:
-        case flags::spellout:
-        case flags::ordinal:
-        
-        case flags::currency:
-        default:
-            return super::do_get(in,end,ios,err,val);
-        }
-    }
-
-};
-
-
 
 
 template<typename CharType>
@@ -687,7 +443,7 @@ std::locale create_parsing_impl(std::locale const &in,boost::shared_ptr<locale_t
 {
     std::locale tmp = std::locale(in,new num_punct_posix<CharType>(*lc));
     tmp = std::locale(tmp,new ctype_posix<CharType>(lc));
-    tmp = std::locale(tmp,new num_parse<CharType>());
+    tmp = std::locale(tmp,new util::base_num_parse<CharType>());
     return tmp;
 }
 
