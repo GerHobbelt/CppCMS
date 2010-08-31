@@ -46,8 +46,6 @@ namespace boost {
                                         character_facet_type type,
                                         utf8_support utf = utf8_none); 
 
-            std::locale create_info(std::locale const &,std::string const &name); // ok
-
         }
     }
 }

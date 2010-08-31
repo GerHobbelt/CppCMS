@@ -10,7 +10,9 @@
 #include <boost/locale/gnu_gettext.hpp>
 #include "all_generator.hpp"
 #include "find_locale_name.hpp"
-#include "locale_data.hpp"
+#include "../util/locale_data.hpp"
+#include "../util/info.hpp"
+#include "../util/default_locale.hpp"
 #include "std_backend.hpp"
 
 namespace boost {
@@ -60,19 +62,10 @@ namespace impl_std {
                 return;
             invalid_ = false;
             std::string lid=locale_id_;
+            if(lid.empty())
+                lid = util::get_system_locale();
+            in_use_id_ = lid;
             data_.parse(lid);
-            if(lid.empty()) {
-                try {
-                    std::locale l("");
-                    if(l.name()!="*" && l.name()!="POSIX" && l.name()!="C")
-                        lid=l.name();
-                    else
-                        lid="C";
-                }
-                catch(std::exception const &e) {
-                    lid="C";
-                }
-            }
             locale_name::subst_type tmp = locale_name::find(lid);
             name_ = tmp.first;
             utf_mode_ = tmp.second;
@@ -124,7 +117,7 @@ namespace impl_std {
                     }
                 }
             case information_facet:
-                return create_info(base,locale_id_);
+                return util::create_info(base,in_use_id_);
             default:
                 return base;
             }
@@ -136,8 +129,9 @@ namespace impl_std {
         std::vector<std::string> domains_;
         std::string locale_id_;
 
-        locale_data data_;
+        util::locale_data data_;
         std::string name_;
+        std::string in_use_id_;
         utf8_support utf_mode_;
         bool invalid_;
     };

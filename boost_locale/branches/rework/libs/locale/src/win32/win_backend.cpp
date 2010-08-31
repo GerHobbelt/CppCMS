@@ -60,25 +60,8 @@ namespace impl_win {
                 return;
             invalid_ = false;
             if(locale_id_.empty()) {
-                char *lang = 0;
-                lang = getenv("LANG");
-                if(!lang) 
-                    lang = getenv("LC_ALL");
-                if(!lang)
-                    lang = getenv("LC_CTYPE");
-                if(lang) {
-                    lc_ = winlocale(lang);
-                    real_id_ = lang;
-                }
-                else {
-                    lc_ = winlocale("");
-                    real_id_ = lc_.language();
-                    std::string country = lc_.country();
-                    if(!country.empty()) {
-                        real_id_+="_" + country;
-                    }
-                    real_id_ += ".UTF-8";
-                }
+                real_id_ = util::get_system_locale();
+                lc_ = winlocale(real_id_);
             }
             else {
                 lc_=winlocale(locale_id_);
@@ -122,7 +105,7 @@ namespace impl_win {
                     }
                 }
             case information_facet:
-                return create_info(base,real_id_);
+                return util::create_info(base,real_id_);
             default:
                 return base;
             }

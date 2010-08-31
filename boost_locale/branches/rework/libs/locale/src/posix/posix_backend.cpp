@@ -12,6 +12,10 @@
 #include "all_generator.hpp"
 #include "posix_backend.hpp"
 
+#include "../util/default_locale.hpp"
+#include "../util/locale_data.hpp"
+#include "../util/info.hpp"
+
 namespace boost {
 namespace locale {
 namespace impl_posix { 
@@ -65,7 +69,10 @@ namespace impl_posix {
                 return;
             invalid_ = false;
             lc_.reset();
-            locale_t tmp = newlocale(LC_ALL_MASK,locale_id_.c_str(),0);
+            real_id_ = locale_id_;
+            if(real_id_.empty())
+                real_id_ = util::get_system_locale();
+            locale_t tmp = newlocale(LC_ALL_MASK,real_id_.c_str(),0);
             if(!tmp) {
                 tmp=newlocale(LC_ALL_MASK,"C",0);
             }
@@ -95,12 +102,12 @@ namespace impl_posix {
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;
-                    std::locale tmp=create_info(std::locale::classic(),locale_id_);
-                    boost::locale::info const &inf=std::use_facet<boost::locale::info>(tmp);
-                    minf.language = inf.language();
-                    minf.country = inf.country();
-                    minf.variant = inf.variant();
-                    minf.encoding = inf.encoding();
+                    util::locale_data inf;
+                    inf.parse(real_id_);
+                    minf.language = inf.language;
+                    minf.country = inf.country;
+                    minf.variant = inf.variant;
+                    minf.encoding = inf.encoding;
                     minf.domains = domains_;
                     minf.paths = paths_;
                     switch(type) {
@@ -123,7 +130,7 @@ namespace impl_posix {
                     }
                 }
             case information_facet:
-                return create_info(base,locale_id_);
+                return util::create_info(base,real_id_);
             default:
                 return base;
             }
@@ -134,6 +141,7 @@ namespace impl_posix {
         std::vector<std::string> paths_;
         std::vector<std::string> domains_;
         std::string locale_id_;
+        std::string real_id_;
 
         bool invalid_;
         boost::shared_ptr<locale_t> lc_;

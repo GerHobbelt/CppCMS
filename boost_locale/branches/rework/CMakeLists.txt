@@ -173,14 +173,19 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/shared/ids.cpp
 	libs/locale/src/shared/localization_backend.cpp
 	libs/locale/src/shared/message.cpp
-	libs/locale/src/shared/mo_lambda.cpp)
+	libs/locale/src/shared/mo_lambda.cpp
+
+	libs/locale/src/util/info.cpp
+	libs/locale/src/util/locale_data.cpp
+	libs/locale/src/util/default_locale.cpp
+	
+	)
 
 if(NOT DISABLE_STD_BACKEND)
 	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
 		libs/locale/src/std/codecvt.cpp
 		libs/locale/src/std/collate.cpp
 		libs/locale/src/std/converter.cpp
-		libs/locale/src/std/info.cpp
 		libs/locale/src/std/numeric.cpp
 		libs/locale/src/std/std_backend.cpp
 		libs/locale/src/std/windows_locale_name.cpp
@@ -191,7 +196,6 @@ if(NOT DISABLE_POSIX_BACKEND)
 	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
 		libs/locale/src/posix/collate.cpp
 		libs/locale/src/posix/converter.cpp
-		libs/locale/src/posix/info.cpp
 		libs/locale/src/posix/numeric.cpp
 		libs/locale/src/posix/posix_backend.cpp
 	)
@@ -201,7 +205,6 @@ if(NOT DISABLE_WINAPI_BACKEND)
 	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
 		libs/locale/src/win32/collate.cpp
 		libs/locale/src/win32/converter.cpp
-		libs/locale/src/win32/info.cpp
 		libs/locale/src/win32/lcid.cpp
 		libs/locale/src/win32/numeric.cpp
 		libs/locale/src/win32/win_backend.cpp

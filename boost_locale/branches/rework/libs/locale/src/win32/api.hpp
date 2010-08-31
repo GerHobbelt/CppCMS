@@ -52,26 +52,6 @@ namespace impl_win {
         {
         }
 
-        std::string language() const
-        {
-            if(lcid==0)
-                return "C";
-            wchar_t buf[9];
-            if(GetLocaleInfoW(lcid,LOCALE_SISO639LANGNAME,buf,9)==0)
-                return "C";
-            return std::string(buf,buf+wcslen(buf));
-        }
-
-        std::string country() const
-        {
-            if(lcid==0)
-                return "";
-            wchar_t buf[9];
-            if(GetLocaleInfoW(lcid,LOCALE_SISO3166CTRYNAME,buf,9)==0)
-                return "";
-            return std::string(buf,buf+wcslen(buf));
-        }
-
         winlocale(std::string const &name)
         {
             lcid = locale_to_lcid(name);

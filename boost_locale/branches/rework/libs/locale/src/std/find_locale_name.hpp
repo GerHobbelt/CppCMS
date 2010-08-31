@@ -9,7 +9,7 @@
 #define BOOST_LOCALE_IMPL_STD_FIND_LOCALE_NAME_HPP
 
 #include "all_generator.hpp"
-#include "locale_data.hpp"
+#include "../util/locale_data.hpp"
 #include "windows_locale_name.hpp"
 namespace boost {
     namespace locale {
@@ -20,7 +20,7 @@ namespace boost {
 
                 static subst_type find(std::string const &name)
                 {
-                    locale_data d;
+                    util::locale_data d;
                     d.parse(name);
                     substs_list_type list = get_substitutions(name,d);
                     for(unsigned i=0;i<list.size();i++) 
@@ -40,9 +40,9 @@ namespace boost {
                 static const int use_variant = 2;
                 static const int use_encoding = 4;
                 
-                static locale_data to_windows_name(locale_data const &din)
+                static util::locale_data to_windows_name(util::locale_data const &din)
                 {
-                    locale_data d = din;
+                    util::locale_data d = din;
                     d.variant.clear();
                     if(d.encoding.compare(0,2,"cp") == 0)
                         d.encoding=d.encoding.substr(2);
@@ -55,7 +55,7 @@ namespace boost {
                     return d;
                 }
 
-                static std::string create_name(locale_data const &d,int flags)
+                static std::string create_name(util::locale_data const &d,int flags)
                 {
                     std::string res;
                     res+=d.language;
@@ -78,7 +78,7 @@ namespace boost {
                     res.push_back(std::make_pair(name,s));
                 }
 
-                static substs_list_type get_substitutions(std::string const &name,locale_data const &d)
+                static substs_list_type get_substitutions(std::string const &name,util::locale_data const &d)
                 {
                     #ifndef BOOST_NO_STD_WSTRING
                     static const bool has_wide = true;

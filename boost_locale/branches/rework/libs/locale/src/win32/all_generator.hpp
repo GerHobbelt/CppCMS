@@ -37,8 +37,6 @@ namespace boost {
             std::locale create_codecvt( std::locale const &in,
                                         character_facet_type type);
 
-            std::locale create_info(std::locale const &,std::string const &name); // ok
-
         }
     }
 }

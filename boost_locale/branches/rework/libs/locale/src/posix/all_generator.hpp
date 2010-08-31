@@ -33,8 +33,6 @@ namespace boost {
                                         boost::shared_ptr<locale_t> lc,
                                         character_facet_type type);
 
-            std::locale create_info(std::locale const &,std::string const &name); // ok
-
         }
     }
 }
