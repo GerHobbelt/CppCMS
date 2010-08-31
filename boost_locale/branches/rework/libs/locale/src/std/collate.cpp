@@ -9,7 +9,7 @@
 #include <locale>
 #include <string>
 #include <ios>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include "all_generator.hpp"
 
 namespace boost {

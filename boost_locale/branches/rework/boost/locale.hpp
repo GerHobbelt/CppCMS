@@ -10,7 +10,7 @@
 
 #include <boost/locale/collator.hpp>
 #include <boost/locale/boundary.hpp>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/locale/format.hpp>
 #include <boost/locale/formatting.hpp>

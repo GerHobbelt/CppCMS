@@ -9,7 +9,7 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/localization_backend.hpp>
 #include <boost/locale/message.hpp>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include "test_locale.hpp"
 #include "test_locale_tools.hpp"
 
@@ -297,8 +297,8 @@ void test_wide_path(int argc,char **argv)
 int main(int argc,char **argv)
 {
     try {
-        std::string def[3] = { "icu" , "posix", "std" };
-        for(int type = 0 ; type < 3; type ++ ) {
+        std::string def[] = { "icu" , "posix", "winapi", "std" };
+        for(int type = 0 ; type < int(sizeof(def)/sizeof(def[0])) ; type ++ ) {
             boost::locale::localization_backend_manager tmp_backend = boost::locale::localization_backend_manager::global();
             tmp_backend.select(def[type]);
             boost::locale::localization_backend_manager::global(tmp_backend);

@@ -12,7 +12,10 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
-#include <time.h>
+#include <limits>
+#include <ctime>
+
+#include "lcid.hpp"
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -34,7 +37,7 @@ namespace boost {
 namespace locale {
 namespace impl_win {
     
-    class numeric_info {
+    struct numeric_info {
         std::wstring thousands_sep;
         std::wstring decimal_point;
         std::string grouping;
@@ -44,8 +47,109 @@ namespace impl_win {
     
     class winlocale{
     public:
+        winlocale() : 
+            lcid(0) 
+        {
+        }
+
+        std::string language() const
+        {
+            if(lcid==0)
+                return "C";
+            wchar_t buf[9];
+            if(GetLocaleInfoW(lcid,LOCALE_SISO639LANGNAME,buf,9)==0)
+                return "C";
+            return std::string(buf,buf+wcslen(buf));
+        }
+
+        std::string country() const
+        {
+            if(lcid==0)
+                return "";
+            wchar_t buf[9];
+            if(GetLocaleInfoW(lcid,LOCALE_SISO3166CTRYNAME,buf,9)==0)
+                return "";
+            return std::string(buf,buf+wcslen(buf));
+        }
+
+        winlocale(std::string const &name)
+        {
+            lcid = locale_to_lcid(name);
+        }
+        
         unsigned lcid;
+        
+        bool is_c() const
+        {
+            return lcid == 0;
+        }
     };
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ///
+    /// Number Format
+    ///
+    ////////////////////////////////////////////////////////////////////////
+    
+    inline numeric_info wcsnumformat_l(winlocale const &l)
+    {
+        numeric_info res;
+        res.decimal_point = L'.';
+        unsigned lcid = l.lcid;
+
+        if(lcid == 0)
+            return res;
+
+        // limits according to MSDN
+        static const int th_size = 4;
+        static const int de_size = 4;
+        static const int gr_size = 10;
+
+        wchar_t th[th_size]={0}; 
+        wchar_t de[de_size]={0};
+        wchar_t gr[gr_size]={0}; 
+
+        if( GetLocaleInfoW(lcid,LOCALE_STHOUSAND,th,th_size)==0
+            || GetLocaleInfoW(lcid,LOCALE_SDECIMAL ,de,de_size)==0
+            || GetLocaleInfoW(lcid,LOCALE_SGROUPING,gr,gr_size)==0)
+        {
+            return res;
+        }
+        res.decimal_point = de;
+        res.thousands_sep = th;
+        bool inf_group = false;
+        for(unsigned i=0;gr[i];i++) {
+            if(gr[i]==L';')
+                continue;
+            if(L'1'<= gr[i] && gr[i]<=L'9') {
+                res.grouping += char(gr[i]-L'0');
+            }
+            else if(gr[i]==L'0')
+                inf_group = true;
+        }
+        if(!inf_group) {
+            if(std::numeric_limits<char>::is_signed) {
+                res.grouping+=std::numeric_limits<char>::min();
+            }
+            else {
+                res.grouping+=std::numeric_limits<char>::max();
+            }
+        }
+        return res;
+    }
+
+    inline std::wstring win_map_string_l(unsigned flags,wchar_t const *begin,wchar_t const *end,winlocale const &l)
+    {
+        std::wstring res;
+        int len = LCMapStringW(l.lcid,flags,begin,end-begin,0,0);
+        if(len == 0)
+            return res;
+        std::vector<wchar_t> buf(len+1);
+        int l2 = LCMapStringW(l.lcid,flags,begin,end-begin,&buf.front(),buf.size());
+        res.assign(&buf.front(),l2);
+        return res;
+    }
 
     ////////////////////////////////////////////////////////////////////////
     ///
@@ -58,17 +162,6 @@ namespace impl_win {
         return CompareStringW(l.lcid,0,lb,le-lb,rb,re-rb) - 2;
     }
 
-    inline std::wstring wcsxfrm_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)
-    {
-        std::wstring res;
-        int len = LCMapStringW(l.lcid,0,begin,end-begin,0,0);
-        if(len == 0)
-            return res;
-        std::vector<wchar_t> buf(len);
-        LCMapStringW(l.lcid,0,begin,end-begin,&buf.front(),len);
-        res.assign(&buf.front(),len-1);
-        return res;
-    }
 
     ////////////////////////////////////////////////////////////////////////
     ///
@@ -80,6 +173,7 @@ namespace impl_win {
     {
         std::wostringstream ss;
         ss.imbue(std::locale::classic());
+
         ss << std::setprecision(std::numeric_limits<double>::digits10+1) << value;
         std::wstring sval = ss.str();
         int len = GetCurrencyFormatW(l.lcid,0,sval.c_str(),0,0,0);
@@ -111,8 +205,35 @@ namespace impl_win {
         return &buf.front(); 
     }
 
+    inline std::wstring wcsfold(wchar_t const *begin,wchar_t const *end)
+    {
+        return win_map_string_l(LCMAP_LOWERCASE,begin,end,winlocale("en_US.UTF-8"));
+        /*
+        int len = FoldStringW(0,begin,end-begin,0,0);
+        if(len == 0)
+            return std::wstring();
+        std::vector<wchar_t> buf(len+1);
+        FoldStringW(0,begin,end-begin,&buf.front(),len);
+        return std::wstring(&buf.front(),len-1);*/
+    }
+
 
     #endif
+
+    inline std::wstring wcsxfrm_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)
+    {
+        return win_map_string_l(LCMAP_SORTKEY,begin,end,l);
+    }
+
+    inline std::wstring towupper_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)
+    {
+        return win_map_string_l(LCMAP_UPPERCASE | LCMAP_LINGUISTIC_CASING,begin,end,l);
+    }
+
+    inline std::wstring towlower_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)
+    {
+        return win_map_string_l(LCMAP_LOWERCASE | LCMAP_LINGUISTIC_CASING,begin,end,l);
+    }
 
     inline std::wstring wcsftime_l(char c,std::tm const *tm,winlocale const &l)
     {

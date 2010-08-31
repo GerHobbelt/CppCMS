@@ -6,7 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 #define BOOST_LOCALE_SOURCE
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include "all_generator.hpp"
 #include "uconv.hpp"
 #include <unicode/ucnv.h>

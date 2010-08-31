@@ -8,7 +8,7 @@
 #ifndef BOOST_LOCALE_IMPL_ICONV_CODEPAGE_HPP
 #define BOOST_LOCALE_IMPL_ICONV_CODEPAGE_HPP
 
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <iconv.h>
 #include <errno.h>
 #include "conv.hpp"

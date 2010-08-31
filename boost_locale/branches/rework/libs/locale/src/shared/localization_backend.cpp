@@ -16,6 +16,10 @@
 #include "../std/std_backend.hpp"
 #endif
 
+#ifndef BOOST_LOCALE_NO_WINAPI_BACKEND
+#include "../win32/win_backend.hpp"
+#endif
+
 namespace boost {
     namespace locale {
         class localization_backend_manager::impl {
@@ -215,6 +219,11 @@ namespace boost {
                     #ifndef BOOST_LOCALE_NO_POSIX_BACKEND
                     backend.reset(impl_posix::create_localization_backend());
                     mgr.add_backend("posix",backend);
+                    #endif
+
+                    #ifndef BOOST_LOCALE_NO_WINAPI_BACKEND
+                    backend.reset(impl_win::create_localization_backend());
+                    mgr.add_backend("winapi",backend);
                     #endif
                     
                     #ifndef BOOST_LOCALE_NO_STD_BACKEND

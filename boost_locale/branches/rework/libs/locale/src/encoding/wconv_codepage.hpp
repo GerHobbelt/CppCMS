@@ -10,7 +10,7 @@
 #define BOOST_LOCALE_IMPL_WCONV_CODEPAGE_HPP
 
 
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <algorithm>
 #include "conv.hpp"
 

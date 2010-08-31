@@ -1031,6 +1031,106 @@ For example:
 
 Then these locales can be imbued to `iostreams` or used directly as parameters in various functions.
 
+# Using Localization Backends
+
+
+Boost.Locale uses by default ICU for all localization and text manipulation tasks.
+Indeed, this is the most powerful library available, but sometimes we don't need
+the full power of this library or we want to reduce dependencies from 3rd part
+libraries and ICU is by no means small library.
+
+Boost.Locale provides and option to implement or use additional non-ICU based localization
+backends that usually less powerful but in many cases cover most of our needs. 
+
+They provide: message formatting, currency, date, time, number formatting, basic collation and 
+case manipulation. They implemented using standard OS API, C or C++ library. 
+
+Following backends are supported.
+
+- `std` - localization backend based on standard C++ library. It is supported on all
+   platforms, but actually useful mostly on Linux with GCC or Intel compilers and
+   Windows with MSVC compiler.
+
+- `posix` - localization backend based on latest POSIX 2008 standards, and uses POSIX api
+   as `newlocale`, `freelocale`, `strftime_l` etc. It is available under Linux and Mac OS X
+   platforms.
+
+- `winapi` - Win32API based localization, it provide decent UTF-8/UTF-16 locale support,
+   based on Windows API like `GetLocaleInfoW`, `LCMapStringW`, `GetDateFormatW` etc.
+
+   It provides decent localization support even for MinGW and Cygwin platforms.
+
+
+## Supported Features
+
+<table border="1" sellpadding="5" >
+<tr>
+  <th>Backend</th>
+  <th>icu</th><th>posix</th><th>winapi</th><th>std</th>
+</tr>
+  <th>Message Formatting</th>
+  <td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Non UTF-8 encodings</th>
+  <td>Yes</td><td>Yes</td><td>No</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Date/Time Formatting/Parsing</th>
+  <td>Yes</td><td>Formatting Only</td><td>Formatting Only</td><td>Formatting Only</td>
+</tr>
+<tr>
+  <th>Monetary Formatting/Parsing</th>
+  <td>Yes</td><td>Formatting Only</td><td>Formatting Only</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Number Formatting/Parsing</th>
+  <td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Numbers as Percent, Spelling</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Case Manipulation</th>
+  <td>Yes</td><td>Basic</td><td>Basic</td><td>Basic</td>
+</tr>
+<tr>
+  <th>Collation</th>
+  <td>Yes</td><td>Basic</td><td>Basic</td><td>Basic</td>
+</tr>
+<tr>
+  <th>Calendar</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Boundary Analysis</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Unicode Normalization</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>C++0x characters</th>
+  <td>Yes</td><td>No</td><td>No</td><td>Yes</td>
+</tr>
+<tr>
+  <th>OS Support</th>
+  <td>Any</td><td>Linux, Mac OS X</td><td>Windows, Cygwin</td><td>Any</td>
+</tr>
+<tr>
+  <th>Compiler Support</th>
+  <td>Any</td><td>Any</td><td>Any</td><td>Any</td>
+</tr>
+<tr>
+  <th>Useful on</th>
+  <td>Any Platform</td><td>Linux and Mac OS X</td><td>Windows/MinGW/Cygwin</td><td>Linux with GCC or Intel;<br/> Windows with MSVC</td>
+</tr>
+</table>
+
+
+
 # Recommendations and Myths
 
 ## Recommendations

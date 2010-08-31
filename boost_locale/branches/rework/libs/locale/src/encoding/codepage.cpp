@@ -27,7 +27,7 @@
 #include "wconv_codepage.hpp"
 #endif
 
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 
 #include <string>
 #include <memory>

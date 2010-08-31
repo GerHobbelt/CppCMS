@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/conversion.hpp>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <vector>
 
 #include "all_generator.hpp"

@@ -15,6 +15,12 @@ else()
 	option(DISABLE_POSIX_BACKEND	"Disable POSIX backend" ON)
 endif()
 
+if(WIN32) 
+	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" OFF)
+else()
+	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" ON)
+endif()
+
 if(DISABLE_STD_BACKEND) 
 	add_definitions(-DBOOST_LOCALE_NO_STD_BACKEND)
 endif()
@@ -22,6 +28,11 @@ endif()
 if(DISABLE_POSIX_BACKEND) 
 	add_definitions(-DBOOST_LOCALE_NO_POSIX_BACKEND)
 endif()
+
+if(DISABLE_WINAPI_BACKEND) 
+	add_definitions(-DBOOST_LOCALE_NO_WINAPI_BACKEND)
+endif()
+
 
 
 if(WIN32 AND NOT CYGWIN)
@@ -62,7 +73,7 @@ if(ICU_UC AND ICU_DATA AND ICU_I18N AND ICU_INCLUDE_DIR)
 	set(BOOST_LOCALE_HAVE_ICU ON)
 	add_definitions(-DBOOST_LOCALE_WITH_ICU)
 else()
-	set(BOOST_LOCALE_HAVE_ICU OFF)
+	set(BOOST_LOCALE_HAVE_ICU ON)
 endif()
 
 message("-- Looking for iconv")
@@ -186,6 +197,17 @@ if(NOT DISABLE_POSIX_BACKEND)
 	)
 endif()
 
+if(NOT DISABLE_WINAPI_BACKEND)
+	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
+		libs/locale/src/win32/collate.cpp
+		libs/locale/src/win32/converter.cpp
+		libs/locale/src/win32/info.cpp
+		libs/locale/src/win32/lcid.cpp
+		libs/locale/src/win32/numeric.cpp
+		libs/locale/src/win32/win_backend.cpp
+	)
+endif()
+
 if(BOOST_LOCALE_HAVE_ICU)
 	set(BOOST_LOCALE_SRC 
 		${BOOST_LOCALE_SRC}
@@ -261,6 +283,14 @@ if(NOT DISABLE_POSIX_BACKEND)
 		test_posix_collate
 		test_posix_convert
 		test_posix_formatting
+		)
+endif()
+
+if(NOT DISABLE_WINAPI_BACKEND) 
+	set(LOCALE_TESTS ${LOCALE_TESTS}
+		test_winapi_formatting
+		test_winapi_collate
+		test_winapi_convert
 		)
 endif()
 

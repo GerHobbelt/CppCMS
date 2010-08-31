@@ -5,8 +5,8 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_LOCALE_CODEPAGE_HPP_INCLUDED
-#define BOOST_LOCALE_CODEPAGE_HPP_INCLUDED
+#ifndef BOOST_LOCALE_ENCODING_HPP_INCLUDED
+#define BOOST_LOCALE_ENCODING_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
 #ifdef BOOST_MSVC

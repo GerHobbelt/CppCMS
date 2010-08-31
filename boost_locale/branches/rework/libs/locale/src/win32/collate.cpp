@@ -9,61 +9,37 @@
 #include <locale>
 #include <string>
 #include <ios>
-#include <boost/locale/codepage.hpp>
-#include "all_generator.hpp"
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+#include <boost/locale/encoding.hpp>
+#include <boost/locale/generator.hpp>
+#include "api.hpp"
+#include "../shared/mo_hash.hpp"
 
 namespace boost {
 namespace locale {
 namespace impl_win {
 
-namespace {
-
-    int wcscoll_lcid(int lcid,wchar_t const *lb,wchar_t const *le,wchar_t const *rb,wchar_t const *re)
-    {
-        return CompareStringW(lcid,0,lb,le-lb,rb,re-rb) - 2;
-    }
-
-    std::wstring wcsxfrm_lcid(int lcid,wchar_t const *begin,wchar_t const *end)
-    {
-        std::wstring res;
-        int len = LCMapStringW(lcid,0,begin,end-begin,0,0);
-        if(len == 0)
-            return res;
-        std::vector<wchar_t> buf(len);
-        LCMapStringW(lcid,0,begin,end-begin,&buf.front(),len);
-        res.assign(&buf.front(),len-1);
-        return res;
-    }
-
-}
-
-class utf8_collator_from_wide : public std::collate<char> {
+class utf8_collator : public std::collate<char> {
 public:
-    typedef std::collate<wchar_t> wfacet;
-    utf8_collator_from_wide(int lcid,size_t refs = 0) : 
+    utf8_collator(winlocale lc,size_t refs = 0) : 
         std::collate<char>(refs),
-        lcid_(lcid)
+        lc_(lc)
     {
     }
     virtual int do_compare(char const *lb,char const *le,char const *rb,char const *re) const
     {
         std::wstring l=conv::to_utf<wchar_t>(lb,le,"UTF-8");
         std::wstring r=conv::to_utf<wchar_t>(rb,re,"UTF-8");
-        return wcscoll_lcid(lcid_,l.c_str(),l.c_str()+l.size(),r.c_str(),r.c_str()+r.size());
+        return wcscoll_l(l.c_str(),l.c_str()+l.size(),r.c_str(),r.c_str()+r.size(),lc_);
     }
     virtual long do_hash(char const *b,char const *e) const
     {
-        return gnu_gettext::pj_winberger_hash_function(do_transform(b,e));
+        std::string key = do_transform(b,e);
+        return gnu_gettext::pj_winberger_hash_function(key.c_str(),key.c_str() + key.size());
     }
     virtual std::string do_transform(char const *b,char const *e) const
     {
         std::wstring tmp=conv::to_utf<wchar_t>(b,e,"UTF-8");
-        std::wstring wkey = wcsxfrm_lcid(lcid_,tmp.c_str(),tmp.c_str()+tmp.size());
+        std::wstring wkey = wcsxfrm_l(tmp.c_str(),tmp.c_str()+tmp.size(),lc_);
         std::string key;
         if(sizeof(wchar_t)==2)
             key.reserve(wkey.size()*2);
@@ -86,47 +62,59 @@ public:
         return key;
     }
 private:
-    std::locale base_;
+    winlocale lc_;
 };
 
 
 class utf16_collator : public std::collate<wchar_t> {
 public:
     typedef std::collate<wchar_t> wfacet;
-    utf16_collator(int lcid,size_t refs = 0) : 
-        std::collate<char>(refs),
-        lcid_(lcid)
+    utf16_collator(winlocale lc,size_t refs = 0) : 
+        std::collate<wchar_t>(refs),
+        lc_(lc)
     {
     }
     virtual int do_compare(wchar_t const *lb,wchar_t const *le,wchar_t const *rb,wchar_t const *re) const
     {
-        return wcscoll_lcid(lcid_,lb,le,rb,re);
+        return wcscoll_l(lb,le,rb,re,lc_);
     }
     virtual long do_hash(wchar_t const *b,wchar_t const *e) const
     {
-        return gnu_gettext::pj_winberger_hash_function(reinterpret_cast<char const *>(do_transform(b,e).c_str()));
+        std::wstring key = do_transform(b,e);
+        char const *begin = reinterpret_cast<char const *>(do_transform(b,e).c_str());
+        char const *end = begin + key.size()*sizeof(wchar_t);
+        return gnu_gettext::pj_winberger_hash_function(begin,end);
     }
-    virtual std::wstring do_transform(char const *b,char const *e) const
+    virtual std::wstring do_transform(wchar_t const *b,wchar_t const *e) const
     {
-        return wcsxfrm_lcid(lcid_,b,e);
+        return wcsxfrm_l(b,e,lc_);
     }
 private:
-    int lcid_;
+    winlocale lc_;
 };
 
 
 std::locale create_collate( std::locale const &in,
-                            int lcid,
+                            winlocale const &lc,
                             character_facet_type type)
 {
-    switch(type) {
-    case char_facet:
-        return std::locale(in,new utf8_collator_from_wide(lcid));
-    case wchar_t_facet:
-        return std::locale(in,new utf16_collator(lcid));
-    default:
-        return in;
+    if(lc.is_c()) {
+        switch(type) {
+        case char_facet:
+            return std::locale(in,new std::collate_byname<char>("C"));
+        case wchar_t_facet:
+            return std::locale(in,new std::collate_byname<wchar_t>("C"));
+        }
     }
+    else {
+        switch(type) {
+        case char_facet:
+            return std::locale(in,new utf8_collator(lc));
+        case wchar_t_facet:
+            return std::locale(in,new utf16_collator(lc));
+        }
+    }
+    return in;
 }
 
 

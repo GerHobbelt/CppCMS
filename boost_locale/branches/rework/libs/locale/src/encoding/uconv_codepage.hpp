@@ -7,7 +7,7 @@
 //
 #ifndef BOOST_LOCALE_IMPL_UCONV_CODEPAGE_HPP
 #define BOOST_LOCALE_IMPL_UCONV_CODEPAGE_HPP
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include "conv.hpp"
 #include "../icu/icu_util.hpp"
 #include "../icu/uconv.hpp"

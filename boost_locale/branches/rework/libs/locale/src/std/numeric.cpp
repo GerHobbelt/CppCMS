@@ -11,7 +11,7 @@
 #include <ios>
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/generator.hpp>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <sstream>
 #include <stdlib.h>
 

@@ -10,7 +10,7 @@
 #include <boost/locale/message.hpp>
 #include <boost/locale/gnu_gettext.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
 #else

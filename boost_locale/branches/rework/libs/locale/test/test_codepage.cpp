@@ -6,7 +6,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/locale/codepage.hpp>
+#include <boost/locale/encoding.hpp>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/localization_backend.hpp>
 #include <boost/locale/info.hpp>
