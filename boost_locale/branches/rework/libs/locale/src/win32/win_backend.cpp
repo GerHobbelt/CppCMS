@@ -11,6 +11,8 @@
 #include <boost/locale/info.hpp>
 #include "all_generator.hpp"
 #include "win_backend.hpp"
+#include "../util/default_locale.hpp"
+#include "../util/info.hpp"
 #include "api.hpp"
 
 namespace boost {
@@ -60,7 +62,7 @@ namespace impl_win {
                 return;
             invalid_ = false;
             if(locale_id_.empty()) {
-                real_id_ = util::get_system_locale();
+                real_id_ = util::get_system_locale(true);
                 lc_ = winlocale(real_id_);
             }
             else {
@@ -87,7 +89,7 @@ namespace impl_win {
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;
-                    std::locale tmp=create_info(std::locale::classic(),real_id_);
+                    std::locale tmp=util::create_info(std::locale::classic(),real_id_);
                     boost::locale::info const &inf=std::use_facet<boost::locale::info>(tmp);
                     minf.language = inf.language();
                     minf.country = inf.country();

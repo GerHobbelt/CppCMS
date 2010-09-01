@@ -12,7 +12,7 @@
 namespace boost {
     namespace locale {
         namespace util {
-            std::string get_system_locale();
+            std::string get_system_locale(bool use_utf8_on_windows = false);
         }
     }
 }

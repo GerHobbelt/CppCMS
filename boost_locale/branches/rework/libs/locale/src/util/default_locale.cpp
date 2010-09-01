@@ -22,7 +22,7 @@
 namespace boost {
     namespace locale {
         namespace util {
-            std::string get_system_locale()
+            std::string get_system_locale(bool use_utf8)
             {
                 char const *lang = 0;
                 if(!lang || !*lang)
@@ -46,9 +46,14 @@ namespace boost {
                     lc_name += "_";
                     lc_name += buf;
                 }
-                if(GetLocaleInfoA(LOCALE_USER_DEFAULT,LOCALE_IDEFAULTANSICODEPAGE,buf,sizeof(buf))!=0) {
-                    lc_name +=".windows-";
-                    lc_name +=buf;
+                if(!use_utf8) {
+                    if(GetLocaleInfoA(LOCALE_USER_DEFAULT,LOCALE_IDEFAULTANSICODEPAGE,buf,sizeof(buf))!=0) {
+                        lc_name +=".windows-";
+                        lc_name +=buf;
+                    }
+                }
+                else {
+                    lc_name += "UTF-8";
                 }
                 return lc_name;
                 #endif
