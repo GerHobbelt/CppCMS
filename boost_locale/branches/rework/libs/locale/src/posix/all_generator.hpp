@@ -13,6 +13,10 @@
 #include <vector>
 #include <locale.h>
 
+#ifdef __APPLE__
+#include <xlocale.h>
+#endif
+
 namespace boost {
     namespace locale {
         namespace impl_posix {
