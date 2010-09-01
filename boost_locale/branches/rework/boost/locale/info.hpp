@@ -35,20 +35,23 @@ namespace boost {
             /// String information about the locale
             ///
             typedef enum {
-                language_property,
-                country_property,
-                variant_property,
-                encoding_property
+                language_property,  ///< ISO 639 language id
+                country_property,   ///< ISO 3166 country id
+                variant_property,   ///< Variant for locale
+                encoding_property   ///< encoding name
             } string_propery;
 
             ///
             /// Integer information about locale
             ///
             typedef enum {
-                utf8_property
+                utf8_property       ///< Non zero value if uses UTF-8 encoding
             } integer_property;
 
-           
+          
+            ///
+            /// Standard facet's constructor
+            /// 
             info(size_t refs = 0) : std::locale::facet(refs)
             {
             }
@@ -93,7 +96,13 @@ namespace boost {
             std::locale::id& __get_id (void) const { return id; }
 #endif
         protected:
+            ///
+            /// Get string property by its id \a v
+            ///
             virtual std::string get_string_property(string_propery v) const = 0;
+            ///
+            /// Get integer property by its id \a v
+            ///
             virtual int get_ineger_property(integer_property v) const = 0;
         };
 

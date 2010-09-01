@@ -35,8 +35,8 @@ namespace boost {
         static const unsigned char16_t_facet  = 1 << 2;   ///< C++0x char16_t facets
         static const unsigned char32_t_facet  = 1 << 3;   ///< C++0x char32_t facets
 
-        static const unsigned character_first_facet = char_facet;
-        static const unsigned character_last_facet = char32_t_facet;
+        static const unsigned character_first_facet = char_facet;  ///< First facet specific for character type
+        static const unsigned character_last_facet = char32_t_facet; ///< Last facet specific for character typr
         static const unsigned all_characters = 0xFFFF;     ///< Special mask -- generate all
         
         typedef unsigned character_facet_type; ///<type that specifies the character type that locales can be generated for
@@ -49,14 +49,15 @@ namespace boost {
         static const unsigned     codepage_facet  = 1 << 5;   ///< Generate codepage conversion facets (derived from std::codecvt)
         static const unsigned     boundary_facet  = 1 << 6;   ///< Generate boundary analysis facet
             
-        static const unsigned     per_character_facet_first = convert_facet;
-        static const unsigned     per_character_facet_last = boundary_facet;
+        static const unsigned     per_character_facet_first = convert_facet; ///< First facet specific for character
+        static const unsigned     per_character_facet_last = boundary_facet; ///< Last facet specific for character
 
         static const unsigned     calendar_facet  = 1 << 16;   ///< Generate boundary analysis facet
         static const unsigned     information_facet = 1 << 17;   ///< Generate general locale information facet
 
-        static const unsigned    non_character_facet_first = calendar_facet;
-        static const unsigned    non_character_facet_last = information_facet;
+        static const unsigned    non_character_facet_first = calendar_facet; ///< First character independed facet 
+        static const unsigned    non_character_facet_last = information_facet;///< Last character independed facet 
+
             
         static const unsigned    all_categories  = 0xFFFFFFFFu;   ///< Generate all of them
         
@@ -72,8 +73,15 @@ namespace boost {
         class BOOST_LOCALE_DECL generator {
         public:
 
+            ///
+            /// Create new generator using global localization_backend_manager 
+            ///
             generator();
+            ///
+            /// Create new generator using specific localization_backend_manager 
+            ///
             generator(localization_backend_manager const &);
+
             ~generator();
 
             ///

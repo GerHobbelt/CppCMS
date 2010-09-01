@@ -39,8 +39,14 @@ namespace boost {
                 conversion_error() : std::runtime_error("Conversion failed") {}
             };
             
+            ///
+            /// \brief This exception is thrown in case of use of unsupported
+            /// or invalid character set
+            ///
             class invalid_charset_error : public std::runtime_error {
             public:
+
+                /// Create an error for charset \a charset
                 invalid_charset_error(std::string charset) : 
                     std::runtime_error("Invalid or unsupported charset:" + charset)
                 {

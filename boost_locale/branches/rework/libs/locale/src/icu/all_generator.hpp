@@ -22,7 +22,6 @@ namespace boost {
             std::locale create_codecvt(std::locale const &,std::string const &encoding,character_facet_type); // ok
             std::locale create_boundary(std::locale const &,cdata const &,character_facet_type); // ok
             std::locale create_calendar(std::locale const &,cdata const &); // ok
-            std::locale create_info(std::locale const &,cdata const &); // ok
 
         }
     }

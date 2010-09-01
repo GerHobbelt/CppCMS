@@ -19,26 +19,63 @@ namespace locale {
         hold_ptr(hold_ptr const &other); // non copyable 
         hold_ptr const &operator=(hold_ptr const &other); // non assignable
     public:
+        ///
+        /// Create new empty pointer
+        ///
         hold_ptr() : ptr_(0) {}
+        ///
+        /// Create a pointer that holds \a v, ownership is transfered to smart pointer
+        ///
         hold_ptr(T *v) : ptr_(v) {}
+
+        ///
+        /// Destroy smart pointer and the object it owns.
+        ///
         ~hold_ptr() 
         {
             if(ptr_) delete ptr_;
         }
 
+        ///
+        /// Get a const pointer to the object
+        ///
         T const *get() const { return ptr_; }
+        ///
+        /// Get a mutable pointer to the object 
+        ///
         T *get() { return ptr_; }
 
+        /// 
+        /// Get a const reference to the object
+        ///
         T const &operator *() const { return *ptr_; }
+        /// 
+        /// Get a mutable reference to the object
+        ///
         T &operator *() { return *ptr_; }
+        ///
+        /// Get a const pointer to the object
+        ///
         T const *operator->() const { return ptr_; }
+        ///
+        /// Get a mutable pointer to the object 
+        ///
         T *operator->() { return ptr_; }
+
+        ///
+        /// Transfer an ownership on the pointer to user
+        ///
         T *release() { T *tmp=ptr_; ptr_=0; return tmp; }
+
+        ///
+        /// Set new value to pointer, previous object is destroyed, ownership on new object is transfered
+        ///
         void reset(T *p=0)
         {
             if(ptr_) delete ptr_;
             ptr_=p;
         }
+        /// Swap two pointers
         void swap(hold_ptr &other)
         {
             T *tmp=other.ptr_;

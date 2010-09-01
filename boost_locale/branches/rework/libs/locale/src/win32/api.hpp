@@ -25,6 +25,9 @@
 #endif
 #include <windows.h>
 
+#include <boost/locale/conversion.hpp>
+#include <boost/locale/collator.hpp>
+
 #define BOOST_LOCALE_WINDOWS_2000_API
 
 #if defined(_WIN32_NT) && _WIN32_NT >= 0x600 && !defined(BOOST_LOCALE_WINDOWS_2000_API)
@@ -42,6 +45,27 @@ namespace impl_win {
         std::wstring decimal_point;
         std::string grouping;
     };
+
+    inline int collation_level_to_flag(collator_base::level_type level)
+    {
+        int flags;
+        switch(level) {
+        case collator_base::primary:
+            flags = NORM_IGNORESYMBOLS | NORM_IGNORECASE | NORM_IGNORENONSPACE;
+            break;
+        case collator_base::secondary:
+            flags = NORM_IGNORESYMBOLS | NORM_IGNORECASE;
+            break;
+        case collator_base::tertiary:
+            flags = NORM_IGNORESYMBOLS;
+            break;
+        default:
+            flags = 0;
+        }
+        return flags;
+    }
+
+    
   
     #ifdef BOOST_LOCALE_WINDOWS_2000_API 
     
@@ -137,9 +161,13 @@ namespace impl_win {
     ///
     ////////////////////////////////////////////////////////////////////////
 
-    inline int wcscoll_l(wchar_t const *lb,wchar_t const *le,wchar_t const *rb,wchar_t const *re,winlocale const &l)
+
+    inline int wcscoll_l(   collator_base::level_type level,
+                            wchar_t const *lb,wchar_t const *le,
+                            wchar_t const *rb,wchar_t const *re,
+                            winlocale const &l)
     {
-        return CompareStringW(l.lcid,0,lb,le-lb,rb,re-rb) - 2;
+        return CompareStringW(l.lcid,collation_level_to_flag(level),lb,le-lb,rb,re-rb) - 2;
     }
 
 
@@ -187,22 +215,49 @@ namespace impl_win {
 
     inline std::wstring wcsfold(wchar_t const *begin,wchar_t const *end)
     {
-        return win_map_string_l(LCMAP_LOWERCASE,begin,end,winlocale("en_US.UTF-8"));
-        /*
-        int len = FoldStringW(0,begin,end-begin,0,0);
+        winlocale l;
+        l.lcid = 0x0409; // en-US
+        return win_map_string_l(LCMAP_LOWERCASE,begin,end,l);
+    }
+
+    inline std::wstring wcsnormalize(norm_type norm,wchar_t const *begin,wchar_t const *end)
+    {
+        // We use FoldString, under Vista it actually does noramlization;
+        // under XP and below it does something similar, half job, better then nothing
+        unsigned flags = 0;
+        switch(norm) {
+        case norm_nfd:
+            flags = MAP_COMPOSITE;
+            break;
+        case norm_nfc:
+            flags = MAP_PRECOMPOSED;
+            break;
+        case norm_nfkd:
+            flags = MAP_FOLDCZONE;
+            break;
+        case norm_nfkc:
+            flags = MAP_FOLDCZONE | MAP_COMPOSITE;
+            break;
+        default:
+            flags = MAP_PRECOMPOSED;
+        }
+
+        int len = FoldStringW(flags,begin,end-begin,0,0);
         if(len == 0)
             return std::wstring();
-        std::vector<wchar_t> buf(len+1);
-        FoldStringW(0,begin,end-begin,&buf.front(),len);
-        return std::wstring(&buf.front(),len-1);*/
+        std::vector<wchar_t> v(len+1);
+        len = FoldStringW(flags,begin,end-begin,&v.front(),len+1);
+        return std::wstring(&v.front(),len);
     }
 
 
     #endif
 
-    inline std::wstring wcsxfrm_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)
+    inline std::wstring wcsxfrm_l(collator_base::level_type level,wchar_t const *begin,wchar_t const *end,winlocale const &l)
     {
-        return win_map_string_l(LCMAP_SORTKEY,begin,end,l);
+        int flag = LCMAP_SORTKEY | collation_level_to_flag(level);
+
+        return win_map_string_l(flag,begin,end,l);
     }
 
     inline std::wstring towupper_l(wchar_t const *begin,wchar_t const *end,winlocale const &l)

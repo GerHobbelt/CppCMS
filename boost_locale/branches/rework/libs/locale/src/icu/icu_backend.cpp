@@ -11,6 +11,9 @@
 #include "all_generator.hpp"
 #include "cdata.hpp"
 #include "icu_backend.hpp"
+#include "../util/locale_data.hpp"
+#include "../util/default_locale.hpp"
+#include "../util/info.hpp"
 
 #include <unicode/ucnv.h>
 
@@ -54,35 +57,24 @@ namespace impl_icu {
             domains_.clear();
         }
 
-        std::string encoding_from_locale(std::string const &str)
-        {
-            std::string lenc;
-            size_t start = str.find('.');
-            if(start!=std::string::npos) {
-                start++;
-                size_t end = str.find('@',start);
-                lenc=str.substr(start,end-start);
-            }
-            if(lenc.empty()) {
-                lenc=ucnv_getDefaultName();
-            }
-            if(ucnv_compareNames(lenc.c_str(),"UTF8")==0) {
-                lenc="UTF-8";
-            }
-            return lenc;
-        }
-
         void prepare_data()
         {
             if(!invalid_)
                 return;
             invalid_ = false;
-            data_.locale = icu::Locale::createCanonical(locale_id_.c_str());
-            data_.encoding = encoding_from_locale(locale_id_);
-            data_.utf8 = data_.encoding == "UTF-8";
-            language_ = data_.locale.getLanguage();
-            country_ = data_.locale.getCountry();
-            variant_ = data_.locale.getVariant();
+            real_id_ = locale_id_;
+            if(real_id_.empty())
+                real_id_ = util::get_system_locale();
+            
+            util::locale_data d;
+            d.parse(real_id_);
+
+            data_.locale = icu::Locale::createCanonical(real_id_.c_str());
+            data_.encoding = d.encoding;
+            data_.utf8 = d.utf8;
+            language_ = d.language;
+            country_ = d.country;
+            variant_ = d.variant;
         }
         
         virtual std::locale install(std::locale const &base,
@@ -135,7 +127,7 @@ namespace impl_icu {
             case calendar_facet:
                 return create_calendar(base,data_);
             case information_facet:
-                return create_info(base,data_);
+                return util::create_info(base,real_id_);
             default:
                 return base;
             }
@@ -151,6 +143,7 @@ namespace impl_icu {
         std::string language_;
         std::string country_;
         std::string variant_;
+        std::string real_id_;
         bool invalid_;
     };
     

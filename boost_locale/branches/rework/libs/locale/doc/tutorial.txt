@@ -30,10 +30,13 @@ Boost.Locale provides the natural glue between C++ locales framework, iostreams 
 - Transparent support of 8-bit character sets like Latin1.
 - Support of `char`, `wchar_t` and C++0x `char16_t`, `char32_t` strings and streams.
 
+In addition in allows you to use non-ICU based localization tools in order to make most 
+frequent tasks useful without ICU as well.
 
-# Tutorial
 
-## Introduction to C++ Standard Library localization support
+# Introduction to C++ Standard Library localization support
+
+## Basics
 
 C++ standard library provides a simple and powerful way to provide locale specific information. It is done
 via `std::locale` class that is the container that holds all required information about specific culture like: number formatting
@@ -89,10 +92,70 @@ Now you can print distance according to correct locale:
 This technique was adopted by Boost.Locale library in order to provide powerful and correct localization. However instead of using
 standard and very limited standard library C++ facets it created its own facets that use ICU under the hood in order to make much powerful.
 
+## Common Critical Problems with Standard Library
+
+Regardless of numerous issues present in standard library that do not allow to use its full power, there are several
+additional issues:
+
+-   Setting global locale has bad side effects.
+
+
+    Consider following code:
+
+
+        int main()
+        {
+            std::locale::global(std::locale("")); 
+            // Set default locale as global
+            std::ofstream csv("test.csv");
+            csv << 1.1 << ","  << 1.3 << std::endl;
+        }
+
+    What would be the content of `test.csv`? It may be "1.1,1.3" or it may be "1,1,1,3" 
+    not what you had expected.
+
+    More then that it effects even `printf` and libraries like `boost::lexical_cast` giving
+    incorrect or unexpected formatting. In fact many 3rd part library become broken in such 
+    situation.
+
+    Unlike standard localization library, Boost.Locale, even when it uses `std` based localization
+    backend it never changes the basic number formatting, so by default, numbers are always
+    formatted using C style locale and localized number formatting requires specific flags.
+
+-   Number formatting is broken on some locales.
+
+    Some locales use non-breakable space u00A0 character for thousands separator, thus
+    in ru_RU.UTF-8 locale number 1024 should be displayed as "1 024" where the space
+    is Unicode character with codepoint u00A0. Unfortunately many libraries don't handle
+    this correctly, for example GCC and SunStudio display "\xC2" character instead
+    the first character in UTF-8 sequence "\xC2\xA0" that represents this code point, and 
+    actually generate invalid UTF-8.
+
+-   Locale names are not standardized, for example, under MSVC you need to provide name
+    `en-US` or `English_USA.1252`, when on POSIX platforms it would be `en_US.UTF-8`
+    or `en_US.ISO-8859-1`
+
+    More then that, MSVC does not support UTF-8 locales at all.
+
+-   Many standard libraries provide only C and POSIX locale, thus GCC supports localization
+    only under Linux, on all other platforms create locales besides "C" or "POSIX" would fail.
+
+
+# Using Boost.Locale
+
+In this section we would talk mostly about ICU backend as the default and most powerful localization
+backend provided by this library. In further section we would admit a feature that are supported
+or unsupported by other localization backends.
+
 ## Locale Generation
 
 Each locale is defined by specific locale identifier that contains a mandatory part---Language and optional pars Country, Variant, keywords
-and character encoding of `std::string`.
+and character encoding of `std::string`. Boost.Locale uses POSIX naming convention of locales, i.e. locale
+is defined as `language[_COUNTRY][.encoding][@variant]` where lang is ISO-639 language name like "en" or "ru", COUNTRY
+is ISO-3166 country id like "US" or "DE", encoding is octets character encoding like UTF-8 or ISO-8859-1
+and variant is additional option for specializing the locale, like `euro` or `calendar=hebrew`.
+
+Note each locale should include encoding in order to handle `char` based strings correctly.
 
 Class `boost::locale::generator` provides us tool to generate locales we need. The simplest way to use generator is to create a locale
 and set it as global one:
@@ -108,27 +171,11 @@ and set it as global one:
         // Set system default global locale
     }
 
-Of course we can specify locale manually, using default system encoding:
+Of course we can specify locale manually
 
-    std::locale loc = gen("en_US"); 
+    std::locale loc = gen("en_US.UTF-8"); 
     // Use English, United States locale
 
-Or specify both locale and encoding independently or using POSIX locale specifier that includes both locale 
-information and encoding:
-
-    std::locale loc = gen("ja_JP","UTF-8"); 
-    // Separation of locale and encoding
-    std::locale loc = gen("ja_JP.UTF-8");
-    // POSIX locale name with encoding
-
-When you generate more then one locale, you may specify the default encoding used
-for `std::string` by calling `octet_encoding` member function of `generator`. For example:
-
-    generator gen;
-    gen.octet_encoding("UTF-8");
-
-    std::locale en=gen("en_US");
-    std::locale ja=gen("ja_JP");
 
 **Note:** Even if your application uses wide strings anywhere it is recommended to specify
 8-bit encoding that would be used for all wide stream IO operations like `wcout` or `wfstream`.
@@ -151,7 +198,7 @@ For example:
 ## Collation 
 
 Boost.Locale provides `collator` class derived from `std::collate` that extends it with support of comparison levels:
-primary -- the default one, secondary, tertiary, quaternary and identical levels. They can be approximately defined as:
+primary, secondary, tertiary, quaternary and identical - the default one levels. They can be approximately defined as:
 
 1. Primary -- ignore accents and characters' case compare base letters only. For example "facade" and "Façade" are same.
 2. Secondary -- ignore characters case but consider accents "facade" and "façade" are different but "Façade" and "façade" are same.
@@ -290,7 +337,7 @@ By default, the date and time is shown in local time zone, this behavior may be 
 -   `as::gmt` -- display date and time in GMT.
 -   `as::local_time` -- display in local time format (default).
 -   `as::time_zone` -- parametrized manipulator that sets time-zone ID for date-time formatting and parsing. It receives as parameter a string
-    that represents time zone id or `boost::locale::time_zone` class.
+    that represents time zone id.
 
 For example:
 
@@ -300,9 +347,7 @@ For example:
     cout << as::time_zone("EST") << "Eastern Standard Time is: "<< now <<endl;
 
 
-The list of all available time zone IDs can be received as `set<string>` using `all_zones` static member function of `boost::locale::time_zone` class.
-
-There is a list of supported `strftime` flags:
+There is a list of supported `strftime` flags by ICU backend:
 
 -   `%a` -- Abbreviated  weekday (Sun.)
 -   `%A` -- Full weekday (Sunday)
@@ -700,7 +745,7 @@ may reduce all unused parameters.
     2.  GNU Gettext API supports only 8-bits encoding making it irrelevant in environments that use
         natively wide strings.
 
-## Code-page conversions
+## Character Set Conversions
 
 Boost.Locale provides `to_utf` and `from_utf` functions placed in `boost::locale::conv` namespace. They are simple functions
 to convert string to and from UTF-8/16/32 strings and strings using other encodings.
@@ -997,10 +1042,10 @@ For example:
 `std::locale::name` function provides quite limited information about locale. Thus additional facet was created for giving
 more precise information: `boost::locale::info`. It has following member functions:
 
--   `std::string language()` -- get the language code of current locale, for example "en".
--   `std::string country()` -- get country code of currect locale, for example "US".
--   `std::string variant()` -- get variant of currecnt locale, for example "euro".
--   `std::string encoding()` -- get charset used for `char` based strings, for exaple "UTF-8"
+-   `std::string language()` -- get ISO-639 language code of current locale, for example "en".
+-   `std::string country()` -- get ISO-3199 country code of current locale, for example "US".
+-   `std::string variant()` -- get the variant of current locale, for example "euro".
+-   `std::string encoding()` -- get the encoding used for `char` based strings, for example "UTF-8"
 -   `bool utf8()` -- fast way to check if the encoding is UTF-8 encoding.
 
 ## Working with multiple locales
@@ -1009,30 +1054,30 @@ Boost.Locale allows you to work safely with multiple locales in the same process
 generation process is not a cheap one. Thus, when we work with multiple locales it is recommended to create all used
 locales at the beginning and then use them.
 
-`generator` class has member function `preload` that allows you create locale and put it into cache. Then, next time
+`generator` class has an option to cache all generated locales. Then, next time
 you create locale, if it is exists it would be fetched from the existing preloaded locale set.
+
+This option should be explicitly enabled by calling `locale_cache_enabled` member function of `boost::locale::generator` 
+with `true` as parameter.
 
 
 For example:
 
     generator gen;
-    gen.octet_encoding("UTF-8");
-    gen.preload("en_US");
-    gen.preload("de_DE");
-    gen.preload("ja_JP");
+    get.locale_cache_enabled(true);
+    gen("en_US.UTF-8");
+    gen("de_DE.UTF-8");
+    gen("ja_JP.UTF-8");
     // Create all locales
 
-    std::locale en=gen("en_US"); 
+    std::locale en=gen("en_US.UTF-8"); 
     // Fetch existing locale from cache
-    std::locale ar=get("ar_EG");
-    // Because ar_EG not in cache, new locale is generated (but not cached)
-
-**Note:** generation of locale does not put it in cache only `generator::preload` does this.
+    std::locale ar=get("ar_EG.UTF-8");
+    // Because ar_EG not in cache, new locale is generated (and put in cache)
 
 Then these locales can be imbued to `iostreams` or used directly as parameters in various functions.
 
 # Using Localization Backends
-
 
 Boost.Locale uses by default ICU for all localization and text manipulation tasks.
 Indeed, this is the most powerful library available, but sometimes we don't need
@@ -1045,25 +1090,76 @@ backends that usually less powerful but in many cases cover most of our needs.
 They provide: message formatting, currency, date, time, number formatting, basic collation and 
 case manipulation. They implemented using standard OS API, C or C++ library. 
 
-Following backends are supported.
+## When to use non-ICU backends
 
-- `std` - localization backend based on standard C++ library. It is supported on all
-   platforms, but actually useful mostly on Linux with GCC or Intel compilers and
-   Windows with MSVC compiler.
+There are situations when using non-ICU based localization is appropriate:
 
-- `posix` - localization backend based on latest POSIX 2008 standards, and uses POSIX api
-   as `newlocale`, `freelocale`, `strftime_l` etc. It is available under Linux and Mac OS X
-   platforms.
+- Embedded systems where ICU library is quite heavy
+- Application where only basic features like message, date and time formatting,
+  basic collation are required, and using 3rd part library like ICU would be too
+  complicated.
+- Performance, ICU is very powerful library, but it is generally slower then standard
+  library, so sometimes it would be better to use simpler but faster localization backends.
 
-- `winapi` - Win32API based localization, it provide decent UTF-8/UTF-16 locale support,
-   based on Windows API like `GetLocaleInfoW`, `LCMapStringW`, `GetDateFormatW` etc.
 
-   It provides decent localization support even for MinGW and Cygwin platforms.
+## Non-ICU Backends
+
+All this backends have limited features: 
+
+- Non Gregorian calendar are not supported and calendar facets are not installed at all.
+- No boundary analysis provided.
+- Case handing is very simple and based on single codepoint conversion,
+  however still handles UTF-8 better then standard library.
+- Time zone specification is very limited: either local time or time zone
+  in format of "GMT+HH::MM".
+- No percent formatting, no spellout or ordinal number formatting
+- Collation, with exception of `winapi` backend is limited to one level
+  similar to what is done by `strcoll`
+
+
+### `std` - Standard C++ library
+
+This localization backend is based on standard C++ library.
+
+It is supported on all platforms, but actually useful on platforms where
+standard library supports locales besides "C" and "POSIX".
+
+During development and testing it was found useful on Linux with GCC or Intel compilers and under MSVC compiler.
+
+
+
+It workarounds some common standard library bugs like invalid UTF-8 generation for numeric
+formatting, it gives an absent POSIX locales names and UTF-8 support under MSVC compiler.
+
+It is very useful backend when the compiler and the library actually give fine localization
+support, like GCC under Linux or MSVC under Windows
+
+### `posix` - POSIX 2008 C library
+
+
+This backend is  based on latest POSIX 2008 standards, and uses POSIX api
+as `newlocale`, `freelocale`, `strftime_l` etc. It is available under Linux and Mac OS X
+platforms.
+
+It allows to have a simple and already available in standard C library localization
+support, most notably under Mac OS X where GCC's `libstdc++` does not support locales.
+
+### `winapi` - Win32 API.
+
+This Win32API based localization backend it provides decent UTF-8/UTF-16 locale support.
+It is based on Windows API like `GetLocaleInfoW`, `LCMapStringW`, `GetDateFormatW` etc and
+It provides decent localization support even for MinGW and Cygwin platforms that are
+problematic for this case. 
+
+Notes:
+
+- You need GCC-4.x series to use it.
+- Only UTF-8 encoding is supported
 
 
 ## Supported Features
 
-<table border="1" sellpadding="5" >
+<table border="1" sellpadding="5" sellspacing="3">
 <tr>
   <th>Backend</th>
   <th>icu</th><th>posix</th><th>winapi</th><th>std</th>
@@ -1097,7 +1193,7 @@ Following backends are supported.
 </tr>
 <tr>
   <th>Collation</th>
-  <td>Yes</td><td>Basic</td><td>Basic</td><td>Basic</td>
+  <td>Full</td><td>1 level</td><td>3 levels</td><td>1 level</td>
 </tr>
 <tr>
   <th>Calendar</th>
@@ -1109,7 +1205,7 @@ Following backends are supported.
 </tr>
 <tr>
   <th>Unicode Normalization</th>
-  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+  <td>Yes</td><td>No</td><td>Vista and above</td><td>No</td>
 </tr>
 <tr>
   <th>C++0x characters</th>
@@ -1120,16 +1216,48 @@ Following backends are supported.
   <td>Any</td><td>Linux, Mac OS X</td><td>Windows, Cygwin</td><td>Any</td>
 </tr>
 <tr>
-  <th>Compiler Support</th>
-  <td>Any</td><td>Any</td><td>Any</td><td>Any</td>
-</tr>
-<tr>
   <th>Useful on</th>
   <td>Any Platform</td><td>Linux and Mac OS X</td><td>Windows/MinGW/Cygwin</td><td>Linux with GCC or Intel;<br/> Windows with MSVC</td>
 </tr>
 </table>
 
+## Using Localization Backends
 
+The access to localization backend is done via `boost::locale::localization_backend_manager` class.
+
+You can create your own `localization_backend_manager` by taking a global backend
+via `localization_backend_manager::global` static member function and manipulating
+over it.
+
+For example:
+
+
+    localization_backend_manager my = localization_backend_manager::global(); 
+    // Get global backend
+
+    my.select("std"); 
+    // select `std` backend as default
+
+    generator gen(my); 
+    // create a generator that  uses this backend.
+
+    localization_backend_manager::global(my);
+    // set this backend globally
+
+    generator gen2();
+    // now this one would use new global backend.
+
+You can also create a mixture of several backends
+and for example use `icu` for one kind of operations and `std`
+for all others:
+
+    localization_backend_manager my = localization_backend_manager::global(); 
+    // Get global backend
+
+    my.select("std"); 
+    // select `std` backend as default for all categories
+    my.select("icu",boundary_facet); 
+    // select `icu` backend for boundary analysis (not as it not supported by `std`)
 
 # Recommendations and Myths
 
@@ -1174,6 +1302,86 @@ For example:
 
 So, UTF-16 can be used for dealing with Unicode, in-facet ICU and may other applications use UTF-16 as internal Unicode representation, but
 you should be very careful and never assume one-code-point == one-utf16-character.
+
+# Building The library
+
+Currently Boost.Locale supports only. CMake build system. BBv2 support would be added in future.
+
+## Build Instructions
+
+### Dependencies
+
+- CMake 2.6 and above
+- Boost 1.43 headers and above
+- ICU library 3.6 and above - strongly recommended!
+- If no ICU library given iconv support is required under POSIX platforms.
+
+### Building Process
+
+
+The library build should be fairly simple for users familiar with CMake.
+
+**Notes:**
+
+- MSVC Users: use nmake for building library, MSVC projects are not supported!
+- Windows users: don't forget to set PATH environment variable, such it points to ICU's dlls.
+
+The simplest way to build library is:
+
+-   Extract its sources
+-   Go to sources directory
+-   Create directory build
+-   Go to this directory and run:
+
+        cmake ..
+        make
+        make test
+
+    For windows you may need to specify:
+
+        cmake -DCMAKE_INCLUDE_PATH=/path/to/icu/include:/path/to/boost/include -DCMAKE_LIBRARY_PATH=/path/to/icu/lib ..
+
+    And then:
+
+        nmake
+        mmake test
+
+    Or
+        make && make test
+
+    According to your compiler.
+
+
+## Build Options
+
+This options can be passed to CMake to configure library according to your needs.
+
+- `DISABLE_SHARED` - build static only library version
+- `DISABLE_STATIC` - build shared only library version
+- `DISABLE_ICU` - Disable ICU backend, it is strongly recommended not to disable it.
+- `DISABLE_STD_BACKED` - Disable building "std" backend.
+- `DISABLE_POSIX_BACKEND` - Disable building "posix" backend (ON by default on all but Linux and Mac OS X)
+- `DISABLE_WINAPI_BACKEND` - Disable building "winapi" backend (ON by default on POSIX platforms).
+- `DISABLE_ICONV` - Disable iconv based conversion (ON by default on Windows)
+
+Useful CMake options
+
+- `CMAKE_INCLUDE_PATH` - path to location of boost, (if not system wide used)
+- `CMAKE_INSTALL_PREFIX` - installation path
+- `CMAKE_BUILD_TYPE` - default is Debug on Windows/MSVC and RelWithDebInfo on all other platforms.
+
+For example:
+
+
+- Build Boost.Locale with "icu" backend only on Linux
+
+        cmake -DDISABLE_POSIX_BACKEND=ON -DDISABLE_STD_BACKEND=ON -DDISABLE_ICONV=ON ..
+
+- Build Boost.Locale with "winapi" and "std" backends on Windows
+
+        cmake -G "NMake Makefiles" -DDISABLE_ICU_BACKEND=ON -DCMAKE_INCLUDE_PATH=c:/boost_1_43_0 ..
+
+
 
 
 # Appendix

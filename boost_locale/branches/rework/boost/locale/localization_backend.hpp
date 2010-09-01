@@ -50,6 +50,9 @@ namespace boost {
             {
             }
 
+            ///
+            /// Make a polymorphic copy of the backend
+            ///
             virtual localization_backend *clone() const = 0;
 
             ///
@@ -69,23 +72,71 @@ namespace boost {
 
         }; // localization_backend 
 
+
+        ///
+        /// \brief Localization backend manager is a class that holds various backend and allows creation
+        /// of their combination or selection
+        ///
+
         class BOOST_LOCALE_DECL localization_backend_manager {
         public:
+            ///
+            /// New empty localization_backend_manager 
+            ///
             localization_backend_manager();
+            ///
+            /// Copy localization_backend_manager 
+            ///
             localization_backend_manager(localization_backend_manager const &);
+            ///
+            /// Assign localization_backend_manager 
+            ///
             localization_backend_manager const &operator=(localization_backend_manager const &);
+
+            ///
+            /// Destructor
+            ///
             ~localization_backend_manager();
 
+            ///
+            /// Create new localization backend according to current settings.
+            ///
             std::auto_ptr<localization_backend> get() const;
 
+            ///
+            /// Add new backend to the manager, each backend should be uniquely defined by its name.
+            ///
+            /// This library provides: "icu", "posix", "winapi" and "std" backends.
+            ///
             void add_backend(std::string const &name,std::auto_ptr<localization_backend> backend);
+
+            ///
+            /// Clear backend
+            ///
             void remove_all_backends();
             
+            ///
+            /// Get list of all avalible backends
+            ///
             std::vector<std::string> get_all_backends() const;
             
+            ///
+            /// Select specific backend by name for a category \a category. It allows combing different
+            /// backends for user preferences.
+            ///
             void select(std::string const &backend_name,locale_category_type category = all_categories);
-            
+           
+            ///
+            /// Set new global backend manager, the old one is returned.
+            ///
+            /// This function is thread safe
+            /// 
             static localization_backend_manager global(localization_backend_manager const &);
+            ///
+            /// Get global backend manager
+            ///
+            /// This function is thread safe
+            /// 
             static localization_backend_manager global();
         private:
             class impl;

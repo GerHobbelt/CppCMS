@@ -26,27 +26,44 @@ namespace boost {
         /// @{
         ///
 
+        
+        ///
+        /// This class provides base flags for text manipulation, it is used as base for converter facet.
+        ///
         class converter_base {
         public:
+            ///
+            /// The flag used for facet - the type of operation to perform
+            ///
             typedef enum {
-                normalization,
-                upper_case,
-                lower_case,
-                case_folding,
-                title_case
+                normalization,  ///< Apply Unicode normalization on the text
+                upper_case,     ///< Convert text to upper case
+                lower_case,     ///< Convert text to lower case
+                case_folding,   ///< Fold case in the text
+                title_case      ///< Convert text to title case
             } conversion_type;
         };
 
         template<typename CharType>
         class converter;
 
+        ///
+        /// The facet that implements text manipulation
+        ///
         template<>
         class BOOST_LOCALE_DECL converter<char> : public converter_base, public std::locale::facet {
         public:
+            /// Locale identification
             static std::locale::id id;
+
+            /// Standard constructor
             converter(size_t refs = 0) : std::locale::facet(refs)
             {
             }
+            ///
+            /// Convert text in range [\a begin, \a end) according to conversion method \a how. Parameter
+            /// \a flags is used for specification of normalization method like nfd, nfc etc.
+            ///
             virtual std::string convert(conversion_type how,char const *begin,char const *end,int flags = 0) const = 0;
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
             std::locale::id& __get_id (void) const { return id; }
@@ -54,14 +71,23 @@ namespace boost {
         };
 
         #ifndef BOOST_NO_STD_WSTRING
+        ///
+        /// The facet that implements text manipulation
+        ///
         template<>
         class BOOST_LOCALE_DECL converter<wchar_t> : public converter_base, public std::locale::facet {
         public:
+            /// Locale identification
             static std::locale::id id;
+            /// Standard constructor
             converter(size_t refs = 0) : std::locale::facet(refs)
             {
             }
-            virtual std::wstring convert(conversion_type how,wchar_t const *begin,wchar_t const *end,int flags = 0) const = 0;
+            ///
+            /// Convert text in range [\a begin, \a end) according to conversion method \a how. Parameter
+            /// \a flags is used for specification of normalization method like nfd, nfc etc.
+            ///
+             virtual std::wstring convert(conversion_type how,wchar_t const *begin,wchar_t const *end,int flags = 0) const = 0;
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
             std::locale::id& __get_id (void) const { return id; }
 #endif
@@ -98,8 +124,6 @@ namespace boost {
         };
         #endif
 
-        /// \endcond
- 
         ///
         /// Type of normalization
         ///

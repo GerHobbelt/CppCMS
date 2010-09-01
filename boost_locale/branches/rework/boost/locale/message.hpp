@@ -32,27 +32,63 @@ namespace boost {
         /// @{
         /// 
 
+        /// \cond INTERNAL 
+
         template<typename CharType>
         struct base_message_format: public std::locale::facet
         {
         };
        
+        /// \endcond
        
+        ///
+        /// \brief This facet provides message formatting abilities
+        ///
         template<typename CharType>
         class message_format : public base_message_format<CharType>
         {
         public:
 
+            ///
+            /// Character type
+            ///
             typedef CharType char_type;
+            ///
+            /// String type
+            ///
             typedef std::basic_string<CharType> string_type;
 
+            ///
+            /// Default constructor
+            ///
             message_format(size_t refs = 0) : 
                 base_message_format<CharType>(refs)
             {
             }
 
+            ///
+            /// This function returns a pointer to string for a message defined by a \a context
+            /// and identification string \a id, both create a single key for message lookup in
+            /// a domain defined by \a domain_id.
+            ///
+            /// If translated string is found, it is returned, otherwise NULL is returned
+            /// 
+            ///
             virtual char_type const *get(int domain_id,char const *context,char const *id) const = 0;
+            ///
+            /// This function returns a pointer to string for a plural message defined by a \a context
+            /// and identification string \a single_id, both create a single key for message lookup in
+            /// a domain defined \a domain_id. \a n used to pick a correct translation string for specific
+            /// number.
+            ///
+            /// If translated string is found, it is returned, otherwise NULL is returned
+            /// 
+            ///
             virtual char_type const *get(int domain_id,char const *context,char const *single_id,int n) const = 0;
+
+            ///
+            /// Convert a string that defines \a domain to the integer id used by \a get functions
+            ///
             virtual int domain(std::string const &domain) const = 0;
 
 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)

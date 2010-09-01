@@ -32,7 +32,7 @@ namespace gnu_gettext {
 
         std::string language;   ///< The language we load the catalog for, like "ru", "en", "de" 
         std::string country;    ///< The country wel load the catalog for, like "US", "IL"
-        std::string variant;    ///< Language variant, like "euro" so it would look for catalog like de_DE@euro
+        std::string variant;    ///< Language variant, like "euro" so it would look for catalog like de_DE\@euro
         std::string encoding;   ///< Required target charset encoding. Igronred for wide characters.
                                 ///< for narror should specify correct encoding required for this catalog
         std::string locale_category; ///< Locale category, is set by default LC_MESSAGES, but ma

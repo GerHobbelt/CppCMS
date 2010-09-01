@@ -6,76 +6,102 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/locale/config.hpp>
-#include <boost/locale/conversion.hpp>
-#include <boost/locale/localization_backend.hpp>
+#include <boost/locale/collator.hpp>
 #include <boost/locale/generator.hpp>
-#include <boost/locale/info.hpp>
+#include <boost/locale/localization_backend.hpp>
 #include <iomanip>
 #include "test_locale.hpp"
-#include "test_locale_tools.hpp"
-#include <iostream>
 
-int get_sign(int x)
+
+template<typename Char>
+void test_comp(std::locale l,std::basic_string<Char> left,std::basic_string<Char> right,int ilevel,int expected)
 {
-    if(x<0)
-        return -1;
-    else if(x==0)
-        return 0;
-    return 1;
-}
+    typedef std::basic_string<Char> string_type;
+    boost::locale::collator_base::level_type level = static_cast<boost::locale::collator_base::level_type>(ilevel);
+    TEST(boost::locale::comparator<Char>(l,level)(left,right) == (expected < 0));
+    if(ilevel==4) {
+        std::collate<Char> const &coll=std::use_facet<std::collate<Char> >(l);
+        string_type lt=coll.transform(left.c_str(),left.c_str()+left.size());
+        string_type rt=coll.transform(right.c_str(),right.c_str()+right.size());
+        if(expected < 0)
+            TEST(lt<rt);
+        else if(expected == 0) {
+            TEST(lt==rt);
+        }
+        else 
+            TEST(lt > rt);
+        long lh=coll.hash(left.c_str(),left.c_str()+left.size());
+        long rh=coll.hash(right.c_str(),right.c_str()+right.size());
+        if(expected == 0)
+            TEST(lh==rh);
+        else
+            TEST(lh!=rh);
+    }
+    boost::locale::collator<Char> const &coll=std::use_facet<boost::locale::collator<Char> >(l);
+    string_type lt=coll.transform(level,left.c_str(),left.c_str()+left.size());
+    TEST(lt==coll.transform(level,left));
+    string_type rt=coll.transform(level,right.c_str(),right.c_str()+right.size());
+    TEST(rt==coll.transform(level,right));
+    if(expected < 0)
+        TEST(lt<rt);
+    else if(expected == 0)
+        TEST(lt==rt);
+    else 
+        TEST(lt > rt);
+    long lh=coll.hash(level,left.c_str(),left.c_str()+left.size());
+    TEST(lh==coll.hash(level,left));
+    long rh=coll.hash(level,right.c_str(),right.c_str()+right.size());
+    TEST(rh==coll.hash(level,right));
+    if(expected == 0)
+        TEST(lh==rh);
+    else
+        TEST(lh!=rh);
 
-template<typename CharType>
-void test_one(std::locale const &l,std::string ia,std::string ib,int diff)
-{
-    std::basic_string<CharType> a=to_correct_string<CharType>(ia,l);
-    std::basic_string<CharType> b=to_correct_string<CharType>(ib,l);
-    if(diff < 0) {
-        TEST(l(a,b));
-        TEST(!l(b,a));
-    }
-    else if(diff == 0) {
-        TEST(!l(a,b));
-        TEST(!l(b,a));
-    }
-    else {
-        TEST(!l(a,b));
-        TEST(l(b,a));
-    }
-    
-    std::collate<CharType> const &col = std::use_facet<std::collate<CharType> >(l);
+}    
+        
+#define TEST_COMP(c,_l,_r) test_comp<c>(l,_l,_r,level,expected)
 
-    TEST(diff == col.compare(a.c_str(),a.c_str()+a.size(),b.c_str(),b.c_str()+b.size()));
-    TEST(diff == get_sign(col.transform(a.c_str(),a.c_str()+a.size()).compare(col.transform(b.c_str(),b.c_str()+b.size()))));
-    if(diff == 0) {
-        TEST(col.hash(a.c_str(),a.c_str()+a.size()) == col.hash(b.c_str(),b.c_str()+b.size()));
-    }
-}
 
-template<typename CharType>
-void test_char()
+void compare(std::string left,std::string right,int level,int expected)
 {
     boost::locale::generator gen;
-    
-    std::cout << "- Testing at least C" << std::endl;
-
-    std::locale l = gen("en_US.UTF-8");
-
-    test_one<CharType>(l,"a","b",-1);
-    test_one<CharType>(l,"a","a",0);
-
-
-    std::string names[] = { "en_US.UTF-8" };
-    for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);i++) {
-        std::string name = names[i];
-        std::cout << "- Testing " << name << std::endl;
-        std::locale l=gen(name);
-        std::cout << "- Testing a< c`" << std::endl;
-        test_one<CharType>(l,"a","ç",-1);
-        std::cout << "- Testing c`< d" << std::endl;
-        test_one<CharType>(l,"ç","d",-1);
-    }
+    std::locale l=gen("en_US.UTF-8");
+    if(level == 4)
+        TEST(l(left,right) == (expected < 0));
+    TEST_COMP(char,left,right);
+    TEST_COMP(wchar_t,to<wchar_t>(left),to<wchar_t>(right));
 }
+
+
+void test_collate()
+{
+    int
+        primary     = 0,
+        secondary   = 1,
+        tertiary    = 2,
+        quaternary  = 3,
+        identical   = 4;
+    int     le = -1,gt = 1,eq = 0;
+
+
+    compare("a","A",primary,eq);
+    compare("a","A",secondary,eq);
+    compare("A","a",tertiary,gt);
+    compare("a","A",tertiary,le);
+    compare("a","A",quaternary,le);
+    compare("A","a",quaternary,gt);
+    compare("a","A",identical,le);
+    compare("A","a",identical,gt);
+    compare("a","ä",primary,eq); //  a , ä
+    compare("a","ä",secondary,le); //  a , ä
+    compare("ä","a",secondary,gt); //  a , ä
+    compare("a","ä",quaternary,le); //  a , ä
+    compare("ä","a",quaternary,gt); //  a , ä
+    compare("a","ä",identical,le); //  a , ä
+    compare("ä","a",identical,gt); //  a , ä
+}
+
+
 
 
 int main()
@@ -85,10 +111,7 @@ int main()
         mgr.select("winapi");
         boost::locale::localization_backend_manager::global(mgr);
 
-        std::cout << "Testing char" << std::endl;
-        test_char<char>();
-        std::cout << "Testing wchar_t" << std::endl;
-        test_char<wchar_t>();
+        test_collate();
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;
@@ -98,5 +121,3 @@ int main()
 
 }
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
-
-

@@ -23,7 +23,15 @@
 
 namespace boost {
     namespace locale {
+        ///
+        /// This namespace holds additional formatting
+        /// flags that can be set using ios_info.
+        ///
         namespace flags {
+            ///
+            /// Formatting flags, each one of them has corresponding manipulation
+            /// in namespace \a as
+            ///
             typedef enum {
                 posix               = 0,
                 number              = 1,
@@ -62,43 +70,87 @@ namespace boost {
 
             } display_flags_type;
 
+            ///
+            /// Special string patters that can be used
+            /// for text formatting
+            ///
             typedef enum {
-                datetime_pattern,
-                time_zone_id
+                datetime_pattern,   ///< strftime like formatting
+                time_zone_id        ///< time zone name
             } pattern_type;
 
+            ///
+            /// Special integer values that can be used for formatting
+            ///
             typedef enum {
-                domain_id
+                domain_id           ///< Domain code - for message formatting
             } value_type;
 
             
         } // flags
 
-        /// \cond INTERNAL
-
+        ///
+        /// \brief This class holds an external data - beyond existing fmtflags that std::ios_base holds
+        ///
+        /// You almost never create this object directly, you rather access it via ios_info::get(stream_object)
+        /// static member function. It automatically creates default formatting data for that stream
+        ///
         class BOOST_LOCALE_DECL ios_info {
         public:
+
+            /// \cond INTERNAL
+
             ios_info();
             ios_info(ios_info const &);
             ios_info const &operator=(ios_info const &);
             ~ios_info();
 
+            /// \endcond
+
+            ///
+            /// Get ios_info instance for specific stream object
+            ///
             static ios_info &get(std::ios_base &ios);
 
+            ///
+            /// Set a flags that define a way for format data like number, spell, currency etc.
+            ///
             void display_flags(uint64_t flags);
             
+            ///
+            /// Set a flags that define how to format currency
+            ///
             void currency_flags(uint64_t flags);
             
+            ///
+            /// Set a flags that define how to format date
+            ///
             void date_flags(uint64_t flags);
             
+            ///
+            /// Set a flags that define how to format time
+            ///
             void time_flags(uint64_t flags);
             
+            ///
+            /// Set a flags that define how to format both date and time
+            ///
             void datetime_flags(uint64_t flags);
             
+            ///
+            /// Set special message domain identification
+            ///
             void domain_id(int);
             
+            ///
+            /// Set time zone for formatting dates and time
+            ///
             void time_zone(std::string const &);
             
+
+            ///
+            /// Set date/time pattern (strftime like)
+            ///
             template<typename CharType>
             void date_time_pattern(std::basic_string<CharType> const &str)
             {
@@ -106,27 +158,54 @@ namespace boost {
             }
 
 
+            ///
+            /// Get a flags that define a way for format data like number, spell, currency etc.
+            ///
             uint64_t display_flags() const;
             
+            ///
+            /// Get a flags that define how to format currency
+            ///
             uint64_t currency_flags() const;
 
+            
+            ///
+            /// Get a flags that define how to format date
+            ///
             uint64_t date_flags() const;
             
+            ///
+            /// Get a flags that define how to format time
+            ///
             uint64_t time_flags() const;
-            
+
+            ///
+            /// Get a flags that define how to format both date and time
+            ///
             uint64_t datetime_flags() const;
             
+            ///
+            /// Get special message domain identification
+            ///
             int domain_id() const;
             
+            ///
+            /// Get time zone for formatting dates and time
+            ///
             std::string time_zone() const;
             
+            ///
+            /// Get date/time pattern (strftime like)
+            ///
             template<typename CharType>
             std::basic_string<CharType> date_time_pattern() const
             {
                 return date_time_pattern_set().get<CharType>();
             }
-
+            
+            /// \cond INTERNAL
             void on_imbue();
+            /// \endcond
             
         private:
 

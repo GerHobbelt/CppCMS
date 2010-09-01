@@ -48,6 +48,21 @@ void test_char()
 
 }
 
+template<typename Char>
+void test_normc(std::basic_string<Char> orig,std::basic_string<Char> normal,boost::locale::norm_type type)
+{
+    std::locale l = boost::locale::generator().generate("en_US.UTF-8");
+    TEST(boost::locale::normalize(orig,type,l)==normal);
+    TEST(boost::locale::normalize(orig.c_str(),type,l)==normal);
+    TEST(boost::locale::normalize(orig.c_str(),orig.c_str()+orig.size(),type,l)==normal);
+}
+
+
+void test_norm(std::string orig,std::string normal,boost::locale::norm_type type)
+{
+    test_normc<char>(orig,normal,type);
+    test_normc<wchar_t>(to<wchar_t>(orig),to<wchar_t>(normal),type);
+}
 
 int main()
 {
@@ -60,6 +75,16 @@ int main()
         test_char<char>();
         std::cout << "Testing wchar_t" << std::endl;
         test_char<wchar_t>();
+        
+        std::cout << "Testing Unicode normalization" << std::endl;
+        test_norm("\xEF\xAC\x81","\xEF\xAC\x81",boost::locale::norm_nfd); /// ligature fi
+        test_norm("\xEF\xAC\x81","\xEF\xAC\x81",boost::locale::norm_nfc);
+		#if defined(_WIN32_NT) && _WIN32_NT >= 0x600
+        test_norm("\xEF\xAC\x81","fi",boost::locale::norm_nfkd);
+        test_norm("\xEF\xAC\x81","fi",boost::locale::norm_nfkc);
+		#endif
+        test_norm("ä","ä",boost::locale::norm_nfd); // ä to a and accent
+        test_norm("ä","ä",boost::locale::norm_nfc);
     }
     catch(std::exception const &e) {
         std::cerr << "Failed " << e.what() << std::endl;

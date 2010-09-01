@@ -38,6 +38,8 @@ public:
             return towlower_l(begin,end,lc_);
         case converter_base::case_folding:
             return wcsfold(begin,end);
+        case converter_base::normalization:
+            return wcsnormalize(static_cast<norm_type>(flags),begin,end);
         default:
             return std::wstring(begin,end-begin);
         }
@@ -55,14 +57,6 @@ public:
     }
     virtual std::string convert(converter_base::conversion_type how,char const *begin,char const *end,int flags = 0) const 
     {
-        switch(how) {
-        case upper_case:
-        case lower_case:
-        case case_folding:
-            break;
-        default:
-            return std::string(begin,end-begin);
-        }
         std::wstring tmp = conv::to_utf<wchar_t>(begin,end,"UTF-8");
         wchar_t const *wb=tmp.c_str();
         wchar_t const *we=wb+tmp.size();
@@ -79,6 +73,8 @@ public:
         case case_folding:
             res = wcsfold(wb,we);
             break;
+        case normalization:
+            res = wcsnormalize(static_cast<norm_type>(flags),wb,we);
         default:
             ; // make gcc happy
         }

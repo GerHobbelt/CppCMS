@@ -111,41 +111,78 @@ namespace boost {
                 }
             }
             
+            ///
+            /// This structure is used for representing boundary point
+            /// that follows the offset.
+            ///
             struct break_info {
 
+                ///
+                /// Create empty break point at beginning
+                ///
                 break_info() : 
                     offset(0),
                     mark(0)
                 {
                 }
+                ///
+                /// Create empty break point at offset v.
+                /// it is useful for order comparison with other points.
+                ///
                 break_info(unsigned v) :
                     offset(v),
                     mark(0)
                 {
                 }
 
+                ///
+                /// Offset from the begging of the text where a break occurs.
+                ///
                 uint32_t offset;
+                ///
+                /// The identification of this break point according to 
+                /// various break types
+                ///
                 uint32_t mark;
                
+                ///
+                /// Compare two break points' offset. Allows to search with
+                /// standard algorithms over the index.
+                ///
                 bool operator<(break_info const &other) const
                 {
                     return offset < other.offset;
                 }
             };
             
+            ///
+            /// This type holds the alalisys of the text - all its break points
+            /// with marks
+            ///
             typedef std::vector<break_info> index_type;
 
 
             template<typename CharType>
             class boundary_indexing;
 
+            ///
+            /// The facet that allows us to create an index for boundary analisys
+            /// of the text.
+            ///
             template<>
             class BOOST_LOCALE_DECL boundary_indexing<char> : public std::locale::facet {
             public:
+                ///
+                /// Default constructor typical for facets
+                ///
                 boundary_indexing(size_t refs=0) : std::locale::facet(refs)
                 {
                 }
+                ///
+                /// Create index for boundary type \a t for text in range [begin,end)
+                ///
                 virtual index_type map(boundary_type t,char const *begin,char const *end) const = 0;
+                /// Identification of this facet
                 static std::locale::id id;
                 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
                 std::locale::id& __get_id (void) const { return id; }
@@ -153,14 +190,25 @@ namespace boost {
             };
             
             #ifndef BOOST_NO_STD_WSTRING
+            ///
+            /// The facet that allows us to create an index for boundary analisys
+            /// of the text.
+            ///
             template<>
             class BOOST_LOCALE_DECL boundary_indexing<wchar_t> : public std::locale::facet {
             public:
+                ///
+                /// Default constructor typical for facets
+                ///
                 boundary_indexing(size_t refs=0) : std::locale::facet(refs)
                 {
                 }
+                ///
+                /// Create index for boundary type \a t for text in range [begin,end)
+                ///
                 virtual index_type map(boundary_type t,wchar_t const *begin,wchar_t const *end) const = 0;
 
+                /// Identification of this facet
                 static std::locale::id id;
                 #if defined (__SUNPRO_CC) && defined (_RWSTD_VER)
                 std::locale::id& __get_id (void) const { return id; }
@@ -197,6 +245,9 @@ namespace boost {
                 #endif
             };
             #endif
+
+
+            /// \cond INTERNAL
 
             namespace details {
 
