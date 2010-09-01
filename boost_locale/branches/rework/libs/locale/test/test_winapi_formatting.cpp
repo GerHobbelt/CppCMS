@@ -17,9 +17,7 @@
 #include <iostream>
 
 #include <time.h>
-#include <monetary.h>
 #include <assert.h>
-#include <langinfo.h>
 
 #ifndef NOMINMAX
 #define NOMINMAX

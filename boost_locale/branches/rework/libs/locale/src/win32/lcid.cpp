@@ -10,7 +10,7 @@
 #include <string.h>
 #include <string>
 
-#include "../std/locale_data.hpp"
+#include "../util/locale_data.hpp"
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -435,7 +435,7 @@ unsigned locale_to_lcid(std::string const &locale_name)
     if(locale_name.empty()) {
         return LOCALE_USER_DEFAULT;
     } 
-    boost::locale::impl_std::locale_data d;
+    boost::locale::util::locale_data d;
     d.parse(locale_name);
     if(!d.utf8)
         return 0;
