@@ -36,8 +36,9 @@ namespace boost {
                     lang = "C";
                 return lang;
                 #else
-                if(lang && *lang) 
+                if(lang && *lang) {
                     return lang;
+                }
                 char buf[10];
                 if(GetLocaleInfoA(LOCALE_USER_DEFAULT,LOCALE_SISO639LANGNAME,buf,sizeof(buf))==0)
                     return "C";
@@ -53,9 +54,10 @@ namespace boost {
                     }
                 }
                 else {
-                    lc_name += "UTF-8";
+                    lc_name += ".UTF-8";
                 }
                 return lc_name;
+                
                 #endif
             }
         } // impl

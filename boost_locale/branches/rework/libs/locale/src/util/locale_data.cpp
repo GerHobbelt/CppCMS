@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include "locale_data.hpp"
+#include "../encoding/conv.hpp"
 #include <string>
 
 namespace boost {
@@ -85,7 +86,8 @@ namespace util {
                 tmp[i]=tmp[i]-'A'+'a';
         }
         encoding = tmp;
-        utf8 = encoding == "utf8" || encoding == "utf-8";
+        
+        utf8 = conv::impl::normalize_encoding(encoding.c_str()) == "utf8";
 
         if(end >= locale_name.size())
             return;

@@ -15,6 +15,7 @@
 #include "test_locale_tools.hpp"
 
 bool test_iso;
+bool test_utf;
 
 std::string he_il_8bit;
 std::string en_us_8bit;
@@ -93,16 +94,22 @@ template<typename Char>
 void test_for_char()
 {
     boost::locale::generator g;
-    std::cout << "    UTF-8" << std::endl;
-    test_ok<Char>("grüße\nn i",g("en_US.UTF-8"));
-    test_rfail<Char>("abc\xFF\xFF",g("en_US.UTF-8"),3);
-    if(sizeof(Char) > 2)  {
-        test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
+    if(test_utf) {
+        std::cout << "    UTF-8" << std::endl;
+        test_ok<Char>("grüße\nn i",g("en_US.UTF-8"));
+        test_rfail<Char>("abc\xFF\xFF",g("en_US.UTF-8"),3);
+        if(sizeof(Char) > 2)  {
+            test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
+        }
+        else {
+            test_rfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
+            test_wfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
+        }
     }
     else {
-        test_rfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
-        test_wfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
+        std::cout << "    UTF-8 Not supported " << std::endl;
     }
+    
     if(test_iso) {
         std::cout << "    ISO-8859-8" << std::endl;
         test_ok<Char>("hello \xf9\xec\xe5\xed",g(he_il_8bit),to<Char>("hello שלום"));
@@ -264,6 +271,8 @@ int main()
                 test_iso = false;
             }
 
+            test_utf = def[type]!="std" || (!get_std_name("en_US.UTF-8").empty() && !get_std_name("he_IL.UTF-8").empty());
+            
             std::cout << "Testing wide I/O" << std::endl;
             test_wide_io();
             std::cout << "Testing charset to/from UTF conversion functions" << std::endl;

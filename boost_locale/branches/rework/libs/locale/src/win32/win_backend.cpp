@@ -12,6 +12,7 @@
 #include "all_generator.hpp"
 #include "win_backend.hpp"
 #include "../util/default_locale.hpp"
+#include "../util/locale_data.hpp"
 #include "../util/info.hpp"
 #include "api.hpp"
 
@@ -68,6 +69,12 @@ namespace impl_win {
             else {
                 lc_=winlocale(locale_id_);
                 real_id_ = locale_id_;
+            }
+            util::locale_data d;
+            d.parse(real_id_);
+            if(!d.utf8) {
+                lc_ = winlocale(); 
+                // Make it C as non-UTF8 locales are not supported
             }
         }
         

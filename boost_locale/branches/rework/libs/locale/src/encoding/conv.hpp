@@ -9,11 +9,24 @@
 #ifndef BOOST_LOCALE_CONV_IMPL_HPP
 #define BOOST_LOCALE_CONV_IMPL_HPP
 
+#include <boost/locale/config.hpp>
+#include <boost/locale/encoding.hpp>
 namespace boost {
     namespace locale {
         namespace conv {
             namespace impl {
 
+                std::string normalize_encoding(char const *encoding);
+                
+                inline int compare_encodings(char const *l,char const *r)
+                {
+                    return normalize_encoding(l).compare(normalize_encoding(r));
+                }
+            
+                #if defined(BOOST_WINDOWS)  || defined(__CYGWIN__)
+                int encoding_to_windows_codepage(char const *ccharset);
+                #endif
+            
                 class converter_between {
                 public:
                     typedef char char_type;

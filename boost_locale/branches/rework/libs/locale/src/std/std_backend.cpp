@@ -9,10 +9,19 @@
 #include <boost/locale/localization_backend.hpp>
 #include <boost/locale/gnu_gettext.hpp>
 #include "all_generator.hpp"
-#include "find_locale_name.hpp"
 #include "../util/locale_data.hpp"
 #include "../util/info.hpp"
 #include "../util/default_locale.hpp"
+
+#if defined(BOOST_WINDOWS)
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
+#  include <windows.h>
+#  include "../encoding/conv.hpp"
+#  include "../win32/lcid.hpp"
+#endif
+
 #include "std_backend.hpp"
 
 namespace boost {
@@ -66,9 +75,80 @@ namespace impl_std {
                 lid = util::get_system_locale();
             in_use_id_ = lid;
             data_.parse(lid);
-            locale_name::subst_type tmp = locale_name::find(lid);
-            name_ = tmp.first;
-            utf_mode_ = tmp.second;
+            name_ = "C";
+            utf_mode_ = utf8_none;
+
+            #if defined(BOOST_WINDOWS)
+            std::pair<std::string,int> wl_inf = to_windows_name(lid);
+            std::string win_name = wl_inf.first;
+            int win_codepage = wl_inf.second;
+            #endif
+
+            if(!data_.utf8) {
+                if(loadable(lid)) {
+                    name_ = lid;
+                    utf_mode_ = utf8_none;
+                }
+                #if defined(BOOST_WINDOWS)
+                else if(loadable(win_name) 
+                        && win_codepage == conv::impl::encoding_to_windows_codepage(data_.encoding.c_str())) 
+                {
+                    name_ = win_name;
+                    utf_mode_ = utf8_none;
+                }
+                #endif
+            }
+            else {
+                if(loadable(lid)) {
+                    name_ = lid;
+                    #ifdef BOOST_NO_STD_WSTRING
+                    utf_mode_ = utf8_native;
+                    #else
+                    utf_mode_ = utf8_native_with_wide;
+                    #endif
+                }
+                #if defined(BOOST_WINDOWS) && !defined(BOOST_NO_STD_WSTRING)
+                else if(loadable(win_name)) {
+                    name_ = win_name;
+                    utf_mode_ = utf8_from_wide;
+                }
+                #endif
+            }
+        }
+        
+        #if defined(BOOST_WINDOWS)
+        std::pair<std::string,int> to_windows_name(std::string const &l)
+        {
+            std::pair<std::string,int> res("C",0);
+            unsigned lcid = impl_win::locale_to_lcid(l);
+            char win_lang[256]  = {0};
+            char win_country[256]  = {0};
+            char win_codepage[10] = {0};
+            if(GetLocaleInfoA(lcid,LOCALE_SENGLANGUAGE,win_lang,sizeof(win_lang))==0)
+                return res;
+            std::string lc_name = win_lang;
+            if(GetLocaleInfoA(lcid,LOCALE_SENGCOUNTRY,win_country,sizeof(win_country))!=0) {
+                lc_name += "_";
+                lc_name += win_country;
+            }
+            
+            res.first = lc_name;
+
+            if(GetLocaleInfoA(lcid,LOCALE_IDEFAULTANSICODEPAGE,win_codepage,sizeof(win_codepage))!=0)
+                res.second = atoi(win_codepage);
+            return res;
+        }
+        #endif
+        
+        bool loadable(std::string name)
+        {
+            try {
+                std::locale l(name.c_str());
+                return true;
+            }
+            catch(std::exception const &/*e*/) {
+                return false;
+            }
         }
         
         virtual std::locale install(std::locale const &base,

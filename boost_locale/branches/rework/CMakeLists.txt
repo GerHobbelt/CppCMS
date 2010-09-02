@@ -206,7 +206,6 @@ if(NOT DISABLE_STD_BACKEND)
 		libs/locale/src/std/converter.cpp
 		libs/locale/src/std/numeric.cpp
 		libs/locale/src/std/std_backend.cpp
-		libs/locale/src/std/windows_locale_name.cpp
 	)
 endif()
 
@@ -223,11 +222,19 @@ if(NOT DISABLE_WINAPI_BACKEND)
 	set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
 		libs/locale/src/win32/collate.cpp
 		libs/locale/src/win32/converter.cpp
-		libs/locale/src/win32/lcid.cpp
 		libs/locale/src/win32/numeric.cpp
 		libs/locale/src/win32/win_backend.cpp
 	)
 endif()
+
+if(WIN32 OR CYGWIN)
+    if(NOT DISABLE_WINAPI_BACKEND AND NOT DISABLE_STD_BACKEND)
+        set(BOOST_LOCALE_SRC ${BOOST_LOCALE_SRC}
+            libs/locale/src/win32/lcid.cpp
+        )
+    endif()
+endif()
+
 
 if(BOOST_LOCALE_HAVE_ICU)
 	set(BOOST_LOCALE_SRC 

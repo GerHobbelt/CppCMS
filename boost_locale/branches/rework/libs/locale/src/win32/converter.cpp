@@ -75,8 +75,9 @@ public:
             break;
         case normalization:
             res = wcsnormalize(static_cast<norm_type>(flags),wb,we);
+            break;
         default:
-            ; // make gcc happy
+            res = tmp; // make gcc happy
         }
         return conv::from_utf(res,"UTF-8");
     }

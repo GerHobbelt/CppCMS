@@ -114,6 +114,23 @@ namespace boost {
                     throw invalid_charset_error(charset);
                 }
 
+                std::string normalize_encoding(char const *ccharset)
+                {
+                    std::string charset;
+                    charset.reserve(strlen(ccharset));
+                    while(*ccharset!=0) {
+                        char c=*ccharset++;
+                        if('0' <= c && c<= '9')
+                            charset+=c;
+                        else if('a' <=c && c <='z')
+                            charset+=c;
+                        else if('A' <=c && c <='Z')
+                            charset+=char(c-'A'+'a');
+                    }
+                    return charset;
+                }
+                
+
             } // impl 
 
             using namespace impl;

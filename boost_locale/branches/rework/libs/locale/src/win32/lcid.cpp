@@ -437,8 +437,6 @@ unsigned locale_to_lcid(std::string const &locale_name)
     } 
     boost::locale::util::locale_data d;
     d.parse(locale_name);
-    if(!d.utf8)
-        return 0;
     unsigned matched = 0;
     unsigned lcid = 0;
     for(size_t i=0;i<sizeof(all_locales)/sizeof(all_locales[0]);i++) {
@@ -452,13 +450,18 @@ unsigned locale_to_lcid(std::string const &locale_name)
             cmatched+=2;
         if(d.variant == cur.variant)
             cmatched+=4;
-        if(cmatched == 7)
-            return cur.lcid;
+        if(cmatched == 7) {
+            lcid = cur.lcid;
+            break;
+        }
         if(cmatched > matched) {
             lcid = cur.lcid;
             matched = cmatched;
         }
     }
+    if(lcid!=0)
+        if(!IsValidLocale(lcid,LCID_INSTALLED))
+            lcid = 0;
     return lcid;
 }
 

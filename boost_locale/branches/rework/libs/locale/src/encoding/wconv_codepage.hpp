@@ -38,6 +38,16 @@ namespace impl {
 
     windows_encoding all_windows_encodings[] = {
         { "big5",       950 },
+        { "cp1250",     1250 },
+        { "cp1251",     1251 },
+        { "cp1252",     1252 },
+        { "cp1253",     1253 },
+        { "cp1254",     1254 },
+        { "cp1255",     1255 },
+        { "cp1256",     1256 },
+        { "cp1257",     1257 },
+        { "cp874",      874 },
+        { "cp932",      932 },
         { "eucjp",      20932 },
         { "euckr",      51949 },
         { "gb18030",    54936 },
@@ -68,7 +78,8 @@ namespace impl {
         { "windows1255",        1255 },
         { "windows1256",        1256 },
         { "windows1257",        1257 },
-        { "windows874", 874 },
+        { "windows874",         874 },
+        { "windows932",         932 },
     };
 
     size_t remove_substitutions(std::vector<wchar_t> &v)
@@ -168,17 +179,7 @@ namespace impl {
     
     int encoding_to_windows_codepage(char const *ccharset)
     {
-        std::string charset;
-        charset.reserve(strlen(ccharset));
-        while(*ccharset!=0) {
-            char c=*ccharset++;
-            if('0' <= c && c<= '9')
-                charset+=c;
-            else if('a' <=c && c <='z')
-                charset+=c;
-            else if('A' <=c && c <='Z')
-                charset+=char(c-'A'+'a');
-        }
+        std::string charset = normalize_encoding(ccharset);
         windows_encoding ref;
         ref.name = charset.c_str();
         size_t n = sizeof(all_windows_encodings)/sizeof(all_windows_encodings[0]);
