@@ -55,6 +55,9 @@ endif(NOT CMAKE_BUILD_TYPE)
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	if(MSVC)
 		set(ICU_SUFFIX "d")
+		if(NOT BOOST_SUFFIX)
+			set(BOOST_SUFFIX "-d")
+		endif()
 	endif()
 endif()
 
@@ -112,6 +115,18 @@ include_directories(${ICU_INCLUDE_DIR})
 if(BOOST_INCLUDE_DIR)
 	include_directories(${BOOST_INCLUDE_DIR})
 endif()
+
+check_cxx_source_compiles(
+	NO_BOOST_LIBRARY_NEEDED
+	"#include <boost/thread.hpp>
+	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }")
+
+if(NOT NO_BOOST_LIBRARY_NEEDED)
+	find_library(BOOST_THREAD boost_thread-mt${BOOST_SUFFIX} NAMES boost_thread${BOOST_SUFFIX})
+	set(BOOST_LIBRARY_NEEDED ON)
+endif()
+
+
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -248,6 +263,9 @@ if(NOT DISABLE_SHARED)
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale ${ICONV_LIB})
 	endif()
+	if(BOOST_LIBRARY_NEEDED)
+		target_link_libraries(boost_locale ${BOOST_THREAD})
+	endif()
 endif(NOT DISABLE_SHARED)
 
 
@@ -259,6 +277,9 @@ if(NOT DISABLE_STATIC)
 	endif()
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale-static ${ICONV_LIB})
+	endif()
+	if(BOOST_LIBRARY_NEEDED)
+		target_link_libraries(boost_locale-static ${BOOST_THREAD})
 	endif()
 endif(NOT DISABLE_STATIC)
 
