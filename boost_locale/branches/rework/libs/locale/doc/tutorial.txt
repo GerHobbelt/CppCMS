@@ -1312,9 +1312,9 @@ Currently Boost.Locale supports only. CMake build system. BBv2 support would be 
 ### Dependencies
 
 - CMake 2.6 and above
-- Boost 1.43 headers and above
+- Boost 1.43 headers and above or Boost 1.35 and above with Boost.Thread
 - ICU library 3.6 and above - strongly recommended!
-- If no ICU library given iconv support is required under POSIX platforms.
+- If no ICU library given, iconv support is required under POSIX platforms.
 
 ### Building Process
 

@@ -116,10 +116,13 @@ if(BOOST_INCLUDE_DIR)
 	include_directories(${BOOST_INCLUDE_DIR})
 endif()
 
+set(CMAKE_REQUIRED_INCLUDES ${BOOST_INCLUDE_DIR})
+set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
+
 check_cxx_source_compiles(
-	NO_BOOST_LIBRARY_NEEDED
 	"#include <boost/thread.hpp>
-	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }")
+	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
+	NO_BOOST_LIBRARY_NEEDED)
 
 if(NOT NO_BOOST_LIBRARY_NEEDED)
 	find_library(BOOST_THREAD boost_thread-mt${BOOST_SUFFIX} NAMES boost_thread${BOOST_SUFFIX})
