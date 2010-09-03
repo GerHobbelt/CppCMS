@@ -30,6 +30,7 @@
 #include <boost/locale/encoding.hpp>
 
 #include <string>
+#include <string.h>
 #include <memory>
 
 namespace boost {
