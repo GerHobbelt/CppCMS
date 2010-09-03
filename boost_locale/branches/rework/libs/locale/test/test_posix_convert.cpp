@@ -16,6 +16,9 @@
 #include "test_posix_tools.hpp"
 #include <iostream>
 
+#include <wctype.h>
+
+
 template<typename CharType>
 void test_one(std::locale const &l,std::string src,std::string tgtl,std::string tgtu)
 {
@@ -59,7 +62,22 @@ void test_char()
     name = "tr_TR.UTF-8";
     if(have_locale(name)) {
         std::cout << "Testing " << name << std::endl;
-        test_one<CharType>(gen(name),"i","i","İ");
+        locale_t cl = newlocale(LC_ALL_MASK,name.c_str(),0);
+        try { 
+            TEST(cl);
+            if(towupper_l(L'i',cl) == 0x130) {
+                test_one<CharType>(gen(name),"i","i","İ");
+            }
+            else {
+                std::cout <<"  Turkish locale is not supported well" << std::endl;
+            }
+        }
+        catch(...) {
+            if(cl) freelocale(cl);
+            throw;
+        }
+        if(cl) freelocale(cl);
+        
     }
     else 
     {

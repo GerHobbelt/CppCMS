@@ -70,6 +70,7 @@ void test_char()
     std::string names[] = { "en_US.UTF-8", "en_US.ISO-8859-1" };
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);i++) {
         if(have_locale(names[i])) {
+            name = names[i];
             std::cout << "- Testing " << name << std::endl;
             std::locale l=gen(name);
             test_one<CharType>(l,"a","ç",-1);
