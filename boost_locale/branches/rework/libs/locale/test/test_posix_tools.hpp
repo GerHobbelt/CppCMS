@@ -12,6 +12,10 @@
 #include <locale.h>
 #include <string>
 
+#ifdef __APPLE__
+#include <xlocale.h>
+#endif
+
 inline bool have_locale(std::string const &name)
 {
     locale_t l=newlocale(LC_ALL_MASK,name.c_str(),0);
