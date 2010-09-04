@@ -259,6 +259,8 @@ void page::edit(std::string slug,std::string version)
 	else {
 		if(version.empty()) {
 			c.new_page=!load(c.form);
+			wi.options.load();
+			c.form.users_only.value(wi.options.global.users_only_edit);
 		}
 		else {
 			int ver=atoi(version.c_str());
