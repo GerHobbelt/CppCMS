@@ -67,6 +67,8 @@ void test_char()
 
     std::string name;
 
+
+    #ifndef __APPLE__
     std::string names[] = { "en_US.UTF-8", "en_US.ISO-8859-1" };
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);i++) {
         if(have_locale(names[i])) {
@@ -80,6 +82,9 @@ void test_char()
             std::cout << "- " << names[i] << " not supported, skipping" << std::endl;
         }
     }
+    #else
+    std::cout << "- Collation is broken in Mac OS X's C standard library, skipping" << std::endl;
+    #endif
 }
 
 

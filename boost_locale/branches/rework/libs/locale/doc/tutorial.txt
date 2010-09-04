@@ -1193,7 +1193,7 @@ Notes:
 </tr>
 <tr>
   <th>Collation</th>
-  <td>Full</td><td>1 level</td><td>3 levels</td><td>1 level</td>
+  <td>Full</td><td>Linux - 1 level<br/>Mac OS X - No</td><td>3 levels</td><td>1 level</td>
 </tr>
 <tr>
   <th>Calendar</th>
