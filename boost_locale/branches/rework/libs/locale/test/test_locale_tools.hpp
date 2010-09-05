@@ -46,7 +46,7 @@ std::string get_std_name(std::string const &name,std::string *real_name = 0)
     #ifdef BOOST_WINDOWS
     bool utf8=name.find("UTF-8")!=std::string::npos;
 
-    if(name=="en_US.UTF-8" || name == "en_US.ISO-8859-1") {
+    if(name=="en_US.UTF-8" || name == "en_US.ISO8859-1") {
         if(has_std_locale("English_United States.1252")) {
             if(real_name) 
                 *real_name = "English_United States.1252";
@@ -54,7 +54,7 @@ std::string get_std_name(std::string const &name,std::string *real_name = 0)
         }
         return "";
     }
-    else if(name=="he_IL.UTF-8" || name == "he_IL.ISO-8859-8")  {
+    else if(name=="he_IL.UTF-8" || name == "he_IL.ISO8859-8")  {
         if(has_std_locale("Hebrew_Israel.1255")) {
             if(real_name) 
                 *real_name = "Hebrew_Israel.1255";

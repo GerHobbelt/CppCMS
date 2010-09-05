@@ -69,7 +69,7 @@ void test_char()
 
 
     #ifndef __APPLE__
-    std::string names[] = { "en_US.UTF-8", "en_US.ISO-8859-1" };
+    std::string names[] = { "en_US.UTF-8", "en_US.ISO8859-1" };
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);i++) {
         if(have_locale(names[i])) {
             name = names[i];

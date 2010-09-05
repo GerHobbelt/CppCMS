@@ -85,7 +85,7 @@ int main()
             TEST_A(char,how,source_s,dest_s);                                \
             if(eight_bit) {                                                    \
                 std::locale tmp=std::locale();                                \
-                std::locale::global(gen("en_US.ISO-8859-1"));                \
+                std::locale::global(gen("en_US.ISO8859-1"));                \
                 TEST_A(char,how,to<char>(source_s),to<char>(dest_s));        \
                 std::locale::global(tmp);                                    \
             }                                                                \

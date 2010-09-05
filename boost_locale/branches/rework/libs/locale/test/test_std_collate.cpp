@@ -66,7 +66,7 @@ void test_char()
 
     std::string name;
 
-    std::string names[] = { "en_US.UTF-8", "en_US.ISO-8859-1" };
+    std::string names[] = { "en_US.UTF-8", "en_US.ISO8859-1" };
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);i++) {
         name = get_std_name(names[i]);
         if(!name.empty()) {

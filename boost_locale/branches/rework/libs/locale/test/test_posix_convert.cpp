@@ -48,7 +48,7 @@ void test_char()
         std::cout << "- en_US.UTF-8 is not supported, skipping" << std::endl;
     }
 
-    name = "en_US.ISO-8859-1";
+    name = "en_US.ISO8859-1";
     if(have_locale(name)) {
         std::cout << "Testing " << name << std::endl;
         std::locale l=gen(name);
@@ -56,7 +56,7 @@ void test_char()
         test_one<CharType>(l,"Façade","façade","FAÇADE");
     }
     else {
-        std::cout << "- en_US.ISO-8859-1 is not supported, skipping" << std::endl;
+        std::cout << "- en_US.ISO8859-1 is not supported, skipping" << std::endl;
     }
     
     name = "tr_TR.UTF-8";

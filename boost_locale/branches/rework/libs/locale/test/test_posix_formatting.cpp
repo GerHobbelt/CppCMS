@@ -193,9 +193,9 @@ int main()
         }
         {
             std::cout << "en_US.Latin-1 locale" << std::endl;
-            std::string name = "en_US.ISO-8859-1";
+            std::string name = "en_US.ISO8859-1";
             if(!have_locale(name)) {
-                std::cout << "en_US.ISO-8859-8 not supported" << std::endl;
+                std::cout << "en_US.ISO8859-8 not supported" << std::endl;
             }
             else {
                 std::locale l1=gen(name);
@@ -230,7 +230,7 @@ int main()
         }
         {
             std::cout << "he_IL.ISO locale" << std::endl;
-            std::string name = "he_IL.ISO-8859-8";
+            std::string name = "he_IL.ISO8859-8";
             if(!have_locale(name)) {
                 std::cout << name <<" not supported" << std::endl;
             }

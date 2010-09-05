@@ -320,7 +320,7 @@ int main(int argc,char **argv)
                 g.add_messages_path("./");
 
             
-            std::string locales[] = { "he_IL.UTF-8", "he_IL.ISO-8859-8" };
+            std::string locales[] = { "he_IL.UTF-8", "he_IL.ISO8859-8" };
 
             for(unsigned i=0;i<sizeof(locales)/sizeof(locales[0]);i++){
                 std::locale l=g(locales[i]);

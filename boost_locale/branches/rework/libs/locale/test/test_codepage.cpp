@@ -113,9 +113,9 @@ void test_for_char()
     }
     
     if(test_iso) {
-        std::cout << "    ISO-8859-8" << std::endl;
+        std::cout << "    ISO8859-8" << std::endl;
         test_ok<Char>("hello \xf9\xec\xe5\xed",g(he_il_8bit),to<Char>("hello שלום"));
-        std::cout << "    ISO-8859-1" << std::endl;
+        std::cout << "    ISO8859-1" << std::endl;
         test_ok<Char>(to<char>("grüße\nn i"),g(en_us_8bit),to<Char>("grüße\nn i"));
         test_wfail<Char>("grüßen שלום",g(en_us_8bit),7);
     }
@@ -147,7 +147,7 @@ void test_pos(std::string source,std::basic_string<Char> target,std::string enco
 {
     using namespace boost::locale::conv;
     boost::locale::generator g;
-    std::locale l= encoding == "ISO-8859-8" ? g("he_IL."+encoding) : g("en_US."+encoding);
+    std::locale l= encoding == "ISO8859-8" ? g("he_IL."+encoding) : g("en_US."+encoding);
     TEST(to_utf<Char>(source,encoding)==target);
     TEST(to_utf<Char>(source.c_str(),encoding)==target);
     TEST(to_utf<Char>(source.c_str(),source.c_str()+source.size(),encoding)==target);
@@ -228,20 +228,20 @@ void test_with_0()
 {
     std::string a("abc\0\0 yz\0",3+2+3+1);
     TEST(boost::locale::conv::from_utf<Char>(boost::locale::conv::to_utf<Char>(a,"UTF-8"),"UTF-8") == a);
-    TEST(boost::locale::conv::from_utf<Char>(boost::locale::conv::to_utf<Char>(a,"ISO-8859-1"),"ISO-8859-1") == a);
+    TEST(boost::locale::conv::from_utf<Char>(boost::locale::conv::to_utf<Char>(a,"ISO8859-1"),"ISO8859-1") == a);
 }
 
 
 template<typename Char>
 void test_to()
 {
-    test_pos<Char>(to<char>("grüßen"),utf<Char>("grüßen"),"ISO-8859-1");
-    test_pos<Char>("\xf9\xec\xe5\xed",utf<Char>("שלום"),"ISO-8859-8");
+    test_pos<Char>(to<char>("grüßen"),utf<Char>("grüßen"),"ISO8859-1");
+    test_pos<Char>("\xf9\xec\xe5\xed",utf<Char>("שלום"),"ISO8859-8");
     test_pos<Char>("grüßen",utf<Char>("grüßen"),"UTF-8");
     test_pos<Char>("abc\"\xf0\xa0\x82\x8a\"",utf<Char>("abc\"\xf0\xa0\x82\x8a\""),"UTF-8");
     
     test_to_neg<Char>("g\xFFrüßen",utf<Char>("grüßen"),"UTF-8");
-    test_from_neg<Char>(utf<Char>("hello שלום"),"hello ","ISO-8859-1");
+    test_from_neg<Char>(utf<Char>("hello שלום"),"hello ","ISO8859-1");
  
     test_with_0<Char>();
 }
@@ -263,13 +263,13 @@ int main()
             boost::locale::localization_backend_manager::global(tmp_backend);
             
             if(def[type]=="std") {
-                en_us_8bit = get_std_name("en_US.ISO-8859-1");
-                he_il_8bit = get_std_name("he_IL.ISO-8859-8");
+                en_us_8bit = get_std_name("en_US.ISO8859-1");
+                he_il_8bit = get_std_name("he_IL.ISO8859-8");
                 ja_jp_shiftjis = get_std_name("ja_JP.SJIS");
             }
             else {
-                en_us_8bit = "en_US.ISO-8859-1";
-                he_il_8bit = "he_IL.ISO-8859-8";
+                en_us_8bit = "en_US.ISO8859-1";
+                he_il_8bit = "he_IL.ISO8859-8";
                 ja_jp_shiftjis = "ja_JP.SJIS";
             }
 

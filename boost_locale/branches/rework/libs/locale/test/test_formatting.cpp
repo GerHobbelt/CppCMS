@@ -341,9 +341,9 @@ int main()
         std::cout << "Testing char, UTF-8" << std::endl;
         test_manip<char>();
         test_format<char>();
-        std::cout << "Testing char, ISO-8859-1" << std::endl;
-        test_manip<char>("ISO-8859-1");
-        test_format<char>("ISO-8859-1");
+        std::cout << "Testing char, ISO8859-1" << std::endl;
+        test_manip<char>("ISO8859-1");
+        test_format<char>("ISO8859-1");
 
         #ifndef BOOST_NO_STD_WSTRING
         std::cout << "Testing wchar_t" << std::endl;
