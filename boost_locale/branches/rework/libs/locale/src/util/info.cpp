@@ -22,7 +22,8 @@ namespace util {
     class simple_info : public info {
     public:
         simple_info(std::string const &name,size_t refs = 0) :
-            info(refs)
+            info(refs),
+            name_(name)
         {
             d.parse(name);
         }
@@ -37,6 +38,8 @@ namespace util {
                 return d.variant;
             case encoding_property:
                 return d.encoding;
+            case name_property:
+                return name_;
             default:
                 return "";
             };
@@ -53,6 +56,7 @@ namespace util {
         }
     private:
         locale_data d;
+        std::string name_;
     };
     
     std::locale create_info(std::locale const &in,std::string const &name)

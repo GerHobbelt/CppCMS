@@ -177,8 +177,15 @@ Of course we can specify locale manually
     // Use English, United States locale
 
 
-**Note:** Even if your application uses wide strings anywhere it is recommended to specify
-8-bit encoding that would be used for all wide stream IO operations like `wcout` or `wfstream`.
+**Note:** 
+
+-   Even if your application uses wide strings anywhere, you should specify
+    8-bit encoding that would be used for all wide stream IO operations like `wcout` or `wfstream`,
+
+-   The default locale is defined by environment variables `LC_CTYPE`, `LC_ALL`, `LANG`
+    in that precedence (i.e. `LC_CTYPE` first and `LANG` last). On Windows
+    it also queries the `LOCALE_USER_DEFAULT` option in Win32 API when this variables
+    are not set.
 
 **Tip:** Prefer using UTF-8 Unicode encoding over 8-bit encodings like ISO-8859-X ones.
 
@@ -1544,6 +1551,16 @@ There are several reasons:
 
 Thus, at this point, `ptime` is not supported for formatting localized date and time.
 
+### Why POSIX locales names are used and not something like BCP-47 IETF language tag?
+
+There are several reasons:
+
+- POSIX locale names have very important feature: character encoding. When you specify, for example fr-FR
+do not actually know how the text should be encoded UTF-8, ISO-8859-1, ISO-8859-15 or maybe Windows-1252.
+This may differ between different operating systems and depend on current installation. So it is critical
+to provide all required information.
+- ICU fully understands POSIX locales and know how to treat them correctly.
+- They are native locale names for most operating systems APIs (with exception of windows)
 
 
 ## Glossary

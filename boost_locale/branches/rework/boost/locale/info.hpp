@@ -38,7 +38,8 @@ namespace boost {
                 language_property,  ///< ISO 639 language id
                 country_property,   ///< ISO 3166 country id
                 variant_property,   ///< Variant for locale
-                encoding_property   ///< encoding name
+                encoding_property,   ///< encoding name
+                name_property       ///< locale name
             } string_propery;
 
             ///
@@ -72,22 +73,30 @@ namespace boost {
             ///
             /// Get locale variant
             ///
-            virtual std::string variant() const
+            std::string variant() const
             {
                 return get_string_property(variant_property);
             }
             ///
             /// Get encoding
             ///
-            virtual std::string encoding() const
+            std::string encoding() const
             {
                 return get_string_property(encoding_property);
             }
 
             ///
+            /// Get the name of the locale, like en_US.UTF-8
+            ///
+            std::string name() const
+            {
+                return get_string_property(name_property);
+            }
+
+            ///
             /// Is underlying encoding is UTF-8 (for char streams and strings)
             ///
-            virtual bool utf8() const
+            bool utf8() const
             {
                 return get_ineger_property(utf8_property) != 0;
             }
