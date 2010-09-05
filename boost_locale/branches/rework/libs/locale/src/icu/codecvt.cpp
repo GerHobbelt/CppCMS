@@ -14,7 +14,6 @@
 #include <unicode/ucnv_err.h>
 #include "../util/codecvt_converter.hpp"
 
-
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
 #endif
@@ -27,7 +26,8 @@ namespace impl_icu {
     class uconv_converter : public util::base_converter {
     public:
        
-        uconv_converter(std::string const &encoding) 
+        uconv_converter(std::string const &encoding) :
+            encoding_(encoding)
         {
             UErrorCode err=U_ZERO_ERROR;
             cvt_ = ucnv_open(encoding.c_str(),&err);
@@ -58,20 +58,7 @@ namespace impl_icu {
 
         virtual uconv_converter *clone() const
         {
-            char buf[U_CNV_SAFECLONE_BUFFERSIZE];
-            ::int32_t size=U_CNV_SAFECLONE_BUFFERSIZE;
-            UErrorCode err=U_ZERO_ERROR;
-            UConverter *cvt = ucnv_safeClone(cvt_,buf,&size,&err);
-            try {
-                check_and_throw_icu_error(err);
-                return new uconv_converter(*this);
-            }
-            catch(...) {
-                if(cvt)
-                    ucnv_close(cvt);
-                throw;
-            }
-            
+            return new uconv_converter(encoding_);
         }
 
         uint32_t to_unicode(char const *&begin,char const *end)
@@ -116,6 +103,7 @@ namespace impl_icu {
         }
 
     private:
+        std::string encoding_;
         UConverter *cvt_;
         int max_len_;
     };
@@ -125,8 +113,11 @@ namespace impl_icu {
         std::auto_ptr<util::base_converter> cvt;
         if(conv::impl::normalize_encoding(encoding.c_str())=="utf8")
             cvt = util::create_utf8_converter(); 
-        else
-            cvt.reset(new uconv_converter(encoding));
+        else {
+            cvt = util::create_simple_converter(encoding);
+            if(!cvt.get())
+                cvt.reset(new uconv_converter(encoding));
+        }
         return util::create_codecvt(in,cvt,type);
     }
 

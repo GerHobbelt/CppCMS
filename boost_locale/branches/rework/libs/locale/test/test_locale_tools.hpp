@@ -76,6 +76,14 @@ std::string get_std_name(std::string const &name,std::string *real_name = 0)
             return name;
         }
     }
+    if(name == "ja_JP.SJIS") {
+        if(has_std_locale("Japanese_Japan.932")) {
+            if(real_name) 
+                *real_name = "Japanese_Japan.932";
+            return name;
+        }
+        return "";
+    }
     #endif
     return "";
 }

@@ -196,6 +196,7 @@ set(BOOST_LOCALE_SRC
 	libs/locale/src/util/info.cpp
 	libs/locale/src/util/locale_data.cpp
 	libs/locale/src/util/default_locale.cpp
+	libs/locale/src/util/codecvt_converter.cpp
 	
 	)
 

@@ -9,12 +9,15 @@
 #include <boost/locale/generator.hpp>
 #include <boost/locale/encoding.hpp>
 
+#include "../encoding/conv.hpp"
+
 #include "codecvt_converter.hpp"
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
 #endif
 
 
+#include <string.h>
 #include <vector>
 #include <algorithm>
 
@@ -287,9 +290,10 @@ namespace util {
     std::auto_ptr<base_converter> create_simple_converter(std::string const &encoding)
     {
         std::auto_ptr<base_converter> res;
-       if(std::binary_search( simple_encoding_table,
+        std::string norm = conv::impl::normalize_encoding(encoding.c_str());
+       if(std::binary_search<char const **>( simple_encoding_table,
                         simple_encoding_table + sizeof(simple_encoding_table)/sizeof(char const *),
-                        encoding.c_str(),
+                        norm.c_str(),
                         compare_strings))
         {
             res.reset(new simple_converter(encoding));

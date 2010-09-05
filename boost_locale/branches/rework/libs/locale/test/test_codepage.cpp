@@ -16,9 +16,11 @@
 
 bool test_iso;
 bool test_utf;
+bool test_sjis;
 
 std::string he_il_8bit;
 std::string en_us_8bit;
+std::string ja_jp_shiftjis;
 
 
 template<typename Char>
@@ -116,6 +118,12 @@ void test_for_char()
         std::cout << "    ISO-8859-1" << std::endl;
         test_ok<Char>(to<char>("grüße\nn i"),g(en_us_8bit),to<Char>("grüße\nn i"));
         test_wfail<Char>("grüßen שלום",g(en_us_8bit),7);
+    }
+
+    if(test_sjis) {
+        std::cout << "    Shift-JIS" << std::endl;
+        test_ok<Char>("\x93\xfa\x96\x7b",g(ja_jp_shiftjis),
+                boost::locale::conv::to_utf<Char>("\xe6\x97\xa5\xe6\x9c\xac","UTF-8"));  // Japan
     }
 }
 void test_wide_io()
@@ -257,18 +265,25 @@ int main()
             if(def[type]=="std") {
                 en_us_8bit = get_std_name("en_US.ISO-8859-1");
                 he_il_8bit = get_std_name("he_IL.ISO-8859-8");
+                ja_jp_shiftjis = get_std_name("ja_JP.SJIS");
             }
             else {
                 en_us_8bit = "en_US.ISO-8859-1";
                 he_il_8bit = "he_IL.ISO-8859-8";
+                ja_jp_shiftjis = "ja_JP.SJIS";
             }
 
             std::cout << "Testing for backend " << def[type] << std::endl;
 
             test_iso = true;
             if(def[type]=="std" && (he_il_8bit.empty() || en_us_8bit.empty())) {
-                std::cout << "No ISO locales availible, passing" << std::endl;
+                std::cout << "no iso locales availible, passing" << std::endl;
                 test_iso = false;
+            }
+            test_sjis = true;
+            if(def[type]=="std" && ja_jp_shiftjis.empty()) {
+                std::cout << "no ShiftJIS locales availible, passing" << std::endl;
+                test_sjis = false;
             }
 
             test_utf = def[type]!="std" || (!get_std_name("en_US.UTF-8").empty() && !get_std_name("he_IL.UTF-8").empty());

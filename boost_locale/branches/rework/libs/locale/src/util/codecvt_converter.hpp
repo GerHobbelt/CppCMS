@@ -36,6 +36,7 @@ namespace util {
     };
 
     std::auto_ptr<base_converter> create_utf8_converter();
+    std::auto_ptr<base_converter> create_simple_converter(std::string const &encoding);
 
     std::locale create_codecvt(std::locale const &in,std::auto_ptr<base_converter> cvt,character_facet_type type);
 
