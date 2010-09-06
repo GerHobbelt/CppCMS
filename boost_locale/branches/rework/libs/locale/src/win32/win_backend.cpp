@@ -14,6 +14,7 @@
 #include "../util/default_locale.hpp"
 #include "../util/locale_data.hpp"
 #include "../util/info.hpp"
+#include "../util/codecvt_converter.hpp"
 #include "api.hpp"
 
 namespace boost {

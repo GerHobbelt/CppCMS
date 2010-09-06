@@ -35,8 +35,8 @@ namespace util {
         virtual uint32_t from_unicode(uint32_t u,char *begin,char const *end) = 0;
     };
 
-    std::auto_ptr<base_converter> create_utf8_converter();
-    std::auto_ptr<base_converter> create_simple_converter(std::string const &encoding);
+    BOOST_LOCALE_DECL std::auto_ptr<base_converter> create_utf8_converter();
+    BOOST_LOCALE_DECL std::auto_ptr<base_converter> create_simple_converter(std::string const &encoding);
 
     std::locale create_codecvt(std::locale const &in,std::auto_ptr<base_converter> cvt,character_facet_type type);
 

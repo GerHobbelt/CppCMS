@@ -302,7 +302,9 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale"
 set(LOCALE_TESTS
 		test_codepage
 		test_message
-		test_ios_prop)
+		test_ios_prop
+		test_codepage_converter
+		)
 
 if(NOT DISABLE_STD_BACKEND)
 	set(LOCALE_TESTS ${LOCALE_TESTS}

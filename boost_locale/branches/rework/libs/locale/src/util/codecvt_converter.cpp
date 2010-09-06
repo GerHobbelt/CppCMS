@@ -72,7 +72,9 @@ namespace util {
             }
             switch(len) {
             case 1:
-                break;
+                if(seq0 <= 0x7F)
+                    break;
+                return illegal;
             case 2: // non-overloading 2 bytes
                 if( 0xC2 <= seq0 && seq0 <= 0xDF
                     && 0x80 <= seq1 && seq1<= 0xBF)
