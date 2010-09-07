@@ -39,17 +39,17 @@ char *make4(unsigned v)
 }
 
 
-bool test_to(boost::locale::util::base_converter &cvt,char const *s,uint32_t codepoint)
+bool test_to(boost::locale::util::base_converter &cvt,char const *s,unsigned codepoint)
 {
     size_t len = strlen(s);
     char const *end = s + len;
     return cvt.to_unicode(s,end) == codepoint;
 }
 
-bool test_from(boost::locale::util::base_converter &cvt,uint32_t codepoint,char const *str)
+bool test_from(boost::locale::util::base_converter &cvt,unsigned codepoint,char const *str)
 {
     char buf[32];
-    uint32_t res = cvt.from_unicode(codepoint,buf,buf+sizeof(buf));
+    unsigned res = cvt.from_unicode(codepoint,buf,buf+sizeof(buf));
     if(res == boost::locale::util::base_converter::illegal) {
         return str == 0;
     }
@@ -73,8 +73,8 @@ int main()
         std::cout << "Test UTF-8" << std::endl;
         std::cout << "- From UTF-8" << std::endl;
 
-        static const uint32_t illegal=0xFFFFFFFF;
-        static const uint32_t incomplete=0xFFFFFFFE;
+        static const unsigned illegal=0xFFFFFFFF;
+        static const unsigned incomplete=0xFFFFFFFE;
 
         cvt = create_utf8_converter();
         TEST(cvt.get());

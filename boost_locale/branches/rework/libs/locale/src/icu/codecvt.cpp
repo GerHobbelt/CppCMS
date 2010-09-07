@@ -64,11 +64,16 @@ namespace impl_icu {
         uint32_t to_unicode(char const *&begin,char const *end)
         {
             UErrorCode err=U_ZERO_ERROR;
-            UChar32 c=ucnv_getNextUChar(cvt_,&begin,end,&err);
-            if(err==U_INDEX_OUTOFBOUNDS_ERROR)
+            char const *tmp = begin;
+            UChar32 c=ucnv_getNextUChar(cvt_,&tmp,end,&err);
+            if(err==U_INDEX_OUTOFBOUNDS_ERROR || err == U_TRUNCATED_CHAR_FOUND) {
                 return incomplete;
-            if(U_FAILURE(err))
+            }
+            if(U_FAILURE(err)) {
                 return illegal;
+            }
+
+            begin = tmp;
             return c;
         }
 
