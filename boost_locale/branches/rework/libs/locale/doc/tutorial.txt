@@ -1200,7 +1200,7 @@ Notes:
 </tr>
 <tr>
   <th>Collation</th>
-  <td>Full</td><td>Linux - 1 level<br/>Mac OS X - No</td><td>3 levels</td><td>1 level</td>
+  <td>Full</td><td>Linux - 1 level<br/>Mac OS X - broken</td><td>3 levels</td><td>1 level</td>
 </tr>
 <tr>
   <th>Calendar</th>
@@ -1561,6 +1561,29 @@ This may differ between different operating systems and depend on current instal
 to provide all required information.
 - ICU fully understands POSIX locales and know how to treat them correctly.
 - They are native locale names for most operating systems APIs (with exception of windows)
+
+## Running Examples under Microsoft Windows
+
+All the examples that come with Boost.Locale are oriented for UTF-8 encoding, which is default
+encoding on most Unix platforms and they would not behave correctly under Microsoft Windows
+as default locale is rather 8-bit codepage like 1252.
+
+Boost.Locale takes the default locale for environment variable LANG as well, so in order to 
+use UTF-8 encoding under Windows console and see the output correctly do following:
+
+1. Open `cmd` window
+2. Change default font to TrueType font: go to properties-\>font (right click on title-bar-\>properties-\>font) and
+change font to true type font like Lucida Console
+3. Change default codepage to 65001 (UTF-8) by running `chcp 65001`
+4. Set environment variable LANG to any locale you need, for example: `set LANG=ru_RU.UTF-8`
+
+Now all examples should display UTF-8 characters correctly (if the font supports them)
+
+**Note for Visual Studio users:** Microsoft Visual studio assumes that the encoding of source files uses ANSI codepage,
+like 1252. However all examples use UTF-8 encoding by default, so wide character examples would
+not work under MSVC as-is. In order to enforce it to treat source files encoding as UTF-8 you need to
+convert the files to UTF-8 files with BOM, it can be simply done be re-saving them from Notepad
+which adds BOM to UTF-8 files by default.
 
 
 ## Glossary
