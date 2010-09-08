@@ -344,6 +344,9 @@ namespace util {
 
         virtual std::codecvt_base::result do_unshift(std::mbstate_t &s,char *from,char *to,char *&next) const
         {
+            uint16_t &state = *reinterpret_cast<uint16_t *>(&s);
+            if(state != 0)
+                return std::codecvt_base::error;
             next=from;
             return std::codecvt_base::ok;
         }
@@ -516,7 +519,7 @@ namespace util {
         // Implementation for UTF-16
         //
         std::codecvt_base::result
-        do_real_in( std::mbstate_t &state,
+        do_real_in( std::mbstate_t &std_state,
                     char const *from,
                     char const *from_end,
                     char const *&from_next,
@@ -534,8 +537,14 @@ namespace util {
                 cvt = cvtp.get();
             }
             std::codecvt_base::result r=std::codecvt_base::ok;
+            uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
+                if(state != 0) {
+                    *to++ = state;
+                    state = 0;
+                    continue;
+                }
                 uint32_t ch=cvt->to_unicode(from,from_end);
                 if(ch==base_converter::illegal) {
                     r=std::codecvt_base::error;
@@ -548,16 +557,21 @@ namespace util {
                 if(ch <= 0xFFFF) {
                     *to++=ch;
                 }
-                else { /// can't handle surrogates
-                    r=std::codecvt_base::error;
-                    break;
+                else {
+                    ch-=0x10000;
+                    uint16_t vh = ch >> 10;
+                    uint16_t vl = ch & 0x3FF;
+                    uint16_t w1 = vh + 0xD800;
+                    uint16_t w2 = vh + 0xDC00;
+                    *to++ = w1;
+                    state = w2;
                 }
             }
             from_next=from;
             to_next=to;
             if(r!=std::codecvt_base::ok)
                 return r;
-            if(from!=from_end)
+            if(from!=from_end || state!=0)
                 return std::codecvt_base::partial;
             return r;
         }
@@ -565,7 +579,7 @@ namespace util {
         //encoding// Implementation for UTF-16
         //
         std::codecvt_base::result
-        do_real_out(std::mbstate_t &state,
+        do_real_out(std::mbstate_t &std_state,
                     uint16_t const *from,
                     uint16_t const *from_end,
                     uint16_t const *&from_next,
@@ -583,15 +597,33 @@ namespace util {
                 cvt = cvtp.get();
             }
             std::codecvt_base::result r=std::codecvt_base::ok;
+            uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
-                uint32_t ch=*from;
-                if(0xD800 <= ch && ch<=0xDFFF) {
-                    r=std::codecvt_base::error;
-                    // Can't handle surragates
-                    break;
+                uint32_t ch=0;
+                if(state != 0) {
+                    uint16_t w1 = state;
+                    uint16_t w2 = *from;
+                    if(0xDC00 <= w2 && w2<=0xDFFF) {
+                        uint16_t vh = w1 - 0xD800;
+                        uint16_t vl = w2 - 0xDC00;
+                        ch=((uint32_t(vh) << 10)  | vl) + 0x10000;
+                    }
+                    else {
+                        // Invalid surrogate
+                        r=std::codecvt_base::error;
+                        break;
+                    }
                 }
-                        
+                else {
+                    ch = *from;
+                    if(0xD800 <= ch && ch<=0xD800) {
+                        state = ch;
+                        from++;
+                        continue;
+                    }
+                }
+                
                 uint32_t len=cvt->from_unicode(ch,to,to_end);
                 if(len==base_converter::illegal) {
                     r=std::codecvt_base::error;
@@ -601,6 +633,7 @@ namespace util {
                     r=std::codecvt_base::partial;
                     break;
                 }
+                state = 0;
                 to+=len;
                 from++;
             }
@@ -617,6 +650,8 @@ namespace util {
         std::auto_ptr<base_converter> cvt_;
 
     };
+
+    static const char ensure_mbstate_size_is_at_least_2[sizeof(mbstate_t) >= 2 ? 1 : -1] = {0};
     
     template<>
     class code_converter<char> : public std::codecvt<char,char,mbstate_t>

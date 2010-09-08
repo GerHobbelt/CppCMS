@@ -100,13 +100,9 @@ void test_for_char()
         std::cout << "    UTF-8" << std::endl;
         test_ok<Char>("grüße\nn i",g("en_US.UTF-8"));
         test_rfail<Char>("abc\xFF\xFF",g("en_US.UTF-8"),3);
-        if(sizeof(Char) > 2)  {
-            test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
-        }
-        else {
-            test_rfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
-            test_wfail<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8"),0);
-        }
+        
+        test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
+        test_ok<Char>("\xf0\xa0\x82\x8a\xf0\xa0\x82\x8a",g("en_US.UTF-8")); // U+2008A
     }
     else {
         std::cout << "    UTF-8 Not supported " << std::endl;
