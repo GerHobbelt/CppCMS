@@ -100,9 +100,17 @@ void test_for_char()
         std::cout << "    UTF-8" << std::endl;
         test_ok<Char>("grüße\nn i",g("en_US.UTF-8"));
         test_rfail<Char>("abc\xFF\xFF",g("en_US.UTF-8"),3);
-        
+        std::cout << "    Testing codepoints above 0xFFFF" << std::endl;
+        std::cout << "      Single U+2008A" << std::endl;
+        test_ok<Char>("\xf0\xa0\x82\x8a",g("en_US.UTF-8")); // U+2008A
+        std::cout << "      Single U+2008A withing text" << std::endl;
         test_ok<Char>("abc\"\xf0\xa0\x82\x8a\"",g("en_US.UTF-8")); // U+2008A
-        test_ok<Char>("\xf0\xa0\x82\x8a\xf0\xa0\x82\x8a",g("en_US.UTF-8")); // U+2008A
+        std::string one = "\xf0\xa0\x82\x8a";
+        std::string res;
+        for(unsigned i=0;i<1000;i++)
+            res+=one;
+        std::cout << "      U+2008A x 1000" << std::endl;
+        test_ok<Char>(res.c_str(),g("en_US.UTF-8")); // U+2008A
     }
     else {
         std::cout << "    UTF-8 Not supported " << std::endl;

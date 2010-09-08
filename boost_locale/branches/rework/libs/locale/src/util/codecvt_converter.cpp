@@ -21,6 +21,12 @@
 #include <vector>
 #include <algorithm>
 
+//#define DEBUG_CODECVT
+
+#ifdef DEBUG_CODECVT            
+#include <iostream>
+#endif
+
 namespace boost {
 namespace locale {
 namespace util {
@@ -345,6 +351,9 @@ namespace util {
         virtual std::codecvt_base::result do_unshift(std::mbstate_t &s,char *from,char *to,char *&next) const
         {
             uint16_t &state = *reinterpret_cast<uint16_t *>(&s);
+#ifdef DEBUG_CODECVT            
+            std::cout << "Entering unshift " << std::hex << state << std::dec << std::endl;
+#endif            
             if(state != 0)
                 return std::codecvt_base::error;
             next=from;
@@ -540,11 +549,12 @@ namespace util {
             uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
-                if(state != 0) {
-                    *to++ = state;
-                    state = 0;
-                    continue;
-                }
+#ifdef DEBUG_CODECVT            
+                std::cout << "Entering IN--------------" << std::endl;
+                std::cout << "State " << std::hex << state <<std::endl;
+                std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
+#endif           
+                char const *from_saved = from;
                 uint32_t ch=cvt->to_unicode(from,from_end);
                 if(ch==base_converter::illegal) {
                     r=std::codecvt_base::error;
@@ -562,17 +572,41 @@ namespace util {
                     uint16_t vh = ch >> 10;
                     uint16_t vl = ch & 0x3FF;
                     uint16_t w1 = vh + 0xD800;
-                    uint16_t w2 = vh + 0xDC00;
-                    *to++ = w1;
-                    state = w2;
+                    uint16_t w2 = vl + 0xDC00;
+                    if(state == 0) {
+                        from = from_saved;
+                        *to++ = w1;
+                        state = 1;
+                    }
+                    else {
+                        *to++ = w2;
+                        state = 0;
+                    }
                 }
             }
             from_next=from;
             to_next=to;
-            if(r!=std::codecvt_base::ok)
-                return r;
-            if(from!=from_end || state!=0)
-                return std::codecvt_base::partial;
+            if(r == std::codecvt_base::ok && (from!=from_end || state!=0))
+                r = std::codecvt_base::partial;
+#ifdef DEBUG_CODECVT            
+            std::cout << "Returning ";
+            switch(r) {
+            case std::codecvt_base::ok:
+                std::cout << "ok" << std::endl;
+                break;
+            case std::codecvt_base::partial:
+                std::cout << "partial" << std::endl;
+                break;
+            case std::codecvt_base::error:
+                std::cout << "error" << std::endl;
+                break;
+            default:
+                std::cout << "other" << std::endl;
+                break;
+            }
+            std::cout << "State " << std::hex << state <<std::endl;
+            std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
+#endif            
             return r;
         }
 
@@ -600,6 +634,11 @@ namespace util {
             uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
+#ifdef DEBUG_CODECVT            
+            std::cout << "Entering OUT --------------" << std::endl;
+            std::cout << "State " << std::hex << state <<std::endl;
+            std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
+#endif            
                 uint32_t ch=0;
                 if(state != 0) {
                     uint16_t w1 = state;
@@ -617,7 +656,7 @@ namespace util {
                 }
                 else {
                     ch = *from;
-                    if(0xD800 <= ch && ch<=0xD800) {
+                    if(0xD800 <= ch && ch<=0xDBFF) {
                         state = ch;
                         from++;
                         continue;
@@ -639,10 +678,27 @@ namespace util {
             }
             from_next=from;
             to_next=to;
-            if(r!=std::codecvt_base::ok)
-                return r;
-            if(from!=from_end)
-                return std::codecvt_base::partial;
+            if(r==std::codecvt_base::ok && from!=from_end)
+                r = std::codecvt_base::partial;
+#ifdef DEBUG_CODECVT            
+            std::cout << "Returning ";
+            switch(r) {
+            case std::codecvt_base::ok:
+                std::cout << "ok" << std::endl;
+                break;
+            case std::codecvt_base::partial:
+                std::cout << "partial" << std::endl;
+                break;
+            case std::codecvt_base::error:
+                std::cout << "error" << std::endl;
+                break;
+            default:
+                std::cout << "other" << std::endl;
+                break;
+            }
+            std::cout << "State " << std::hex << state <<std::endl;
+            std::cout << "Left in " << std::dec << from_end - from << " out " << to_end -to << std::endl;
+#endif            
             return r;
         }
         
