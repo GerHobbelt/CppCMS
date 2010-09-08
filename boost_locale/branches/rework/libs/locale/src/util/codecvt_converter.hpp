@@ -28,11 +28,26 @@ namespace util {
         virtual ~base_converter() 
         {
         }
-        virtual int max_len() const = 0;
-        virtual bool is_thread_safe() const = 0;
-        virtual base_converter *clone() const = 0;
-        virtual uint32_t to_unicode(char const *&begin,char const *end) = 0;
-        virtual uint32_t from_unicode(uint32_t u,char *begin,char const *end) = 0;
+        virtual int max_len() const 
+        {
+            return 1;
+        }
+        virtual bool is_thread_safe() const 
+        {
+            return false;
+        }
+        virtual base_converter *clone() const 
+        {
+            return new base_converter();
+        }
+        virtual uint32_t to_unicode(char const *&begin,char const *end) 
+        {
+            return illegal;
+        }
+        virtual uint32_t from_unicode(uint32_t u,char *begin,char const *end) 
+        {
+            return illegal;
+        }
     };
 
     BOOST_LOCALE_DECL std::auto_ptr<base_converter> create_utf8_converter();

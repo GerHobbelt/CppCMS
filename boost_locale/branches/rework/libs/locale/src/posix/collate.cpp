@@ -56,22 +56,19 @@ class collator : public std::collate<CharType> {
 public:
     typedef CharType char_type;
     typedef std::basic_string<char_type> string_type;
-    collator(locale_t l,size_t refs = 0) : 
-        std::collate<CharType>(refs)
+    collator(boost::shared_ptr<locale_t> l,size_t refs = 0) : 
+        std::collate<CharType>(refs),
+        lc_(l)
     {
-        lc_ = duplocale(l);
-        if(!lc_) 
-            throw std::bad_alloc();
     }
     virtual ~collator()
     {
-        freelocale(lc_);
     }
     virtual int do_compare(char_type const *lb,char_type const *le,char_type const *rb,char_type const *re) const
     {
         string_type left(lb,le-lb);
         string_type right(rb,re-rb);
-        int res = coll_traits<char_type>::coll(left.c_str(),right.c_str(),lc_);
+        int res = coll_traits<char_type>::coll(left.c_str(),right.c_str(),*lc_);
         if(res < 0)
             return -1;
         if(res > 0)
@@ -86,20 +83,20 @@ public:
     {
         string_type s(b,e-b);
         std::vector<char_type> buf((e-b)*2+1);
-        size_t n = coll_traits<char_type>::xfrm(&buf.front(),s.c_str(),buf.size(),lc_);
+        size_t n = coll_traits<char_type>::xfrm(&buf.front(),s.c_str(),buf.size(),*lc_);
         if(n>buf.size()) {
             buf.resize(n);
-            coll_traits<char_type>::xfrm(&buf.front(),s.c_str(),n,lc_);
+            coll_traits<char_type>::xfrm(&buf.front(),s.c_str(),n,*lc_);
         }
         return string_type(&buf.front(),n);
     }
 private:
-    locale_t lc_;
+    boost::shared_ptr<locale_t> lc_;
 };
 
 
 std::locale create_collate( std::locale const &in,
-                            locale_t lc,
+                            boost::shared_ptr<locale_t> lc,
                             character_facet_type type)
 {
     switch(type) {

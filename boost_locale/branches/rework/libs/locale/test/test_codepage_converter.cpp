@@ -8,6 +8,12 @@
 #include "test_locale.hpp"
 #include "test_locale_tools.hpp"
 #include "../src/util/codecvt_converter.hpp"
+#ifdef BOOST_LOCALE_WITH_ICU
+#include "../src/icu/codecvt.hpp"
+#endif
+#ifdef BOOST_LOCALE_WITH_ICONV
+#include "../src/posix/codecvt.hpp"
+#endif
 
 #include <string.h>
 
@@ -38,6 +44,9 @@ char *make4(unsigned v)
     return reinterpret_cast<char*>(buf);
 }
 
+static const unsigned illegal=0xFFFFFFFF;
+static const unsigned incomplete=0xFFFFFFFE;
+
 
 bool test_to(boost::locale::util::base_converter &cvt,char const *s,unsigned codepoint)
 {
@@ -58,9 +67,45 @@ bool test_from(boost::locale::util::base_converter &cvt,unsigned codepoint,char 
     }
 }
 
+bool test_incomplete(boost::locale::util::base_converter &cvt,unsigned codepoint,int len)
+{
+    char buf[32];
+    unsigned res = cvt.from_unicode(codepoint,buf,buf+len);
+    return res == incomplete;
+}
+
+
 
 #define TEST_TO(str,codepoint) TEST(test_to(*cvt,str,codepoint))
 #define TEST_FROM(str,codepoint) TEST(test_from(*cvt,codepoint,str))
+#define TEST_INC(codepoint,len) TEST(test_incomplete(*cvt,codepoint,len))
+
+void test_shiftjis(std::auto_ptr<boost::locale::util::base_converter> cvt)
+{
+        std::cout << "- Correct" << std::endl;
+        TEST_TO("a",'a');
+        TEST_TO("X",'X');
+        TEST_TO("\xCB",0xFF8b); // half width katakana Hi ヒ
+        TEST_TO("\x83\x71",0x30d2); // Full width katakana Hi ヒ
+        TEST_TO("\x82\xd0",0x3072); // Full width hiragana Hi ひ
+
+        TEST_FROM("a",'a');
+        TEST_FROM("X",'X');
+        TEST_FROM("\xCB",0xFF8b); // half width katakana Hi ヒ
+        TEST_FROM("\x83\x71",0x30d2); // Full width katakana Hi ヒ
+        TEST_FROM("\x82\xd0",0x3072); // Full width hiragana Hi ひ
+
+        std::cout << "- Illegal/incomplete" << std::endl;
+        
+        TEST_TO("\xa0",illegal);
+        TEST_TO("\x82",incomplete);
+        TEST_TO("\x83\xf0",illegal);
+
+        TEST_INC(0x30d2,1); // Full width katakana Hi ヒ
+        TEST_INC(0x3072,1); // Full width hiragana Hi ひ
+        
+        TEST_FROM(0,0x5e9); // Hebrew ש not in ShiftJIS
+}
 
 
 int main()
@@ -73,8 +118,6 @@ int main()
         std::cout << "Test UTF-8" << std::endl;
         std::cout << "- From UTF-8" << std::endl;
 
-        static const unsigned illegal=0xFFFFFFFF;
-        static const unsigned incomplete=0xFFFFFFFE;
 
         cvt = create_utf8_converter();
         TEST(cvt.get());
@@ -167,8 +210,14 @@ int main()
         TEST_FROM("\x7f",0x7f);
         TEST_FROM("\xC2\x80",0x80);
         TEST_FROM("\xdf\xBF",0x7FF);
+        TEST_INC(0x7FF,1);
         TEST_FROM("\xe0\xa0\x80",0x800);
+        TEST_INC(0x800,2);
+        TEST_INC(0x800,1);
         TEST_FROM("\xef\xbf\xbf",0xFFFF);
+        TEST_INC(0x10000,3);
+        TEST_INC(0x10000,2);
+        TEST_INC(0x10000,1);
         TEST_FROM("\xf0\x90\x80\x80",0x10000);
         TEST_FROM("\xf4\x8f\xbf\xbf",0x10FFFF);
        
@@ -213,6 +262,21 @@ int main()
         TEST_FROM(0,0xe4);
         TEST_FROM(0,0xd0);
 
+        #ifdef BOOST_LOCALE_WITH_ICU
+        std::cout << "Testing Shift-JIS using ICU/uconv" << std::endl;
+
+        cvt = boost::locale::impl_icu::create_uconv_converter("Shift-JIS");
+        TEST(cvt.get());
+        test_shiftjis(cvt);
+        #endif
+
+        #ifdef BOOST_LOCALE_WITH_ICONV
+        std::cout << "Testing Shift-JIS using POSIX/iconv" << std::endl;
+
+        cvt = boost::locale::impl_posix::create_iconv_converter("Shift-JIS");
+        TEST(cvt.get());
+        test_shiftjis(cvt);
+        #endif
 
     }
     catch(std::exception const &e) {

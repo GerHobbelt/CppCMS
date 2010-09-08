@@ -13,6 +13,7 @@
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 #include "../util/codecvt_converter.hpp"
+#include "codecvt.hpp"
 
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
@@ -66,7 +67,8 @@ namespace impl_icu {
             UErrorCode err=U_ZERO_ERROR;
             char const *tmp = begin;
             UChar32 c=ucnv_getNextUChar(cvt_,&tmp,end,&err);
-            if(err==U_INDEX_OUTOFBOUNDS_ERROR || err == U_TRUNCATED_CHAR_FOUND) {
+            ucnv_reset(cvt_);
+            if(err == U_TRUNCATED_CHAR_FOUND) {
                 return incomplete;
             }
             if(U_FAILURE(err)) {
@@ -95,10 +97,11 @@ namespace impl_icu {
             }
             UErrorCode err=U_ZERO_ERROR;
             int olen = ucnv_fromUChars(cvt_,begin,end-begin,code_point,len,&err);
+            ucnv_reset(cvt_);
+            if(err == U_BUFFER_OVERFLOW_ERROR)
+                return incomplete;
             if(U_FAILURE(err))
                 return illegal;
-            if(olen > end-begin)
-                return incomplete;
             return olen;
         }
 
@@ -112,6 +115,19 @@ namespace impl_icu {
         UConverter *cvt_;
         int max_len_;
     };
+    
+    std::auto_ptr<util::base_converter> create_uconv_converter(std::string const &encoding)
+    {
+        std::auto_ptr<util::base_converter> cvt;
+        try {
+            cvt.reset(new uconv_converter(encoding));
+        }
+        catch(std::exception const &/*e*/)
+        {
+            // no encoding so we return empty pointer
+        }
+        return cvt;
+    }
 
     std::locale create_codecvt(std::locale const &in,std::string const &encoding,character_facet_type type)
     {
@@ -121,7 +137,7 @@ namespace impl_icu {
         else {
             cvt = util::create_simple_converter(encoding);
             if(!cvt.get())
-                cvt.reset(new uconv_converter(encoding));
+                cvt = create_uconv_converter(encoding);
         }
         return util::create_codecvt(in,cvt,type);
     }

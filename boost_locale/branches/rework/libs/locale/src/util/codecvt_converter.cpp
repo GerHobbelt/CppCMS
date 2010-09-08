@@ -631,6 +631,8 @@ namespace util {
 
     std::locale create_codecvt(std::locale const &in,std::auto_ptr<base_converter> cvt,character_facet_type type)
     {
+        if(!cvt.get())
+            cvt.reset(new base_converter());
         switch(type) {
         case char_facet:
             return std::locale(in,new code_converter<char>(cvt));

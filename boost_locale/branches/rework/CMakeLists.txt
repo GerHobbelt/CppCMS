@@ -215,6 +215,7 @@ if(NOT DISABLE_POSIX_BACKEND)
 		libs/locale/src/posix/collate.cpp
 		libs/locale/src/posix/converter.cpp
 		libs/locale/src/posix/numeric.cpp
+		libs/locale/src/posix/codecvt.cpp
 		libs/locale/src/posix/posix_backend.cpp
 	)
 endif()

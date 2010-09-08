@@ -26,7 +26,7 @@ namespace boost {
                                         character_facet_type type);
 
             std::locale create_collate( std::locale const &in,
-                                        locale_t lc,
+                                        boost::shared_ptr<locale_t> lc,
                                         character_facet_type type);
 
             std::locale create_formatting(  std::locale const &in,
@@ -35,6 +35,9 @@ namespace boost {
 
             std::locale create_parsing( std::locale const &in,
                                         boost::shared_ptr<locale_t> lc,
+                                        character_facet_type type);
+            std::locale create_codecvt( std::locale const &in,
+                                        std::string const &encoding,
                                         character_facet_type type);
 
         }

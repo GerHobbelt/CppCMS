@@ -12,12 +12,16 @@
 #include "all_generator.hpp"
 
 #include <iconv.h>
+#include <errno.h>
 #include <algorithm>
 
 #include <vector>
+#include "codecvt.hpp"
 namespace boost {
 namespace locale {
 namespace impl_posix {
+
+#ifdef BOOST_LOCALE_WITH_ICONV
     class mb2_iconv_converter : public util::base_converter {
     public:
        
@@ -85,6 +89,17 @@ namespace impl_posix {
                     return result[0];
                 }
             }
+            {   // maybe illegal single byte
+                char inseq[1] = {seq0};
+                char *inbuf = inseq;
+                size_t insize = 1;
+                uint32_t result[1] = { illegal };
+                size_t outsize = 4;
+                char *outbuf = reinterpret_cast<char*>(result);
+                size_t res = iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
+                if(res == size_t(-1) && errno==EILSEQ && insize == 1 && outsize == 4)
+                    return illegal;
+            }
             {   // maybe illegal or may be double byte
                 if(begin+1 == end)
                     return incomplete;
@@ -139,7 +154,7 @@ namespace impl_posix {
 
         void open(iconv_t &d,char const *to,char const *from)
         {
-            if(d==(iconv_t)(-1))
+            if(d!=(iconv_t)(-1))
                 return;
             d=iconv_open(to,from);
         }
@@ -154,6 +169,15 @@ namespace impl_posix {
                 return "UTF-32BE";
         }
 
+        static bool check(std::string const &encoding)
+        {
+            iconv_t d = iconv_open(encoding.c_str(),utf32_encoding());
+            if(d == (iconv_t)(-1))
+                return false;
+            iconv_close(d);
+            return true;
+        }
+
         virtual int max_len() const
         {
             return 2;
@@ -165,6 +189,22 @@ namespace impl_posix {
         iconv_t from_utf_;
     };
 
+    std::auto_ptr<util::base_converter> create_iconv_converter(std::string const &encoding)
+    {
+        std::auto_ptr<util::base_converter> cvt;
+        if(mb2_iconv_converter::check(encoding))
+            cvt.reset(new mb2_iconv_converter(encoding));
+        return cvt;
+    }
+
+#else // no iconv
+    std::auto_ptr<base_converter> create_iconv_converter(std::string const &/*encoding*/)
+    {
+        std::auto_ptr<util::base_converter> cvt;
+        return cvt;
+    }
+#endif
+
     std::locale create_codecvt(std::locale const &in,std::string const &encoding,character_facet_type type)
     {
         std::auto_ptr<util::base_converter> cvt;
@@ -173,7 +213,7 @@ namespace impl_posix {
         else {
             cvt = util::create_simple_converter(encoding);
             if(!cvt.get())
-                cvt.reset(new mb2_iconv_converter(encoding));
+                cvt = create_iconv_converter(encoding);
         }
         return util::create_codecvt(in,cvt,type);
     }

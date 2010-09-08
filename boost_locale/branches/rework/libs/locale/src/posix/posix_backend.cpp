@@ -16,6 +16,8 @@
 #include "../util/locale_data.hpp"
 #include "../util/info.hpp"
 
+#include <langinfo.h>
+
 namespace boost {
 namespace locale {
 namespace impl_posix { 
@@ -94,11 +96,13 @@ namespace impl_posix {
             case convert_facet:
                 return create_convert(base,lc_,type);
             case collation_facet:
-                return create_collate(base,*lc_,type);
+                return create_collate(base,lc_,type);
             case formatting_facet:
                 return create_formatting(base,lc_,type);
             case parsing_facet:
                 return create_parsing(base,lc_,type);
+            case codepage_facet:
+                return create_codecvt(base,nl_langinfo_l(CODESET,*lc_),type);
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;
