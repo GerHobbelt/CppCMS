@@ -12,9 +12,8 @@
 #include "all_generator.hpp"
 #include "posix_backend.hpp"
 
-#include "../util/default_locale.hpp"
 #include "../util/locale_data.hpp"
-#include "../util/info.hpp"
+#include <boost/locale/util.hpp>
 
 #include <langinfo.h>
 

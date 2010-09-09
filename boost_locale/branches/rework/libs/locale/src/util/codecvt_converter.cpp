@@ -11,7 +11,8 @@
 
 #include "../encoding/conv.hpp"
 
-#include "codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
+
 #ifdef BOOST_MSVC
 #  pragma warning(disable : 4244) // loose data 
 #endif

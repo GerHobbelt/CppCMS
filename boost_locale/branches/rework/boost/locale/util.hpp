@@ -5,19 +5,48 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_LOCALE_IMPL_UTIL_CODECVT_CONVERTER_HPP
-#define BOOST_LOCALE_IMPL_UTIL_CODECVT_CONVERTER_HPP
+#ifndef BOOST_LOCALE_UTIL_HPP
+#define BOOST_LOCALE_UTIL_HPP
 #include <locale>
 #include <boost/cstdint.hpp>
 #include <boost/locale/generator.hpp>
-#ifdef BOOST_MSVC
-#  pragma warning(disable : 4244) // loose data 
-#endif
 
 #include <vector>
 namespace boost {
 namespace locale {
+///
+/// \brief This namespace provides various utility function useful for Boost.Locale backends
+/// implementations
+///
 namespace util {
+    
+    ///
+    /// \brief Return default system locale name in POSIX format.
+    ///
+    /// This function tries to detect the locale using, LC_CTYPE, LC_ALL and LANG environment
+    /// variables in this order and if all of them unset, in POSIX platforms it returns "C"
+    /// 
+    /// On Windows additionally to check the above environment variables, this function
+    /// tries to creates locale name from ISO-339 and ISO-3199 country codes defined
+    /// for user default locale.
+    /// If \a use_utf8_on_windows is true it sets the encoding to UTF-8, otherwise, if system
+    /// locale supports ANSI code-page it defines the ANSI encoding like windows-1252, otherwise it fall-backs
+    /// to UTF-8 encoding if ANSI code-page is not available.
+    ///
+    BOOST_LOCALE_DECL
+    std::string get_system_locale(bool use_utf8_on_windows = false);
+
+    ///
+    /// \brief Installs information facet to locale in based on locale name \a name
+    ///
+    /// This function installs boost::locale::info facet into the locale \a in and returns
+    /// newly created locale.
+    ///
+    /// Note: all information is based only on parsing of string \a name;
+    ///
+    BOOST_LOCALE_DECL
+    std::locale create_info(std::locale const &in,std::string const &name); 
+
 
     ///
     /// \brief This class represent a simple stateless converter from UCS-4 and to UCS-4 for

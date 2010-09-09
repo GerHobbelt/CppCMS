@@ -12,7 +12,7 @@
 #include "uconv.hpp"
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
-#include "../util/codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
 #include "codecvt.hpp"
 
 #ifdef BOOST_MSVC

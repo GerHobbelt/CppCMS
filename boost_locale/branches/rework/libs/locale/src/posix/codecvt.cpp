@@ -9,7 +9,7 @@
 #include <boost/locale/encoding.hpp>
 #include <boost/shared_ptr.hpp>
 #include "../encoding/conv.hpp"
-#include "../util/codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
 #include "all_generator.hpp"
 
 #include <iconv.h>

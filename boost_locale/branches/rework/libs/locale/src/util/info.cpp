@@ -11,6 +11,7 @@
 #include <ios>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/info.hpp>
+#include <boost/locale/util.hpp>
 #include <sstream>
 #include <stdlib.h>
 

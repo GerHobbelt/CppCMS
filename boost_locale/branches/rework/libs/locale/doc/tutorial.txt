@@ -792,34 +792,12 @@ Boost.Iostreams filters or `std::wfstream`. For example:
 
 Would create file `hello.txt` encoded as UTF-8 with "שלום!" (shalom) in it.
 
-**Important Note**
-
-Boost.Locale codepage conversion facets do not support UTF-16 text outside of BMP (i.e. it supports only UCS-2).
-So if you want to provide full Unicode support do not use wide strings under platforms where `sizeof(wchar_t)==2` (i.e. Windows)
-or do not use these facets for character I/O.
-
 **Limitations:**
-
-1.  Standard does not provides any useful information about `std::mbstate_t` type that should be used for saving 
-    intermediate code-page conversion states. It leave the definition the compiler implementation making it
-    impossible to reimplement `std::codecvt<wchar_t,char,mbstate_t>` to any stateful encodings.
-    Thus. Boost.Locae `codecvt` facet implementation may be used only with stateless encodings like UTF-8,
-    ISO-8859, Shift-JIS, but not with stateful encodings like UTF-7 or SCSU.
-
-2.  Standard requires that code page translation can be done by translating each wide character independently.
-    This is not a problem for most fixed width encodings like ISO-8859 family, and this is not a problem
-    when `wchar_t` represents a single code point, i.e.`sizeof(wchar_t)=4` which is true for most POSIX platforms.
-    
-    But under Windows, `sizeof(wchar_t)=2`, and this it can represent only a single character
-    in Base Multilingual Plane (BMP) where characters with code points above `0xFFFF` are represented
-    using surrogate pairs. Because, the conversion should be stateless (above limitation) and when
-    `wchar_t` can't represent single Unicode character, only UCS-2 encoding is supported, `codecvt`
-    would fail on surrogate characters of UTF-16 strings.
-    
-    Same is valid for C++0x `char16_t` base streams.
-
-So, if your system supports required encoding, it would be better to use it directly instead of Boost.Locale
-facet.
+Standard does not provides any useful information about `std::mbstate_t` type that should be used for saving 
+intermediate code-page conversion states. It leave the definition the compiler implementation making it
+impossible to reimplement `std::codecvt<wchar_t,char,mbstate_t>` to any stateful encodings.
+Thus. Boost.Locae `codecvt` facet implementation may be used only with stateless encodings like UTF-8,
+ISO-8859, Shift-JIS, but not with stateful encodings like UTF-7 or SCSU.
 
 **General Recommendation:** Prefer Unicode UTF-8 encoding for `char` based strings and files in your application.
 

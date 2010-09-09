@@ -8,7 +8,7 @@
 #ifndef BOOST_LOCALE_IMPL_POSIX_CODECVT_HPP
 #define BOOST_LOCALE_IMPL_POSIX_CODECVT_HPP
 #include <boost/locale/config.hpp>
-#include "../util/codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
 namespace boost {
 namespace locale {
 namespace impl_posix {

@@ -21,6 +21,7 @@
 #include <boost/locale/info.hpp>
 #include <boost/locale/localization_backend.hpp>
 #include <boost/locale/message.hpp>
+#include <boost/locale/util.hpp>
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

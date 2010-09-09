@@ -7,7 +7,7 @@
 //
 #include "test_locale.hpp"
 #include "test_locale_tools.hpp"
-#include "../src/util/codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
 #ifdef BOOST_LOCALE_WITH_ICU
 #include "../src/icu/codecvt.hpp"
 #endif

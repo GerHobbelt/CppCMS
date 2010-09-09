@@ -8,12 +8,11 @@
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/localization_backend.hpp>
 #include <boost/locale/gnu_gettext.hpp>
+#include <boost/locale/util.hpp>
 #include "all_generator.hpp"
 #include "cdata.hpp"
 #include "icu_backend.hpp"
 #include "../util/locale_data.hpp"
-#include "../util/default_locale.hpp"
-#include "../util/info.hpp"
 
 #include <unicode/ucnv.h>
 

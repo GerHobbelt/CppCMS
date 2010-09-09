@@ -7,7 +7,7 @@
 //
 
 #define BOOST_LOCALE_SOURCE
-#include "default_locale.hpp"
+#include <boost/locale/util.hpp>
 #include <boost/config.hpp>
 #include <stdlib.h>
 
@@ -49,8 +49,15 @@ namespace boost {
                 }
                 if(!use_utf8) {
                     if(GetLocaleInfoA(LOCALE_USER_DEFAULT,LOCALE_IDEFAULTANSICODEPAGE,buf,sizeof(buf))!=0) {
-                        lc_name +=".windows-";
-                        lc_name +=buf;
+                        if(atoi(buf)==0)
+                            lc_name+=".UTF-8";
+                        else {
+                            lc_name +=".windows-";
+                            lc_name +=buf;
+                        }
+                    }
+                    else {
+                        lc_name += "UTF-8";
                     }
                 }
                 else {

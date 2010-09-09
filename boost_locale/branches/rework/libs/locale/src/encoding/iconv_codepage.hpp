@@ -20,12 +20,6 @@ namespace locale {
 namespace conv {
 namespace impl {
 
-
-extern "C" {
-    typedef size_t gnu_iconv_type(iconv_t,char const **,size_t *,char **,size_t *);
-    typedef size_t std_iconv_type(iconv_t,char **,size_t *,char **,size_t *);
-}
-
 namespace {
 
     template<typename CharType>
@@ -78,10 +72,11 @@ public:
         close();
     }
 
-    size_t conv(char const **inbuf,size_t *inchar_left,
+    size_t conv(char const **inbufc,size_t *inchar_left,
                 char **outbuf,size_t *outchar_left)
     {
-        return do_conv(iconv,inbuf,inchar_left,outbuf,outchar_left);
+        char **inbuf = const_cast<char **>(inbufc);
+        return iconv(cvt_,inbuf,inchar_left,outbuf,outchar_left);
     }
 
     bool open(char const *to,char const *from)
@@ -101,17 +96,6 @@ private:
         }
     }
     
-
-    size_t do_conv(gnu_iconv_type *real_conv,char const **inbuf,size_t *inchar_left,char **outbuf,size_t *outchar_left)
-    {
-        return real_conv(cvt_,inbuf,inchar_left,outbuf,outchar_left);
-    }
-
-    size_t do_conv(std_iconv_type *real_conv,char const **inbuf,size_t *inchar_left,char **outbuf,size_t *outchar_left)
-    {
-        return real_conv(cvt_,const_cast<char **>(inbuf),inchar_left,outbuf,outchar_left);
-    }
-
     iconv_t cvt_;
 
 };

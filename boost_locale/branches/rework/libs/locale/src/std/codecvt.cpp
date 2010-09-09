@@ -8,7 +8,7 @@
 #define BOOST_LOCALE_SOURCE
 #include <locale>
 #include <boost/cstdint.hpp>
-#include "../util/codecvt_converter.hpp"
+#include <boost/locale/util.hpp>
 #include "all_generator.hpp"
 #include <vector>
 namespace boost {

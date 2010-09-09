@@ -10,8 +10,7 @@
 #include <boost/locale/gnu_gettext.hpp>
 #include "all_generator.hpp"
 #include "../util/locale_data.hpp"
-#include "../util/info.hpp"
-#include "../util/default_locale.hpp"
+#include <boost/locale/util.hpp>
 
 #if defined(BOOST_WINDOWS)
 #  ifndef NOMINMAX

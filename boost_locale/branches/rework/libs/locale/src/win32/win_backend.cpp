@@ -11,10 +11,8 @@
 #include <boost/locale/info.hpp>
 #include "all_generator.hpp"
 #include "win_backend.hpp"
-#include "../util/default_locale.hpp"
+#include <boost/locale/util.hpp>
 #include "../util/locale_data.hpp"
-#include "../util/info.hpp"
-#include "../util/codecvt_converter.hpp"
 #include "api.hpp"
 
 namespace boost {
