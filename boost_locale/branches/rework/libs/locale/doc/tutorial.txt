@@ -1367,6 +1367,7 @@ For example:
         cmake -G "NMake Makefiles" -DDISABLE_ICU_BACKEND=ON -DCMAKE_INCLUDE_PATH=c:/boost_1_43_0 ..
 
 
+# Few 
 
 
 # Appendix
@@ -1621,6 +1622,41 @@ which adds BOM to UTF-8 files by default.
 -   **UTF-32/UCS-4** - fixed width Unicode transformation format, where each code point is represented as single 32-bit word. It has
     advantage of simplicity of code points representation but quite wasteful in terms of memory usage. It is used for `std::wstring` encoding
     for most POSIX platforms where `sizeof(wchar_t)==4`.
+
+## Tested Compilers and Platforms
+
+<table border="1" sellpadding="5" sellspacing="3">
+<tr>
+  <th>Platform</th><th>Compiler</th><th>Backends</th><th>ICU version</th><th>Notes</th>
+</tr>
+  <td>Linux 2.6 x86\_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86\_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x with new characters</td><td>icu</td><td>3.8</td><td>charXX\_t faults, compiler issues</td>
+</tr>
+<tr>
+  <td>Windows XP 32bit</td><td>MSVC 2008</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
+</tr>
+<tr>
+  <td>Windows XP 32bit</td><td>MinGW/GCC 4.5</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
+</tr>
+<tr>
+  <td>Cygwin 1.7</td><td>GCC 4.3</td><td>icu/winapi/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Mac OS X 10.6</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>FreeBSD 8.0</td><td>GCC-4.3</td><td>icu/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>OpenSolaris</td><td>GCC-3.4</td><td>icu/std</td><td>4.2</td><td>-</td>
+</tr>
+</table>
+
 
 ## Reference
 

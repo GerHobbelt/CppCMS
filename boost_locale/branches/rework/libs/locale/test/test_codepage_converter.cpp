@@ -11,7 +11,7 @@
 #ifdef BOOST_LOCALE_WITH_ICU
 #include "../src/icu/codecvt.hpp"
 #endif
-#ifdef BOOST_LOCALE_WITH_ICONV
+#if defined(BOOST_LOCALE_WITH_ICONV) && !defined(BOOST_LOCALE_NO_POSIX_BACKEND)
 #include "../src/posix/codecvt.hpp"
 #endif
 
@@ -270,7 +270,7 @@ int main()
         test_shiftjis(cvt);
         #endif
 
-        #ifdef BOOST_LOCALE_WITH_ICONV
+        #if defined(BOOST_LOCALE_WITH_ICONV) && !defined(BOOST_LOCALE_NO_POSIX_BACKEND)
         std::cout << "Testing Shift-JIS using POSIX/iconv" << std::endl;
 
         cvt = boost::locale::impl_posix::create_iconv_converter("Shift-JIS");
