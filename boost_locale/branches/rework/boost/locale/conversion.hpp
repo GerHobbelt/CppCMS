@@ -70,7 +70,6 @@ namespace boost {
 #endif
         };
 
-        #ifndef BOOST_NO_STD_WSTRING
         ///
         /// The facet that implements text manipulation
         ///
@@ -92,7 +91,6 @@ namespace boost {
             std::locale::id& __get_id (void) const { return id; }
 #endif
         };
-        #endif
 
         #ifdef BOOST_HAS_CHAR16_T
         template<>

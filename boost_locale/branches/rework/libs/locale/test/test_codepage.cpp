@@ -132,10 +132,9 @@ void test_for_char()
 }
 void test_wide_io()
 {
-    #ifndef BOOST_NO_STD_WSTRING
     std::cout << "  wchar_t" << std::endl;
     test_for_char<wchar_t>();
-    #endif
+    
     #if defined BOOST_HAS_CHAR16_T && !defined(BOOST_NO_CHAR16_T_CODECVT)
     std::cout << "  char16_t" << std::endl;
     test_for_char<char16_t>();
@@ -297,10 +296,8 @@ int main()
             std::cout << "Testing charset to/from UTF conversion functions" << std::endl;
             std::cout << "  char" << std::endl;
             test_to<char>();
-            #ifndef BOOST_NO_STD_WSTRING
             std::cout << "  wchar_t" << std::endl;
             test_to<wchar_t>();
-            #endif
             #ifdef BOOST_HAS_CHAR16_T
             std::cout << "  char16_t" << std::endl;
             test_to<char16_t>();

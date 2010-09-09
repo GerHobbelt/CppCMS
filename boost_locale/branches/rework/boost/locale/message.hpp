@@ -498,8 +498,6 @@ namespace boost {
             return message(context,s,p,n).str<char>(loc,domain);
         }
 
-        #ifndef BOOST_NO_STD_WSTRING
-
         ///
         /// Translate message \a id according to locale \a loc
         ///
@@ -557,8 +555,6 @@ namespace boost {
         {
             return message(context,s,p,n).str<wchar_t>(loc,domain);
         }
-
-        #endif
 
         #ifdef BOOST_HAS_CHAR16_T
         ///
@@ -700,8 +696,6 @@ namespace boost {
             static std::locale::id id;
         };
         
-        #ifndef BOOST_NO_STD_WSTRING
-        
         template<>
         struct BOOST_LOCALE_DECL base_message_format<wchar_t> : public std::locale::facet 
         {
@@ -710,8 +704,7 @@ namespace boost {
             }
             static std::locale::id id;
         };
-        #endif
-
+        
         #ifdef BOOST_HAS_CHAR16_T
 
         template<>

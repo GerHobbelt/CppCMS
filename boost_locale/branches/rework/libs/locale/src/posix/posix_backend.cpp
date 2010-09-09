@@ -116,10 +116,8 @@ namespace impl_posix {
                     switch(type) {
                     case char_facet:
                         return std::locale(base,gnu_gettext::create_messages_facet<char>(minf));
-                    #ifndef BOOST_NO_STD_WSTRING
                     case wchar_t_facet:
                         return std::locale(base,gnu_gettext::create_messages_facet<wchar_t>(minf));
-                    #endif
                     #ifdef BOOST_HAS_CHAR16_T
                     case char16_t_facet:
                         return std::locale(base,gnu_gettext::create_messages_facet<char16_t>(minf));

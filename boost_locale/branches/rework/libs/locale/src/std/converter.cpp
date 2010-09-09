@@ -59,7 +59,6 @@ private:
     std::locale base_;
 };
 
-#ifndef BOOST_NO_STD_WSTRING
 class utf8_converter : public converter<char> {
 public:
     typedef std::ctype<char> ctype_type;
@@ -95,7 +94,6 @@ public:
 private:
     std::locale base_;
 };
-#endif
 
 std::locale create_convert( std::locale const &in,
                             std::string const &locale_name,
@@ -105,22 +103,18 @@ std::locale create_convert( std::locale const &in,
         switch(type) {
         case char_facet: 
             {
-                #ifndef BOOST_NO_STD_WSTRING
                 if(utf == utf8_native_with_wide || utf == utf8_from_wide) {
                     std::locale base(std::locale::classic(),new std::ctype_byname<wchar_t>(locale_name.c_str()));
                     return std::locale(in,new utf8_converter(base));
                 }
-                #endif
                 std::locale base(std::locale::classic(),new std::ctype_byname<char>(locale_name.c_str()));
                 return std::locale(in,new std_converter<char>(base));
             }
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             {
                 std::locale base(std::locale::classic(),new std::ctype_byname<wchar_t>(locale_name.c_str()));
                 return std::locale(in,new std_converter<wchar_t>(base));
             }
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
             {

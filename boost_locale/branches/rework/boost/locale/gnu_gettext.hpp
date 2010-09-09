@@ -56,11 +56,8 @@ namespace gnu_gettext {
     template<>
     BOOST_LOCALE_DECL message_format<char> *create_messages_facet(messages_info &info);
     
-
-    #ifndef BOOST_NO_STD_WSTRING
     template<>
     BOOST_LOCALE_DECL message_format<wchar_t> *create_messages_facet(messages_info &info);
-    #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>

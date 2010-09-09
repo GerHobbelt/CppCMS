@@ -205,10 +205,8 @@ namespace impl_icu {
         switch(type) {
         case char_facet:
             return std::locale(in,new boundary_indexing_impl<char>(cd));
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             return std::locale(in,new boundary_indexing_impl<wchar_t>(cd));
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
             return std::locale(in,new boundary_indexing_impl<char16_t>(cd));

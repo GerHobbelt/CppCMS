@@ -91,10 +91,8 @@ int main()
 
         std::cout << "Testing char" << std::endl;
         test_char<char>();
-        #ifndef BOOST_NO_STD_WSTRING
         std::cout << "Testing wchar_t" << std::endl;
         test_char<wchar_t>();
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         std::cout << "Testing char16_t" << std::endl;
         test_char<char16_t>();

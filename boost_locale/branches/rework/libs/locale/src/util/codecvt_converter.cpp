@@ -203,7 +203,7 @@ namespace util {
             for(unsigned i=0;i<128;i++)
                 to_unicode_tbl_[i]=i;
             for(unsigned i=128;i<256;i++) {
-                char buf[2] = { i , 0 };
+                char buf[2] = { char(i) , 0 };
                 std::wstring const tmp = conv::to_utf<wchar_t>(buf,buf+1,encoding);
                 if(tmp.size() != 1) {
                     to_unicode_tbl_[i] = illegal;
@@ -754,10 +754,8 @@ namespace util {
         switch(type) {
         case char_facet:
             return std::locale(in,new code_converter<char>(cvt));
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             return std::locale(in,new code_converter<wchar_t>(cvt));
-        #endif
         #if defined(BOOST_HAS_CHAR16_T) && !defined(BOOST_NO_CHAR16_T_CODECVT)
         case char16_t_facet:
             return std::locale(in,new code_converter<char16_t>(cvt));

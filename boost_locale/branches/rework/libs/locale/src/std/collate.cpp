@@ -16,7 +16,6 @@ namespace boost {
 namespace locale {
 namespace impl_std {
 
-#ifndef BOOST_NO_STD_WSTRING
 class utf8_collator_from_wide : public std::collate<char> {
 public:
     typedef std::collate<wchar_t> wfacet;
@@ -67,8 +66,6 @@ private:
     std::locale base_;
 };
 
-#endif
-
 std::locale create_collate( std::locale const &in,
                             std::string const &locale_name,
                             character_facet_type type,
@@ -77,7 +74,6 @@ std::locale create_collate( std::locale const &in,
     switch(type) {
     case char_facet:
         {
-            #ifndef BOOST_NO_STD_WSTRING
             if(utf == utf8_native_with_wide || utf == utf8_from_wide) {
                 std::locale base=
                     std::locale(std::locale::classic(),
@@ -85,15 +81,13 @@ std::locale create_collate( std::locale const &in,
                 return std::locale(in,new utf8_collator_from_wide(base));
             }
             else
-            #endif
             {
                 return std::locale(in,new std::collate_byname<char>(locale_name.c_str()));
             }
         }
-    #ifndef BOOST_NO_STD_WSTRING
+
     case wchar_t_facet:
         return std::locale(in,new std::collate_byname<wchar_t>(locale_name.c_str()));
-    #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     case char16_t_facet:

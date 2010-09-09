@@ -420,12 +420,10 @@ namespace boost {
         ///
         typedef basic_format<char> format;
 
-        #ifndef BOOST_NO_STD_WSTRING
         ///
         /// Definiton of wchar_t based format
         ///
         typedef basic_format<wchar_t> wformat;
-        #endif
 
         #ifdef BOOST_HAS_CHAR16_T
         ///

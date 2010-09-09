@@ -42,7 +42,6 @@ private:
     std::locale base_;
 };
 
-#ifndef BOOST_NO_STD_WSTRING
 class utf8_time_put_from_wide : public std::time_put<char> {
 public:
     utf8_time_put_from_wide(std::locale const &base, size_t refs = 0) : 
@@ -290,9 +289,6 @@ public:
 };
 
 
-
-#endif // BOOST_NO_STD_WSTRING
-
 template<typename CharType>
 std::locale create_basic_parsing(std::locale const &in,std::string const &locale_name)
 {
@@ -321,7 +317,6 @@ std::locale create_formatting(  std::locale const &in,
         switch(type) {
         case char_facet: 
             {
-                #ifndef BOOST_NO_STD_WSTRING
                 if(utf == utf8_from_wide ) {
                     std::locale base = std::locale(locale_name.c_str());
                     
@@ -350,21 +345,18 @@ std::locale create_formatting(  std::locale const &in,
                     return std::locale(tmp,new util::base_num_format<char>());
                 }
                 else
-                #endif
                 {
                     std::locale tmp = create_basic_formatting<char>(in,locale_name);
                     tmp = std::locale(tmp,new util::base_num_format<char>());
                     return tmp;
                 }
             }
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             {
                 std::locale tmp = create_basic_formatting<wchar_t>(in,locale_name);
                 tmp = std::locale(tmp,new util::base_num_format<wchar_t>());
                 return tmp;
             }
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
             {
@@ -394,7 +386,6 @@ std::locale create_parsing( std::locale const &in,
         switch(type) {
         case char_facet:
             {
-                #ifndef BOOST_NO_STD_WSTRING
                 if(utf == utf8_from_wide ) {
                     std::locale base = std::locale::classic();
                     
@@ -422,21 +413,18 @@ std::locale create_parsing( std::locale const &in,
                     return std::locale(tmp,new util::base_num_parse<char>());
                 }
                 else 
-                #endif
                 {
                     std::locale tmp = create_basic_parsing<char>(in,locale_name);
                     tmp = std::locale(in,new util::base_num_parse<char>());
                     return tmp;
                 }
             }
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
                 {
                     std::locale tmp = create_basic_parsing<wchar_t>(in,locale_name);
                     tmp = std::locale(in,new util::base_num_parse<wchar_t>());
                     return tmp;
                 }
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
                 {

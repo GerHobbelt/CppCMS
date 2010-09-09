@@ -68,9 +68,7 @@ void compare(std::string left,std::string right,int level,int expected)
     if(level == 4)
         TEST(l(left,right) == (expected < 0));
     TEST_COMP(char,left,right);
-    #ifndef BOOST_NO_STD_WSTRING
     TEST_COMP(wchar_t,to<wchar_t>(left),to<wchar_t>(right));
-    #endif
     #ifdef BOOST_HAS_CHAR16_T
     TEST_COMP(char16_t,to<char16_t>(left),to<char16_t>(right));
     #endif

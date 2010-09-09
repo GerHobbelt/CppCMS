@@ -216,16 +216,10 @@ int main()
                 if(name==real_name) 
                     test_by_char<char,char>(l1,l2);
                 else
-                    #ifndef BOOST_NO_STD_WSTRING
                     test_by_char<char,wchar_t>(l1,l2);
-                    #else
-                    std::cout << "UTF-8 Unsupported - no wide locale" << std::endl;
-                    #endif
                 
-                #ifndef BOOST_NO_STD_WSTRING
                 std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
                 test_by_char<wchar_t,wchar_t>(l1,l2);
-                #endif
 
                 #ifdef BOOST_HAS_CHAR16_T
                 std::cout << "char16 UTF-16" << std::endl;
@@ -247,10 +241,8 @@ int main()
             else {
                 std::locale l1=gen(name),l2(real_name.c_str());
                 test_by_char<char,char>(l1,l2);
-                #ifndef BOOST_NO_STD_WSTRING
                 std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
                 test_by_char<wchar_t,wchar_t>(l1,l2);
-                #endif
 
                 #ifdef BOOST_HAS_CHAR16_T
                 std::cout << "char16 UTF-16" << std::endl;
@@ -275,16 +267,10 @@ int main()
                 if(name==real_name) 
                     test_by_char<char,char>(l1,l2);
                 else
-                    #ifndef BOOST_NO_STD_WSTRING
                     test_by_char<char,wchar_t>(l1,l2);
-                    #else
-                    std::cout << "UTF-8 Unsupported - no wide locale" << std::endl;
-                    #endif
                 
-                #ifndef BOOST_NO_STD_WSTRING
                 std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
                 test_by_char<wchar_t,wchar_t>(l1,l2);
-                #endif
 
                 #ifdef BOOST_HAS_CHAR16_T
                 std::cout << "char16 UTF-16" << std::endl;
@@ -306,10 +292,8 @@ int main()
             else {
                 std::locale l1=gen(name),l2(real_name.c_str());
                 test_by_char<char,char>(l1,l2);
-                #ifndef BOOST_NO_STD_WSTRING
                 std::cout << "Wide UTF-" << sizeof(wchar_t) * 8 << std::endl;
                 test_by_char<wchar_t,wchar_t>(l1,l2);
-                #endif
 
                 #ifdef BOOST_HAS_CHAR16_T
                 std::cout << "char16 UTF-16" << std::endl;
@@ -353,11 +337,7 @@ int main()
                     ss.imbue(l1);
                     ss << std::setprecision(10) ;
                     ss << boost::locale::as::number << 12345.45;
-                    #ifdef BOOST_NO_STD_WSTRING
-                    TEST(ss.str() == "12345,45");
-                    #else
                     TEST(ss.str() == "12 345,45");
-                    #endif
                 }
             }
         }

@@ -39,7 +39,7 @@ namespace impl_posix {
                     throw std::runtime_error("Unsupported encoding" + encoding);
                 }
                 for(unsigned c=0;c<256;c++) {
-                    char ibuf[2] = { c , 0 };
+                    char ibuf[2] = { char(c) , 0 };
                     char *in = ibuf;
                     size_t insize =2;
                     uint32_t obuf[2] = {illegal,illegal};

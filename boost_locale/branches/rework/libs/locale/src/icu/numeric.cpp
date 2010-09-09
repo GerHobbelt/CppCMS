@@ -345,10 +345,8 @@ std::locale create_formatting(std::locale const &in,cdata const &cd,character_fa
         switch(type) {
         case char_facet:
             return install_formatting_facets<char>(in,cd);
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             return install_formatting_facets<wchar_t>(in,cd);
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
             return install_formatting_facets<char16_t>(in,cd);
@@ -367,10 +365,8 @@ std::locale create_parsing(std::locale const &in,cdata const &cd,character_facet
         switch(type) {
         case char_facet:
             return install_parsing_facets<char>(in,cd);
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             return install_parsing_facets<wchar_t>(in,cd);
-        #endif
         #ifdef BOOST_HAS_CHAR16_T
         case char16_t_facet:
             return install_parsing_facets<char16_t>(in,cd);

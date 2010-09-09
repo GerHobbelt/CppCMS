@@ -20,12 +20,10 @@ std::string same_s(std::string s)
     return s;
 }
 
-#ifndef BOOST_NO_STD_WSTRING
 std::wstring same_w(std::wstring s)
 {
     return s;
 }
-#endif
 
 #ifdef BOOST_HAS_CHAR16_T
 std::u16string same_u16(std::u16string s)
@@ -216,9 +214,7 @@ void strings_equal(std::string original,std::string iexpected,std::locale const 
 void test_cntranslate(std::string c,std::string s,std::string p,int n,std::string expected,std::locale const &l,std::string domain)
 {
     strings_equal<char>(c,s,p,n,expected,l,domain);
-    #ifndef BOOST_NO_STD_WSTRING
     strings_equal<wchar_t>(c,s,p,n,expected,l,domain);
-    #endif
     #ifdef BOOST_HAS_CHAR16_T
     strings_equal<char16_t>(c,s,p,n,expected,l,domain);
     #endif
@@ -231,9 +227,7 @@ void test_cntranslate(std::string c,std::string s,std::string p,int n,std::strin
 void test_ntranslate(std::string s,std::string p,int n,std::string expected,std::locale const &l,std::string domain)
 {
     strings_equal<char>(s,p,n,expected,l,domain);
-    #ifndef BOOST_NO_STD_WSTRING
     strings_equal<wchar_t>(s,p,n,expected,l,domain);
-    #endif
     #ifdef BOOST_HAS_CHAR16_T
     strings_equal<char16_t>(s,p,n,expected,l,domain);
     #endif
@@ -245,9 +239,7 @@ void test_ntranslate(std::string s,std::string p,int n,std::string expected,std:
 void test_ctranslate(std::string c,std::string original,std::string expected,std::locale const &l,std::string domain)
 {
     strings_equal<char>(c,original,expected,l,domain);
-    #ifndef BOOST_NO_STD_WSTRING
     strings_equal<wchar_t>(c,original,expected,l,domain);
-    #endif
     #ifdef BOOST_HAS_CHAR16_T
     strings_equal<char16_t>(c,original,expected,l,domain);
     #endif
@@ -261,9 +253,7 @@ void test_ctranslate(std::string c,std::string original,std::string expected,std
 void test_translate(std::string original,std::string expected,std::locale const &l,std::string domain)
 {
     strings_equal<char>(original,expected,l,domain);
-    #ifndef BOOST_NO_STD_WSTRING
     strings_equal<wchar_t>(original,expected,l,domain);
-    #endif
     #ifdef BOOST_HAS_CHAR16_T
     strings_equal<char16_t>(original,expected,l,domain);
     #endif
@@ -378,9 +368,7 @@ int main(int argc,char **argv)
 
 
             TEST(same_s(bl::translate("hello"))=="שלום");
-            #ifndef BOOST_NO_STD_WSTRING
             TEST(same_w(bl::translate("hello"))==to<wchar_t>("שלום"));
-            #endif
             
             #ifdef BOOST_HAS_CHAR16_T
             TEST(same_u16(bl::translate("hello"))==to<char16_t>("שלום"));

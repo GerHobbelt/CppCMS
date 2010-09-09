@@ -627,14 +627,12 @@ namespace locale {
         return generate_formatter<char>(ios,l,e);
     }
 
-    #ifndef BOOST_NO_STD_WSTRING
     template<>
     std::auto_ptr<formatter<wchar_t> > formatter<wchar_t>::create(std::ios_base &ios,icu::Locale const &l,std::string const &e)
     {
         return generate_formatter<wchar_t>(ios,l,e);
     }
 
-    #endif
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>

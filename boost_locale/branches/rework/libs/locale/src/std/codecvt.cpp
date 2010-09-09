@@ -33,10 +33,8 @@ namespace impl_std {
         switch(type) {
         case char_facet:
             return codecvt_bychar<char>(in,locale_name);
-        #ifndef BOOST_NO_STD_WSTRING
         case wchar_t_facet:
             return codecvt_bychar<wchar_t>(in,locale_name);
-        #endif
         #if defined(BOOST_HAS_CHAR16_T) && !defined(BOOST_NO_CHAR16_T_CODECVT)
         case char16_t_facet:
             return codecvt_bychar<char16_t>(in,locale_name);

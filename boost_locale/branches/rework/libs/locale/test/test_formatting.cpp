@@ -30,7 +30,6 @@ using namespace boost::locale;
 #endif
 
 #ifdef TEST_DEBUG
-#define BOOST_NO_STD_WSTRING
 #undef BOOST_HAS_CHAR16_T
 #undef BOOST_HAS_CHAR32_T
 #define TESTEQ(x,y) do { std::cerr << "["<<x << "]!=\n[" << y <<"]"<< std::endl; TEST((x)==(y)); } while(0)
@@ -345,11 +344,9 @@ int main()
         test_manip<char>("ISO8859-1");
         test_format<char>("ISO8859-1");
 
-        #ifndef BOOST_NO_STD_WSTRING
         std::cout << "Testing wchar_t" << std::endl;
         test_manip<wchar_t>();
         test_format<wchar_t>();
-        #endif
 
         #ifdef BOOST_HAS_CHAR16_T
         std::cout << "Testing char16_t" << std::endl;
