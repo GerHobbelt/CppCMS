@@ -382,6 +382,13 @@ if(MSVC AND NOT DISABLE_STATIC)
 	set_target_properties(boost_locale-static PROPERTIES PREFIX "lib")
 endif(MSVC AND NOT DISABLE_STATIC)
 
+if(GCC_IS_GCC4)
+	if(BOOST_LOCALE_HAVE_ICU)
+		# Workaround huge compilation times
+		set_target_properties(test_formatting PROPERTIES COMPILE_FLAGS "-O0")
+	endif()
+endif()
+
 install(TARGETS ${BOOST_LOCALE_LIBS}
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
