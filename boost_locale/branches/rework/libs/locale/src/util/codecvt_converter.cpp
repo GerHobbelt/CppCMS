@@ -513,18 +513,6 @@ namespace util {
         }
 
         //
-        // Can't handle full UTF-16, only UCS-2
-        // because:
-        //   1. codecvt facet must be able to work on single
-        //      internal character ie if  do_in(s,from,from_end,x,y,z,t) returns ok
-        //      then do_in(s,from,from+1) should return ok according to the standard papars
-        //   2. I have absolutly NO information about mbstat_t -- I can't even know if its 0 
-        //      or it is somehow initialized. So I can't store any state information
-        //      about suragate pairs... So it works only for UCS-2
-        //
-        
-        
-        //
         // Implementation for UTF-16
         //
         std::codecvt_base::result
@@ -546,6 +534,11 @@ namespace util {
                 cvt = cvtp.get();
             }
             std::codecvt_base::result r=std::codecvt_base::ok;
+            // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
+            // according to standard. We use it to keed a flag 0/1 for surrogate pair writing
+            //
+            // if 0 no code above >0xFFFF observed, of 1 a code above 0xFFFF observerd
+            // and first pair is written, but no input consumed
             uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
@@ -564,10 +557,20 @@ namespace util {
                     r=std::codecvt_base::partial;
                     break;
                 }
+                // Normal codepoints go direcly to stream
                 if(ch <= 0xFFFF) {
                     *to++=ch;
                 }
                 else {
+                    // for  other codepoints we do following
+                    //
+                    // 1. We can't consume our input as we may find ourselfs
+                    //    in state where all input consumed but not all output written,i.e. only
+                    //    1st pair is written
+                    // 2. We only write first pair and mark this in the state, we also revert back
+                    //    the from pointer in order to make sure this codepoint would be read
+                    //    once again and then we would consume our input together with writing
+                    //    second surrogate pair
                     ch-=0x10000;
                     uint16_t vh = ch >> 10;
                     uint16_t vl = ch & 0x3FF;
@@ -631,6 +634,13 @@ namespace util {
                 cvt = cvtp.get();
             }
             std::codecvt_base::result r=std::codecvt_base::ok;
+            // mbstate_t is POD type and should be initialized to 0 (i.a. state = stateT())
+            // according to standard. We assume that sizeof(mbstate_t) >=2 in order
+            // to be able to store first observerd surrogate pair
+            //
+            // State: state!=0 - a first surrogate pair was observerd (state = first pair),
+            // we expect the second one to come and then zero the state
+            ///
             uint16_t &state = *reinterpret_cast<uint16_t *>(&std_state);
             while(to < to_end && from < from_end)
             {
@@ -641,8 +651,13 @@ namespace util {
 #endif            
                 uint32_t ch=0;
                 if(state != 0) {
+                    // if the state idecates that 1st surrogate pair was written
+                    // we should make sure that the second one that comes is actually
+                    // second surrogate
                     uint16_t w1 = state;
-                    uint16_t w2 = *from;
+                    uint16_t w2 = *from; 
+                    // we don't forward from as writing may fail to incomplete or
+                    // partial conversion
                     if(0xDC00 <= w2 && w2<=0xDFFF) {
                         uint16_t vh = w1 - 0xD800;
                         uint16_t vl = w2 - 0xDC00;
@@ -657,9 +672,20 @@ namespace util {
                 else {
                     ch = *from;
                     if(0xD800 <= ch && ch<=0xDBFF) {
+                        // if this is a first surrogate pair we put
+                        // it into the state and consume it, note we don't
+                        // go forward as it should be illegal so we increase
+                        // the from pointer manually
                         state = ch;
                         from++;
                         continue;
+                    }
+                    else if(0xDC00 <= ch && ch<=0xDFFF) {
+                        // if we observe second surrogate pair and 
+                        // first only may be expected we should break from the loop with error
+                        // as it is illegal input
+                        r=std::codecvt_base::error;
+                        break;
                     }
                 }
                 
