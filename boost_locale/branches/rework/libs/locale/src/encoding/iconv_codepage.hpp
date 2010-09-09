@@ -9,7 +9,7 @@
 #define BOOST_LOCALE_IMPL_ICONV_CODEPAGE_HPP
 
 #include <boost/locale/encoding.hpp>
-#include <iconv.h>
+#include "../util/iconv.hpp"
 #include <errno.h>
 #include "conv.hpp"
 #include <assert.h>

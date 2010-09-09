@@ -12,12 +12,16 @@
 #include <boost/locale/util.hpp>
 #include "all_generator.hpp"
 
-#include <iconv.h>
 #include <errno.h>
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
 #include "codecvt.hpp"
+
+#ifdef BOOST_LOCALE_WITH_ICONV
+#include "../util/iconv.hpp"
+#endif
+
 namespace boost {
 namespace locale {
 namespace impl_posix {
