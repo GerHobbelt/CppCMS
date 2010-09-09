@@ -7,6 +7,7 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/locale/encoding.hpp>
+#include <boost/shared_ptr.hpp>
 #include "../encoding/conv.hpp"
 #include "../util/codecvt_converter.hpp"
 #include "all_generator.hpp"
@@ -14,7 +15,7 @@
 #include <iconv.h>
 #include <errno.h>
 #include <algorithm>
-
+#include <stdexcept>
 #include <vector>
 #include "codecvt.hpp"
 namespace boost {
@@ -27,6 +28,64 @@ namespace impl_posix {
        
         mb2_iconv_converter(std::string const &encoding) :
             encoding_(encoding),
+            to_utf_((iconv_t)(-1)),
+            from_utf_((iconv_t)(-1))
+        {
+            iconv_t d = (iconv_t)(-1);
+            std::vector<uint32_t> first_byte_table;
+            try {
+                iconv_t d = iconv_open(utf32_encoding(),encoding.c_str());
+                if(d == (iconv_t)(-1)) {
+                    throw std::runtime_error("Unsupported encoding" + encoding);
+                }
+                for(unsigned c=0;c<256;c++) {
+                    char ibuf[2] = { c , 0 };
+                    char *in = ibuf;
+                    size_t insize =2;
+                    uint32_t obuf[2] = {illegal,illegal};
+                    char *out = reinterpret_cast<char *>(obuf);
+                    size_t outsize = 8;
+                    // Basic sigle codepoint conversion
+                    iconv(d,&in,&insize,&out,&outsize);
+                    if(insize == 0 && outsize == 0 && obuf[1] == 0) {
+                        first_byte_table.push_back(obuf[0]);
+                        continue;
+                    }
+                    
+                    // Test if this is illegal first byte or incomplete
+                    in = ibuf;
+                    insize = 1;
+                    out = reinterpret_cast<char *>(obuf);
+                    outsize = 8;
+                    iconv(d,0,0,0,0);
+                    size_t res = iconv(d,&in,&insize,&out,&outsize);
+                    
+                    // Now if this single byte starts a sequence we add incomplete 
+                    // to know to ask that we need two bytes, othewise it maybe only
+                    // illegal
+
+                    uint32_t point;
+                    if(res == (size_t)(-1) && errno == EINVAL)
+                        point = incomplete;
+                    else
+                        point = illegal;
+                    first_byte_table.push_back(point);
+
+                }
+            }
+            catch(...) {
+                if(d!=(iconv_t)(-1))
+                    iconv_close(d);
+                throw;
+            }
+            iconv_close(d);
+            first_byte_table_.reset(new std::vector<uint32_t>());
+            first_byte_table_->swap(first_byte_table);
+        }
+
+        mb2_iconv_converter(mb2_iconv_converter const &other) :
+            first_byte_table_(other.first_byte_table_),
+            encoding_(other.encoding_),
             to_utf_((iconv_t)(-1)),
             from_utf_((iconv_t)(-1))
         {
@@ -48,74 +107,41 @@ namespace impl_posix {
 
         virtual mb2_iconv_converter *clone() const
         {
-            return new mb2_iconv_converter(encoding_);
+            return new mb2_iconv_converter(*this);
         }
 
         uint32_t to_unicode(char const *&begin,char const *end)
         {
             if(begin == end)
                 return incomplete;
-            if(*begin == 0) {
+            
+            unsigned char seq0 = *begin;
+            uint32_t index = (*first_byte_table_)[seq0];
+            if(index == illegal)
+                return illegal;
+            if(index != incomplete) {
                 begin++;
-                return 0;
+                return index;
             }
+            else if(begin+1 == end)
+                return incomplete;
             
             open(to_utf_,utf32_encoding(),encoding_.c_str());
 
-            unsigned char seq0 = *begin;
-            // single byte
-            if(seq0 <= 0x7F) {
-                char *inbuf = reinterpret_cast<char*>(&seq0);
-                size_t insize = 1;
-                uint32_t result;
-                size_t outsize = 4;
-                char *outbuf = reinterpret_cast<char*>(&result);
-                iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
-                if(outsize != 0 || insize != 0)
-                    return illegal;
-                begin++;
-                return result;
+            // maybe illegal or may be double byte
+
+            char inseq[3] = {seq0 , begin[1], 0};
+            char *inbuf = inseq;
+            size_t insize = 3;
+            uint32_t result[2] = { illegal, illegal };
+            size_t outsize = 8;
+            char *outbuf = reinterpret_cast<char*>(result);
+            iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
+            if(outsize == 0 && insize == 0 && result[1]==0 ) {
+                begin+=2;
+                return result[0];
             }
-            {   // maybe single byte
-                char inseq[2] = {seq0 , 0};
-                char *inbuf = inseq;
-                size_t insize = 2;
-                uint32_t result[2] = { illegal, illegal };
-                size_t outsize = 8;
-                char *outbuf = reinterpret_cast<char*>(result);
-                iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
-                if(outsize == 0 && insize == 0 && result[1]==0 ) {
-                    begin++;
-                    return result[0];
-                }
-            }
-            {   // maybe illegal single byte
-                char inseq[1] = {seq0};
-                char *inbuf = inseq;
-                size_t insize = 1;
-                uint32_t result[1] = { illegal };
-                size_t outsize = 4;
-                char *outbuf = reinterpret_cast<char*>(result);
-                size_t res = iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
-                if(res == size_t(-1) && errno==EILSEQ && insize == 1 && outsize == 4)
-                    return illegal;
-            }
-            {   // maybe illegal or may be double byte
-                if(begin+1 == end)
-                    return incomplete;
-                char inseq[3] = {seq0 , begin[1], 0};
-                char *inbuf = inseq;
-                size_t insize = 3;
-                uint32_t result[2] = { illegal, illegal };
-                size_t outsize = 8;
-                char *outbuf = reinterpret_cast<char*>(result);
-                iconv(to_utf_,&inbuf,&insize,&outbuf,&outsize);
-                if(outsize == 0 && insize == 0 && result[1]==0 ) {
-                    begin+=2;
-                    return result[0];
-                }
-                return illegal;
-            }
+            return illegal;
         }
 
         uint32_t from_unicode(uint32_t cp,char *begin,char const *end)
@@ -169,21 +195,13 @@ namespace impl_posix {
                 return "UTF-32BE";
         }
 
-        static bool check(std::string const &encoding)
-        {
-            iconv_t d = iconv_open(encoding.c_str(),utf32_encoding());
-            if(d == (iconv_t)(-1))
-                return false;
-            iconv_close(d);
-            return true;
-        }
-
         virtual int max_len() const
         {
             return 2;
         }
 
     private:
+        boost::shared_ptr<std::vector<uint32_t> > first_byte_table_;
         std::string encoding_;
         iconv_t to_utf_;
         iconv_t from_utf_;
@@ -192,8 +210,12 @@ namespace impl_posix {
     std::auto_ptr<util::base_converter> create_iconv_converter(std::string const &encoding)
     {
         std::auto_ptr<util::base_converter> cvt;
-        if(mb2_iconv_converter::check(encoding))
+        try {
             cvt.reset(new mb2_iconv_converter(encoding));
+        }
+        catch(std::exception const &e) {
+            // Nothing to do, just retrun empty cvt
+        }
         return cvt;
     }
 
