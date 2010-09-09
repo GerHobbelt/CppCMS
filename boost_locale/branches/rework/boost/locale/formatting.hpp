@@ -154,7 +154,8 @@ namespace boost {
             template<typename CharType>
             void date_time_pattern(std::basic_string<CharType> const &str)
             {
-                date_time_pattern_set().set<CharType>(str.c_str());
+                string_set &s = date_time_pattern_set();
+                s.set<CharType>(str.c_str());
             }
 
 
@@ -200,7 +201,8 @@ namespace boost {
             template<typename CharType>
             std::basic_string<CharType> date_time_pattern() const
             {
-                return date_time_pattern_set().get<CharType>();
+                string_set const &s = date_time_pattern_set();
+                return s.get<CharType>();
             }
             
             /// \cond INTERNAL

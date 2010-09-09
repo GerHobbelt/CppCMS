@@ -38,7 +38,11 @@ endif()
 if(WIN32 AND NOT CYGWIN)
 	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" ON)
 else()
-	option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" OFF)
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+		option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" ON)
+	else()
+		option(DISABLE_ICONV	"Disable iconv library (default On on Windows)" OFF)
+	endif()
 endif()
 
 if(NOT WIN32 AND NOT CYGWIN AND DISABLE_ICONV AND DISABLE_ICU)
@@ -116,21 +120,6 @@ if(BOOST_INCLUDE_DIR)
 	include_directories(${BOOST_INCLUDE_DIR})
 endif()
 
-set(CMAKE_REQUIRED_INCLUDES ${BOOST_INCLUDE_DIR})
-set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
-
-check_cxx_source_compiles(
-	"#include <boost/thread.hpp>
-	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
-	NO_BOOST_LIBRARY_NEEDED)
-
-if(NOT NO_BOOST_LIBRARY_NEEDED)
-	find_library(BOOST_THREAD boost_thread-mt${BOOST_SUFFIX} NAMES boost_thread${BOOST_SUFFIX})
-	set(BOOST_LIBRARY_NEEDED ON)
-endif()
-
-
-
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	check_cxx_source_compiles(
@@ -176,6 +165,23 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
 		set(CXX_FLAGS "${CXX_FLAGS} -mt")
 	endif()
 endif()
+
+set(CMAKE_REQUIRED_INCLUDES ${BOOST_INCLUDE_DIR})
+set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
+set(CMAKE_REQUIRED_FLAGS ${CXX_FLAGS})
+
+check_cxx_source_compiles(
+	"#include <boost/thread.hpp>
+	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
+	NO_BOOST_LIBRARY_NEEDED)
+
+if(NOT NO_BOOST_LIBRARY_NEEDED)
+	find_library(BOOST_THREAD boost_thread-mt${BOOST_SUFFIX} NAMES boost_thread${BOOST_SUFFIX})
+	set(BOOST_LIBRARY_NEEDED ON)
+endif()
+
+
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
