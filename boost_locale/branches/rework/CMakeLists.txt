@@ -80,7 +80,7 @@ if(ICU_UC AND ICU_DATA AND ICU_I18N AND ICU_INCLUDE_DIR)
 	set(BOOST_LOCALE_HAVE_ICU ON)
 	add_definitions(-DBOOST_LOCALE_WITH_ICU)
 else()
-	set(BOOST_LOCALE_HAVE_ICU ON)
+	set(BOOST_LOCALE_HAVE_ICU OFF)
 endif()
 
 message("-- Looking for iconv")

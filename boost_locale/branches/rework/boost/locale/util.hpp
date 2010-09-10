@@ -127,6 +127,13 @@ namespace util {
         ///
         virtual uint32_t to_unicode(char const *&begin,char const *end) 
         {
+            if(begin == end)
+                return incomplete;
+            unsigned char cp = *begin;
+            if(cp <= 0x7F) {
+                begin++;
+                return cp;
+            }
             return illegal;
         }
         ///
@@ -143,7 +150,12 @@ namespace util {
 
         virtual uint32_t from_unicode(uint32_t u,char *begin,char const *end) 
         {
-            return illegal;
+            if(begin==end)
+                return incomplete;
+            if(u >= 0x80)
+                return illegal;
+            *begin = static_cast<char>(u);
+            return 1;
         }
     };
 

@@ -1366,9 +1366,16 @@ For example:
 
         cmake -G "NMake Makefiles" -DDISABLE_ICU_BACKEND=ON -DCMAKE_INCLUDE_PATH=c:/boost_1_43_0 ..
 
+## Binary Compatibility
 
-# Few 
+Boost.Locale is build with binary compatibility in mind. Switching localization back ends on and off,
+using iconv or not using it does not affect binary compatibility. So if dynamic library was build
+build with all possible backends, other dynamic library compiled with, for example, only `std`, `posix` 
+or `winapi` backend would be binary compatible with it.
 
+However this defiantly has an effect on quality of backend and some features. For example, if you
+would try to use boundary analysis or calendar when the library does not support icu backend
+you would get an exception.
 
 # Appendix
 
@@ -1635,7 +1642,13 @@ which adds BOM to UTF-8 files by default.
   <td>Linux 2.6 x86\_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x with new characters</td><td>icu</td><td>3.8</td><td>charXX\_t faults, compiler issues</td>
+  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x with char16\_t/char32\_t</td><td>icu</td><td>3.8</td><td>Some charXX\_t faults, compiler issues</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86\_64</td><td>Intel 11.0</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
   <td>Windows XP 32bit</td><td>MSVC 2008</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
@@ -1646,14 +1659,17 @@ which adds BOM to UTF-8 files by default.
 <tr>
   <td>Cygwin 1.7</td><td>GCC 4.3</td><td>icu/winapi/std</td><td>3.8</td><td>-</td>
 </tr>
+<!-- <tr>
+  <td>Mac OS X 10.6.4</td><td>GCC-4.2/td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr> -->
 <tr>
-  <td>Mac OS X 10.6</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+  <td>FreeBSD 8.0</td><td>GCC-4.2.1</td><td>icu/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
-  <td>FreeBSD 8.0</td><td>GCC-4.3</td><td>icu/std</td><td>3.8</td><td>-</td>
+  <td>OpenSolaris/SunOS 5.11</td><td>GCC-3.4</td><td>icu/std</td><td>4.2</td><td>iconv is disabled</td>
 </tr>
 <tr>
-  <td>OpenSolaris</td><td>GCC-3.4</td><td>icu/std</td><td>4.2</td><td>-</td>
+  <td>OpenSolaris/SunOS 5.11</td><td>SunCC 5.10/STLport4</td><td>icu</td><td>4.2</td><td>Some faults in collation, STLport issue<br/>iconv is disabled</td>
 </tr>
 </table>
 
