@@ -224,7 +224,7 @@ namespace impl_posix {
     }
 
 #else // no iconv
-    std::auto_ptr<base_converter> create_iconv_converter(std::string const &/*encoding*/)
+    std::auto_ptr<util::base_converter> create_iconv_converter(std::string const &/*encoding*/)
     {
         std::auto_ptr<util::base_converter> cvt;
         return cvt;
