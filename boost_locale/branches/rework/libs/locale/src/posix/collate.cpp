@@ -15,7 +15,6 @@
 #include <ios>
 #include <vector>
 #include <boost/locale/generator.hpp>
-#include <boost/functional/hash.hpp>
 #include "../shared/mo_hash.hpp"
 
 #include "all_generator.hpp"
@@ -77,7 +76,10 @@ public:
     }
     virtual long do_hash(char_type const *b,char_type const *e) const
     {
-        return boost::hash<string_type>()(do_transform(b,e));
+        string_type s(do_transform(b,e));
+        char const *begin = reinterpret_cast<char const *>(s.c_str());
+        char const *end = begin + s.size() * sizeof(char_type);
+        return gnu_gettext::pj_winberger_hash_function(begin,end);
     }
     virtual string_type do_transform(char_type const *b,char_type const *e) const
     {

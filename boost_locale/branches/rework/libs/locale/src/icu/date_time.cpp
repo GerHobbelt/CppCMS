@@ -11,7 +11,7 @@
 #include <boost/locale/formatting.hpp>
 #include "all_generator.hpp"
 
-#include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 #include <unicode/utypes.h>
