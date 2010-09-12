@@ -9,6 +9,8 @@
 #include "lcid.hpp"
 #include <string.h>
 #include <string>
+#include <sstream>
+#include <map>
 
 #include "../util/locale_data.hpp"
 
