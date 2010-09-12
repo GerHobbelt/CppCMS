@@ -1129,6 +1129,8 @@ platforms.
 It allows to have a simple and already available in standard C library localization
 support, most notably under Mac OS X where GCC's `libstdc++` does not support locales.
 
+Note: POSIX backend supports utf-8, single byte and double byte encodings only.
+
 ### `winapi` - Win32 API.
 
 This Win32API based localization backend it provides decent UTF-8/UTF-16 locale support.
