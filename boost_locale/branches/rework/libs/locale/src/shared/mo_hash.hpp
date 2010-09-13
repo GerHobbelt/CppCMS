@@ -5,6 +5,9 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
+
+#include <boost/cstdint.hpp>
+
 namespace boost {
     namespace locale {
         namespace gnu_gettext {
