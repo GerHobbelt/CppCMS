@@ -1638,19 +1638,22 @@ which adds BOM to UTF-8 files by default.
 <tr>
   <th>Platform</th><th>Compiler</th><th>Backends</th><th>ICU version</th><th>Notes</th>
 </tr>
-  <td>Linux 2.6 x86\_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+</tr>
+  <td>Linux 2.6 x86</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.6</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86\_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86\_64</td><td>GCC-4.5/C++0x with char16\_t/char32\_t</td><td>icu</td><td>3.8</td><td>Some charXX\_t faults, compiler issues</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x with char16_t/char32_t</td><td>icu</td><td>3.8</td><td>Some charXX_t faults, compiler issues</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86\_64</td><td>Intel 11.0</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>Intel 11.0</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
   <td>Windows XP 32bit</td><td>MSVC 2008</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
