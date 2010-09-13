@@ -18,6 +18,7 @@ namespace boost {
             public:
                 locale_data() : 
                     language("C"),
+                    encoding("us-ascii"),
                     utf8(false)
                 {
                 }
