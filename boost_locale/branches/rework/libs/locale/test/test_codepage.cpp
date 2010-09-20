@@ -303,7 +303,6 @@ int main()
             }
             test_sjis = true;
             if(bname=="std" && ja_jp_shiftjis.empty()) {
-                std::cout << "no ShiftJIS locales availible, passing" << std::endl;
                 test_sjis = false;
             }
             if(bname=="winapi") {
@@ -311,7 +310,7 @@ int main()
                 test_sjis = false;
             }
             #ifndef BOOST_LOCALE_NO_POSIX_BACKEND
-            if(bname=="winapi") {
+            if(bname=="posix") {
                 {
                     locale_t l = newlocale(LC_ALL_MASK,he_il_8bit.c_str(),0);
                     if(!l)
@@ -326,6 +325,7 @@ int main()
                     else
                         freelocale(l);
                 }
+                #ifdef BOOST_LOCALE_WITH_ICONV
                 {
                     locale_t l = newlocale(LC_ALL_MASK,ja_jp_shiftjis.c_str(),0);
                     if(!l)
@@ -333,6 +333,9 @@ int main()
                     else
                         freelocale(l);
                 }
+                #else
+                test_sjis = false;
+                #endif
             }
             #endif
 
