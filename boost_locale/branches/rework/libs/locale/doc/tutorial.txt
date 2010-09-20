@@ -1664,9 +1664,9 @@ which adds BOM to UTF-8 files by default.
 <tr>
   <td>Cygwin 1.7</td><td>GCC 4.3</td><td>icu/winapi/std</td><td>3.8</td><td>-</td>
 </tr>
-<!-- <tr>
-  <td>Mac OS X 10.6.4</td><td>GCC-4.2/td><td>icu/posix/std</td><td>3.8</td><td>-</td>
-</tr> -->
+<tr>
+  <td>Mac OS X 10.6.4</td><td>GCC-4.2</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+</tr>
 <tr>
   <td>FreeBSD 8.0</td><td>GCC-4.2.1</td><td>icu/std</td><td>3.8</td><td>-</td>
 </tr>
