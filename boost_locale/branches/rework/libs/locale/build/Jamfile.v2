@@ -1,4 +1,4 @@
-# copyright John Maddock 2003
+# copyright John Maddock 2003, Artyom Beilis 2010
 # Distributed under the Boost Software License, Version 1.0. 
 # (See accompanying file LICENSE_1_0.txt or copy at 
 # http://www.boost.org/LICENSE_1_0.txt.
@@ -35,10 +35,11 @@ else
             }
             else {
                 message m3 : "--- Iconv is not found in given ICONV_PATH " ;
+                OPTS = $(OPTS) <define>BOOST_LOCALE_NO_ICONV=1 ;
             }
         }
         else {
-            if [ check-target-builds has_iconv : iconv ]
+            if [ check-target-builds has_iconv : iconv  ]
             {
                 message m4 : "--- Found in system path" ;
                 OPTS = $(OPTS) iconv ;
@@ -187,11 +188,11 @@ if $(WITH_ICU)
 if $(WITH_STD)
 {
     STD_SOURCES =
-	    codecvt
-		collate
-		converter
-		numeric
-		std_backend
+        codecvt
+        collate
+        converter
+        numeric
+        std_backend
         ;
     for SRC in $(SRC_SOURCES) 
     {
@@ -205,10 +206,10 @@ if $(WITH_POSIX)
 {
     POSIX_SOURCES = 
         collate
-		converter
-		numeric
-		codecvt
-		posix_backend
+        converter
+        numeric
+        codecvt
+        posix_backend
         ;
 
     for SRC in $(POSIX_SOURCES) 
@@ -222,10 +223,10 @@ if $(WITH_POSIX)
 if $(WITH_WINAPI)
 {
     WINAPI_SOURCES = 
-		collate
-		converter
-		numeric
-		win_backend
+        collate
+        converter
+        numeric
+        win_backend
         ;
     for SRC in $(WINAPI_SOURCES) 
     {
