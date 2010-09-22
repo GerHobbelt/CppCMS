@@ -3,149 +3,205 @@
 # (See accompanying file LICENSE_1_0.txt or copy at 
 # http://www.boost.org/LICENSE_1_0.txt.
 
-#
-# ICU configuration:
-#
+project /boost/locale
+    : source-location ../src
+    ;
 
-OPTS = <define>BOOST_THREAD_NO_LIB=1 ;
+import configure ;
+import project ;
 
-if [ modules.peek : LOCALE_DISABLE_ICONV ]
+exe has_iconv : ../build/has_iconv.cpp ;
+explicit has_iconv ;
+
+ICONV_PATH = [ modules.peek : ICONV_PATH ] ;
+lib iconv 
+  : 
+  : <search>$(ICONV_PATH)/lib <link>shared <runtime-link>shared
+  :
+  : <include>$(ICONV_PATH)/include 
+  ;
+explicit iconv ;
+
+exe has_external_iconv : ../build/has_iconv.cpp iconv ;
+explicit has_external_iconv ;
+
+
+ICU_PATH =  [ modules.peek : ICU_PATH ] ;
+ICU_LINK =  [ modules.peek : ICU_LINK ] ;
+if $(ICU_LINK)
 {
-    OPTS = $(OPTS) <define>BOOST_LOCALE_NO_ICONV=1 ;
+    ICU_OPTS = <include>$(ICU_PATH)/include <linkflags>$(ICU_LINK) <dll-path>$(ICU_PATH)/bin <runtime-link>shared ;
 }
-else 
+else
 {
-    message m1 : "-- Searching for iconv support " ;
-    exe has_iconv : ./has_iconv.cpp ;
-    explicit has_iconv ;
-
-    if [ check-target-builds has_iconv ]
-    {
-        message m2 : "--- Found in libc " ;
-        OPTS = $(OPTS) <define>BOOST_LOCALE_WITH_ICONV=1 ;
-    }
-    else {
-        if [ modules.peek : ICONV_PATH ]
-        {
-            lib iconv : : <search>$(ICONV_PATH)/lib ;
-            ICONV_OPTS = <include>$(ICONV_PATH)/include <library>iconv/<link>shared/<runtime-link>shared ;
-            if [ check-target-builds has_iconv : iconv : $(ICONV_OPTS) ]
-            {
-                OPTS = $(OPTS) $(ICONV_OPTS) ;
-            }
-            else {
-                message m3 : "--- Iconv is not found in given ICONV_PATH " ;
-                OPTS = $(OPTS) <define>BOOST_LOCALE_NO_ICONV=1 ;
-            }
-        }
-        else {
-            if [ check-target-builds has_iconv : iconv  ]
-            {
-                message m4 : "--- Found in system path" ;
-                OPTS = $(OPTS) iconv ;
-            }
-            else {
-                message m5 : "--- iconv not found. Disabling" ;
-                OPTS = $(OPTS) <define>BOOST_LOCALE_NO_ICONV=1 ;
-            }
-        }
-    }
-}
+    searched-lib icuuc : : <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
+    searched-lib icuuc : : <toolset>msvc <variant>debug <name>icuucd <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
+    searched-lib icuuc : : <name>this_is_an_invalid_library_name ;
+    searched-lib icudt : : <search>$(ICU_PATH)/lib <name>icudata <link>shared <runtime-link>shared ;
+    searched-lib icudt : : <search>$(ICU_PATH)/lib <name>icudt <toolset>msvc <link>shared <runtime-link>shared ;
+    searched-lib icudt : : <name>this_is_an_invalid_library_name ;
+    searched-lib icuin : : <search>$(ICU_PATH)/lib <name>icui18n <link>shared <runtime-link>shared ;
+    searched-lib icuin : : <toolset>msvc <variant>debug <name>icuind <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
+    searched-lib icuin : : <toolset>msvc <variant>release <name>icuin <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
+    searched-lib icuin : : <name>this_is_an_invalid_library_name ;
+    explicit icuuc icudt icuin ;
     
-if ! [ modules.peek : LOCALE_DISABLE_ICU ]
+    ICU_OPTS =   <include>$(ICU_PATH)/include 
+      <library>icuuc/<link>shared/<runtime-link>shared 
+      <library>icudt/<link>shared/<runtime-link>shared 
+      <library>icuin/<link>shared/<runtime-link>shared
+      <dll-path>$(ICU_PATH)/bin
+        <runtime-link>shared ;
+}
+exe has_icu : ../build/has_icu_test.cpp  : $(ICU_OPTS) ;
+explicit has_icu ;
+
+
+# This function is called whenever the 'boost_locale' metatarget
+# below is generated and figures what external components we have,
+# what user wants, and what sources have to be compiled in the end.
+rule configure ( properties * )
 {
-    message m6 : "-- Searching for icu library " ;
-
-    if [ modules.peek : ICU_PATH ]
-    {    
-        ICU_PATH =  [ modules.peek : ICU_PATH ] ;
-    }
-    if [ modules.peek : ICU_LINK ]
-    {    
-        ICU_LINK =  [ modules.peek : ICU_LINK ] ;
-    }
-
-    if $(ICU_LINK)
+    local result ;
+    
+    local found-iconv ;
+    
+    if <boost.locale.iconv>on in $(properties)
+      || ! <boost.locale.iconv> in $(properties:G) 
+        && <target-os>linux in $(properties)
     {
-       ICU_OPTS = <include>$(ICU_PATH)/include <linkflags>$(ICU_LINK) <dll-path>$(ICU_PATH)/bin <runtime-link>shared ;
+        # See if iconv is bundled with standard library.
+        if [ configure.builds has_iconv : $(properties) : "iconv (libc)" ]
+        {
+            found-iconv = true ;
+        }
+        else 
+        {
+            if [ configure.builds has_external_iconv : $(properties) : "iconv (separate)" ]
+            {
+                found-iconv = true ;
+                result += <library>iconv ;
+            }
+        }
+    }        
+    if $(found-iconv) 
+    {
+        result += <define>BOOST_LOCALE_WITH_ICONV=1 ;
+    }
+
+    local found-icu ;
+    if ! <boost.locale.iconv>off in $(properties)
+    {
+        if [ configure.builds has_icu : $(properties) : "icu" ]
+        {
+            found-icu = true ;
+            result += <define>BOOST_LOCALE_WITH_ICU=1 ;
+
+            for s in boundary codecvt collator conversion date_time formatter
+                     icu_backend numeric
+            {
+                result += <source>icu/$(s).cpp ;
+            }
+        }
+    }
+        
+    if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties)
+    {
+        ECHO "error: Boost.Locale need either iconv or ICU library to be built." ;
+        EXIT ;
+    }
+    
+    if ! <boost.locale.std> in $(properties:G)
+    {
+        if <toolset>sun in $(properties)
+        {
+            properties += <boost.locale.std>off ;
+        }
+        else
+        {
+            properties += <boost.locale.std>on ;
+        }                
+    }
+    
+    if <boost.locale.std>off in $(properties)
+    {
+        result += <define>BOOST_LOCALE_NO_STD_BACKEND=1 ;
     }
     else
     {
-       lib icuuc : : <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
-       lib icuuc : : <toolset>msvc <variant>debug <name>icuucd <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
-       lib icuuc : : <name>this_is_an_invalid_library_name ;
-       lib icudt : : <search>$(ICU_PATH)/lib <name>icudata <link>shared <runtime-link>shared ;
-       lib icudt : : <search>$(ICU_PATH)/lib <name>icudt <toolset>msvc <link>shared <runtime-link>shared ;
-       lib icudt : : <name>this_is_an_invalid_library_name ;
-       lib icuin : : <search>$(ICU_PATH)/lib <name>icui18n <link>shared <runtime-link>shared ;
-       lib icuin : : <toolset>msvc <variant>debug <name>icuind <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
-       lib icuin : : <toolset>msvc <variant>release <name>icuin <search>$(ICU_PATH)/lib <link>shared <runtime-link>shared ;
-       lib icuin : : <name>this_is_an_invalid_library_name ;
-
-       ICU_OPTS =   <include>$(ICU_PATH)/include 
-                    <library>icuuc/<link>shared/<runtime-link>shared 
-                    <library>icudt/<link>shared/<runtime-link>shared 
-                    <library>icuin/<link>shared/<runtime-link>shared
-                    <dll-path>$(ICU_PATH)/bin
-                    <runtime-link>shared ;
+        STD_SOURCES =
+          codecvt
+          collate
+          converter
+          numeric
+          std_backend
+          ;
+        result += <source>std/$(STD_SOURCES).cpp ;
     }
-
-    exe has_icu : ./has_icu_test.cpp  : $(ICU_OPTS) ;
-    explicit has_icu ;
-
-    if [ check-target-builds has_icu : $(ICU_OPTS) : ] 
+    
+    if ! <boost.locale.winapi> in $(properties:G)
     {
-        message m7 : "--- ICU Found " ;
-        WITH_ICU = 1 ;
-        OPTS = $(OPTS) $(ICU_OPTS) <define>BOOST_LOCALE_HAS_ICU=1 ;
+        if <target-os>windows in $(properties) 
+          || <target-os>cygwin in $(properties)
+        {
+            properties += <boost.locale.winapi>on ;
+        }      
+        else
+        {
+            properties += <boost.locale.winapi>off ;
+        }                
     }
-    else {
-        WITH_ICU = 0 ;
+    
+    if <boost.locale.winapi>off in $(properties)
+    {
+        result += <define>BOOST_LOCALE_NO_WINAPI_BACKEND=1 ;
     }
-}
-else {
-    WITH_ICU = 0 ;
+    else
+    {
+        WINAPI_SOURCES = 
+          collate
+          converter
+          numeric
+          win_backend
+          ;
+        result += <source>win32/$(WINAPI_SOURCES).cpp ;
+    }
+    
+    if ! <boost.locale.posix> in $(properties:G)
+    {
+        if <target-os>linux in $(properties) || <target-os>darwin in $(properties)
+        {
+            properties += <boost.locale.posix>on ;
+        }
+        else
+        {
+            properties += <boost.locale.posix>on ;            
+        }        
+    }
+    
+    if <boost.locale.posix>off in $(properties)
+    {
+        result += <define>BOOST_LOCATE_NO_POSIX_BACKEND=1 ;        
+    }
+    else
+    {
+        POSIX_SOURCES = 
+          collate
+          converter
+          numeric
+          codecvt
+          posix_backend
+          ;
+        result += <source>posix/$(POSIX_SOURCES).cpp ;
+    }
+          
+    return $(result) ;
 }
 
 
-if [ modules.peek : LOCALE_DISABLE_POSIX_BACKEND ]
-{   
-    message m75 : "-- posix backend disabled" ; 
-    WITH_POSIX = 0 ;
-    OPTS = $(OPTS) <define>BOOST_LOCALE_NO_POSIX_BACKEND=1 ;
-}
-else {
-    message m8 : "-- posix backend enabled" ; 
-    WITH_POSIX = 1 ;
-}
 
-if [ modules.peek : LOCALE_DISABLE_STD_BACKEND ]
-{    
-    message m9 : "-- std backend disabled" ; 
-    WITH_STD = 0 ;
-    OPTS = $(OPTS) <define>BOOST_LOCALE_NO_STD_BACKEND=1 ;
-}
-else {
-    message m10 : "-- std backend enabled" ; 
-    WITH_STD = 1 ;
-}
-
-if [ modules.peek : LOCALE_DISABLE_WINAPI_BACKEND ]
-{    
-    message m11 : "-- winapi backend disabled" ; 
-    WITH_WINAPI = 0 ;
-    OPTS = $(OPTS) <define>BOOST_LOCALE_NO_WINAPI_BACKEND=1 ;
-}
-else {
-    message m12 : "-- winapi backend enabled" ; 
-    WITH_WINAPI = 1 ;
-}
-
-
-
-
-SHARED_SOURCES = 
-    encoding/codepage.cpp
+lib boost_locate 
+    : encoding/codepage.cpp
     shared/date_time.cpp
     shared/format.cpp
     shared/formatting.cpp
@@ -158,88 +214,12 @@ SHARED_SOURCES =
     util/default_locale.cpp
     util/info.cpp
     util/locale_data.cpp 
+    : <define>BOOST_THREAD_NO_LIB=1
+      <threading>multi
+      <conditional>@configure
     ;
 
-SOURCES = ../src/$(SHARED_SOURCES) ;
 
 
-if $(WITH_ICU)
-{
 
-    ICU_SOURCES = 
-        boundary
-        codecvt
-        collator
-        conversion
-        date_time
-        formatter
-        icu_backend
-        numeric
-        ;
-
-    for SRC in $(ICU_SOURCES) 
-    {
-        obj icu-$(SRC) : ../src/icu/$(SRC).cpp : $(OPTS) ;
-        explicit icu-$(SRC) ;
-        SOURCES = $(SOURCES) icu-$(SRC) ;
-    }
-}
-
-if $(WITH_STD)
-{
-    STD_SOURCES =
-        codecvt
-        collate
-        converter
-        numeric
-        std_backend
-        ;
-    for SRC in $(SRC_SOURCES) 
-    {
-        obj std-$(SRC) : ../src/std/$(SRC).cpp : $(OPTS) ;
-        explicit std-$(SRC) ;
-        SOURCES = $(SOURCES) std-$(SRC) ;
-    }
-}
-
-if $(WITH_POSIX)
-{
-    POSIX_SOURCES = 
-        collate
-        converter
-        numeric
-        codecvt
-        posix_backend
-        ;
-
-    for SRC in $(POSIX_SOURCES) 
-    {
-        obj posix-$(SRC) : ../src/posix/$(SRC).cpp : $(OPTS) ;
-        explicit posix-$(SRC) ;
-        SOURCES = $(SOURCES) posix-$(SRC) ;
-    }
-}
-
-if $(WITH_WINAPI)
-{
-    WINAPI_SOURCES = 
-        collate
-        converter
-        numeric
-        win_backend
-        ;
-    for SRC in $(WINAPI_SOURCES) 
-    {
-        obj winapi-$(SRC) : ../src/win32/$(SRC).cpp : $(OPTS) ;
-        explicit winapi-$(SRC) ;
-        SOURCES = $(SOURCES) winapi-$(SRC) ;
-    }
-}
-
-
-lib boost_locale : $(SOURCES) : $(OPTS) ;
-
-boost-install boost_locale ;
-
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
