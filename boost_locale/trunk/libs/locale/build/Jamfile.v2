@@ -90,7 +90,7 @@ rule configure ( properties * )
     }
 
     local found-icu ;
-    if ! <boost.locale.iconv>off in $(properties)
+    if ! <boost.locale.icu>off in $(properties)
     {
         if [ configure.builds has_icu : $(properties) : "icu" ]
         {
@@ -175,7 +175,7 @@ rule configure ( properties * )
         }
         else
         {
-            properties += <boost.locale.posix>on ;            
+            properties += <boost.locale.posix>off ;            
         }        
     }
     
@@ -200,7 +200,7 @@ rule configure ( properties * )
 
 
 
-lib boost_locate 
+lib boost_locale 
     : encoding/codepage.cpp
     shared/date_time.cpp
     shared/format.cpp
@@ -215,6 +215,7 @@ lib boost_locate
     util/info.cpp
     util/locale_data.cpp 
     : <define>BOOST_THREAD_NO_LIB=1
+      <link>shared:<define>BOOST_LOCALE_DYN_LINK=1
       <threading>multi
       <conditional>@configure
     ;

@@ -7,11 +7,6 @@
 //
 #define BOOST_LOCALE_SOURCE
 #include <boost/config.hpp>
-#if (!defined(BOOST_WINDOWS) && !defined(BOOST_LOCALE_NO_ICONV))
-#  ifndef BOOST_LOCALE_WITH_ICONV
-#    define BOOST_LOCALE_WITH_ICONV
-#  endif
-#endif
 
 #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 #define BOOST_LOCALE_WITH_WCONV
