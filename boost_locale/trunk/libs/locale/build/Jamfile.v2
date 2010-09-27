@@ -95,7 +95,7 @@ rule configure ( properties * )
         if [ configure.builds has_icu : $(properties) : "icu" ]
         {
             found-icu = true ;
-            result += <define>BOOST_LOCALE_WITH_ICU=1 ;
+            result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
 
             for s in boundary codecvt collator conversion date_time formatter
                      icu_backend numeric
@@ -194,7 +194,7 @@ rule configure ( properties * )
           ;
         result += <source>posix/$(POSIX_SOURCES).cpp ;
     }
-          
+
     return $(result) ;
 }
 
