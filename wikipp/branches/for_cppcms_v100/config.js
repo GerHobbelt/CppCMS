@@ -5,10 +5,10 @@
 		"syntax_highlighter" : "/templates/sh",
 		"disable_registration" : false,
 		"languages" : {
-			"en" : "en_US" ,
-			"he" : "he_IL" ,
-			"ru" : "ru_RU" ,
-			"pl" : "pl_PL"
+			"en" : "en_US.UTF-8" ,
+			"he" : "he_IL.UTF-8" ,
+			"ru" : "ru_RU.UTF-8" ,
+			"pl" : "pl_PL.UTF-8"
 		},
 
 		"sql" : {
@@ -62,12 +62,11 @@
 		"doument_root" : "."
 	},
 	"localization" : {
-		"encoding" : "UTF-8",
 		"messages" : { 
 			"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage/locale"],
 			"domains" :  [ "wikipp" ]
 		},
-		"locales" : [ "he_IL" , "en_US", "ru_RU", "pl_PL" ]
+		"locales" : [ "he_IL.UTF-8" , "en_US.UTF-8", "ru_RU.UTF-8", "pl_PL.UTF-8" ]
 	},
 	"http" : {
 		"script_names" : [ "/wikipp" ]
