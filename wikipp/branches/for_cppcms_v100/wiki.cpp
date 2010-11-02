@@ -19,15 +19,7 @@ wiki::wiki(cppcms::service &srv) :
 	add(users);
 	add(index);
 
-	sql.driver(settings().get<std::string>("wikipp.sql.driver"));
-	cppcms::json::object ob=settings().get<cppcms::json::object>("wikipp.sql.params");
-	for(cppcms::json::object::const_iterator p=ob.begin();p!=ob.end();++p) {
-		if(p->second.type()==cppcms::json::is_string)
-			sql.param(p->first,p->second.str());
-		else if(p->second.type()==cppcms::json::is_number)
-			sql.param(p->first,p->second.number());
-	}
-	sql.connect();
+	sql.connect(settings().get<std::string>("wikipp.dbixx_conn"));
 	script=settings().get<std::string>("wikipp.script");
 	cppcms::json::object langs = settings().at("wikipp.languages").object();
 	for(cppcms::json::object::const_iterator p=langs.begin();p!=langs.end();++p) {

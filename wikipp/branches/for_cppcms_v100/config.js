@@ -11,21 +11,11 @@
 			"pl" : "pl_PL.UTF-8"
 		},
 
-		"sql" : {
-			//"driver" : "sqlite3", // "mysql", "postgresql"
-			"driver" : "mysql", // "mysql", "postgresql"
-			//"params" : {"dbname" : "wikipp.db","sqlite3_dbdir" : "./db/"}
-			"params" : {"dbname" : "wikipp","username" : "root", "password" : "root" } // mysql
-		}
-		//	dbname="wikipp"
-		//	username="root"
-		//	password="root"
+		"dbixx_conn" : "sqlite3:dbname=wikipp.db;sqlite3_dbdir=./db/",
 
-		//	sqlite3.dbname="wikipp.db"
-		//	sqlite3.sqlite3_dbdir="./db/"
-
-		//	postgresql.dbname="cppcms"
-		//	postgresql.username="artik"
+		// "dbixx_conn" : "mysql:dbname=wikipp;username=root;password=root",
+		// "dbixx_conn" : "postgresql:dbname=cppcms;username=artik",
+		
 	},
 	"service" : {
 		//"worker_processes" : 1,
@@ -52,9 +42,8 @@
 		}
 	},
 	"views" : {
-		//"default_skin" : "view",
-		"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage"] ,
-		//"skins" : [ "view" ] ,
+		"paths" : [ "./stage"] ,
+		"skins" : [ "view" ] ,
 		//"auto_reload" : true
 	},
 	"file_server" : {
@@ -63,7 +52,7 @@
 	},
 	"localization" : {
 		"messages" : { 
-			"paths" : [ "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/stage/locale"],
+			"paths" : [ "./stage/locale"],
 			"domains" :  [ "wikipp" ]
 		},
 		"locales" : [ "he_IL.UTF-8" , "en_US.UTF-8", "ru_RU.UTF-8", "pl_PL.UTF-8" ]
@@ -78,7 +67,7 @@
 			"id" : "WikiPP"
 		},
 		"file" : {
-			"name" : "/home/artik/Projects/FastBlog/cppblog/wikipp_v100/wikipp.log",
+			"name" : "./wikipp.log",
 			"append" : true
 		}
 	},
@@ -88,17 +77,6 @@
 	}
 
 }
-
-
-
-//# Localization
-//locale.dir = "./locale"
-//locale.dir = "/usr/local/share/locale"
-//locale.lang_list = { "he" "en" }
-//locale.lang_default = "en"
-//locale.domain_list = { "wikipp" }
-
-
 
 
 
