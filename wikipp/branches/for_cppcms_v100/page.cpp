@@ -7,7 +7,6 @@
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/cache_interface.h>
 
-using namespace dbixx;
 #define _(X) ::cppcms::locale::translate(X)
 
 namespace content { 
@@ -102,25 +101,19 @@ void page::diff(std::string slug,std::string sv1,std::string sv2)
 {
 	int v1=atoi(sv1.c_str()), v2=atoi(sv2.c_str());
 	this->slug=slug;
-	result rs;
+	cppdb::result r;
 	content::diff c;
 	c.v1=v1;
 	c.v2=v2;
 	c.edit_v1=edit_version_url(v1);
 	c.edit_v2=edit_version_url(v2);
-	sql<<	"SELECT version,history.title,history.content,history.sidebar,pages.title FROM pages "
+	r=sql<<	"SELECT version,history.title,history.content,history.sidebar,pages.title FROM pages "
 		"JOIN history ON pages.id=history.id "
-		"WHERE lang=? AND slug=? AND version IN (?,?) ",
-		locale_name,slug,v1,v2,rs;
-	if(rs.rows()!=2) {
-		c.no_versions=true;
-		master::ini(c);
-		render("diff",c);
-		return;
-	}
+		"WHERE lang=? AND slug=? AND version IN (?,?) " << locale_name << slug << v1 << v2;
+	
 	std::string t1,c1,s1,t2,c2,s2;
-	row r;
-	while(rs.next(r)) {
+	int count=0;
+	while(r.next()) {
 		int ver;
 		r>>ver;
 		if(ver==v1) {
@@ -129,6 +122,13 @@ void page::diff(std::string slug,std::string sv1,std::string sv2)
 		else {
 			r>>t2>>c2>>s2;
 		}
+		count++;
+	}
+	if(count != 2) {
+		c.no_versions=true;
+		master::ini(c);
+		render("diff",c);
+		return;
 	}
 	if(t1!=t2) {
 		c.title_diff=true;
@@ -168,49 +168,37 @@ void page::history(std::string slug,std::string page)
 	else
 		offset=atoi(page.c_str());
 
-	sql<<	"SELECT title,id FROM pages "
-		"WHERE pages.lang=? AND pages.slug=? ",
-		locale_name,slug;
-	row r;
-	if(!sql.single(r)) {
+	cppdb::result r;
+	r=sql<<	"SELECT title,id FROM pages "
+		"WHERE pages.lang=? AND pages.slug=? " << locale_name << slug << cppdb::row;
+	if(r.empty()) {
 		redirect(locale_name);
 		return;
 	}
 	int id;
 	r>>c.title>>id;
-	result rs;
-	sql<<	"SELECT created,version,author FROM history "
+	r=sql<<	"SELECT created,version,author FROM history "
 		"WHERE id=? "
 		"ORDER BY version DESC "
-		"LIMIT ?,?",
-		id,offset*vers,vers+1,
-		rs;
+		"LIMIT ?,?"
+		<<id << offset*vers << vers+1;
 	
-	if(rs.rows()>vers) {
-		c.hist.resize(vers);
-		c.page=history_url(offset+1);
-	}
-	else {
-		c.hist.resize(rs.rows());
-	}
-
-	for(unsigned i=0;rs.next(r) && i<vers;i++) {
+	c.hist.reserve(vers);
+	for(unsigned i=0;r.next() && i<vers;i++) {
 		int ver;
+		c.hist.resize(i+1);
 		std::tm update = std::tm();
 		r>> update >> ver >> c.hist[i].author ;
-		char buf[256];
-		strftime(buf,sizeof(buf),"%c\n",&update);
-		time_t t2=mktime(&update);
-		std::tm u2=*localtime(&t2);
-		std::cerr << buf << " --- ";
-		strftime(buf,sizeof(buf),"%c\n",&u2);
-		std::cerr << buf << std::endl;
 		c.hist[i].update = mktime(&update);
 		c.hist[i].version=ver;
 		c.hist[i].show_url=page_version_url(ver);
 		c.hist[i].edit_url=edit_version_url(ver);
 		if(ver>1)
 			c.hist[i].diff_url=diff_url(ver-1,ver);
+	}
+	
+	if(r.next()) {
+		c.page=history_url(offset+1);
 	}
 
 	c.page_link=page_url();
@@ -226,10 +214,10 @@ void page::display(std::string slug)
 		return;
 	content::page c;
 
-	sql<<	"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?",
-		locale_name,slug;
-	row r;
-	if(!sql.single(r)) {
+	cppdb::result r;
+	r=sql<<	"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?"
+		<<locale_name << slug << cppdb::row;
+	if(r.empty()) {
 		std::string redirect=edit_url();
 		std::cerr << " Page " << redirect << std::endl;
 		response().set_redirect_header(redirect);
@@ -281,12 +269,10 @@ void page::edit(std::string slug,std::string version)
 
 bool page::load(content::page_form &form)
 {
-	sql<<	
-		"SELECT title,content,sidebar,users_only "
-		"FROM pages WHERE lang=? AND slug=?",
-		locale_name,slug;
-	row r;
-	if(sql.single(r)) {
+	cppdb::result r;
+	r=sql<<	"SELECT title,content,sidebar,users_only "
+		"FROM pages WHERE lang=? AND slug=?" << locale_name << slug << cppdb::row;
+	if(!r.empty()) {
 		std::string title,content,sidebar;
 		int users_only;
 		r >> title >> content >> sidebar >> users_only;
@@ -313,32 +299,33 @@ void page::save(int id,content::page_form &form)
 	wi.users.auth();
 	if(id!=-1) {
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
-			"WHERE lang=? AND slug=?",
-				form.content.value(),form.title.value(),
-				form.sidebar.value(),int(form.users_only.value()),
-				locale_name,slug,exec();
+			"WHERE lang=? AND slug=?"
+				<< form.content.value() << form.title.value() 
+				<< form.sidebar.value() << form.users_only.value() 
+				<< locale_name << slug << cppdb::exec;
 	}
 	else {
-		sql<<	"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
-			"VALUES(?,?,?,?,?,?)",
-			locale_name,slug,
-			form.title.value(),
-			form.content.value(),
-			form.sidebar.value(),
-			form.users_only.value(),
-			exec();
-		id=sql.rowid();
+		cppdb::statement s;
+		s=sql<<	"INSERT INTO pages(lang,slug,title,content,sidebar,users_only) "
+			"VALUES(?,?,?,?,?,?)"
+			<< locale_name << slug
+			<< form.title.value()
+			<< form.content.value()
+			<< form.sidebar.value()
+			<< form.users_only.value();
+		s.exec();
+		id=s.last_insert_id();
 	}
 	sql<<	"INSERT INTO history(id,version,created,title,content,sidebar,author) "
 		"SELECT ?,"
 		"	(SELECT COALESCE(MAX(version),0)+1 FROM history WHERE id=?),"
-		"	?,?,?,?,?",
-			id,id,t,
-			form.title.value(),
-			form.content.value(),
-			form.sidebar.value(),
-			wi.users.username,
-			exec();
+		"	?,?,?,?,?"
+			<< id << id << t 
+			<< form.title.value()
+			<< form.content.value()
+			<< form.sidebar.value()
+			<< wi.users.username 
+			<< cppdb::exec;
 }
 
 
@@ -346,11 +333,11 @@ bool page::edit_on_post(content::edit_page &c)
 {
 	wi.options.load();
 	
-	transaction tr(sql);
-	sql<<	"SELECT id,users_only FROM pages WHERE lang=? and slug=?",locale_name,slug;
-	row r;
+	cppdb::transaction tr(sql);
+	cppdb::result r;
+	r=sql<<	"SELECT id,users_only FROM pages WHERE lang=? and slug=?" << locale_name << slug << cppdb::row;
 	int id=-1,users_only=wi.options.global.users_only_edit;
-	if(sql.single(r)) {
+	if(!r.empty()) {
 		r>>id>>users_only;
 	}
 	if(users_only && !wi.users.auth()) {
@@ -380,13 +367,13 @@ bool page::edit_on_post(content::edit_page &c)
 
 bool page::load_history(int ver,content::page_form &form)
 {
-	sql<<	"SELECT history.title,history.content,history.sidebar,pages.users_only "
+	cppdb::result r;
+	r=sql<<	"SELECT history.title,history.content,history.sidebar,pages.users_only "
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
-		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-		locale_name,slug,ver;
-	row r;
-	if(sql.single(r)) {
+		"WHERE pages.lang=? AND pages.slug=? AND history.version=?"
+		<<locale_name<<slug<<ver<<cppdb::row;
+	if(!r.empty()) {
 		std::string title,content,sidebar;
 		int uonly;
 		r >> title >> content >> sidebar >> uonly;
@@ -404,13 +391,13 @@ void page::display_ver(std::string slug,std::string sid)
 	this->slug=slug;
 	content::page_hist c;
 	int id=atoi(sid.c_str());
-	sql<<	"SELECT history.title,history.content,history.sidebar,history.created "
+	cppdb::result r;
+	r=sql<<	"SELECT history.title,history.content,history.sidebar,history.created "
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "
-		"WHERE pages.lang=? AND pages.slug=? AND history.version=?",
-			locale_name,slug,id;
-	row r;
-	if(!sql.single(r)) {
+		"WHERE pages.lang=? AND pages.slug=? AND history.version=?"
+			<<locale_name << slug << id << cppdb::row;
+	if(!r.empty()) {
 		redirect(locale_name,slug);
 		return;
 	}

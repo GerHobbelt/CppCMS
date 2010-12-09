@@ -1,7 +1,7 @@
 #ifndef WIKI_H
 #define WIKI_H
 #include <cppcms/application.h>
-#include <dbixx/dbixx.h>
+#include <cppdb/frontend.h>
 
 #include "page.h"
 #include "users.h"
@@ -22,7 +22,7 @@ class wiki : public cppcms::application {
 	std::string script;
 public:
 	// Data 
-	dbixx::session sql;
+	cppdb::session sql;
 	std::string locale_name;
 
 	// Applications 

@@ -5,7 +5,7 @@
 #include <map>
 
 namespace content { class master; }
-namespace dbixx { class session; }
+namespace cppdb { class session; }
 namespace apps {
 
 class wiki;
@@ -13,7 +13,7 @@ class wiki;
 class master : public cppcms::application {
 protected:
 	wiki &wi;
-	dbixx::session &sql;
+	cppdb::session &sql;
 	std::string &locale_name;
 	std::map<std::string,std::string> languages;
 public:

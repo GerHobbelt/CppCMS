@@ -31,8 +31,6 @@ options_form::options_form()
 
 namespace apps {
 
-using namespace dbixx;
-
 void global_options::serialize(cppcms::archive &a)
 {
 	a & users_only_edit & contact;
@@ -72,11 +70,10 @@ void options::load()
 	local.copyright.clear();
 	if(!cache().fetch_data("global_ops",global)) 
 	{
-		result res;
-		sql<<	"SELECT name,value FROM options "
-			"WHERE	lang='global' ",res;
-		row r;
-		while(res.next(r)) {
+		cppdb::result r;
+		r=sql<<	"SELECT name,value FROM options "
+			"WHERE	lang='global' ";
+		while(r.next()) {
 			std::string n,v;
 			r >> n >> v;
 			if(n=="users_only_edit")
@@ -90,11 +87,10 @@ void options::load()
 	}
 	if(cache().fetch_data("local_ops:"+locale_name,local))
 		return;
-	result res;
-	sql<<	"SELECT value,name FROM options "
-		"WHERE  lang=?",locale_name,res;
-	row r;
-	while(res.next(r)) {
+	cppdb::result r;
+	r=sql<<	"SELECT value,name FROM options "
+		"WHERE  lang=?" << locale_name;
+	while(r.next()) {
 		std::string v,n;
 		r>>v>>n;
 		if(n=="title")
@@ -122,23 +118,17 @@ void options::load()
 void options::save()
 {
 	sql<<	"DELETE FROM options "
-		"WHERE lang='global' OR lang=?",
-		locale_name,exec();
+		"WHERE lang='global' OR lang=?" << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
-		"VALUES(?,'users_only_edit','global')",
-		global.users_only_edit,exec();
+		"VALUES(?,'users_only_edit','global')" <<  global.users_only_edit << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
-		"VALUES(?,'contact','global')",
-		global.contact,exec();
+		"VALUES(?,'contact','global')" <<  global.contact << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
-		"VALUES(?,'title',?)",
-		local.title,locale_name,exec();
+		"VALUES(?,'title',?)" <<  local.title << locale_name << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
-		"VALUES(?,'about',?)",
-		local.about,locale_name,exec();
+		"VALUES(?,'about',?)" << local.about << locale_name << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
-		"VALUES(?,'copyright',?)",
-		local.copyright,locale_name,exec();
+		"VALUES(?,'copyright',?)" << local.copyright << locale_name << cppdb::exec;
 	cache().rise("global_ops");
 	cache().rise("local_ops:"+locale_name);
 }

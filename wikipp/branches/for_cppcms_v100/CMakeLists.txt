@@ -13,12 +13,12 @@ option(USE_STATIC_VIEW "Compile view statically into wikipp" OFF)
 
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
-find_library(DBIXX dbixx)
+find_library(CPPDB cppdb)
 find_library(DISCOUNT markdown)
 
 find_path(CPPCMS_INC cppcms/application.h)
 find_path(BOOSTER_INC booster/shared_ptr.h)
-find_path(DBIXX_INC dbixx/dbixx.h)
+find_path(CPPDB_INC cppdb/frontend.h)
 find_path(DISCOUNT_INC mkdio.h)
 
 if(NOT DISCOUNT_INC OR NOT DISCOUNT)
@@ -30,7 +30,7 @@ endif()
 
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
-include_directories(${DBIXX_INC})
+include_directories(${CPPDB_INC})
 include_directories(${DISCOUNT_INC})
 include_directories(.)
 
@@ -81,7 +81,7 @@ else()
 endif()
 
 
-target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${DBIXX} ${DISCOUNT})
+target_link_libraries(wikipp ${BOOSTER} ${CPPCMS} ${CPPDB} ${DISCOUNT})
 
 #  Localization
 

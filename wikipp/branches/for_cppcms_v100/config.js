@@ -11,7 +11,7 @@
 			"pl" : "pl_PL.UTF-8"
 		},
 
-		"dbixx_conn" : "sqlite3:dbname=wikipp.db;sqlite3_dbdir=./db/",
+		"connection_string" : "mysql:database=cppcms;user=root;password=root",
 
 		// "dbixx_conn" : "mysql:dbname=wikipp;username=root;password=root",
 		// "dbixx_conn" : "postgresql:dbname=cppcms;username=artik",
@@ -19,7 +19,7 @@
 	},
 	"service" : {
 		//"worker_processes" : 1,
-		"worker_threads" : 5,
+		"worker_threads" : 25,
 		"api" : "http",
 		//"api" : "fastcgi",
 		"port" : 8080
@@ -72,7 +72,7 @@
 		}
 	},
 	"cache" : {
-		"backend" : "thread_shared", 
+		//"backend" : "thread_shared", 
 		"limit" : 100, // items - thread cache
 	}
 

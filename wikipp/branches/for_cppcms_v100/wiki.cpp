@@ -4,7 +4,6 @@
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/http_context.h>
 
-using namespace dbixx;
 namespace apps {
 
 wiki::wiki(cppcms::service &srv) :
@@ -19,7 +18,7 @@ wiki::wiki(cppcms::service &srv) :
 	add(users);
 	add(index);
 
-	sql.connect(settings().get<std::string>("wikipp.dbixx_conn"));
+	sql.open(settings().get<std::string>("wikipp.connection_string"));
 	script=settings().get<std::string>("wikipp.script");
 	cppcms::json::object langs = settings().at("wikipp.languages").object();
 	for(cppcms::json::object::const_iterator p=langs.begin();p!=langs.end();++p) {

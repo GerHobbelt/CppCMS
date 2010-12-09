@@ -7,8 +7,6 @@
 
 namespace apps {
 
-using namespace dbixx;
-
 index::index(wiki &w):
 	master(w)
 {
@@ -39,24 +37,24 @@ void index::changes(std::string page_no)
 		p=0;
 	else
 		p=atoi(page_no.c_str());
-	result rs;
-	sql<<	"SELECT history.title,history.version,history.created,"
+	cppdb::result rs;
+	rs = sql<<
+		"SELECT history.title,history.version,history.created,"
 		"	history.author,pages.lang,pages.slug "
 		"FROM history "
 		"JOIN pages ON history.id=pages.id "
 		"ORDER BY created DESC "
-		"LIMIT ?,?",
-		p*window,window,
-		rs;
+		"LIMIT ?,?"
+		<< p*window << window;
 	content::recent_changes c;	
-	c.content.resize(rs.rows());
-	row r;
+	c.content;
 	int n;
-	for(n=0;rs.next(r);n++) {
-		content::recent_changes::element &d=c.content[n];
+	for(n=0;rs.next();n++) {
+		c.content.push_back(content::recent_changes::element());
+		content::recent_changes::element &d=c.content.back();
 		std::string lang,slug;
 		std::tm created;
-		r>>d.title>>d.version>>created>>d.author>>lang>>slug;
+		rs>>d.title>>d.version>>created>>d.author>>lang>>slug;
 		d.created = mktime(&created);
 		d.url=wi.page.page_version_url(d.version,lang,slug);
 		if(d.version>1)
@@ -78,22 +76,21 @@ void index::display_index()
 		return;
 	content::toc c;
 	ini(c);
-	result res;
-	sql<<	"SELECT slug,title FROM pages "
+	cppdb::result r;
+	r=sql<<	"SELECT slug,title FROM pages "
 		"WHERE lang=? "
-		"ORDER BY title ASC",locale_name,res;
-	unsigned items=res.rows();
-	unsigned items_left=items/3;
-	unsigned items_mid=items*2/3;
+		"ORDER BY title ASC" << locale_name;
 	std::string letter="";
-	row r;
 	typedef std::multimap<std::string,std::string,std::locale> mapping_type;
 	mapping_type mapping(context().locale());
-	while(res.next(r)) {
+	while(r.next()) {
 		std::string slug,t;
 		r >> slug >> t;
 		mapping.insert(std::pair<std::string,std::string>(t,slug));
 	}
+	unsigned items=mapping.size();
+	unsigned items_left=items/3;
+	unsigned items_mid=items*2/3;
 
 	mapping_type::iterator p=mapping.begin();
 	int rows_no = (mapping.size() +2)/3;

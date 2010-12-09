@@ -8,7 +8,6 @@
 #include <cppcms/cache_interface.h>
 #include <cppcms/session_interface.h>
 
-using namespace dbixx;
 #define _(X) ::cppcms::locale::translate(X)
 
 namespace content {
@@ -98,13 +97,13 @@ void users::new_user()
 	content::new_user c(&wi);
 	if(request().request_method()=="POST") {
 		c.form.load(context());
-		transaction tr(sql);
+		cppdb::transaction tr(sql);
 		if(c.form.validate()) {
 			sql<<	"INSERT INTO users(username,password) "
-				"VALUES(?,?)",
-				c.form.username.value(),
-				c.form.password1.value(),
-				exec();
+				"VALUES(?,?)"
+				<< c.form.username.value()
+				<< c.form.password1.value()
+				<< cppdb::exec;
 			tr.commit();
 			wi.page.redirect(locale_name);
 			session()["username"]=c.form.username.value();
@@ -136,9 +135,9 @@ bool users::user_exists(std::string u)
 	if(cache().fetch_frame(key,tmp,true)) { // No triggers
 		return true;
 	}
-	sql<<"SELECT id FROM users WHERE username=?",u;
-	row r;
-	if(sql.single(r)) {
+	cppdb::result r;
+	r=sql<<"SELECT id FROM users WHERE username=?" << u << cppdb::row;
+	if(!r.empty()) {
 		cache().store_frame(key,tmp);
 		return true;
 	}
@@ -174,10 +173,10 @@ bool users::check_login(std::string u,std::string p)
 {
 	if(u.empty() || p.empty())
 		return false;
-	sql<<	"SELECT password FROM users "
-		"WHERE username=?",u;
-	row r;
-	if(!sql.single(r) ) {
+	cppdb::result r;
+	r=sql<<	"SELECT password FROM users "
+		"WHERE username=?" << u << cppdb::row;
+	if(r.empty()) {
 		return false;
 	}
 	std::string pass;
