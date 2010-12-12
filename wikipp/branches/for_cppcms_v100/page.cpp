@@ -180,9 +180,10 @@ void page::history(std::string slug,std::string page)
 	r=sql<<	"SELECT created,version,author FROM history "
 		"WHERE id=? "
 		"ORDER BY version DESC "
-		"LIMIT ?,?"
-		<<id << offset*vers << vers+1;
-	
+		"LIMIT ? "
+		"OFFSET ?"
+		<<id << vers+1 << offset*vers;
+
 	c.hist.reserve(vers);
 	for(unsigned i=0;r.next() && i<vers;i++) {
 		int ver;
@@ -314,7 +315,7 @@ void page::save(int id,content::page_form &form)
 			<< form.sidebar.value()
 			<< form.users_only.value();
 		s.exec();
-		id=s.last_insert_id();
+		id=s.sequence_last("pages_id_seq");
 	}
 	sql<<	"INSERT INTO history(id,version,created,title,content,sidebar,author) "
 		"SELECT ?,"

@@ -132,3 +132,5 @@ endforeach()
 
 add_custom_target(create-po ALL DEPENDS ${MO_FILES})
 
+add_executable(wikipp_migrate migrate.cpp)
+target_link_libraries(wikipp_migrate ${CPPDB})

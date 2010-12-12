@@ -4,6 +4,7 @@
 		"media" :"/templates",
 		"syntax_highlighter" : "/templates/sh",
 		"disable_registration" : false,
+
 		"languages" : {
 			"en" : "en_US.UTF-8" ,
 			"he" : "he_IL.UTF-8" ,
@@ -11,10 +12,17 @@
 			"pl" : "pl_PL.UTF-8"
 		},
 
-		"connection_string" : "mysql:database=cppcms;user=root;password=root",
+		//"connection_string" : "sqlite3:db=./db/wikipp.db",
+		"connection_string" : "postgresql:dbname=wikipp",
+		//"connection_string" : "mysql:database=wikipp;user=root;password=root",
 
-		// "dbixx_conn" : "mysql:dbname=wikipp;username=root;password=root",
-		// "dbixx_conn" : "postgresql:dbname=cppcms;username=artik",
+		//"connection_string" : "sqlite3:db=./db/wikipp.db;@use_prepared=off",
+		//"connection_string" : "postgresql:dbname=wikipp;@use_prepared=off",
+		//"connection_string" : "mysql:database=wikipp;user=root;password=root;@use_prepared=off",
+		
+		//"connection_string" : "odbc:@engine=sqlite3;Driver=SQlite3;Database=./db/wikipp.db",
+		//"connection_string" : "odbc:@engine=postgresql;Driver=PostgreSQL ANSI;Database=wikipp",
+		//"connection_string" : "odbc:@engine=mysql;Driver=MySQL;Database=wikipp;UID=root;PWD=root",
 		
 	},
 	"service" : {
@@ -51,6 +59,7 @@
 		"doument_root" : "."
 	},
 	"localization" : {
+		"backend" : "std" ,
 		"messages" : { 
 			"paths" : [ "./stage/locale"],
 			"domains" :  [ "wikipp" ]
@@ -61,7 +70,7 @@
 		"script_names" : [ "/wikipp" ]
 	},
 	"logging" : {
-		"level" : "info",
+		"level" : "error",
 		"syslog" : {
 			"enable": true,
 			"id" : "WikiPP"
@@ -72,8 +81,14 @@
 		}
 	},
 	"cache" : {
-		//"backend" : "thread_shared", 
+		"backend" : "thread_shared", 
 		"limit" : 100, // items - thread cache
+	},
+	"security" : {
+		// "multipart_form_data_limit" : 65536, // KB
+		// "content_length_limit" : 1024, // KB
+		// "uploads_path" : "" // temporary directory
+		"display_error_message" : false
 	}
 
 }

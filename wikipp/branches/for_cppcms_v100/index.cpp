@@ -44,8 +44,9 @@ void index::changes(std::string page_no)
 		"FROM history "
 		"JOIN pages ON history.id=pages.id "
 		"ORDER BY created DESC "
-		"LIMIT ?,?"
-		<< p*window << window;
+		"LIMIT ? "
+		"OFFSET ?"
+		<< window << p*window;
 	content::recent_changes c;	
 	c.content;
 	int n;
