@@ -1,0 +1,47 @@
+/*! \mainpage CppDB - SQL Connectivity Library
+
+CppDB is an SQL connectivity library that is designed to provide platform
+and Database independent connectivity API similarly to what JDBC, ODBC and
+other connectivity libraries do.
+
+CppDB was designed with following goals in the mind:
+
+- Performance is the primary goal - make fastest possible SQL connectivity as possible
+- Transparent connection pooling support
+- Transparent prepared statements caching 
+- Dynamic DB modules loading and optional static linking
+- Full and high priority support of FOSS RDBMS: MySQL, PostgreSQL, Sqlite3
+- Support as many  RDBMSs as possible via cppdb-odbc bridge
+- Simplicity in use
+- Locale safety
+- Support of both explicit verbose API and brief and nice syntactic sugar
+
+This library was developed on the base of experience with SOCI, libdbi and
+other SQL Connectivity libraries.
+
+The library is released under LGPLv3 license.
+
+This manual is divided in the following parts:
+
+Basic use:
+
+- \subpage intro
+- \subpage connstr
+- \subpage stat
+- \subpage query
+- \subpage transaction
+- \subpage escaping
+- \subpage backendref 
+- \subpage build
+- \subpage support
+
+Advanced use:
+
+- \subpage advanced_drivers
+- \subpage backenddev 
+
+*/
+
+
+
+
