@@ -118,7 +118,8 @@ void options::load()
 void options::save()
 {
 	sql<<	"DELETE FROM options "
-		"WHERE lang='global' OR lang=?" << cppdb::exec;
+		"WHERE lang='global' OR lang=?" 
+		<< locale_name << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')" <<  global.users_only_edit << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
