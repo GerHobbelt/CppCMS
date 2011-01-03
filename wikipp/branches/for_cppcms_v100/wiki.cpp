@@ -8,6 +8,7 @@ namespace apps {
 
 wiki::wiki(cppcms::service &srv) :
 	cppcms::application(srv),
+ 	conn(settings().get<std::string>("wikipp.connection_string")),
 	page(*this),
 	options(*this),
 	users(*this),
@@ -18,7 +19,6 @@ wiki::wiki(cppcms::service &srv) :
 	add(users);
 	add(index);
 
-	sql.open(settings().get<std::string>("wikipp.connection_string"));
 	script=settings().get<std::string>("wikipp.script");
 	cppcms::json::object langs = settings().at("wikipp.languages").object();
 	for(cppcms::json::object::const_iterator p=langs.begin();p!=langs.end();++p) {

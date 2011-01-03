@@ -61,6 +61,7 @@ std::string options::edit_url()
 
 void options::load()
 {
+	cppdb::session sql(conn);
 	if(loaded)
 		return;
 	global.users_only_edit=0;
@@ -117,9 +118,12 @@ void options::load()
 
 void options::save()
 {
-	sql<<	"DELETE FROM options "
-		"WHERE lang='global' OR lang=?" 
-		<< locale_name << cppdb::exec;
+	cppdb::session sql(conn);
+	cppdb::transaction guard(sql);
+	if(loaded)
+		sql<<	"DELETE FROM options "
+			"WHERE lang='global' OR lang=?" 
+			<< locale_name << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')" <<  global.users_only_edit << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
@@ -132,6 +136,7 @@ void options::save()
 		"VALUES(?,'copyright',?)" << local.copyright << locale_name << cppdb::exec;
 	cache().rise("global_ops");
 	cache().rise("local_ops:"+locale_name);
+	guard.commit();
 }
 
 void options::edit()

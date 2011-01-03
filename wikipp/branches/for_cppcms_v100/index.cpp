@@ -38,6 +38,7 @@ void index::changes(std::string page_no)
 	else
 		p=atoi(page_no.c_str());
 	cppdb::result rs;
+	cppdb::session sql(conn);
 	rs = sql<<
 		"SELECT history.title,history.version,history.created,"
 		"	history.author,pages.lang,pages.slug "
@@ -78,6 +79,7 @@ void index::display_index()
 	content::toc c;
 	ini(c);
 	cppdb::result r;
+	cppdb::session sql(conn);
 	r=sql<<	"SELECT slug,title FROM pages "
 		"WHERE lang=? "
 		"ORDER BY title ASC" << locale_name;

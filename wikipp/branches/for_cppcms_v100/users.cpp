@@ -97,6 +97,7 @@ void users::new_user()
 	content::new_user c(&wi);
 	if(request().request_method()=="POST") {
 		c.form.load(context());
+		cppdb::session sql(conn);
 		cppdb::transaction tr(sql);
 		if(c.form.validate()) {
 			sql<<	"INSERT INTO users(username,password) "
@@ -136,6 +137,7 @@ bool users::user_exists(std::string u)
 		return true;
 	}
 	cppdb::result r;
+	cppdb::session sql(conn);
 	r=sql<<"SELECT id FROM users WHERE username=?" << u << cppdb::row;
 	if(!r.empty()) {
 		cache().store_frame(key,tmp);
@@ -174,6 +176,7 @@ bool users::check_login(std::string u,std::string p)
 	if(u.empty() || p.empty())
 		return false;
 	cppdb::result r;
+	cppdb::session sql(conn);
 	r=sql<<	"SELECT password FROM users "
 		"WHERE username=?" << u << cppdb::row;
 	if(r.empty()) {

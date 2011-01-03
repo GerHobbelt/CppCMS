@@ -101,6 +101,7 @@ void page::diff(std::string slug,std::string sv1,std::string sv2)
 {
 	int v1=atoi(sv1.c_str()), v2=atoi(sv2.c_str());
 	this->slug=slug;
+	cppdb::session sql(conn);
 	cppdb::result r;
 	content::diff c;
 	c.v1=v1;
@@ -168,6 +169,7 @@ void page::history(std::string slug,std::string page)
 	else
 		offset=atoi(page.c_str());
 
+	cppdb::session sql(conn);
 	cppdb::result r;
 	r=sql<<	"SELECT title,id FROM pages "
 		"WHERE pages.lang=? AND pages.slug=? " << locale_name << slug << cppdb::row;
@@ -215,6 +217,7 @@ void page::display(std::string slug)
 		return;
 	content::page c;
 
+	cppdb::session sql(conn);
 	cppdb::result r;
 	r=sql<<	"SELECT title,content,sidebar FROM pages WHERE lang=? AND slug=?"
 		<<locale_name << slug << cppdb::row;
@@ -272,6 +275,7 @@ void page::edit(std::string slug,std::string version)
 
 bool page::load(content::page_form &form)
 {
+	cppdb::session sql(conn);
 	cppdb::result r;
 	r=sql<<	"SELECT title,content,sidebar,users_only "
 		"FROM pages WHERE lang=? AND slug=?" << locale_name << slug << cppdb::row;
@@ -300,6 +304,7 @@ void page::save(int id,content::page_form &form)
 {
 	std::tm t = booster::ptime::local_time(booster::ptime::now());
 	wi.users.auth();
+	cppdb::session sql(conn);
 	if(id!=-1) {
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
 			"WHERE lang=? AND slug=?"
@@ -336,6 +341,7 @@ bool page::edit_on_post(content::edit_page &c)
 {
 	wi.options.load();
 	
+	cppdb::session sql(conn);
 	cppdb::transaction tr(sql);
 	cppdb::result r;
 	r=sql<<	"SELECT id,users_only FROM pages WHERE lang=? and slug=?" << locale_name << slug << cppdb::row;
@@ -370,6 +376,7 @@ bool page::edit_on_post(content::edit_page &c)
 
 bool page::load_history(int ver,content::page_form &form)
 {
+	cppdb::session sql(conn);
 	cppdb::result r;
 	r=sql<<	"SELECT history.title,history.content,history.sidebar,pages.users_only "
 		"FROM pages "
@@ -395,6 +402,7 @@ void page::display_ver(std::string slug,std::string sid)
 	content::page_hist c;
 	int id=atoi(sid.c_str());
 	cppdb::result r;
+	cppdb::session sql(conn);
 	r=sql<<	"SELECT history.title,history.content,history.sidebar,history.created "
 		"FROM pages "
 		"JOIN history ON pages.id=history.id "

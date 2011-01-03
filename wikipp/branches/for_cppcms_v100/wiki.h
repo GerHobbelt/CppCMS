@@ -21,8 +21,8 @@ class wiki : public cppcms::application {
 
 	std::string script;
 public:
+	std::string conn;
 	// Data 
-	cppdb::session sql;
 	std::string locale_name;
 
 	// Applications 

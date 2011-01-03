@@ -13,7 +13,7 @@ class wiki;
 class master : public cppcms::application {
 protected:
 	wiki &wi;
-	cppdb::session &sql;
+	std::string conn;
 	std::string &locale_name;
 	std::map<std::string,std::string> languages;
 public:

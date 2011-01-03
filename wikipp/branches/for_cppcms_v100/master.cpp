@@ -96,9 +96,9 @@ namespace apps {
 master::master(wiki &_w) : 
 	application(_w.service()),
 	wi(_w),
-	sql(wi.sql),
 	locale_name(wi.locale_name)
 {
+	conn = wi.conn;
 	cppcms::json::object langs=settings().get("wikipp.languages",cppcms::json::object());
 	for(cppcms::json::object::const_iterator p=langs.begin(),e=langs.end();p!=e;++p) {
 		std::string lname;
