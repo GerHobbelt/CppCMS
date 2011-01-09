@@ -24,7 +24,7 @@
 <% end %>
 <% end template %>
 <% template main() %><% end %>
-<% template wiki_title() %><% wiki_title | raw %><% end %>
+<% template wiki_title() %><% wiki_title %><% end %>
 <% template sidebar() %><% end %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -93,7 +93,7 @@
 	</div>
 	<div id="footer">
 		<div id="copyrightdesign">
-		<% copyright | raw %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+		<% copyright %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
 		</div>
 		<div id="footercontact">
 		<a href="<% contact %>"><% gt "Contact" %></a>
