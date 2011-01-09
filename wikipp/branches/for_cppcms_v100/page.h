@@ -13,7 +13,7 @@ namespace content {
 namespace apps {
 
 class page : public master {
-	void save(int id,content::page_form &);
+	void save(int id,content::page_form &,cppdb::session &sql);
 	bool load(content::page_form &);
 	bool edit_on_post(content::edit_page &);
 	bool load_history(int,content::page_form &);

@@ -300,11 +300,10 @@ void page::redirect(std::string loc,std::string slug)
 	response().set_redirect_header(redirect);
 }
 
-void page::save(int id,content::page_form &form)
+void page::save(int id,content::page_form &form,cppdb::session &sql)
 {
 	std::tm t = booster::ptime::local_time(booster::ptime::now());
 	wi.users.auth();
-	cppdb::session sql(conn);
 	if(id!=-1) {
 		sql<<	"UPDATE pages SET content=?,title=?,sidebar=?,users_only=? "
 			"WHERE lang=? AND slug=?"
@@ -356,7 +355,7 @@ bool page::edit_on_post(content::edit_page &c)
 	c.form.load(context());
 	if(c.form.validate()) {
 		if(c.form.save.value() || c.form.save_cont.value()) {
-			save(id,c.form);
+			save(id,c.form,sql);
 			cache().rise("article_"+locale_name+":"+slug);
 		}
 		if(c.form.save.value()) {

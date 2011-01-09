@@ -120,10 +120,10 @@ void options::save()
 {
 	cppdb::session sql(conn);
 	cppdb::transaction guard(sql);
-	if(loaded)
-		sql<<	"DELETE FROM options "
-			"WHERE lang='global' OR lang=?" 
-			<< locale_name << cppdb::exec;
+
+	sql<<	"DELETE FROM options "
+		"WHERE lang='global' OR lang=?" 
+		<< locale_name << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
 		"VALUES(?,'users_only_edit','global')" <<  global.users_only_edit << cppdb::exec;
 	sql<<	"INSERT INTO options(value,name,lang) "
@@ -137,6 +137,7 @@ void options::save()
 	cache().rise("global_ops");
 	cache().rise("local_ops:"+locale_name);
 	guard.commit();
+	reset();
 }
 
 void options::edit()

@@ -12,32 +12,33 @@
 			"pl" : "pl_PL.UTF-8"
 		},
 
-		//"connection_string" : "sqlite3:db=./db/wikipp.db",
-		"connection_string" : "postgresql:dbname=wikipp",
-		//"connection_string" : "mysql:database=wikipp;user=root;password=root",
-
-		//"connection_string" : "sqlite3:db=./db/wikipp.db;@use_prepared=off",
-		//"connection_string" : "postgresql:dbname=wikipp;@use_prepared=off",
-		//"connection_string" : "mysql:database=wikipp;user=root;password=root;@use_prepared=off",
-		
-		//"connection_string" : "odbc:@engine=sqlite3;Driver=SQlite3;Database=./db/wikipp.db",
-		//"connection_string" : "odbc:@engine=postgresql;Driver=PostgreSQL ANSI;Database=wikipp",
-		//"connection_string" : "odbc:@engine=mysql;Driver=MySQL;Database=wikipp;UID=root;PWD=root",
-		
+		// Sqlite3 Sample Connection String
+		"connection_string" : "sqlite3:db=./db/wikipp.db;@pool_size=16",
+		//
+		// PostgreSQL Sample Connection String
+		// "connection_string" : "postgresql:dbname=wikipp;@pool_size=16",
+		//
+		// MySQL Sample Connection String
+		//
+		// "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16",
+		//
+		// In Some cases mysql works faster without prepared statements as it uses query cache, so you
+		// may change this string to:
+		//
+		// "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16;@use_prepared=off",
+		//	
 	},
 	"service" : {
-		//"worker_processes" : 1,
-		"worker_threads" : 25,
 		"api" : "http",
-		//"api" : "fastcgi",
-		"port" : 8080
-		//"socket" : "/tmp/wikipp.sock"
-		//"socket" : "stdin"
+		"port" : 8080,
+		// "api" : "fastcgi",
+		// "socket" : "/tmp/wikipp.sock"
+		// "socket" : "stdin"
 	},
 	"session" : {
 		"expire" : "renew",
 		"location" : "client",
-		"timeout" : 100000,
+		"timeout" : 2592000, // One month 24*3600*30
 		"cookies" :  {
 			"prefix" : "wikipp"
 		},
@@ -59,7 +60,7 @@
 		"doument_root" : "."
 	},
 	"localization" : {
-		"backend" : "std" ,
+		// "backend" : "std", you may switch if for performance enhanecements 
 		"messages" : { 
 			"paths" : [ "./stage/locale"],
 			"domains" :  [ "wikipp" ]
@@ -88,7 +89,9 @@
 		// "multipart_form_data_limit" : 65536, // KB
 		// "content_length_limit" : 1024, // KB
 		// "uploads_path" : "" // temporary directory
-		"display_error_message" : false
+		//
+		// You may change to true for debugging only
+		// "display_error_message" : false
 	}
 
 }
