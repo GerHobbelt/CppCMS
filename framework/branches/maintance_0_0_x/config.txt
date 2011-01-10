@@ -1,6 +1,6 @@
 # Server API settings
 
-server.api = "fastcgi"				# fastcgi -- preferred API
+server.api = "scgi"				# fastcgi -- preferred API
 						# scgi	  -- simplefied FCGI API -- yet another alternative
 						# cgi	  -- Use only in case you application does huge amount of work
 						#            such the fork()+exec() time in neligable
@@ -83,7 +83,7 @@ session.location = "client" 			# "none" "client" "server" "both" default none
 
 
 # Clinet side storage configuration
-#session.cookies_encryptor = "hmac"		# "hmac" "aes" -- default "aes" unless unsupported
+session.cookies_encryptor = "aes"		# "hmac" "aes" -- default "aes" unless unsupported
 						# hmac -- Preserves consistency
 						# aes  ---Preserves consistency and secrecy 
 session.cookies_key = "126ba5b3f9c7d5a0b75f135c46cec946"

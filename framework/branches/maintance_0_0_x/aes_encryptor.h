@@ -12,9 +12,11 @@ namespace aes {
 class cipher : public encryptor {
 	gcry_cipher_hd_t hd_out;
 	gcry_cipher_hd_t hd_in;
+	gcry_md_hd_t hd_mac;
 	struct aes_hdr {
 		char salt[16];
-		char md5[16];
+		time_t timeout;
+		unsigned size;
 	};
 public:
 	virtual std::string encrypt(std::string const &plain,time_t timeout);
