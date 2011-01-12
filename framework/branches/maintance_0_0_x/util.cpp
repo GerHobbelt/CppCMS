@@ -45,7 +45,8 @@ std::string urlencode(std::string const &s)
 				default:
 				{
 					char buf[4];
-					snprintf(buf,sizeof(buf),"%%%02x",(unsigned)(c));
+					unsigned char uc = c;
+					snprintf(buf,sizeof(buf),"%%%02x",uc);
 					content.append(buf,3);
 				}
 			};
