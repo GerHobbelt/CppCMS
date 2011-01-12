@@ -28,6 +28,7 @@ class load {
 	load() {
 		gcry_control (GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
 		gcry_check_version(NULL);
+		gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
 	}
 } loader;
 
