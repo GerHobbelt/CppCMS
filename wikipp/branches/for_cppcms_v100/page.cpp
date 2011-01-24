@@ -348,6 +348,8 @@ bool page::edit_on_post(content::edit_page &c)
 	if(!r.empty()) {
 		r>>id>>users_only;
 	}
+	r.clear();
+
 	if(users_only && !wi.users.auth()) {
 		wi.users.error_forbidden();
 		return false;
