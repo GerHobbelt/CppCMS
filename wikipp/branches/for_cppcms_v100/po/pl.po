@@ -67,8 +67,8 @@ msgstr ""
 "szkieletem [CppCMS](http://cppcms.sf.net/) dla aplikacji web.\n"
 
 #: options.cpp:116
-msgid "&copy; All Rights Reserverd"
-msgstr "&copy; Wszelkie prawa zastrzeżone"
+msgid "(C) All Rights Reserverd"
+msgstr "(C) Wszelkie prawa zastrzeżone"
 
 #: page.cpp:18
 msgid "Title"

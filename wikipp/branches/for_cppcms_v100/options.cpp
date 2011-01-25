@@ -102,7 +102,7 @@ void options::load()
 			local.copyright=v;
 	}
 	if(local.title.empty())
-		local.title=cppcms::locale::gettext("Wiki++ &mdash; CppCMS Wiki",context().locale());;
+		local.title=cppcms::locale::gettext("Wiki++ - CppCMS Wiki",context().locale());
 	if(local.about.empty())
 		local.about=
 			cppcms::locale::gettext("## About\n"
@@ -110,7 +110,7 @@ void options::load()
 				"Wiki++ is a wiki engine powered by\n"
 				"[CppCMS](http://cppcms.sf.net/) web development framework.\n",context().locale());
 	if(local.copyright.empty())
-		local.copyright=cppcms::locale::gettext("&copy; All Rights Reserverd",context().locale());
+		local.copyright=cppcms::locale::gettext("(C) All Rights Reserverd",context().locale());
 	cache().store_data("local_ops:"+locale_name,local);
 	loaded=true;
 }

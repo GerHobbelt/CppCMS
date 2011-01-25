@@ -53,8 +53,8 @@ msgid "Disable creation of new articles by visitors"
 msgstr "בטל יצירת מאמרים חדשים ע\" מבקרים"
 
 #: options.cpp:108
-msgid "Wiki++ &mdash; CppCMS Wiki"
-msgstr "ויקי++ &mdash; ‏ויקי על CppCMS"
+msgid "Wiki++ - CppCMS Wiki"
+msgstr "ויקי++ - ‏ויקי על CppCMS"
 
 #: options.cpp:111
 msgid ""
@@ -69,8 +69,8 @@ msgstr ""
 "net/)\n"
 
 #: options.cpp:116
-msgid "&copy; All Rights Reserverd"
-msgstr "‏&copy; כל הזכויות שמורות"
+msgid "(C) All Rights Reserverd"
+msgstr "‏(C) כל הזכויות שמורות"
 
 #: page.cpp:18
 msgid "Title"

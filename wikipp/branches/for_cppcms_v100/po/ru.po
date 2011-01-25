@@ -55,8 +55,8 @@ msgid "Disable creation of new articles by visitors"
 msgstr "Отключить создание новых статей посетителями"
 
 #: options.cpp:108
-msgid "Wiki++ &mdash; CppCMS Wiki"
-msgstr "Wiki++ &mdash; CppCMS Wiki"
+msgid "Wiki++ - CppCMS Wiki"
+msgstr "Wiki++ - CppCMS Wiki"
 
 #: options.cpp:111
 msgid ""
@@ -71,8 +71,8 @@ msgstr ""
 "[CppCMS](http://cppcms.sf.net/) фрэймворке веб-разработки.\n"
 
 #: options.cpp:116
-msgid "&copy; All Rights Reserverd"
-msgstr "&copy; Все права защищены"
+msgid "(C) All Rights Reserverd"
+msgstr "(C) Все права защищены"
 
 #: page.cpp:18
 msgid "Title"
