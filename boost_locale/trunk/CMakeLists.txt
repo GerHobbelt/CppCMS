@@ -69,8 +69,8 @@ if(NOT DISABLE_ICU)
 	message("-- Looking for ICU libraries")
 
 	find_library(ICU_UC icuuc${ICU_SUFFIX})
-	find_library(ICU_DATA icudt NAMES icudata)
-	find_library(ICU_I18N icuin${ICU_SUFFIX} NAMES icui18n${ICU_SUFFIX})
+	find_library(ICU_DATA NAMES icudt icudata)
+	find_library(ICU_I18N  NAMES icuin${ICU_SUFFIX} icui18n${ICU_SUFFIX})
 	find_path(ICU_INCLUDE_DIR unicode/unistr.h)
 endif()
 
@@ -170,18 +170,7 @@ set(CMAKE_REQUIRED_INCLUDES ${BOOST_INCLUDE_DIR})
 set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
 set(CMAKE_REQUIRED_FLAGS ${CXX_FLAGS})
 
-check_cxx_source_compiles(
-	"#include <boost/thread.hpp>
-	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
-	NO_BOOST_LIBRARY_NEEDED)
-
-if(NOT NO_BOOST_LIBRARY_NEEDED)
-	find_library(BOOST_THREAD boost_thread-mt${BOOST_SUFFIX} NAMES boost_thread${BOOST_SUFFIX})
-	set(BOOST_LIBRARY_NEEDED ON)
-endif()
-
-
-
+find_library(BOOST_THREAD NAMES boost_thread-mt${BOOST_SUFFIX} boost_thread${BOOST_SUFFIX})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
@@ -281,9 +270,7 @@ if(NOT DISABLE_SHARED)
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale ${ICONV_LIB})
 	endif()
-	if(BOOST_LIBRARY_NEEDED)
-		target_link_libraries(boost_locale ${BOOST_THREAD})
-	endif()
+	target_link_libraries(boost_locale ${BOOST_THREAD})
 endif(NOT DISABLE_SHARED)
 
 
@@ -296,9 +283,7 @@ if(NOT DISABLE_STATIC)
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale-static ${ICONV_LIB})
 	endif()
-	if(BOOST_LIBRARY_NEEDED)
-		target_link_libraries(boost_locale-static ${BOOST_THREAD})
-	endif()
+	target_link_libraries(boost_locale-static ${BOOST_THREAD})
 endif(NOT DISABLE_STATIC)
 
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
@@ -362,6 +347,11 @@ set(LOCALE_EXAMPLES 	hello
 			calendar
 			)
 
+set(PERF_TESTS		perf_collate
+			perf_convert
+			perf_format)
+
+
 foreach(TEST_TAR ${LOCALE_TESTS})
 	add_executable(${TEST_TAR} libs/locale/test/${TEST_TAR}.cpp)
 	add_test(${TEST_TAR} ${TEST_TAR} "${CMAKE_CURRENT_SOURCE_DIR}/libs/locale/test")
@@ -372,6 +362,13 @@ foreach(EX_TAR ${LOCALE_EXAMPLES})
 	add_executable(${EX_TAR} libs/locale/examples/${EX_TAR}.cpp)
 	target_link_libraries(${EX_TAR} ${BOOST_LOCALE_LIB})
 endforeach(EX_TAR)
+
+foreach(EX_TAR ${PERF_TESTS})
+	add_executable(${EX_TAR} libs/locale/performance/${EX_TAR}.cpp)
+	target_link_libraries(${EX_TAR} ${BOOST_LOCALE_LIB})
+endforeach(EX_TAR)
+
+
 
 if(NOT DISABLE_SHARED)
 	set_target_properties(boost_locale ${LOCALE_TESTS} ${LOCALE_EXAMPLES}
