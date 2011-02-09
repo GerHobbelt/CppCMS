@@ -1,0 +1,129 @@
+<% c++ #include "data/blog/master.h" %>
+<% skin %>
+<% view master uses data::blog::master %>
+<% template title() %><% info.blog_title %><% end template %>
+<% template menu() %>
+<a href="<% url "/blog/summary" %>"><% gt "Home" %></a>
+&nbsp;/&nbsp;
+<a href="<% url "/feed/posts" %>"><% gt "RSS" %></a>
+&nbsp;/&nbsp;
+<a href="<% url "/feed/comments" %>"><% gt "RSS Comments" %></a>
+<% include menu_addons() %>
+&nbsp;/&nbsp;
+<a href=""><% gt "Enter" %></a>
+<% end template %>
+<% template menu_addons() %><% end template %>
+<% template render() %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><% include title() %></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" />
+<% if rtl %>
+	<link href="<% media | raw %>/style-rtl.css" rel="stylesheet" type="text/css" />
+<% else %>
+	<link href="<% media | raw %>/style-ltr.css" rel="stylesheet" type="text/css" />
+<% end %>
+<link rel="alternate" type="application/rss+xml" title="RSS Posts" href="<% url "/feed/posts" %>" >
+<link rel="alternate" type="application/rss+xml" title="RSS Comments" href="<% url "/feed/comments" %>" >
+</head>
+<body>
+<div id="page">
+<div id="header">
+<div id="navall" >
+	<div id="nav">
+		<ul>
+			<li><a href="http://cppcms.sourceforge.net/"><% gt "Project" %></a></li>
+			<li><a href="http://cppcms.sourceforge.net/#downloads"><% gt "Downloads" %></a></li>
+			<li><a class="selected" href=""><% gt "Home" %></a></li>
+		</ul>
+	</div>
+</div>
+<div id="title"><% info.blog_title %></div>
+<div id="slogan"><% info.blog_description %></div>
+</div> <!-- end header -->
+
+<div id="path">
+<% include menu() %>
+</div>
+
+<% if not rtl %>
+	<div id="maincontent">
+	<% include master_content() %>
+	</div>
+	<div id="sidecontent">
+	<% include sidebar() %>
+	</div>
+<% else %>
+	<div id="sidecontent">
+	<% include sidebar() %>
+	</div>
+	<div id="maincontent">
+	<% include master_content() %>
+	</div>
+<% end %>
+
+<div id="footer">
+	<div id="copyrightdesign" ><% gt "Based on Design by <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+	</div>
+	<div id="footercontact">
+		<a href="<% info.contact %>"><% gt "Contact" %></a>
+	</div>
+</div>
+</div>
+</body>
+</html>
+<% end template %>
+<% template sidebar() %>
+<% cache "sidebar" for 30 on miss load_sidebar() %>
+<% foreach page in sidebar.pages %>
+	<h2><% gt "Pages" %></h2>
+	<ul>
+		<% item %>
+		<li><a href="<% url "/blog/static_page" using page.id %>"><% page.title %></a></li>
+		<% end %> 
+	</ul>
+<% end %>
+
+<% foreach cat in sidebar.cats %>
+<h2><% gt "Categories" %></h2>
+	<ul>
+	<% item %>
+		<li><a href="<% url "/blog/summary/category" using cat.id %>"><% cat.name %></a></li>
+	<%end%>
+	</ul>
+<% end %>
+
+<% foreach cat in sidebar.link_cats %>
+	<% item %>
+	<h2><% cat.title %></h2>
+	<% foreach link in cat.links %>
+		<ul>
+		<% item %>
+			<li>
+				<a href="<% link.href %>"><% link.title %> </a>
+				<% if not empty link.description %> &mdash; <% link.description %><% end %>
+			</li>
+		<% end %>
+		</ul>
+	<% empty %>
+		<p><% gt "No links" %></p>
+	<% end %>
+	<% end %>
+<% end %>
+
+<div id="copyright">
+<% if not empty info.copyright_string %>
+	<% info.copyright_string | ext markdown2html %>
+<% else %>
+	<% gt "© All Rights Reserved" %>
+<% end %>
+</div>
+<% end cache %>
+<% end template %>
+<% template master_content() %>
+<% end %>
+<% end view %>
+<% end skin %>

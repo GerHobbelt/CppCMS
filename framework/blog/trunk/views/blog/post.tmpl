@@ -1,0 +1,139 @@
+<% c++ #include "data/blog/post.h" %>
+<% skin %>
+<% view post uses data::blog::post extends master %>
+<% template comment_preview() %>
+<dt id="preview" ><% gt "Preview Comment" %></dt>
+<dd><% preview_content | ext markdown2html | ext xss %></dd>
+<% end %>
+<% template master_content() %>
+<h1><a href="<% url "/blog/post" using id %>"><% title %></a></h1>
+<div class="published">
+	<% gt "{1,date=f} {1,time=s}, by {2} " using  published , author %>; 
+	<% foreach cat in categories %>
+		<% gt "Posted in:" %> 
+		<% separator %>, <% item %><a href="<% url "/blog/summary/category" using cat.id %>"><% cat.name %></a><% end %>;
+	<% end %><a href="#comments_pos"><% ngt "one comment","{1} comments", comment_count using comment_count %></a>
+</div>
+<% abstract | ext markdown2html %>
+<% if not empty content %>
+	<span id="more"></span>
+	<% content | ext  markdown2html %>
+<% end %>
+<div id="comments">
+<span id="comments_pos"></span>
+<% foreach comment in comments %>
+	<h2><% gt "Comments" %></h2>
+	<dl>
+	<% item %>
+		<dt id="comment_<% comment.id %>" >
+			<%if not empty comment.url %><a href="<% comment.url %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
+ 			<% gt "at {1,datetime=s}" using comment.date %>
+		</dt>
+		<dd>
+		<% comment.content | ext markdown2html | ext xss %>
+		</dd>
+	<% end %>
+	<% if not empty preview_content %> 
+		<% include comment_preview() %>
+	<% end %>
+	</dl>
+<% empty %>
+	<% if not empty preview_content %> 
+	<dl>
+		<% include comment_preview() %>
+	</dl>
+	<% end %>
+<% end %>
+	<p><% gt "You can send a trackback to following url:" %>
+		<script type="text/javascript">
+		<!--
+		document.write('<a href')
+		document.write('="')
+		document.write('" >')
+		document.write('<% gt "trackback" %>')
+		document.write('</a>')
+		-->
+		</script>
+	</p>
+	<h2><% gt "Add Comment:" %></h2>
+	<script type="text/javascript">
+	<!--
+                /*  Form validation and simple-antispam */
+                function set_cookie(c_name,value,expiredays)
+                {
+                        var exdate=new Date();
+                        exdate.setDate(exdate.getDate()+expiredays);
+                        document.cookie='<% cookie_prefix %>' + c_name+ "=" + encodeURIComponent(value)+
+                        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+
+                        ';path=/';
+                }
+                function get_cookie(c_name)
+                {
+                	c_name='<% cookie_prefix %>' + c_name; 
+                        if (document.cookie.length>0){
+                                c_start=document.cookie.indexOf(c_name + "=");
+                                if (c_start!=-1){ 
+                                        c_start=c_start + c_name.length+1; 
+                                        c_end=document.cookie.indexOf(";",c_start);
+                                        if (c_end==-1) c_end=document.cookie.length;
+                                                return decodeURIComponent(document.cookie.substring(c_start,c_end));
+                                } 
+                        }
+                        return "";
+                }
+        	function test_form() 
+                {
+			var author = document.getElementById('author').value;
+			var email = document.getElementById('email').value;
+                        var url=document.getElementById('url').value;
+                        var message=document.getElementById('msg').value;
+                        if(author.length == 0
+                           || email.length == 0
+                           || message.length  == 0)
+                        {
+                                alert('<% gt "Name, E-Mail, Message content are mandatory!" %>');
+                                return false; 
+                        }
+                        else {
+                                set_cookie('visitor_name',author,365);
+                                set_cookie('visitor_email',email,365);
+                                set_cookie('visitor_url',url,365);
+                                return true;
+                        }
+                }
+	-->
+	</script>
+		<form method="post" action="<% url "/blog/post/postback" using id %>#preview" onsubmit="return test_form();" >
+		<table>
+			<% form as_table response.inputs %>
+	 	</table>
+		<p>
+			<% gt "You can write your messages using <a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> syntax." %> 
+		</p>
+		<p><% form begin response.content %> cols="80" rows="10" <% form end response.content %></p>
+		<p>
+			<% form as_space response.buttons %>
+		</p>
+		</form>
+	<div id="removecomment">
+		<p>
+		<% gt "You must enable JavaScript in order to post comments." %>
+		</p>
+	</div>
+	<script type="text/javascript">
+	<!--
+                function setup_form()
+                {
+                        if((name=get_cookie('visitor_name'))!="") {
+                                document.getElementById('author').value = name;
+                                document.getElementById('email').value = get_cookie('visitor_email');
+                                document.getElementById('url').value = get_cookie('visitor_url');
+                        }
+                }
+                setup_form();
+	-->
+	</script>
+</div>
+<% end template %>
+<% end view %>
+<% end skin %>

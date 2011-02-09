@@ -1,0 +1,26 @@
+body {
+	direction:rtl;
+}
+
+/* * { margin:0px; padding:0px;}*/
+h1, h2, h3, h4, h5, h6, p, pre, blockquote, label, ul, ol, dl, 
+fieldset, address, pre { margin:5px;}
+/*li, dd { margin-right:0em;}*/
+
+#logout { float:left; }
+#header { text-align:right;}
+
+#news {
+        float: left;
+        margin-left:5px;
+}
+
+#menu {
+        margin-right:5px;
+        float: right;
+        padding:5px;
+}
+
+#langlist {
+	text-align: left;
+}
