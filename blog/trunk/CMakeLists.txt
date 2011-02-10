@@ -44,6 +44,13 @@ set(VIEW_TEMPLATES
 	views/blog/summary.tmpl
 	)
 
+set(ADMIN_TEMPLATES 
+	views/admin/master.tmpl
+	views/admin/summary.tmpl
+	views/admin/users.tmpl
+	)
+
+
 set(BLOG_SRC
 	apps/blog/master.cpp
 	apps/blog/post.cpp
@@ -53,7 +60,11 @@ set(BLOG_SRC
 	apps/feed/feed.cpp
 	apps/basic_master.cpp
 	apps/main.cpp
+	apps/admin/admin.cpp
+	apps/admin/users.cpp
+	apps/admin/summary.cpp
 	"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
+	"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
 	)
 
 #set(MB_LANG he)
@@ -66,6 +77,16 @@ include_directories(${INC_CPPDB})
 include_directories(${INC_MARKDOWN})
 
 set(VIEW_SRC "${CMAKE_CURRENT_BINARY_DIR}/${VIEW_NAME}.cpp")
+
+add_custom_command(
+	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
+	COMMAND ${EXE_TMPL_CC}
+		${TMPL_CC_PARAMS}
+		${ADMIN_TEMPLATES}
+		-o "${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	DEPENDS ${ADMIN_TEMPLATES})
+
 
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"

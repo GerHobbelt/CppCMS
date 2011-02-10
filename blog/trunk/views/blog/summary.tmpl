@@ -20,7 +20,12 @@
 		<% gt "Posted in:" %> 
 		<% separator %>, <% item %><a href="<% url "category" using cat.id %>"><% cat.name %></a><% end %>;
 	<% end %>
-	<a href="<% url "/blog/post" using post.id %>#comments_pos"><% ngt "one comment","{1,num} comments", post.comment_count using post.comment_count %></a>		
+	<a href="<% url "/blog/post" using post.id %>#comments_pos"><% ngt "one comment","{1,num} comments", post.comment_count using post.comment_count %></a>	
+		<script type="text/javascript">
+		<!--
+			write_if_admin('| <a href="<% url "/admin/post" using post.id %>"><% gt "edit" %></a>');
+		-->
+		</script>	
 		</div>
 		<% post.abstract | ext markdown2html %>
                 <% if post.has_content %>

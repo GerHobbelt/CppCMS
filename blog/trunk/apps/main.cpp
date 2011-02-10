@@ -1,5 +1,6 @@
 #include <apps/blog/blog.h>
 #include <apps/feed/feed.h>
+#include <apps/admin/admin.h>
 
 #include <cppcms/service.h>
 #include <cppcms/applications_pool.h>
@@ -13,6 +14,11 @@ class blog : public cppcms::application{
 public:
 	blog(cppcms::service &s) : cppcms::application(s)
 	{
+		attach( new apps::admin::admin_master(s),
+			"admin",
+			"/admin{1}",
+			"/admin((/.*)?)",1);
+
 		attach( new apps::feed::feed_master(s),
 			"feed",
 			"/rss{1}",
@@ -37,6 +43,7 @@ int main(int argc,char **argv)
 	}
 	catch(std::exception const &e) {
 		std::cerr << "Failed: " << e.what() << std::endl;
+		std::cerr << booster::trace(e) << std::endl;
 		return 1;
 	}
 	return 0;
