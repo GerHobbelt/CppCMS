@@ -1,5 +1,5 @@
 #include <apps/blog/blog.h>
-#include <apps/blog/static_page.h>
+#include <apps/blog/page.h>
 #include <apps/blog/post.h>
 #include <apps/blog/summary.h>
 
@@ -8,8 +8,8 @@ namespace blog {
 
 blog_master::blog_master(cppcms::service &s) : cppcms::application(s)
 {
-	attach(	new static_page(s),
-		"static_page",
+	attach(	new page(s),
+		"page",
 		"/page{1}",
 		"/page((/.*)?)",1);
 

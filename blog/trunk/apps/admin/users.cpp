@@ -41,6 +41,7 @@ void users::prepare()
 				r >> id >> user >> pass;
 				if(c.login.username.value() == user && c.login.password.value() == pass) {
 					session().set("user",user);
+					session().set<int>("id",id);
 					session().expose("user");
 					response().set_redirect_header(url("/admin/summary"));
 					return;

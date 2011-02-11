@@ -5,11 +5,11 @@ namespace data {
 namespace blog {
 
 
-	struct static_page : public master {
+	struct page : public master {
 		int id;
 		std::string title;
 		std::string content;
-		static_page() : id(0) {}
+		page() : id(0) {}
 	};
 }
 }

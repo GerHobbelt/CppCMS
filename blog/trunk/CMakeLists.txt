@@ -40,7 +40,7 @@ set(VIEW_NAME contendend)
 set(VIEW_TEMPLATES 
 	views/blog/contendend.tmpl
 	views/blog/post.tmpl
-	views/blog/static_page.tmpl
+	views/blog/page.tmpl
 	views/blog/summary.tmpl
 	)
 
@@ -48,13 +48,14 @@ set(ADMIN_TEMPLATES
 	views/admin/master.tmpl
 	views/admin/summary.tmpl
 	views/admin/users.tmpl
+	views/admin/page.tmpl
 	)
 
 
 set(BLOG_SRC
 	apps/blog/master.cpp
 	apps/blog/post.cpp
-	apps/blog/static_page.cpp
+	apps/blog/page.cpp
 	apps/blog/blog.cpp
 	apps/blog/summary.cpp
 	apps/feed/feed.cpp
@@ -63,6 +64,7 @@ set(BLOG_SRC
 	apps/admin/admin.cpp
 	apps/admin/users.cpp
 	apps/admin/summary.cpp
+	apps/admin/page.cpp
 	"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
 	"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
 	)

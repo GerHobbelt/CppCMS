@@ -4,9 +4,9 @@
 namespace apps {
 namespace blog {
 
-	class static_page : public master {
+	class page : public master {
 	public:
-		static_page(cppcms::service &s);
+		page(cppcms::service &s);
 
 		void display(std::string id);
 		void preview(std::string id);

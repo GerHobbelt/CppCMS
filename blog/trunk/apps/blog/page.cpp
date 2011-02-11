@@ -1,5 +1,5 @@
-#include <apps/blog/static_page.h>
-#include <data/blog/static_page.h>
+#include <apps/blog/page.h>
+#include <data/blog/page.h>
 
 #include <cppcms/url_mapper.h>
 #include <cppcms/url_dispatcher.h>
@@ -10,15 +10,15 @@
 namespace apps {
 namespace blog {
 	
-static_page::static_page(cppcms::service &s) : master(s)
+page::page(cppcms::service &s) : master(s)
 {
-	dispatcher().assign("/(\\d+)",&static_page::display,this,1);
+	dispatcher().assign("/(\\d+)",&page::display,this,1);
 	mapper().assign("/{1}");
-	dispatcher().assign("/(\\d+)/preview",&static_page::preview,this,1);
+	dispatcher().assign("/(\\d+)/preview",&page::preview,this,1);
 	mapper().assign("preview","/{1}/preview");
 }
 
-void static_page::preview(std::string id)
+void page::preview(std::string id)
 {
 	if(user_.empty()) {
 		response().make_error_response(cppcms::http::response::forbidden);
@@ -27,7 +27,7 @@ void static_page::preview(std::string id)
 	prepare(id,true);
 }
 
-void static_page::display(std::string id)
+void page::display(std::string id)
 {
 	std::string key = "page_" + id;
 	if(cache().fetch_page(key))
@@ -37,7 +37,7 @@ void static_page::display(std::string id)
 	cache().store_page(key);
 }
 
-bool static_page::prepare(std::string const &sid,bool preview)
+bool page::prepare(std::string const &sid,bool preview)
 {
 	int id = atoi(sid.c_str());
 	
@@ -50,7 +50,7 @@ bool static_page::prepare(std::string const &sid,bool preview)
 		response().make_error_response(404);
 		return false;
 	}
-	data::blog::static_page c;
+	data::blog::page c;
 	c.id = id;
 	int is_open = 0;
 	r >> c.title >> c.content >> is_open;
@@ -59,7 +59,7 @@ bool static_page::prepare(std::string const &sid,bool preview)
 		return false;
 	}
 	master::prepare(c);
-	render("static_page",c);
+	render("page",c);
 	return true;
 }
 
