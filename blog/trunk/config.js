@@ -33,11 +33,11 @@
 		}
 	},
 	"cache" : {
-		"backend" : "thread_shared",
-		"limit" : 100,
+		//"backend" : "thread_shared",
+		//"limit" : 100,
 	},
 	"localization" : {
-		// "backend" : "std",
+		 "backend" : "std",
 		"messages" : {
 			"paths" : [ "./locale" ],
 			"domains" : [ "blog" ]

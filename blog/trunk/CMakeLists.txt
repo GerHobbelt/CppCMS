@@ -49,6 +49,7 @@ set(ADMIN_TEMPLATES
 	views/admin/summary.tmpl
 	views/admin/users.tmpl
 	views/admin/page.tmpl
+	views/admin/post.tmpl
 	)
 
 
@@ -65,6 +66,7 @@ set(BLOG_SRC
 	apps/admin/users.cpp
 	apps/admin/summary.cpp
 	apps/admin/page.cpp
+	apps/admin/post.cpp
 	"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
 	"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
 	)

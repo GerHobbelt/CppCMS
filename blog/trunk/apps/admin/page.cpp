@@ -118,14 +118,14 @@ void page::prepare_shared(int id)
 					<< c.form.content.value()
 					<< open_status 
 					<< id << cppdb::exec;
-				if(c.form.save.value() || (c.form.change_status.value() && !open_status)) {
-					response().set_redirect_header(url("/admin/summary"));
+				if(c.form.change_status.value() || c.form.save.value()) {
+					if(!open_status) 
+						response().set_redirect_header(url("/admin/summary"));
+					else 
+						response().set_redirect_header(url("/blog/page",id));
 					return;
 				}
-				else if(c.form.change_status.value() && open_status) {
-					response().set_redirect_header(url("/blog/page",id));
-					return;
-				}
+
 			}  // else if id
 		} // if valid
 	} // if post

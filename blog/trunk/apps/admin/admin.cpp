@@ -2,6 +2,7 @@
 #include <apps/admin/summary.h>
 #include <apps/admin/users.h>
 #include <apps/admin/page.h>
+#include <apps/admin/post.h>
 #include <cppcms/url_mapper.h>
 #include <cppcms/http_response.h>
 #include <cppcms/session_interface.h>
@@ -10,13 +11,16 @@ namespace admin {
 
 admin_master::admin_master(cppcms::service &srv) : cppcms::application(srv) 
 {
-	mapper().assign("post","");
-	mapper().assign("post","{1}");
 	mapper().assign("links","");
 	mapper().assign("categories","");
 	mapper().assign("options","");
 	mapper().assign("cache","");
 	mapper().assign("comment","{1}");
+
+	attach( new post(srv),
+		"post",
+		"/post{1}",
+		"/post((/.*)?)",1);
 
 	attach( new page(srv),
 		"page",

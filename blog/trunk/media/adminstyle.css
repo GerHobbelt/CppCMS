@@ -50,6 +50,11 @@ a:hover {
 	width:98%
 }
 
+#form_title input {
+	width:98%
+}
+
+
 #form dd, dt {
         margin-left:25px;
         padding-left:5px;
