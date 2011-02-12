@@ -8,7 +8,7 @@
 <% template master_content() %>
 <h1><a href="<% url "/blog/post" using id %>"><% title %></a></h1>
 <div class="published">
-	<% gt "{1,date=f} {1,time=s}, by {2} " using  published , author %>; 
+	<% gt "{1,date=f}, by {2} " using  published , author %>; 
 	<% foreach cat in categories %>
 		<% gt "Posted in:" %> 
 		<% separator %>, <% item %><a href="<% url "/blog/summary/category" using cat.id %>"><% cat.name %></a><% end %>;

@@ -15,7 +15,7 @@
 	<% item %>
 		<h1><a href="<% url "/blog/post" using post.id %>"><% post.title %></a></h1>
 		<div class="published">
-			<% gt "{1,dt=s}, by {2} " using post.published, post.author %>;
+			<% gt "{1,date=f}, by {2} " using post.published, post.author %>;
 	<% foreach cat in post.categories %>
 		<% gt "Posted in:" %> 
 		<% separator %>, <% item %><a href="<% url "category" using cat.id %>"><% cat.name %></a><% end %>;

@@ -7,6 +7,7 @@
 #include <cppcms/http_request.h>
 #include <cppcms/http_response.h>
 #include <cppcms/session_interface.h>
+#include <cppcms/cache_interface.h>
 #include <booster/posix_time.h>
 
 namespace apps {
@@ -146,9 +147,12 @@ void post::prepare_shared(int id)
 							<< id
 							<< atoi(cb->identification().c_str())
 							<< now
-							<< is_open
+							<< open_status
 							<< cppdb::exec;
+						cache().rise("cat_" + cb->identification());
 					}
+					if(open_status)
+						cache().rise("cat_0"); // insert
 					tr.commit();
 				}
 				if(open_status)
@@ -165,6 +169,10 @@ void post::prepare_shared(int id)
 					sql() << "DELETE FROM comments WHERE post_id = ?" << id << cppdb::exec;
 					sql() << "DELETE FROM post2cat WHERE post_id = ?" << id << cppdb::exec;
 					sql() << "DELETE FROM posts where id=?" << id <<cppdb::exec;
+					cache().rise("comments");
+					std::ostringstream ss;
+					ss << "post_" << id;
+					cache().rise(ss.str());
 					tr.commit();
 					response().set_redirect_header(url("/admin/summary"));
 					return;
@@ -199,9 +207,23 @@ void post::prepare_shared(int id)
 							<< c.form.content.value()
 							<< open_status 
 							<< id << cppdb::exec;
+
 						// if we need this to have correct timestamp synchronized
 						sql() << "SELECT publish FROM posts WHERE id=?" << id << cppdb::row >> now;
+
+						if(c.form.change_status.value()) {
+							sql()<< "UPDATE post2cat "
+								"SET is_open=? "
+								"WHERE post_id=?" << open_status << id << cppdb::exec;
+						}
 					}
+					if(c.form.change_status.value()) {
+						cache().rise("cat_0"); // publish or unpublish
+					}
+					
+					std::ostringstream ss;
+					ss << "post_" << id;
+					cache().rise(ss.str());
 					
 					for(unsigned i=0;i<c.form.add_to_cat_list.size();i++) {
 						cppcms::widgets::checkbox *cb = c.form.add_to_cat_list[i];
@@ -214,9 +236,15 @@ void post::prepare_shared(int id)
 							<< now
 							<< is_open
 							<< cppdb::exec;
+						std::ostringstream ss;
+						cache().rise("cat_" + cb->identification());
 					}
 					for(unsigned i=0;i<c.form.del_from_cat_list.size();i++) {
 						cppcms::widgets::checkbox *cb = c.form.del_from_cat_list[i];
+						if(c.form.change_status.value()) {
+							std::ostringstream ss;
+							cache().rise("cat_" + cb->identification());
+						}
 						if(!cb->value())
 							continue;
 						sql()<<	"DELETE FROM post2cat WHERE post_id=? AND cat_id=?"

@@ -109,7 +109,7 @@
 </html>
 <% end template %>
 <% template sidebar() %>
-<% cache "sidebar" for 30 on miss load_sidebar() %>
+<% cache "sidebar" on miss load_sidebar() %>
 <% foreach page in sidebar.pages %>
 	<h2><% gt "Pages" %></h2>
 	<ul>

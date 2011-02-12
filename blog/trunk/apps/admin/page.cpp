@@ -92,6 +92,8 @@ void page::prepare_shared(int id)
 					<< c.form.title.value()
 					<< c.form.content.value()
 					<< open_status << cppdb::exec;
+				if(open_status)
+					cache().rise("pages");
 				id = st.sequence_last("page_id_seq");
 				if(open_status)
 					response().set_redirect_header(url("/blog/page",id));
@@ -105,6 +107,12 @@ void page::prepare_shared(int id)
 			else {
 				if(c.form.remove.value()) {
 					sql() << "DELETE FROM pages where id=?" << id <<cppdb::exec;
+					if(is_open) {
+						std::ostringstream ss;
+						ss << "page_" << id;
+						cache().rise(ss.str());
+						cache().rise("pages");
+					}
 					response().set_redirect_header(url("/admin/summary"));
 					return;
 				}
@@ -118,6 +126,12 @@ void page::prepare_shared(int id)
 					<< c.form.content.value()
 					<< open_status 
 					<< id << cppdb::exec;
+				if(open_status) {
+					std::ostringstream ss;
+					ss << "page_" << id;
+					cache().rise(ss.str());
+					cache().rise("pages");
+				}
 				if(c.form.change_status.value() || c.form.save.value()) {
 					if(!open_status) 
 						response().set_redirect_header(url("/admin/summary"));

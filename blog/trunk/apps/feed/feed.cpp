@@ -21,6 +21,8 @@ namespace feed {
 	
 	void feed_master::comments()
 	{
+		if(cache().fetch_page("comments"))
+			return;
 		cppdb::result r;
 		r = sql()<<
 			"SELECT id,post_id,author,content "
@@ -38,9 +40,14 @@ namespace feed {
 		}
 		response().set_content_header("text/xml");
 		render("feed","comments",c);
+		cache().store_page("comments");
 	}
 	void feed_master::posts()
 	{
+		if(cache().fetch_page("rss_posts"))
+			return;
+		cache().add_trigger("cat_0");
+
 		cppdb::result r;
 		r = sql() <<
 			"SELECT id,title,abstract,length(posts.content) "
@@ -56,14 +63,23 @@ namespace feed {
 			int size;
 			r >> last.id >> last.title >> last.abstract >> size;
 			last.has_content = size != 0;
+			std::ostringstream ss;
+			ss << "post_" << last.id;
+			cache().add_trigger(ss.str());
 		}
 		basic_master::prepare(c);
 		response().set_content_header("text/xml");
 		render("feed","posts",c);
+		cache().store_page("rss_posts");
 
 	}
 	void feed_master::cats(std::string sid)
 	{
+		std::string key = "rss_" + sid;
+		if(cache().fetch_page(key))
+			return;
+		cache().add_trigger("cat_" + sid);
+
 		int id=atoi(sid.c_str());
 		cppdb::result r;
 		r = sql() << "SELECT name FROM cats WHERE id = ?" << id << cppdb::row;
@@ -93,10 +109,14 @@ namespace feed {
 			int size;
 			r >> last.id >> last.title >> last.abstract >> size;
 			last.has_content = size != 0;
+			std::ostringstream ss;
+			ss << "post_" << last.id;
+			cache().add_trigger(ss.str());
 		}
 		basic_master::prepare(c);
 		response().set_content_header("text/xml");
 		render("feed","posts",c);
+		cache().store_page(key);
 	}
 }
 }

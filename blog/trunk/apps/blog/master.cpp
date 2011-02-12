@@ -35,6 +35,7 @@ void master::load_sidebar(data::blog::master &c)
 {
 	if(cache().fetch_data("sidebar_info",c.sidebar))
 		return;
+	cppcms::triggers_recorder recorder(cache());
 	
 	cppdb::result r;
 
@@ -42,6 +43,8 @@ void master::load_sidebar(data::blog::master &c)
 		"SELECT	id,title "
 		"FROM	pages "
 		"WHERE	is_open=1";
+	
+	cache().add_trigger("pages");
 
 	c.sidebar.pages.reserve(16);
 	while(r.next()) {
@@ -57,6 +60,8 @@ void master::load_sidebar(data::blog::master &c)
 		c.sidebar.cats.resize(c.sidebar.cats.size()+1);
 		r >> c.sidebar.cats.back().id >> c.sidebar.cats.back().name;
 	}
+
+	cache().add_trigger("cats");
 
 	r=sql()<<
 		"SELECT link_cats.id,name,title,url,description "
@@ -79,8 +84,9 @@ void master::load_sidebar(data::blog::master &c)
 		link.href = url;
 		link.description = descr;
 	}
+	cache().add_trigger("links");
 
-	cache().store_data("sidebar_info",c.sidebar);
+	cache().store_data("sidebar_info",c.sidebar,recorder.detach());
 }
 
 void master::prepare(data::blog::master &c)

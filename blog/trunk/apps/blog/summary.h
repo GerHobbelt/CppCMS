@@ -17,7 +17,7 @@ namespace apps {
 			void all();
 			void all(std::string from_page);
 		private:
-			bool prepare(int cat_id,int page);
+			void prepare(int cat_id,int page);
 		};
 	}
 }

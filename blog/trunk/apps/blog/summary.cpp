@@ -5,6 +5,7 @@
 #include <cppcms/http_response.h>
 #include <cppcms/url_mapper.h>
 #include <cppcms/url_dispatcher.h>
+#include <cppcms/cache_interface.h>
 
 namespace apps {
 namespace blog {
@@ -45,10 +46,18 @@ void summary::category(std::string id,std::string page)
 }
 
 
-bool summary::prepare(int cat_id,int page)
+void summary::prepare(int cat_id,int page)
 {
 	static const int page_size = 5;
 	cppdb::result r;
+
+	std::ostringstream key;
+	key << "summary_" << cat_id <<"_"<<page;
+	if(cache().fetch_page(key.str()))
+		return;
+	std::ostringstream ss;
+	ss << "cat_" << cat_id;
+	cache().add_trigger(ss.str());
 	
 	data::blog::summary c;
 	
@@ -56,7 +65,6 @@ bool summary::prepare(int cat_id,int page)
 		r = sql() << "SELECT name FROM cats WHERE id=?" << cat_id << cppdb::row;
 		if(r.empty()) {
 			response().make_error_response(404);
-			return false;
 		}
 		r >> c.category_name;
 		c.id = cat_id;
@@ -109,6 +117,9 @@ bool summary::prepare(int cat_id,int page)
 		cur.has_content = content_size != 0;
 		cur.published = mktime(&published);
 		current_pos ++;
+		std::ostringstream ss;
+		ss << "post_" << cur.id;
+		cache().add_trigger(ss.str());
 	}
 
 	master::prepare(c);
@@ -145,7 +156,7 @@ bool summary::prepare(int cat_id,int page)
 
 	render("summary",c);
 
-	return true;
+	cache().store_page(key.str());
 }
 
 

@@ -61,12 +61,12 @@ void post::postback(std::string sid)
 
 			sql()<< "UPDATE posts "
 				"SET comment_count = (SELECT count(*) FROM comments WHERE post_id=?)"
-				"WHERE id = ?" << id << cppdb::exec;
+				"WHERE id = ?" << id << id << cppdb::exec;
 
 			std::ostringstream ss;
 			ss << "post_" << id;
-			cache().rise("comments");
 			cache().rise(ss.str());
+			cache().rise("comments");
 			tr.commit();
 			response().set_redirect_header(url("/blog/post",id));
 		}

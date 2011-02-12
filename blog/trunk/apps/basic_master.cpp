@@ -134,6 +134,7 @@ namespace apps {
 			else if(id == "contact")
 				c.info.contact = value;
 		}
+		cache().add_trigger("options");
 		cache().store_data("general_info",c.info);
 	}
 	basic_master::basic_master(cppcms::service &s) : cppcms::application(s)
