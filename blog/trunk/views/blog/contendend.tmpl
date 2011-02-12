@@ -20,11 +20,11 @@
 <head>
 <title><% include title() %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link href="<% media | raw %>/style.css" rel="stylesheet" type="text/css" />
+<link href="<%= media  %>/style.css" rel="stylesheet" type="text/css" />
 <% if rtl %>
-	<link href="<% media | raw %>/style-rtl.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/style-rtl.css" rel="stylesheet" type="text/css" />
 <% else %>
-	<link href="<% media | raw %>/style-ltr.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/style-ltr.css" rel="stylesheet" type="text/css" />
 <% end %>
 <link rel="alternate" type="application/rss+xml" title="RSS Posts" href="<% url "/feed/posts" %>" >
 <link rel="alternate" type="application/rss+xml" title="RSS Comments" href="<% url "/feed/comments" %>" >
@@ -148,7 +148,7 @@
 
 <div id="copyright">
 <% if not empty info.copyright_string %>
-	<% info.copyright_string | ext markdown2html %>
+	<%= info.copyright_string | ext markdown2html %>
 <% else %>
 	<% gt "© All Rights Reserved" %>
 <% end %>
