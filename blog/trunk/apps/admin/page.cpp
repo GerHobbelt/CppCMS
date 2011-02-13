@@ -92,7 +92,7 @@ void page::prepare_shared(int id)
 					<< c.form.title.value()
 					<< c.form.content.value()
 					<< open_status << cppdb::exec;
-				if(open_status)
+				if(open_status || c.form.change_status.value())
 					cache().rise("pages");
 				id = st.sequence_last("page_id_seq");
 				if(open_status)
@@ -126,7 +126,7 @@ void page::prepare_shared(int id)
 					<< c.form.content.value()
 					<< open_status 
 					<< id << cppdb::exec;
-				if(open_status) {
+				if(open_status || c.form.change_status.value()) {
 					std::ostringstream ss;
 					ss << "page_" << id;
 					cache().rise(ss.str());

@@ -4,8 +4,8 @@
 		"media" : "/media",
 		"root" : "/blog",
 		"host" : "localhost:8080",
-		//"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10"
-		"connection_string" : "mysql:database=cppcms;user=root;password=root;@pool_size=10;@use_prepared=on"
+		"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10"
+		//"connection_string" : "mysql:database=cppcms;user=root;password=root;@pool_size=10;@use_prepared=on"
 	},
 	"service" : {
 		"api" : "http",
