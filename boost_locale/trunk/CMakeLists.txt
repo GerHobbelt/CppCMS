@@ -170,7 +170,21 @@ set(CMAKE_REQUIRED_INCLUDES ${BOOST_INCLUDE_DIR})
 set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
 set(CMAKE_REQUIRED_FLAGS ${CXX_FLAGS})
 
-find_library(BOOST_THREAD NAMES boost_thread-mt${BOOST_SUFFIX} boost_thread${BOOST_SUFFIX})
+check_cxx_source_compiles(
+	"#include <boost/thread.hpp>
+	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
+	NO_BOOST_LIBRARY_NEEDED)
+
+
+if(BOOST_LOCALE_HAVE_ICU OR NOT NO_BOOST_LIBRARY_NEEDED)
+
+	find_library(BOOST_THREAD NAMES boost_thread-mt${BOOST_SUFFIX} boost_thread${BOOST_SUFFIX})
+
+	if(NOT BOOST_THREAD)
+		message(FATAL "Can't find boost_thread, please provide apropriate CMAKE_LIBRARY_PATH")
+	endif()
+endif()
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
@@ -270,7 +284,9 @@ if(NOT DISABLE_SHARED)
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale ${ICONV_LIB})
 	endif()
-	target_link_libraries(boost_locale ${BOOST_THREAD})
+	if(BOOST_THREAD)
+		target_link_libraries(boost_locale ${BOOST_THREAD})
+	endif()
 endif(NOT DISABLE_SHARED)
 
 
@@ -283,7 +299,9 @@ if(NOT DISABLE_STATIC)
 	if(ICONV_LIB)
 		target_link_libraries(boost_locale-static ${ICONV_LIB})
 	endif()
-	target_link_libraries(boost_locale-static ${BOOST_THREAD})
+	if(BOOST_THREAD)
+		target_link_libraries(boost_locale-static ${BOOST_THREAD})
+	endif()
 endif(NOT DISABLE_STATIC)
 
 set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
