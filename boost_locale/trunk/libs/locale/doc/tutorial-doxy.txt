@@ -1,0 +1,1853 @@
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+
+
+/*!
+ 
+
+\mainpage Boost.Locale
+
+\htmlonly <p style="font-size:80%; text-align:center">(Under development for Boost)</p> \endhtmlonly
+
+\section main_intro What is Boost.Locale?
+
+Boost.Locale is a library that brings high quality localization facilities in C++ way.
+It uses \c std::locale, and \c std::locale facets in order to provide localization in transparent and
+C++ aware way to user.
+
+C++ has quite a good base for localization via existing C++ locale facets: \c std::num_put, \c std::ctype, \c std::collate etc.. But
+they are very limited and sometimes buggy by design. The support of localization varies between different
+operating systems, compilers, standard libraries and frequently incompatible between them.
+
+On the other hand, there is great, well debugged, high quality, widely used ICU library that gives all of the goodies but,
+it has very old API that mimics Java behavior, it completely ignores STL and provides useful API only
+for UTF-16 encoded text, ignoring other popular Unicode encodings like UTF-8 and UTF-32 and limited but still popular
+national character sets like Latin1.
+
+Boost.Locale provides the natural glue between C++ locales framework, iostreams and powerful ICU library in following areas:
+
+- Correct case conversion, case folding and normalization
+- Collation including support of 4 Unicode collation levels.
+- Date, time, timezone and calendar manipulations, formatting and parsing including transparent support of calendars other then Gregorian.
+- Boundary analysis for characters, words, sentences and line-breaks.
+- Number formatting, spelling and parsing.
+- Monetary formatting and parsing.
+- Powerful message formatting including support plural forms, using GNU catalogs.
+- Character set conversion.
+- Transparent support of 8-bit character sets like Latin1.
+- Support of \c char, \c wchar_t and C++0x \c char16_t, \c char32_t strings and streams.
+
+In addition in allows you to use non-ICU based localization tools in order to make most 
+frequent tasks useful without ICU as well.
+
+\section main_tutorial Tutorials
+
+- \subpage std_locales
+- \subpage using_boost_locale
+    - \ref locale_gen
+    - \ref collation
+    - \ref conversions
+    - \ref formatting_and_parsing
+    - \ref messages_formatting
+    - \ref charset_handling 
+
+
+\page std_locales Introduction to C++ Standard Library localization support
+
+\section std_locales_basics Getting familiar with standard C++ Locales
+
+C++ standard library provides a simple and powerful way to provide locale specific information. It is done
+via \c std::locale class that is the container that holds all required information about specific culture like: number formatting
+patters, date and time formatting, currency, case conversion etc.
+
+All this information is provided by facets: special classes derived from \c std::locale::facet base class. Such facets are
+packed into \c std::locale class and allow you to provide arbitrary information about the locale. \c std::locale class keeps
+reference counters on installed facets and can be efficiently copied.
+
+Each facet that was installed into the \c std::locale object can be fetched using \c std::use_facet function. For example.
+\c std::ctype<Char> facet provides rules for case conversion. So you can convert character to upper case as following:
+
+\code
+std::ctype<char> const &ctype_facet = std::use_facet<std::ctype>(some_locale);
+char upper_a = ctype_facet.toupper('a');
+\endcode
+
+Locale class can be imbued to \c iostream so it would format information according to locale needs:
+
+\code
+cout.imbue(std::locale("en_US.UTF-8"));
+cout << 1345.45 << endl;
+cout.imbue(std::locale("ru_RU.UTF-8"));
+cout << 1345.45 << endl;
+\endcode
+
+Would display:
+
+\verbatim
+    1,345.45 1.345,45
+\endverbatim
+
+You can also create your own facets and install them to existing locale class. For example:
+
+\code
+    class measure : public std::locale::facet {
+    public:
+        typedef enum { inches, ... } measure_type;
+        measure(measure_type m,size_t refs=0) 
+        double from_metric(double value) const;
+        std::string name() const;
+        ...
+    };
+\endcode
+And now you can simply provide such information to locale:
+
+\code
+    std::locale::global(std::locale(std::locale("en_US.UTF-8"),new measure(paper_size::inches)));
+    /// Create default locale built from en_US locale and add paper size facet.
+\endcode
+
+
+Now you can print distance according to correct locale:
+
+\code
+    void print_distance(std::ostream &out,double value)
+    {
+        measure const &m = std::use_facet<measure>(out.getloc());
+        // Fetch locale information from stream
+        std::cout << m.from_metric(value) << " " << m.name();
+    }
+\endcode
+
+This technique was adopted by Boost.Locale library in order to provide powerful and correct localization. However instead of using
+standard and very limited standard library C++ facets it created its own facets that use ICU under the hood in order to make much powerful.
+
+\section std_locales_common Common Critical Problems with Standard Library
+
+Regardless of numerous issues present in standard library that do not allow to use its full power, there are several
+additional issues:
+
+-   Setting global locale has bad side effects.
+    .
+    Consider following code:
+    .
+    \code
+        int main()
+        {
+            std::locale::global(std::locale("")); 
+            // Set default locale as global
+            std::ofstream csv("test.csv");
+            csv << 1.1 << ","  << 1.3 << std::endl;
+        }
+    \endcode
+    .
+    What would be the content of \c test.csv ? It may be "1.1,1.3" or it may be "1,1,1,3" 
+    not what you had expected.
+    .
+    More then that it effects even \c printf and libraries like \c boost::lexical_cast  giving
+    incorrect or unexpected formatting. In fact many 3rd part library become broken in such 
+    situation.
+    .
+    Unlike standard localization library, Boost.Locale, even when it uses \c std based localization
+    backend it never changes the basic number formatting, so by default, numbers are always
+    formatted using C style locale and localized number formatting requires specific flags.
+    .
+-   Number formatting is broken on some locales.
+    .
+    Some locales use non-breakable space u00A0 character for thousands separator, thus
+    in \c ru_RU.UTF-8 locale number 1024 should be displayed as "1 024" where the space
+    is Unicode character with codepoint u00A0. Unfortunately many libraries don't handle
+    this correctly, for example GCC and SunStudio display "\xC2" character instead
+    the first character in UTF-8 sequence "\xC2\xA0" that represents this code point, and 
+    actually generate invalid UTF-8.
+    .
+-   Locale names are not standardized, for example, under MSVC you need to provide name
+    \c en-US  or \c English_USA.1252 , when on POSIX platforms it would be \c en_US.UTF-8 
+    or \c en_US.ISO-8859-1 
+    .
+    More then that, MSVC does not support UTF-8 locales at all.
+    .
+-   Many standard libraries provide only C and POSIX locale, thus GCC supports localization
+    only under Linux, on all other platforms create locales besides "C" or "POSIX" would fail.
+
+\page using_boost_locale Using Boost.Locale
+
+In this section we would talk mostly about ICU backend as the default and most powerful localization
+backend provided by this library. In further section we would admit a feature that are supported
+or unsupported by other localization backends.
+
+
+- \subpage locale_gen
+- \subpage collation
+- \subpage conversions
+- \subpage formatting_and_parsing
+- \subpage messages_formatting
+- \subpage charset_handling
+
+
+\page locale_gen Locale Generation
+
+Each locale is defined by specific locale identifier that contains a mandatory part---Language and optional pars Country, Variant, keywords
+and character encoding of \c std::string. Boost.Locale uses POSIX naming convention of locales, i.e. locale
+is defined as <tt>language[_COUNTRY][.encoding][\@variant]</tt> where lang is ISO-639 language name like "en" or "ru", COUNTRY
+is ISO-3166 country id like "US" or "DE", encoding is octets character encoding like \c UTF-8 or \c ISO-8859-1
+and variant is additional option for specializing the locale, like \c euro or \c calendar=hebrew.
+
+Note each locale should include encoding in order to handle \c char based strings correctly.
+
+The class  \ref boost::locale::generator "generator" provides us tool to generate locales we need. The simplest way to use generator is to create a locale and set it as global one:
+
+\code
+    #include <boost/locale.hpp>
+    
+    using namespace boost::locale;
+    int main()
+    {
+        generator gen;
+        // Create locale generator 
+        std::locale::global(gen("")); 
+        // "" - the system default locale, set
+        // it globally
+    }
+\endcode
+
+Of course we can specify locale manually
+
+\code
+    std::locale loc = gen("en_US.UTF-8"); 
+    // Use English, United States locale
+\endcode
+
+\Note
+
+-   Even if your application uses wide strings anywhere, you should specify
+    8-bit encoding that would be used for all wide stream IO operations like \c wcout or \c wfstream,
+    .
+-   The default locale is defined by environment variables \c LC_CTYPE , \c LC_ALL , \c LANG
+    in that precedence (i.e. \c LC_CTYPE  first and \c LANG last). On Windows
+    it also queries the \c LOCALE_USER_DEFAULT  option in Win32 API when this variables
+    are not set.
+
+\b Tip: Prefer using UTF-8 Unicode encoding over 8-bit encodings like ISO-8859-X ones.
+
+By default the locale generated for all supported categories and character types. However, if your
+application uses strictly 8-bit encodings, uses only wide character encodings only or it uses
+only specific parts of the localization tools  you can limit facet generation to specific categories
+and character types, by calling \ref boost::locale::generator::categories() "categories" and \ref boost::locale::generator::characters() "characters" member functions of \ref boost::locale::generator "generator" class.
+
+For example:
+
+\code    
+    generator gen;
+    gen.characters(wchar_t_facet);
+    gen.categories(collation_facet | formatting_facet);
+    std::locale::global(gen("de_DE.UTF-8"));
+\endcode
+
+\page collation Collation 
+
+Boost.Locale provides \ref boost::locale::collator "collator" class derived from \c std::collate that extends it with support of comparison levels:
+primary, secondary, tertiary, quaternary and identical - the default one levels. They can be approximately defined as:
+
+-# Primary -- ignore accents and characters' case compare base letters only. For example "facade" and "Façade" are same.
+-# Secondary -- ignore characters case but consider accents "facade" and "façade" are different but "Façade" and "façade" are same.
+-# Tertiary -- consider case and accents: "Façade" and "façade" are different, ignore punctuation
+-# Quaternary -- consider all case, accents, punctuation, the words are identical in terms of Unicode representation.
+-# Identical -- as quaternary but consider code point comparison as well.
+
+There are two ways of using \ref boost::locale::collator "collator" facet: direct by calling its member functions \ref boost::locale::collator::compare() "compare", \ref boost::locale::collator::transform() "transform" and \ref boost::locale::collator::hash() "hash" or indirect by using \ref boost::locale::comparator "comparator" template class in STL algorithms.
+
+For example:
+
+\code
+    wstring a=L"Façade", b=L"facade";
+    bool eq = 0 == use_facet<collator<wchar_t> >(loc).compare(collator_base::secondary,a,b);
+    wcout << a <<L" and "<<b<<L" are " << (eq ? L"identical" : L"different")<<endl;
+\endcode
+
+\c std::locale is designed to be useful as comparison class in STL collection and algorithms.
+In order to get similar functionality with addition of comparison levels you  use comparator class.
+
+\code
+    std::map<std::string,std::string,comparator<char,collator_base::secondary> > strings;
+    // Now strings uses default system locale for string comparison
+\endcode
+
+You can also set specific locale or level when creating and using \ref boost::locale::comparator "comparator" class:
+
+\code
+    comparator<char> comp(some_locale,some_level);
+    std::map<std::string,std::string,comparator<char> > strings(comp);
+\endcode
+
+\page conversions Conversions
+
+There is a set of function that perform basic string conversion operations: upper, lower and title case conversions, case folding
+and Unicode normalization. The functions are called \ref boost::locale::to_upper "to_upper" , \ref boost::locale::to_lower "to_lower", \ref boost::locale::to_title "to_title", \ref boost::locale::fold_case "fold_case"  and \ref boost::locale::normalize "normalize".
+
+You may notice that there are existing functions \c to_upper  and \c to_lower  under in Boost.StringAlgo library, what is the difference?
+The difference is that these function operate over entire string instead of performing incorrect character-by-character conversions.
+
+For example:
+
+\code
+    std::wstring gruben = L"grüßen";
+    std::wcout << boost::algorithm::to_upper_copy(gruben) << " " << boost::locale::to_upper(gruben) << std::endl;
+\endcode
+
+Would give in output:
+
+\verbatim
+GRÜßEN GRÜSSEN
+\endverbatim
+
+Where a letter "ß" was not converted correctly to double-S in first case because of limitation of \c std::ctype facet.
+
+\note
+
+-   \ref boost::locale::normalize() "normalize" operates only on Unicode encoded strings, i.e.: UTF-8, UTF-16 and UTF-32 according to the character width. So be
+    careful when using non-UTF encodings in the program they may be treated incorrectly.
+-   \ref boost::locale::fold_case() "fold_case"  is generally locale independent operation, however it receives locale as parameter in order to determinate
+    8-bit encoding.
+-   All functions can work with STL string, NUL terminated string, and a range defined by two pointers. They always
+    return a newly created STL string.
+-   Length of string may be changed, see an example above.
+
+\page formatting_and_parsing Numbers, Time and Currency formatting and parsing
+
+All formatting and parsing is performed via \c iostream STL library. Each one of the above information types is represented as number.
+The formatting information is set using iostream manipulators. All manipulators are placed in boost::locale::as namespace.
+
+For example:
+
+\code
+    cout << as::currency << 123.45 << endl;
+    // display 123.45 in local currency representation.
+    cin >> as::currency >> x ;
+    // Parse currency representation and store it in x
+\endcode
+
+There is a special manipulator \c as::posix that unset locale specific settings and returns back to ordinary, default \c iostream formatting
+and parsing methods. Please note, such formats may still be localized by default \c std::num_put  and \c std::num_get  facets.
+
+\section numbers_formatting Numbers and number manipulators
+
+These are manipulators for number formatting:
+
+-   \c as::number -- format number according to local specifications, it takes in account various \c std::ios_base  flags like scientific
+    format and precision.
+    .
+-   \c as::percent -- format number as "percent" format. For example:
+    \code
+        cout << as::percent << 0.25 <<endl;
+    \endcode
+    Would create an output that may look like this:
+    \verbatim
+    25%
+    \endverbatim
+    .
+-   \c as::spellout -- spell the number. For example under English locale 103 may be displayed as "one hundred three". \b Note: not all locales
+    provide rules for spelling numbers, in such case the number would be displayed in decimal format.
+    .
+-   \c as::ordinal -- display an order of element. For example "2" would be displayed as "2nd" under English locale. As in above case not all locales
+    provide ordinal rules.
+
+\section currency_formatting Currency formatting
+
+These are manipulators for currency formatting:
+
+-   \c as::currency -- set format to currency mode.
+-   \c as::currency_iso  -- change currency format to international like "USD" instead of "$". This flag is supported when using ICU 4.2 and above.
+-   \c as::currency_national  -- change currency format to national like "$".
+-   \c as::currency_default  -- return to default currency format (national)
+
+\note \c as::currency_XYZ  manipulators do not affect on general formatting, but only on the format of currency, it is necessary to use both manipulators
+in order to use non-default format.
+
+\section date_and_time_formatting Date and Time formatting
+
+Dates and times are represented as POSIX time. When date-time formatting is turned on in the \c iostream, each number is treated as
+POSIX time. The number may be integer, or double.
+
+There are four major manipulators of Date and Time formatting:
+
+-   \c as::date -- display date only
+-   \c as::time -- display time only
+-   \c as::datetime -- display both date and time
+-   \c as::ftime -- parametrized manipulator that allows specification of time in format that is used \c strftime function. \b Note: not all formatting
+    flags of \c strtftime are supported.
+
+For example:
+
+\code
+    double now=time(0);
+    cout << "Today is "<< as::date << now << " and tommorrow is " << now+24*3600 << endl;
+    cout << "Current time is "<< as::time << now << endl;
+    cout << "The current weekday is "<< as::ftime("%A") << now << endl;
+\endcode
+
+There are also more fine grained control of date-time formatting is available:
+
+-   \c as::time_default , \c as::time_short , \c as::time_medium , \c as::time_long , \c as::time_full  -- change time formatting.
+-   \c as::date_default , \c as::date_short , \c as::date_medium , \c as::date_long , \c as::date_full  -- change date formatting.
+
+These manipulators, when used together with \c as::date, \c as::time, \c as::datetime manipulators change the date-time representation.
+The default format is medium.
+
+
+By default, the date and time is shown in local time zone, this behavior may be changed using following manipulators:
+
+-   \c as::gmt -- display date and time in GMT.
+-   \c as::local_time  -- display in local time format (default).
+-   \c as::time_zone  -- parametrized manipulator that sets time-zone ID for date-time formatting and parsing. It receives as parameter a string
+    that represents time zone id.
+
+For example:
+
+\code
+    double now=time(0);
+    cout << as::datetime << as::locale_time << "Locale time is: "<< now << endl;
+    cout << as::gmt << "GMT Time is: "<< now <<endl;
+    cout << as::time_zone("EST") << "Eastern Standard Time is: "<< now <<endl;
+\endcode
+
+There is a list of supported \c strftime flags by ICU backend:
+
+-   \c \%a  -- Abbreviated  weekday (Sun.)
+-   \c \%A  -- Full weekday (Sunday)
+-   \c \%b  -- Abbreviated month (Jan.)
+-   \c \%B  -- Full month (January)
+-   \c \%c  -- Locale date-time format. \b Note: prefer using \c as::datetime
+-   \c \%d  -- Day of Month [01,31]
+-   \c \%e  -- Day of Month [1,31]
+-   \c \%h  -- Same as \c \%b 
+-   \c \%H  -- 24 clock hour [00,23]
+-   \c \%I  -- 12 clock hour [01,12]
+-   \c \%j  -- Day of year [1,366]
+-   \c \%m  -- Month [01,12]
+-   \c \%M  -- Minute [00,59]
+-   \c \%n  -- New Line
+-   \c \%p  -- AM/PM in locale representation
+-   \c \%r  -- Time with AM/PM, same as \c \%I:\%M:\%S \%p 
+-   \c \%R  -- Same as \c \%H:\%M 
+-   \c \%S  -- Second [00,61]
+-   \c \%t  -- Tab character
+-   \c \%T  -- Same as \c \%H:\%M:\%S 
+-   \c \%x  -- Local date representation. **Note:** prefer using \c as::date
+-   \c \%X  -- Local time representation. **Note:** prefer using \c as::time
+-   \c \%y  -- Year [00,99]
+-   \c \%Y  -- 4 digits year. (2009)
+-   \c \%Z  -- Time Zone
+-   \c \%\%  -- Percent symbol
+
+Unsupported \c strftime flags are: \c \%C , \c \%u , \c \%U , \c \%V , \c \%w , \c \%W . Also \c O and \c E modifiers are not supported.
+
+
+\b General \b recommendations
+
+- Prefer using generic date-time manipulators rather then specifying full format using \c as::ftime.
+- Remember that current calendars may be not Gregorian.
+
+
+\section formatting_internals Internals
+
+All formatting information is stored in stream class by using \c xalloc, \c pword, and \c register_callback  member functions
+of \c std::ios_base . All the information is stored and managed using special object binded to \c iostream, all manipulators just
+change its state.
+
+When a number is written to the stream or read from it. Custom Boost.Locale facet access to this object and checks required formatting
+information. Then it creates special object that actually formats the number and caches it in the \c iostream. When
+next time another number is written to the stream same formatter would be used unless some flags had changed and formatter object is
+invalid.
+
+\page messages_formatting Messages Formatting (Translation)
+
+- \ref messages_formatting_into
+- \ref msg_loading_dictionaries
+- \ref message_translation
+    - \ref indirect_message_translation
+    - \ref plural_forms 
+    - \ref multiple_gettext_domain
+    - \ref direct_message_translation
+- \ref extracting_messages_from_code
+- \ref msg_qna
+
+\section messages_formatting_into Introduction
+
+Messages formatting is probably the most important part of localization --- making your application to speak in users language.
+
+Boost.Locale uses <a href="http://www.gnu.org/software/gettext/">GNU Gettext</a> localization model.
+It is recommended to read general <a href="http://www.gnu.org/software/gettext/manual/gettext.html">documentation</a> of GNU Gettext that may be
+out of scope of this document.
+
+The model is following:
+
+-   First of all our application \c foo is prepared for localization by calling \ref boost::locale::translate() "translate" function for each message used in user interface.
+    .
+    For example:
+    \code
+        cout << "Hello World" << endl;
+    \endcode
+    Is converted to
+    .
+    \code
+        cout << translate("Hello World") << endl;
+    \endcode
+-   Then all messages are extracted from source code and a special \c foo.po file is generated that contains all original English strings.
+    .
+    \verbatim
+        ...
+        msgid "Hello World"
+        msgstr ""
+        ...
+    \endverbatim
+-   \c foo.po file is translated for target supported locales: for example \c de.po, \c ar.po, \c en_CA.po , \c he.po.
+    .
+    \verbatim
+        ...
+        msgid "Hello World"
+        msgstr "שלום עולם"
+    \endverbatim
+    And then compiled to binary \c mo format and stored if following file structure:
+    .
+    \verbatim
+        de
+        de/LC_MESSAGES
+        de/LC_MESSAGES/foo.mo
+        en_CA/
+        en_CA/LC_MESSAGES
+        en_CA/LC_MESSAGES/foo.mo
+        ...
+    \endverbatim
+    .
+    When application starts. It loads required dictionaries, and when \c translate function is called and the message is written
+    to an output stream dictionary lookup is performed and localized message is written out.
+
+\section msg_loading_dictionaries Loading dictionaries
+
+All the dictionaries are loaded by generator class. So, in order to use localized strings in the application you need to specify following:
+
+-# The search path of the dictionaries
+-# The application domain (or name)
+
+It is done by calling following member functions of \c generator class:
+
+-   \ref boost::locale::generator::add_messages_path() "add_messages_path" -- add the root path where the dictionaries are placed.
+    .
+    For example: if the dictionary is placed at \c /usr/share/locale/ar/LC_MESSAGES/foo.mo, then path should be \c /usr/share/locale.
+    .
+-   \ref boost::locale::generator::add_messages_domain() "add_messages_domain" -- add the domain (name) of the application. In the above case it would be "foo".
+
+At least one domain and one path should be specified in order to load dictionaries.
+
+For example, our first fully localized program:
+
+\code
+    #include <boost/locale.hpp>
+    #include <iostream>
+
+    using namespace std;
+    using namespace boost::locale;
+
+    int main()
+    {
+        generator gen;
+
+        // Specify location of dictionaries
+        gen.add_messages_path(".");
+        gen.add_messages_domain("hello");
+
+        // Generate locales and imbue them to iostream
+        locale::global(gen(""));
+        cout.imbue(locale());
+
+        // Display a message using current system locale
+        cout << translate("Hello World") << endl;
+    }
+\endcode
+
+
+\section message_translation Message Translation
+\subsection indirect_message_translation Indirect Message Translation
+
+The basic function that allows us to translate a message is boost::locale::translate() family of functions:
+
+-   Basic message translation:\n
+    Translate a message or a message in given context. The source text is \b not copied
+    .
+    -   boost::locale::translate(char const *message)
+    -   boost::locale::translate(char const *context,char const *message)
+    .
+    Translate a message or a message in given context. The source text \b is not copied
+    .
+    -   boost::locale::translate(std::string const &message)
+    -   boost::locale::translate(std::string const &context,std::string const &message)
+    Plural form translation:\n
+    Translate a message or a message in given context. The source text is \b not copied
+    .
+    -   boost::locale::translate(char const *single,char const *plural,int number)
+    -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
+    .
+    Translate a message or a message in given context. The source text \b is not copied
+    .
+    -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
+    -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
+    .
+    
+These functions return special Proxy object of type \ref boost::locale::message "message". It holds all required information for string formatting.
+When this object is written to an output \c ostream it performs dictionary lookup of the message according to the locale imbued in \c iostream.
+
+If the message is found in the dictionary is written to the output stream, otherwise the original string is written to the stream.
+
+For example:
+
+\code
+    std::cout << boost::locale::tanslate("Hello World!") << std::endl;
+\endcode
+
+This allows postpone translation of the message to the place where translation is actually needed, even to different
+locale targets.
+
+\code
+    // Several output stream that we write a message to
+    // English, Japaneese, Hebrew etc.
+    // Each one them has installed std::locale object that represents
+    // their specific locale
+    std::ofstream en,ja,he,de,ar;
+    std::wfstream w_ar;
+
+    // Send single message to multiple streams
+    void send_to_all(message const &msg)
+    {
+        // in each of the cases below
+        // the message is translated to different
+        // language
+        en << msg;
+        ja << msg
+        he << msg;
+        de << msg;
+        ar << msg;
+        w_ar << msg;
+    }
+
+    main()
+    {
+        ...
+        send_to_all(translate("Hello World"));
+    }
+\endcode
+
+\note
+
+-   \c message can be implicitly converted to each type of supported strings: (i.e. \c std::string, \c std::wstring etc.) using 
+    global locale:
+    .
+    \code
+        std::wstring msg = translate("Do you want to open the file?");
+    \endcode
+-   \c message can be explicitly converted to string using \c str<CharType> member function specific locale.
+    .
+    \code
+        std::wstring msg = translate("Do you want to open the file?").str<wchar_t>(some_locale)
+    \endcode
+
+
+\subsection plural_forms Plural Forms
+
+GNU Gettext catalogs has simple, robust and yet powerful plural forms support. It is recommended to read some 
+original GNU documentation <a href="http://www.gnu.org/software/gettext/manual/gettext.html#Plural-forms">there</a>.
+
+Let's try to solve a simple problem, display a message to user:
+
+\code
+    if(files == 1)
+        cout << translate("You have 1 file in the directory") << endl;
+    else
+        cout << format(translate("You have {1} files in the directory")) % files << endl;
+\endcode
+
+This quite simple task becomes quite complicated when we deal with language other then English. Many languages have more
+then two plural forms. For example, in Hebrew there are special forms for single, double, plural, and plural above 10.
+They can't be distinguished by simple rule "\c n is 1 or not".
+
+The correct solution is:
+
+\code
+    cout << format(translate("You have 1 file in the directory",
+                            "You have {1} files in the directory",files)) % files << endl;
+\endcode
+
+Where translate receives single, plural form of original string and the number it should be formatted for.
+On the other side, special entry in the dictionary specifies the rule to choose the correct plural form in the specific language,
+for example, for Slavic languages family there exist 3 plural forms, that can be chosen using following equation:
+
+\code
+    plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
+\endcode
+
+Such equation is written in the dictionary and it is evaluated during translation supplying the correct form.
+For more detailed information please refer to GNU Gettext: <a href="http://www.gnu.org/software/gettext/manual/gettext.html#Plural-forms">11.2.6 Additional functions for plural forms</a>
+
+\subsection adding_context_information Adding Context Information
+
+In many cases it is not enough to provide only original English string to get correct translation.
+you need to provide some context information. For example a button label "open" is translated to 
+"öffnen" in context of "opening file" or to "aufbauen" in context of opening internet connection in German.
+
+Is such cases it is required to add some context information to the original string by adding a comment.
+
+\code
+    button->setLabel(translate("File","open"));
+\endcode
+
+The context information is provided as first parameter of \ref boost::locale::translate(char const*,char const*) "translate" function in both
+single and plural forms. The translator would see this context information and would be able to translate "open" string
+correctly
+
+For example, this how \c po file is expected to look like:
+
+\code    
+    msgctxt "File"
+    msgid "open"
+    msgstr "öffnen"
+    
+    msgctxt "Internet Connection"
+    msgid "open"
+    msgstr "aufbauen"
+\endcode
+
+\note Context information requires using latest gettext tools (>=0.15) for extracting strings and
+formatting message catalogs.
+
+
+\subsection multiple_gettext_domain Working with multiple messages domains
+
+In some cases it is useful to work with multiple message domains.
+
+For example, if an application consists of several independent modules, it may 
+have several domains - each domain for each module.
+
+For example developing a FooBar office suite we would probably have:
+
+- FooBar Word Processor would use "foobarwriter" domain
+- FooBar Spreadsheets would use "foobarspreadsheet" domain
+- FooBar Spell Checker would use "foobarspell" domain
+- FooBar File handler would use "foobarodt" domain
+
+There are three ways of using non-default domains:
+
+-   When working with \c iostream, it is possible to use parametrized manipulator \ref boost::locale::as::domain "as::domain(std::string const &)" that allows switching domains
+    in streams:
+    .
+    \code
+        cout << as::domain("foo") << translate("Hello") << as::domain("bar") << translate("Hello");
+        // First translation is taken from dictionary foo and other from dictionary bar
+    \endcode
+-   It is possible to  specify domain explicitly when converting a \c message object to string:
+    \code
+        std::wstring foo_msg = translate("Hello World").str<wchar_t>("foo");
+        std::wstring bar_msg = translate("Hello World").str<wchar_t>("bar");
+    \endcode
+-   It is possible to specify domain directly using \ref direct_message_translation "convenient" interface:
+    \code
+        MessageBox(dgettext("gui","Error Occured"));
+    \endcode
+
+\subsection direct_message_translation Direct translation (Convenient Interface)
+
+Many applications do not write a messages directly to output stream or use only one locale in the process, so
+calling <tt>translate("Hello World").str<wchar_t>()</tt>  for single message would be annoying. Thus Boost.Locale provides
+GNU Gettext like localization functions for direct translation of the messages. However unlike GNU Gettext functions
+Boost.Locale translation functions provide and additional optional parameter - locale and support wide, u16 and u32 strings.
+
+The GNU Gettext like functions have following prototypes:
+
+
+- Ordinary translation of message and plural form
+    \code
+        std::string boost::locale::gettext(char const *message,std::locale const &l=std::locale());
+        std::string boost::locale::ngettext(char const *single,char const *plural,std::locale const &l=std::locale());
+    \endcode
+- Message translation with context information
+    \code
+        std::string boost::locale::pgettext(char const *context,char const *message,std::locale const &l=std::locale());
+        std::string boost::locale::npgettext(char const *context,char const *single,char const *plural,std::locale const &l=std::locale());
+    \endcode
+- Message translation in specific domain
+    \code
+        std::string boost::locale::dgettext(char const *domain,char const *message,std::locale const &l=std::locale());
+        std::string boost::locale::dngettext(char const *domain,char const *single,char const *plural,std::locale const &l=std::locale());
+    \endcode
+- Message translation in specific domain with context information
+    \code
+        std::string boost::locale::dgettext(char const *domain,char const *context,char const *message,std::locale const &l=std::locale());
+        std::string boost::locale::dngettext(char const *domain,char const *context,,char const *single,char const *plural,std::locale const &l=std::locale());
+    \endcode
+
+
+Also all these function receive a prefix \c w, \c u16  or \c u32  to return \c std::wstring, C++0x \c std::u16string  
+or C++0x \c std::u32string . For example:
+
+\code
+    MessageBoxW(0,wpgettext("File Dialog","Open?").c_str(),wgettext("Question").c_str(),MB_YESNO);
+\endcode
+
+
+\section extracting_messages_from_code Extracting messages from the source code
+
+There are many tools that allow you to extract messages from the source code to \c .po file format. The most
+popular and "native" tool is \c xgettext which is installed by default on most Unix systems and freely downloadable
+for Windows.
+
+For example, we have a source that called \c dir.cpp that prints:
+
+\code
+    cout << translate("Listing of catalog {1}:") % file_name << endl;
+    cout << translate("Catalog {1} contains 1 file","Catalog {1} contains {2,num} files",files_no) 
+            % file_name % files_no << endl;
+\endcode
+
+Now we run:
+
+    xgettext --keyword=translate:1,1t --keyword=translate:1,2,3t dir.cpp
+
+And a file called \c messages.po created that looks like that (approximately):
+
+\code
+    #: dir.cpp:1
+    msgid "Listing of catalog {1}:"
+    msgstr ""
+    
+    #: dir.cpp:2
+    msgid "Catalog {1} contains 1 file"
+    msgid_plural "Catalog {1} contains {2,num} files"
+    msgstr[0] ""
+    msgstr[1] ""
+\endcode
+
+This file can be given to translator to adopt it to specific language.
+
+We had used \c --keyword  parameter of \c xgettext in order to make it suitable for extracting messages from the
+source localized with Boost.Locale -- search for <tt>translate()</tt> function calls instead of default <tt>gettext()</tt> and <tt>ngettext()</tt> ones.
+First parameter <tt>--keyword=translate:1,1t</tt> parameters provides template for basic message: \c translate function that called with 1 
+argument (1t) and first message is taken as key. The second one <tt>--keyword=translate:1,2,3t</tt> -- is used for plural forms. 
+It tells \c xgettext to use <tt>translate()</tt> function call with 3 parameters (3t) and take 1st and 2nd parameter as keys. An 
+additional marker \c Nc can be used to mark context information.
+
+The full set of xgettext parameters suitable for Boost.Locale is:
+
+\code
+    xgettext --keyword=translate:1,1t --keyword=translate:1c,2,2t       \
+             --keyword=translate:1,2,3t --keyword=translate:1c,2,3,4t   \
+             --keyword=gettext:1 --keyword=pgettext:1c,2                \
+             --keyword=ngettext:1,2 --keyword=npgettext:1c,2,3          \
+             --keyword=wgettext:1 --keyword=wpgettext:1c,2              \
+             --keyword=wngettext:1,2 --keyword=wnpgettext:1c,2,3        \
+             --keyword=u16gettext:1 --keyword=u16pgettext:1c,2          \
+             --keyword=u16ngettext:1,2 --keyword=u16npgettext:1c,2,3    \
+             --keyword=u32gettext:1 --keyword=u32pgettext:1c,2          \
+             --keyword=u32ngettext:1,2 --keyword=u32npgettext:1c,2,3    \
+             source_file_1.cpp ... source_file_N.cpp
+\endcode
+
+Of course of you do not use "gettext" like translation, or you do not use wide or C++0x u16/u32 strings you
+may reduce all unused parameters.
+
+\subsection msg_qna Questions and Answers
+
+-   Do I need GNU Gettext to use Boost.Locale?
+    \par
+    Boost.Locale provides a run-time environment to load and use GNU Gettext message catalogs, but it does
+    not provide tools for generation, translation, compilation and managment of these catalogs.
+    Boost.Locale only reimplements GNU Gettext libintl.
+    \par
+    You would probably need:
+    \par
+    -#  Boost.Locale itself -- for runtime.
+    -#  A tool for extracting strings from source code, and managing them: GNU Gettext provides good tools, but other
+        implementations available as well.
+    -#  A good translation program like <a href="http://userbase.kde.org/Lokalize">Lokalize</a>, <a href="http://www.poedit.net/">Pedit</a> or <a href="http://projects.gnome.org/gtranslator/">GTranslator</a>.
+    
+-   Why doesn't Boost.Locale implement tools for extracting and management of message catalogs. Why should
+    I use GPL-ed software? Are my programs or message catalogs affected by its license?
+    \par
+    -#  Boost.Locale does not link or use any of GNU Gettext code, so you should not worry about your code as
+        the runtime library is fully reimplemented.
+    -#  You may freely use GPL-ed software for extracting and management catalogs in same was as you free to use
+        GPL-ed editor. It does not affect your message catalogs or your code.
+    -#  I see no reason to reimplement well debugged, working tools like \c xgettext, \c msgfmt, \c msgmerge that
+        do very fine job, especially that they are freely available for download and support almost any platform.
+
+-   Is there any reason to prefer Boost.Locale implementation to original GNU Gettext runtime library?
+    In any case I would probably need some of GNU tools.
+    \par
+    There are two important differences between GNU Gettext runtime library and Boost.Locale implementation:
+    \par
+    -#  GNU Gettext runtime supports only one locale per-process. It is not thread safe to use multiple locales
+        and encodings in same process. This is perfectly fine for applications that interact directly with 
+        single user like most GUI applications, but this is very problematic for services and servers.
+    -#  GNU Gettext API supports only 8-bits encoding making it irrelevant in environments that use
+        natively wide strings.
+
+*/
+
+
+/*!
+
+\page charset_handling Character Set Conversions
+
+\section codecvt Convenient Interface
+
+Boost.Locale provides \ref boost::locale::conv::to_utf() "to_utf"  and \ref boost::locale::conv::from_utf() "from_utf"  functions placed in \c boost::locale::conv namespace. They are simple and convenient functions to convert string to and from UTF-8/16/32 strings and strings using other encodings.
+
+For example:
+
+\code
+    std::string utf8_string = to_utf<char>(latin1_string,"Latin1");
+    std::wstring wide_string = to_utf<wchar_t>(latin1_string,"Latin1");
+    std::string latin1_string = from_utf(wide_string,"Latin1");
+\endcode
+
+
+These function may use explicit encoding name like "Latin1" or "ISO-8859-8" or use std::locale as parameter and fetch this information from it.
+It also receives a policy parameter that directs it on how to behave if conversion can't be performed (illegal or unsupported character found).
+By default these function would skip all illegal characters and try to do the best they can, however, it is possible ask it to throw 
+\ref boost::locale::conv::conversion_error "conversion_error"
+exception by passing \c stop flag to it:
+
+\code
+    std::wstring s=to_utf<wchar_t>("\xFF\xFF","UTF-8",stop); 
+    // Throws because this string is illegal in UTF-8
+\endcode
+
+\section codecvt_codecvt std::codecvt facet 
+
+Boost.Locale provides stream codepage conversion facets based on \c std::codecvt facet.
+This allows converting between wide characters encoding and 8-bit encodings like UTF-8, ISO-8859 or Shift-JIS encodings.
+
+Most of compilers provide such facets, but:
+
+-   Under Windows MSVC does not support UTF-8 encodings at all.
+-   Under Linux the encodings are supported only if required locales are generated. For example
+    it may be impossible to create \c he_IL.CP1255  locale even when \c he_IL  locale is available.
+
+Thus Boost.Locale provides an option to generate code-page conversion facets for using it with 
+Boost.Iostreams filters or \c std::wfstream. For example:
+
+\code
+    std::locale loc= generator().generate("he_IL.UTF-8");
+    std::wofstream file.
+    file.imbue(loc);
+    file.open("hello.txt");
+    file << L"שלום!" << endl;
+\endcode
+
+Would create file \c hello.txt encoded as UTF-8 with "שלום!" (shalom) in it.
+
+For more details refer to \c std::codecvt documentation and to the documentation
+of Boost.Iostreams for convenient use patterns.
+
+\subsection codecvt_limitations Limitations
+
+Standard does not provides any useful information about \c std::mbstate_t  type that should be used for saving 
+intermediate code-page conversion states. It leave the definition the compiler implementation making it
+impossible to reimplement <tt>std::codecvt<wchar_t,char,mbstate_t></tt> to any stateful encodings.
+Thus, Boost.Locale's \c codecvt facet implementation may be used only with stateless encodings like UTF-8,
+ISO-8859, Shift-JIS, but not with stateful encodings like UTF-7 or SCSU.
+
+\b Recommendation: Prefer Unicode UTF-8 encoding for \c char based strings and files in your application.
+
+\note 
+
+The implementation of codecvt for single byte encodings like ISO-8859-X and for UTF-8 is quite efficent
+and would allow fast conversion of the content, however its performance may be sub-optimal for
+double width encodings like Shift-JIS due to the lack of state problem described above.
+
+*/
+
+
+
+\section Boundary analysis
+
+Boost.Locale provides boundary analysis tool allowing to split the text into characters, words, sentences and find appropriate
+places for line breaks. 
+
+**Note:** Characters are not equivalent to Unicode code points. For example a Hebrew word Shalom -- "שָלוֹם" consists
+of 4 characters and 6 Unicode points, where two code points are used for vowels (diacritical marks).
+
+Boost.Locale provides 3 major classes that are used for boundary analysis:
+
+- \c boost::locale::boundary::mapping -- the special map that hold the boundary points of the text.
+- \c boost::locale::boundary::token_iterator  -- the iterator that returns chunks of text that were split by text boundaries
+- \c boost::locale::boundary::break_iterator  -- the iterator that returns iterator to the original text.
+
+In order to perform boundary analysis we first of all create a boundary mapping or the text we want to work with it.
+
+    using namespace boost::locale::boundary;
+    std::string text="To be, or not to be?"
+    // Create mapping of text for token iterator using default locale.
+    mapping<token_iterator<std::string::const_iterator> > map(word,text.begin(),text.end()); 
+    // Print all "word" -- chunks of word boundary
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
+
+Would print: a list: "To", " ", "be", ",", " ", "or", " ","not"," ","to", " ", "be", "?"
+You can also provide filters for better selection of text chunks or boundaries you are interested in. For example:
+
+    map.mask(word_letters);
+    // Tell newly created iterators to select words that contain letters only.
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
+
+Would now print only: "To", "be", "or", "not", "to", "be" words ignoring all non-words -- like punctuation.
+
+Break iterator has different role, instead of returning text chunks, it returns the underlying iterator used for text source iteration. For example,
+you can select two first sentences as following:
+
+    using namespace boost::locale::boundary;
+    std::string const text="First sentence. Second sentence! Third one?"
+    // Create a sentence boundary mapping and set the mask of boundaries
+    // to select sentence terminators only, like "?", "." ignoring new lines.
+    typedef break_iterator<std::string::const_iterator> iterator;
+    mapping<iterator> map(sentence,map.begin(),map.end(),sentense_term);
+    iterator p=map.begin();
+    /// Advance p by two steps, make sure p is still valid;
+    for(int i=0;i<2 && p!=text.end();i++)
+        ++p;
+    std::cout << "First two sentences are " << std::string(text.begin(),*p) << std::endl;
+
+Would print: "First sentence. Second sentence!"
+
+\section Localized Text Formatting
+
+The \c iostream manipulators are very useful but when we create a messages to the user, sometimes we need something
+like old-good \c printf or \c boost::format.
+
+Unfortunately \c boost::format has several limitations in context of localization:
+
+1.  It renders all parameters using global locale rather then target \c ostream locale.
+2.  It knows nothing about new Boost.Locale manipulators.
+3.  \c printf like syntax is very limited for formatting of complex localized data, not allowing
+    formatting of dates, time or currency
+
+
+Thus new class \c boost::locale::format was introduced. For example:
+
+    wcout << wformat(L"Today {1,date} I would meet {2} at home") % time(0) % name <<endl
+
+Each format specifier is enclosed withing `{}` brackets. Each format specifier is separated with comma "," and
+may have additional option after symbol '='. The option may be simple ASCII text or quoted localized text with
+single quotes "'". If quote should be inserted to the text, it may be represented with double quote.
+
+For example, format string:
+
+    "Ms. {1} had shown at {2,ftime='%I o''clock'} at home. Exact time is {2,time=full}"
+
+The syntax can be described with following grammar:
+
+    format : '{' parameters '}'
+    parameters: parameter | parameter ',' parameters;
+    parameter : key ["=" value] ;
+    key : [0-9a-zA-Z<>] ;
+    value : ascii-string-excluding-"}"-and="," | local-string ; 
+    local-string : quoted-text | quoted-text local-string;
+    quoted-text : '[^']*' ;
+
+Following format key-value pairs are supported:
+
+-   `[0-9]+` -- digits, the index of formatted parameter -- mandatory key.
+-   \c num or \c number -- format a number. Optional values are:
+
+    -   \c hex -- display hexadecimal number
+    -   \c oct -- display in octal format
+    -   \c sci or \c scientific -- display in scientific format
+    -   \c fix or \c fixed -- display in fixed format
+        
+    For example `number=sci`
+-   \c cur or \c currency -- format currency. Optional values are:
+
+    -   \c iso -- display using ISO currency symbol.
+    -   \c nat or \c national -- display using national currency symbol.
+
+-   \c per or \c percent -- format percent value.
+-   \c date, \c time , \c datetime or \c dt -- format date, time or date and time. Optional values are:
+
+    -   \c s or \c short -- display in short format
+    -   \c m or \c medium -- display in medium format.
+    -   \c l or \c long -- display in long format.
+    -   \c f or \c full -- display in full format.
+
+-   \c ftime with string (quoted) parameter -- display as with \c strftime see, \c as::ftime manipulator
+-   \c spell or \c spellout -- spell the number.
+-   \c ord or \c ordinal -- format ordinal number (1st, 2nd... etc)
+-   \c left or \c < -- align to left.
+-   \c right or \c > -- align to right.
+-   \c width or \c w -- set field width (requires parameter).
+-   \c precision or \c p -- set precision (requires parameter).
+-   \c locale -- with parameter -- switch locale for current operation. This command generates locale
+    with formatting facets giving more fine grained control of formatting. For example:
+
+        cout << format("This article was published at {1,date=l} (Gregorian) {1,locale=he_IL@calendar=hebrew,date=l} (Hebrew)") % date;
+
+
+The constructor of \c format class may receive an object of type \c message allowing easier integration with localized messages.
+For example:
+
+    cout<< format(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b) << endl;
+
+Formatted string can be fetched directly using `get(std::locale const &loc=std::locale())` member function. For example:
+
+    std::wstring de = (wformat(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(de_locale);
+    std::wstring fr = (wformat(translate("Adding {1} to {2}, we get {3}")) % a % b % (a+b)).str(fr_locale);
+
+**Important Note:**
+
+There is one significant difference between \c boost::format and \c boost::locale::format: Boost.Locale format converts its parameters
+only when it is written to \c ostream or when `str()` member function is called. It only saves a references to the objects that
+can be written to a stream.
+
+This is generally not a problem when all operations are done in one statement as:
+
+    cout << format("Adding {1} to {2}, we get {3}") % a % b % (a+b);
+
+Because temporary value of `(a+b)` exists until the format is actually written to the stream. But following code is wrong:
+
+    format fmt("Adding {1} to {2}, we get {3}");
+    fmt % a;
+    fmt % b;
+    fmt % (a+b);
+    cout << fmt;
+
+Because temporary value of `(a+b)` is no longer exists when \c fmt is written to the stream. The correct solution would be:
+
+    format fmt("Adding {1} to {2}, we get {3}");
+    fmt % a;
+    fmt % b;
+    int a_and_b = a+b;
+    fmt % a_and_b;
+    cout << fmt;
+
+\section Working with dates, times, timezones and calendars.
+
+One of the important flaws of most libraries that provide operations over dates is the fact that they support only Gregorian calendar.
+It is correct for \c boost::date_time , it is correct for \c std::tm and standard functions like \c localtime, \c gmtime that
+assume that we use Gregorian calendar.
+
+Boost.Locale provides generic \c date_time , and \c calendarclass that allows to to perform operation on dates and time 
+for non-Gregorian calendars like Hebrew, Islamic or Japanese calendars.
+
+\c calendar -- the class that represents generic information about the calender, independent from specific time point. For example you can get the maximal number of days in month for this calender.
+\c date_time  -- represents current time point. It is constructed from calendar and allows us to perform manipulation of various time periods.
+\c boost::locale::period -- holds an enumeration of various periods like, month, year, day, hour that allows us to 
+manipulate with dates. You can add periods, multiply them by integers and get set them or add them to \c date_time  objects.
+
+For example:
+
+    using namespace boost::locale;
+    date_time now; // Create date_time class width default calendar initialized to current time;
+    date_time tomorrow = now + period::day;
+    cout << "Let's met tomorrow at " << as::date << tomorrow << endl;
+    date_time some_point = period::year * 1995 + period::january + period::day*1;
+    // Set some_point's date to 1995-Jan-1.
+    cout << "The "<<as::date << some_point " is " 
+        << as::ordinal << some_point / period::day_of_week_local << " day of week"  << endl;
+
+You can calculate the difference between dates by dividing the difference between dates by period:
+
+    date_time now;
+    cout << " There are " << (now + 2 * period::month - now) / period::day << " days "
+            "between " << as::date << now << " and " << now + 2*period::month << endl;
+
+\c date_time  -- provides member functions \c minimum and \c maximum to get the information about minimal and maximal
+possible value of certain period for specific time.
+
+For example, for February `maximum(period::date)` would be 28 or 29 if the year is leap and 31 for January. 
+
+**Note:** be very careful with assumptions about what you know about calendar. For example, in Hebrew calendar the
+number of months is changed according if current year is leap or not.
+
+It is recommended to take a look on \c calendar.cpp example provided to this library to get understanding of how
+to manipulate with dates and times using these classes.
+
+In order to convert between various calendar dates you may get and get current POSIX time via \c time member function.
+For example:
+
+    using namespace boost::locale;
+    using namespace boost::locale::period;
+    generator gen;
+    // Create locales with Hebrew and Gregorian (default) calendars.
+    std::locale l_hebrew=gen("en_US@calendar=hebrew");
+    std::locale l_gregorian=gen("en_US");
+    
+    // Create Gregorian date from fields
+    date_time greg(2010*year + february + 5*day,l_gregorian);
+    // Assign time point taken from Gregorian date to date_time with
+    // Hebrew calendar
+    date_time heb(greg.time(),l_hebrew);
+    // Now we can query the year now.
+    std::cout << "Hebrew year is " << heb / year << std::endl;
+
+
+\section Getting information about current locale
+
+\c std::locale::name function provides quite limited information about locale. Thus additional facet was created for giving
+more precise information: \c boost::locale::info. It has following member functions:
+
+-   `std::string language()` -- get ISO-639 language code of current locale, for example "en".
+-   `std::string country()` -- get ISO-3199 country code of current locale, for example "US".
+-   `std::string variant()` -- get the variant of current locale, for example "euro".
+-   `std::string encoding()` -- get the encoding used for \c char based strings, for example "UTF-8"
+-   `bool utf8()` -- fast way to check if the encoding is UTF-8 encoding.
+
+\section Working with multiple locales
+
+Boost.Locale allows you to work safely with multiple locales in the same process. As we mentioned before, the locale
+generation process is not a cheap one. Thus, when we work with multiple locales it is recommended to create all used
+locales at the beginning and then use them.
+
+\c generator class has an option to cache all generated locales. Then, next time
+you create locale, if it is exists it would be fetched from the existing preloaded locale set.
+
+This option should be explicitly enabled by calling \c locale_cache_enabled  member function of \c boost::locale::generator 
+with \c true as parameter.
+
+
+For example:
+
+    generator gen;
+    get.locale_cache_enabled(true);
+    gen("en_US.UTF-8");
+    gen("de_DE.UTF-8");
+    gen("ja_JP.UTF-8");
+    // Create all locales
+
+    std::locale en=gen("en_US.UTF-8"); 
+    // Fetch existing locale from cache
+    std::locale ar=get("ar_EG.UTF-8");
+    // Because ar_EG not in cache, new locale is generated (and put in cache)
+
+Then these locales can be imbued to \c iostreams or used directly as parameters in various functions.
+
+\page Using Localization Backends
+
+Boost.Locale uses by default ICU for all localization and text manipulation tasks.
+Indeed, this is the most powerful library available, but sometimes we don't need
+the full power of this library or we want to reduce dependencies from 3rd part
+libraries and ICU is by no means small library.
+
+Boost.Locale provides and option to implement or use additional non-ICU based localization
+backends that usually less powerful but in many cases cover most of our needs. 
+
+They provide: message formatting, currency, date, time, number formatting, basic collation and 
+case manipulation. They implemented using standard OS API, C or C++ library. 
+
+\section When to use non-ICU backends
+
+There are situations when using non-ICU based localization is appropriate:
+
+- Embedded systems where ICU library is quite heavy
+- Application where only basic features like message, date and time formatting,
+  basic collation are required, and using 3rd part library like ICU would be too
+  complicated.
+- Performance, ICU is very powerful library, but it is generally slower then standard
+  library, so sometimes it would be better to use simpler but faster localization backends.
+
+
+\section Non-ICU Backends
+
+All this backends have limited features: 
+
+- Non Gregorian calendar are not supported and calendar facets are not installed at all.
+- No boundary analysis provided.
+- Case handing is very simple and based on single codepoint conversion,
+  however still handles UTF-8 better then standard library.
+- Time zone specification is very limited: either local time or time zone
+  in format of "GMT+HH::MM".
+- No percent formatting, no spellout or ordinal number formatting
+- Collation, with exception of \c winapi backend is limited to one level
+  similar to what is done by \c strcoll
+
+
+\subsection \c std - Standard C++ library
+
+This localization backend is based on standard C++ library.
+
+It is supported on all platforms, but actually useful on platforms where
+standard library supports locales besides "C" and "POSIX".
+
+During development and testing it was found useful on Linux with GCC or Intel compilers and under MSVC compiler.
+
+
+
+It workarounds some common standard library bugs like invalid UTF-8 generation for numeric
+formatting, it gives an absent POSIX locales names and UTF-8 support under MSVC compiler.
+
+It is very useful backend when the compiler and the library actually give fine localization
+support, like GCC under Linux or MSVC under Windows
+
+\subsection \c posix - POSIX 2008 C library
+
+
+This backend is  based on latest POSIX 2008 standards, and uses POSIX api
+as \c newlocale, \c freelocale, \c strftime_l  etc. It is available under Linux and Mac OS X
+platforms.
+
+It allows to have a simple and already available in standard C library localization
+support, most notably under Mac OS X where GCC's `libstdc++` does not support locales.
+
+Note: POSIX backend supports utf-8, single byte and double byte encodings only.
+
+\subsection \c winapi - Win32 API.
+
+This Win32API based localization backend it provides decent UTF-8/UTF-16 locale support.
+It is based on Windows API like \c GetLocaleInfoW, \c LCMapStringW, \c GetDateFormatW etc and
+It provides decent localization support even for MinGW and Cygwin platforms that are
+problematic for this case. 
+
+Notes:
+
+- You need GCC-4.x series to use it.
+- Only UTF-8 encoding is supported
+
+
+\section Supported Features
+
+<table border="1" sellpadding="5" sellspacing="3">
+<tr>
+  <th>Backend</th>
+  <th>icu</th><th>posix</th><th>winapi</th><th>std</th>
+</tr>
+  <th>Message Formatting</th>
+  <td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Non UTF-8 encodings</th>
+  <td>Yes</td><td>Yes</td><td>No</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Date/Time Formatting/Parsing</th>
+  <td>Yes</td><td>Formatting Only</td><td>Formatting Only</td><td>Formatting Only</td>
+</tr>
+<tr>
+  <th>Monetary Formatting/Parsing</th>
+  <td>Yes</td><td>Formatting Only</td><td>Formatting Only</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Number Formatting/Parsing</th>
+  <td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td>
+</tr>
+<tr>
+  <th>Numbers as Percent, Spelling</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Case Manipulation</th>
+  <td>Yes</td><td>Basic</td><td>Basic</td><td>Basic</td>
+</tr>
+<tr>
+  <th>Collation</th>
+  <td>Full</td><td>Linux - 1 level<br/>Mac OS X - broken</td><td>3 levels</td><td>1 level</td>
+</tr>
+<tr>
+  <th>Calendar</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Boundary Analysis</th>
+  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+</tr>
+<tr>
+  <th>Unicode Normalization</th>
+  <td>Yes</td><td>No</td><td>Vista and above</td><td>No</td>
+</tr>
+<tr>
+  <th>C++0x characters</th>
+  <td>Yes</td><td>No</td><td>No</td><td>Yes</td>
+</tr>
+<tr>
+  <th>OS Support</th>
+  <td>Any</td><td>Linux, Mac OS X</td><td>Windows, Cygwin</td><td>Any</td>
+</tr>
+<tr>
+  <th>Useful on</th>
+  <td>Any Platform</td><td>Linux and Mac OS X</td><td>Windows/MinGW/Cygwin</td><td>Linux with GCC or Intel;<br/> Windows with MSVC</td>
+</tr>
+</table>
+
+\section Using Localization Backends
+
+The access to localization backend is done via \c boost::locale::localization_backend_manager  class.
+
+You can create your own \c localization_backend_manager  by taking a global backend
+via \c localization_backend_manager::global  static member function and manipulating
+over it.
+
+For example:
+
+
+    localization_backend_manager my = localization_backend_manager::global(); 
+    // Get global backend
+
+    my.select("std"); 
+    // select \c std backend as default
+
+    generator gen(my); 
+    // create a generator that  uses this backend.
+
+    localization_backend_manager::global(my);
+    // set this backend globally
+
+    generator gen2();
+    // now this one would use new global backend.
+
+You can also create a mixture of several backends
+and for example use \c icu for one kind of operations and \c std
+for all others:
+
+    localization_backend_manager my = localization_backend_manager::global(); 
+    // Get global backend
+
+    my.select("std"); 
+    // select \c std backend as default for all categories
+    my.select("icu",boundary_facet); 
+    // select \c icu backend for boundary analysis (not as it not supported by \c std)
+
+\page Recommendations and Myths
+
+\section Recommendations
+
+-   1st and most important recommendation: prefer UTF-8 encoding for narrow strings --- it represents all
+    supported Unicode characters and most convenient for general use then other encodings like Latin1.
+-   Remember, there are many different cultures, you may assume very few about possible user language. Calendar
+    may not have "January", it may be not possible to convert integer numbers using simple \c atoi because
+    they may not use "ordinary" digits 0..9 at all, you may not assume that "space" characters are frequent 
+    because in Chinese space do not separates different words. The text may be written from Right-to-Left or
+    from Up-to-Down and so far.
+-   Using message formatting try to provide as more context information as you can. Prefer translating entire 
+    sentences over short word. When translating words, **always** add some context information.
+
+
+\section Myths
+
+**In order to use Unicode in my application I should use wide strings anywhere.**
+
+Unicode property is not limited to wide strings, in fact both \c std::string and \c std::wstring
+are absolutely fine to hold and process Unicode text. More then that the semantics of \c std::string
+is much cleaner in multi-platform application, because, if the string is "Unicode" string then 
+it is UTF-8. When we talk about "wide" strings they may be "UTF-16" or "UTF-32" encoded, depending
+on platform.
+
+So wide strings may be even less convenient when dealing with Unicode then \c char based strings.
+
+**UTF-16 is the best encoding to work with.**
+
+There is common assumption that it is one of the best encodings to store information because it gives "shortest" representation
+of strings.
+
+In fact, it probably the most error prone encoding to work with it. The biggest issue is code points laying outside of BMP that
+are represented with surrogate pairs. In fact these characters are very rare and many applications are not tested with them.
+
+For example:
+
+-   Qt3 could not deal with characters outside of BMP. 
+-   Editing a character with codepoint above 0xFFFF shows a not pleasant bug, in order to erase such character you should press backspace twice in
+    Windows Notepad.
+
+So, UTF-16 can be used for dealing with Unicode, in-facet ICU and may other applications use UTF-16 as internal Unicode representation, but
+you should be very careful and never assume one-code-point == one-utf16-character.
+
+\page Building The library
+
+Currently Boost.Locale supports only. CMake build system. BBv2 support would be added in future.
+
+\section Build Instructions
+
+\subsection Dependencies
+
+- CMake 2.6 and above
+- Boost 1.43 headers and above or Boost 1.35 and above with Boost.Thread
+- ICU library 3.6 and above - strongly recommended!
+- If no ICU library given, iconv support is required under POSIX platforms.
+
+\subsection Building Process
+
+
+The library build should be fairly simple for users familiar with CMake.
+
+**Notes:**
+
+- MSVC Users: use nmake for building library, MSVC projects are not supported!
+- Windows users: don't forget to set PATH environment variable, such it points to ICU's dlls.
+
+The simplest way to build library is:
+
+-   Extract its sources
+-   Go to sources directory
+-   Create directory build
+-   Go to this directory and run:
+
+        cmake ..
+        make
+        make test
+
+    For windows you may need to specify:
+
+        cmake -DCMAKE_INCLUDE_PATH=/path/to/icu/include:/path/to/boost/include -DCMAKE_LIBRARY_PATH=/path/to/icu/lib ..
+
+    And then:
+
+        nmake
+        mmake test
+
+    Or
+        make && make test
+
+    According to your compiler.
+
+
+\section Build Options
+
+This options can be passed to CMake to configure library according to your needs.
+
+- \c DISABLE_SHARED  - build static only library version
+- \c DISABLE_STATIC  - build shared only library version
+- \c DISABLE_ICU  - Disable ICU backend, it is strongly recommended not to disable it.
+- \c DISABLE_STD_BACKED  - Disable building "std" backend.
+- \c DISABLE_POSIX_BACKEND  - Disable building "posix" backend (ON by default on all but Linux and Mac OS X)
+- \c DISABLE_WINAPI_BACKEND  - Disable building "winapi" backend (ON by default on POSIX platforms).
+- \c DISABLE_ICONV  - Disable iconv based conversion (ON by default on Windows)
+
+Useful CMake options
+
+- \c CMAKE_INCLUDE_PATH  - path to location of boost, (if not system wide used)
+- \c CMAKE_INSTALL_PREFIX  - installation path
+- \c CMAKE_BUILD_TYPE  - default is Debug on Windows/MSVC and RelWithDebInfo on all other platforms.
+
+For example:
+
+
+- Build Boost.Locale with "icu" backend only on Linux
+
+        cmake -DDISABLE_POSIX_BACKEND=ON -DDISABLE_STD_BACKEND=ON -DDISABLE_ICONV=ON ..
+
+- Build Boost.Locale with "winapi" and "std" backends on Windows
+
+        cmake -G "NMake Makefiles" -DDISABLE_ICU_BACKEND=ON -DCMAKE_INCLUDE_PATH=c:/boost_1_43_0 ..
+
+\section Binary Compatibility
+
+Boost.Locale is build with binary compatibility in mind. Switching localization back ends on and off,
+using iconv or not using it does not affect binary compatibility. So if dynamic library was build
+build with all possible backends, other dynamic library compiled with, for example, only \c std, \c posix 
+or \c winapi backend would be binary compatible with it.
+
+However this defiantly has an effect on quality of backend and some features. For example, if you
+would try to use boundary analysis or calendar when the library does not support icu backend
+you would get an exception.
+
+\page Appendix
+
+\section Design Rationale 
+
+\subsection Why is it needed?
+
+Why do we need localization library, standard C++ facets (should) provide most of required functionality:
+
+- Case conversion is done using \c std::ctype facet
+- Collation is supported by \c std::collate and has nice integration with \c std::locale
+- There are \c std::num_put , \c std::num_get , \c std::money_put , \c std::money_get , \c std::time_put  and \c std::time_get  for numbers,
+    time and currency formatting and parsing.
+- There are \c std::messages class that supports localized message formatting.
+
+
+So why do we need such library if we have all the functionality withing standard library?
+
+Almost each(!) facet has some flaws in their design:
+
+-  \c std::collate supports only one level of collation, not allowing to choose whether case, accents sensitive or insensitive comparison
+    should be performed.
+
+-  \c std::ctype that is responsible for case conversion assumes that conversion can be done on per-character base. This is
+    probably correct for many languages but it isn't correct in general case.
+    
+    1. Case conversion may change string length. For example German word "grüßen" should be converted to "GRÜSSEN" in upper
+    case: the letter "ß" should be converted to "SS", but \c toupper function works on single character base.
+    2. Case conversion is context sensitive. For example Greek word "ὈΔΥΣΣΕΎΣ" should be converted to "ὀδυσσεύς" where Greek letter
+    "Σ" is converted to "σ" or to "ς", according to position in the word.
+    3. Case conversion can not assume that one character is a single code point, which is incorrect for most popular "UTF-8" encoding under
+    Linux and "UTF-16" encoding under Windows. Where each code-point is represented up to 4 \c char's in UTF-8 and up to two \c wchar_t 's under
+    Windows platform. This makes \c std::ctype totally useless with UTF-8 encodings.
+
+-   \c std::numpunct and \c std::moneypunct do not specify digits code point for digits representation at all. 
+    Thus it is impossible to format number using digits used under Arabic locales, for example:
+    the number "103" is expected to be displayed as "١٠٣" under \c ar_EG  locale.
+    
+    \c std::numpunct and \c std::moneypunct assume that thousands separator can be represented using a single character. It is quite untrue
+    for UTF-8 encoding where only Unicode 0-0x7F range can be represented as single character. As a result, localized numbers can't be
+    represented correctly under locales that use Unicode "EN SPACE" character for thousands separator, like Russian locale.
+    
+    This actually cause a real bugs under GCC and SunStudio compilers where formatting numbers under Russian locale creates invalid 
+    UTF-8 sequences..
+
+
+-   \c std::time_put  and \c std::time_get  have several flows:
+    
+    1. It assumes that the required calendar is Gregorian calendar, by using \c std::tm for time representation, ignoring the fact that in many countries
+    dates may be displayed using different calendars.
+    2. It always uses global time zone not-allowing specification of time zone for formatting -- actually standard \c std::tm does not include
+    timezone field.
+    3. \c std::time_get  is not symmetric with \c std::time_put  now allowing parsing dates and times created with \c std::time_put . This issue is addressed
+    in C++0x and some STL implementation like Apache standard C++ library.
+
+-   \c std::messages does not provide support of plural forms making impossible to localize correctly such simple strings like: 
+    "There are X files in directory".
+
+Also many features are not really supported by \c std::locale at all: timezones mentioned above, text boundary analysis, numbers spelling and many
+others. So it is clear that standard C++ locales are very problematic for real-world applications of internationalization and localization.
+
+
+\subsection Why to use ICU wrapper instead of ICU?
+
+ICU is very good localization library but it has several serious flaws:
+
+- It is absolutely unfriendly to C++ developer. It ignores most of popular C++ idioms: STL, RTTI, exceptions etc. Instead
+it mostly mimics Java API.
+- It provides support of only one kind of strings: UTF-16 strings, when some users may want to use other Unicode encodings.
+For example for XML, HTML processing UTF-8 is much more convenient and UTF-32 easier to use. Also there is no support of 
+"narrow" encoding that are still very popular like ISO-8859 encodings family that are useful and applicable for use.
+
+For example: Boost.Locale provides direct integration with \c iostream allowing more natural way of data formatting. For example:
+
+    cout << "You have "<<as::currency << 134.45 << " at your account at "<<as::datetime << std::time(0) << endl;
+
+
+\subsection Why ICU wrapper and not implementation-from-scratch?
+
+
+ICU is one of the best localization/Unicode libraries available. It consists of about half a million lines of well tested,
+production proved source code that today provide state-of-the art localization tools.
+
+Reimplementing of even a small part of ICU abilities is quite unfeasible project which would require many man-years. So the
+question is not if you need reimplement the Unicode and localization algorithm from the scratch, but the question
+is: "Do we need good localization library in Boost?"
+
+Thus Boost.Locale wraps ICU with modern C++ interface allowing future reimplementation of parts with better alternatives,
+but it brings localization support to Boost today and not in "not-so-near-if-at-all-future."
+
+
+\subsection Why the ICU API is not exposed to user?
+
+It is true, all ICU API is hidden behind opaque pointers and user have no access to it. This is done for several reasons:
+
+- At some point, better localization tools may be accepted by future upcoming C++ standards and thus, they may not use ICU directly.
+- At some point, there should be a possibility to switch underlying localization engine to other, for example use native operating
+system API or use some other toolkits like GLib or Qt that provide similar functionality.
+- Not all localization is done withing ICU. For example, message formatting uses GNU Gettext message catalogs. In future more functionality
+may be taken from ICU and reimplemented directly in the Boost.Locale library.
+- Boost.Locale was designed with ABI stability in mind as this library is not developed for Boost only but also
+it is required for [CppCMS framework](http://cppcms.sourceforge.net/) needs.
+
+
+\subsection Why to use GNU Gettext catalogs for message formatting?
+
+There are many available localization formats, most popular so far are: OASIS XLIFF, GNU gettext po/mo files, POSIX catalogs, Qt ts/tm files, Java properties, Windows resources. However, the last three are popular each one in its specific area, POSIX catalogs are too simple and limited so there are two quite reasonable options:
+
+1. Standard localization format OASIS XLIFF.
+2. GNU Gettext binary catalogs.
+
+The first one generally seems like more correct localization solution but... It requires XML parsing for loading documents, it is very complicated
+format and even ICU requires preliminary compilation of it into ICU resource bundles.
+
+On the other hand:
+
+- GNU Gettext binary catalogs have very simple, robust and yet very useful file format.
+- It is so far the most popular and de-facto standard localization format (at least in Open Source world.)
+- It has very simple and very powerful support of plural forms.
+- It uses original English text as key making the process of internationalization much easier. Because at least
+one basic translation is always available.
+- There are many tools for editing and managing gettext catalogs like: Poedit, kbabel etc.
+
+So, even thou GNU Gettext mo catalogs format is not officially approved file format:
+
+- It is de-facto standard and most popular one.
+- It implementation is much easier and does not requires XML parsing and validation
+
+
+**Note:** Boost.Locale does not use any of GNU Gettext code, it just
+reimplements tool for reading and using mo-files, getting rid of current biggest GNU Gettext flaw -- thread safety
+when using multiple locales.
+
+\subsection Why a plain number is used for representation of date-time instead of Boost.DateTime date of Boost.DateTime ptime?
+
+There are several reasons:
+
+1.  Gregorian Date is by definition can't be used for representation of locale independent dates, because not all
+    used calendars are Gregorian.
+2.  \c ptime -- is defiantly could be used unless it had several problems:
+    
+    -   It is created in GMT or Local time clock, when `time()` gives a representation that is independent of time zone,
+        usually GMT time, and only then it should be represented in time zone that user requests.
+        
+        The timezone is not a property of time itself, but it is rather the property of time formatting.
+        
+    -   \c ptime already defines and \c operator<< and \c operator>> for time formatting and parsing.
+    
+    -   The existing facets for \c ptime formatting and parsing were not designed the way user can override their behavior.
+        The major formatting and parsing functions are not virtual. It makes impossible reimplementing formatting and
+        parsing functions of \c ptime unless developers of Boost.DateTime library would decide to change them.
+        
+        Also, the facets of \c ptime are not "correctly" designed in terms of devision between formatting information and 
+        local information. Formatting information should be stored withing \c std::ios_base  when information about how
+        to format according to the locale should be stored in the facet itself.
+        
+        The user of library should not create new facets in order to change formatting information like: display only
+        date or both date and time.
+
+Thus, at this point, \c ptime is not supported for formatting localized date and time.
+
+\subsection Why POSIX locales names are used and not something like BCP-47 IETF language tag?
+
+There are several reasons:
+
+- POSIX locale names have very important feature: character encoding. When you specify, for example fr-FR
+do not actually know how the text should be encoded UTF-8, ISO-8859-1, ISO-8859-15 or maybe Windows-1252.
+This may differ between different operating systems and depend on current installation. So it is critical
+to provide all required information.
+- ICU fully understands POSIX locales and know how to treat them correctly.
+- They are native locale names for most operating systems APIs (with exception of windows)
+
+\section Running Examples under Microsoft Windows
+
+All the examples that come with Boost.Locale are oriented for UTF-8 encoding, which is default
+encoding on most Unix platforms and they would not behave correctly under Microsoft Windows
+as default locale is rather 8-bit codepage like 1252.
+
+Boost.Locale takes the default locale for environment variable LANG as well, so in order to 
+use UTF-8 encoding under Windows console and see the output correctly do following:
+
+1. Open \c cmd window
+2. Change default font to TrueType font: go to properties-\>font (right click on title-bar-\>properties-\>font) and
+change font to true type font like Lucida Console
+3. Change default codepage to 65001 (UTF-8) by running `chcp 65001`
+4. Set environment variable LANG to any locale you need, for example: `set LANG=ru_RU.UTF-8`
+
+Now all examples should display UTF-8 characters correctly (if the font supports them)
+
+**Note for Visual Studio users:** Microsoft Visual studio assumes that the encoding of source files uses ANSI codepage,
+like 1252. However all examples use UTF-8 encoding by default, so wide character examples would
+not work under MSVC as-is. In order to enforce it to treat source files encoding as UTF-8 you need to
+convert the files to UTF-8 files with BOM, it can be simply done be re-saving them from Notepad
+which adds BOM to UTF-8 files by default.
+
+
+\section Glossary
+
+-   **Basic Multilingual Plane (BMP)** -- a part of _Universal Character Set_ with code points in range of U-0000--U-FFFF. Most daily
+    used UCS characters lay in this plane including all Western, Cyrillic, Hebrew, Thai, Arabic and CJK encodings. However there are many
+    characters that lay outside of BMP and their support absolutely required for correct support of East Asian languages.
+-   **Code Point** -- a unique number that represents a "character" in Universal Character Set. Code points lay in range of 0-0x10FFFF. Usually
+    displayed as U+XXXX or U+XXXXXX where X ins hexadecimal digit.
+-   **Collation** -- a definition of sorting order of text, usually alphabetical. It differs for various languages and countries even for same
+    characters.
+-   **Encoding** -- a representation of character set. Some encodings are capable of representing full UCS like UTF-8 and some represent
+    only its subset -- ISO-8859-8 represents only small subset of about 250 characters of UCS.
+    
+    Non-Unicode encodings are still very popular, for example Latin-1 (Or ISO-8859-1) encoding covers most of characters for representation
+    of Western European languages and significantly simplifies processing of text for application designed to handle such languages only.
+    
+    In Boost.Locale you should provide an octets (\c std::sting) encoding as a part of Locale code name, for example \c en_US.UTF-8  or \c he_IL.cp1255 .
+    
+    \c UTF-8  is recommended one.
+-   **Facet** -- or \c std::locale::facet -- a base class that every object that describes specific locale is derived from it. Facets can be
+    added to locale to provide additional culture information.
+-   **Formatting** -- representation of various value according to locale preferences. For example number 1234.5 (C) should be displayed as
+    1,234.5 in US locale and 1.234,5 in Russian locale. Date November 1st, 2005 would be represented as 11/01/2005 in United states, and
+    01.11.2005 in Russia. This is important part of localization, allowing to represent various values correctly.
+    
+    For example: does "You have to bring 134,230 kg of rise at 04/01/2010" means "134 tons of rise in 1 in April" or "134 kg 230 g of rise at 
+    January 4th". That is quite different.
+-   **Gettext** -- GNU localization library used for message formatting. Today it is de-facto standard localization library in Open Source
+    world. Boost.Locale message formatting is totally build on Gettext message catalogs.
+-   **Locale** -- a set of parameters that define specific preferences for users in different cultures. It is generally defined by language,
+    country, variants, encoding and provide information like: collation order, date-time formatting, message, formatting, number formatting
+    and many others. \c std::locale class is used in `C++` for representation of _Locale_ information.
+-   **Message Formatting** -- representation of UI in the users language. Generally process of translation of UI strings is done 
+    using some dictionary provided by program's translator.
+-   **Message Domain** -- in _gettext_ therms the keyword that represents message catalog. Usually this is an application name. When _gettext_
+    and Boost.Locale search for specific message catalog it search in the specified path for file named after domain.
+-   **Normalization** -- Unicode normalization is a process of converting strings to standard form suitable for text processing and comparison.
+    For example, character "ü" can be represented using single code point or a combination of character "u" and diaeresis "¨". Normalization
+    is important part of Unicode text processing.
+    
+    Normalization is not locale dependent but, because it is important part of Unicode processing it is included in Boost.Locale library.
+-   **UCS-2** -- fixed width Unicode encoding which is capable of representing code points in _Basic Multilingual Plane (BMP)_ only.
+    It is legacy encoding and not recommended for use.
+-   **Unicode** -- industry standard that defines representation and manipulation of text suitable for most languages and countries. 
+    It should not be mixed with _Universal Character Set_, it is much wider standard that also defines algorithms like bidirectional
+    display order, Arabic shaping, etc..
+-   **Universal Character Set (UCS)** -- international standard that defines a set of characters for many scripts and their _code points_.
+-   **UTF-8** -- variable width Unicode transformation format. Each UCS code point is represented as a sequence of 1 to 4 octets,
+    that can be easily distinguished. It includes ASCII as subset. It is most popular Unicode encoding for web applications, data transfer
+    and storage, it is de-facto standard encoding for most POSIX operation systems.
+-   **UTF-16** -- variable width Unicode transformation format. Each UCS code point is represented as sequence of one or two 16-bit words.
+    It is very popular encoding for various platforms Win32 API, Java, C#, Python, etc. However, it is frequently misinterpreted with _UCS-2_
+    fixed width limited encoding which is suitable for representation of characters in _Basic Multilingual Plane (BMP)_ only.
+    
+    This encoding is used for \c std::wstring under Win32 platform, where `sizeof(wchar_t)==2`.
+-   **UTF-32/UCS-4** - fixed width Unicode transformation format, where each code point is represented as single 32-bit word. It has
+    advantage of simplicity of code points representation but quite wasteful in terms of memory usage. It is used for \c std::wstring encoding
+    for most POSIX platforms where `sizeof(wchar_t)==4`.
+
+\section Tested Compilers and Platforms
+
+<table border="1" sellpadding="5" sellspacing="3">
+<tr>
+  <th>Platform</th><th>Compiler</th><th>Backends</th><th>ICU version</th><th>Notes</th>
+</tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+</tr>
+  <td>Linux 2.6 x86</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.6</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x with char16_t/char32_t</td><td>icu</td><td>3.8</td><td>Some charXX_t faults, compiler issues</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86_64</td><td>Intel 11.0</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Windows XP 32bit</td><td>MSVC 2008</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
+</tr>
+<tr>
+  <td>Windows XP 32bit</td><td>MinGW/GCC 4.5</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
+</tr>
+<tr>
+  <td>Cygwin 1.7</td><td>GCC 4.3</td><td>icu/winapi/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>Mac OS X 10.6.4</td><td>GCC-4.2</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+</tr>
+<tr>
+  <td>FreeBSD 8.0</td><td>GCC-4.2.1</td><td>icu/std</td><td>3.8</td><td>-</td>
+</tr>
+<tr>
+  <td>OpenSolaris/SunOS 5.11</td><td>GCC-3.4</td><td>icu/std</td><td>4.2</td><td>iconv is disabled</td>
+</tr>
+<tr>
+  <td>OpenSolaris/SunOS 5.11</td><td>SunCC 5.10/STLport4</td><td>icu</td><td>4.2</td><td>Some faults in collation, STLport issue<br/>iconv is disabled</td>
+</tr>
+</table>
+
+
+\section Reference
+
+Full, Doxygen generated reference can be found:
+
+- [Main Page](index.html)
+- [Modules](modules.html)
+- [Classes](annotated.html)
+- [Namespaces](namespaces.html)
