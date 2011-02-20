@@ -38,13 +38,18 @@ Known Issues:
   Unfortunately this is pure ICU issue that can't be fixed
   by Boost.Locale directly.
 
+  See for details: http://bugs.icu-project.org/trac/ticket/7705
+
   WORKAROUND:
 
   1. Use ICU version that recognizes well on your system.
-  
-  2. Specify time-zone manually
+
+  2. Apply the patch attached to this bug on ICU version
+     you use.
+
+  3. Specify time-zone manually
     
-     boost::locale::time_zone::global(boost::locale::time_zone("Correct-TimeZone-Name"));
+     boost::locale::time_zone::global("Correct-TimeZone-Name");
 
 
 
