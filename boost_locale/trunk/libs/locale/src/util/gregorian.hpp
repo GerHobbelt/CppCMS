@@ -114,10 +114,8 @@ namespace util {
                     t.tm_sec = value;
                     break;
                 case day_of_week:                ///< Day of week, starting from Sunday, [1..7]
-                    t.tm_mday += (value - 1) - t.tm_wday;
-                    break;
                 case day_of_week_local: ///< Local day of week, for example in France Monday is 1, in US Sunday is 1, [1..7]
-                    t.tm_mday += (value - 1) - (t.tm_wday - first_day_of_week_);
+                    // FIXME
                     break;
                 case day_of_year:
                     t.tm_mday += (day_of_year - t.tm_yday);
@@ -148,10 +146,10 @@ namespace util {
                     case greatest_minimum:
                     case actual_minimum:
                         #ifdef BOOST_WINDOWS
-                        return 1970;
+                        return 1970; // Unix epoch windows can't handle negative time_t
                         #else
                         if(sizeof(time_t) == 4)
-                            return 1901; 
+                            return 1901; // minimal year with 32 bit time_t
                         else
                             return 1; 
                         #endif
@@ -159,7 +157,7 @@ namespace util {
                     case least_maximum:
                     case actual_maximum:
                         if(sizeof(time_t) == 4)
-                            return 2038;
+                            return 2038; // Y2K38 - maximal with 32 bit time_t
                         else
                             return std::numeric_limits<int>::max();
                     case current:
