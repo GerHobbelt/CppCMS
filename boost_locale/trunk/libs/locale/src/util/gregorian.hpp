@@ -5,8 +5,7 @@
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef BOOST_LOCALE_IMPL_UTIL_NUMERIC_HPP
-#define BOOST_LOCALE_IMPL_UTIL_NUMERIC_HPP
+#define BOOST_LOCALE_SOURCE
 #include <locale>
 #include <string>
 #include <ios>
@@ -14,16 +13,58 @@
 #include <sstream>
 #include <stdlib.h>
 
+#include "timezone.hpp"
+
 namespace boost {
 namespace locale {
 namespace util {
+
+    namespace {
+
+        bool comparator(char const *left,char const *right)
+        {
+            return strcmp(left,right) < 0;
+        }
+        
+        //
+        // Ref: CLDR 1.9 common/supplemental/supplementalData.xml
+        //
+        // monday - default
+        // fri - MV
+        // sat - AE AF BH DJ DZ EG ER ET IQ IR JO KE KW LY MA OM QA SA SD SO SY TN YE
+        // sun - AR AS AZ BW CA CN FO GE GL GU HK IL IN JM JP KG KR LA MH MN MO MP MT NZ PH PK SG TH TT TW UM US UZ VI ZW
+        //
+
+        int first_day_of_week(char const *terr) {
+            static char const * const sat[] = {
+                "AE","AF","BH","DJ","DZ","EG","ER","ET","IQ","IR",
+                "JO","KE","KW","LY","MA","OM","QA","SA","SD","SO",
+                "SY","TN","YE"
+            };
+            static char const * const sun[] = {
+                "AR","AS","AZ","BW","CA","CN","FO","GE","GL","GU",
+                "HK","IL","IN","JM","JP","KG","KR","LA","MH","MN",
+                "MO","MP","MT","NZ","PH","PK","SG","TH","TT","TW",
+                "UM","US","UZ","VI","ZW" 
+            };
+            if(strcmp(terr,"MV") == 0)
+                return 5; // fri
+            if(std::binary_search<char const * const *>(sat,sat+sizeof(sat)/(sizeof(sat[0])),terr,comparator))
+                return 6; // sat
+            if(std::binary_search<char const * const *>(sun,sun+sizeof(sun)/(sizeof(sun[0])),terr,comparator))
+                return 0; // sun
+            // default
+            return 1; // mon
+        }
+    }
+
 
     class gregorian_calendar : public abstract_calendar {
     public:
             
             gregorian_calendar(std::string const &terr)
             {
-                first_day_of_week_ = get_first_day_of_week_for_terr(terr);
+                first_day_of_week_ = first_day_of_week(terr.c_str());
                 time_ = time(0);
                 is_local_ = true;
                 tzoff_ = 0;
@@ -120,7 +161,7 @@ namespace util {
                         if(sizeof(time_t) == 4)
                             return 2038;
                         else
-                            return 9999; // FIXME
+                            return std::numeric_limits<int>::max();
                     case current:
                         return tm_.tm_year + 1900;
                     };
