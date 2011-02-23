@@ -24,7 +24,7 @@ int main()
     cout.imbue(loc);
     // Set as default locale for output
     
-    cout <<format("Today {1,date=f} at {1,time=f} {1,ftime='%Z'} we had run our first localization example") % time(0) 
+    cout <<format("Today {1,date} at {1,time} we had run our first localization example") % time(0) 
           <<endl;
    
     cout<<"This is how we show numbers in this locale "<<as::number << 103.34 <<endl; 
