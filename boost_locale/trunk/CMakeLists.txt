@@ -257,7 +257,8 @@ if(BOOST_LOCALE_HAVE_ICU)
 		libs/locale/src/icu/date_time.cpp
 		libs/locale/src/icu/formatter.cpp
 		libs/locale/src/icu/icu_backend.cpp
-		libs/locale/src/icu/numeric.cpp)
+		libs/locale/src/icu/numeric.cpp
+		libs/locale/src/icu/time_zone.cpp)
 endif()
 
 
