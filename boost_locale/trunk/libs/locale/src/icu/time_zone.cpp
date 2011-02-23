@@ -65,34 +65,21 @@ namespace boost {
             // 
             namespace {
 
+                // Under BSD, Linux and Mac OS X dirent has normal size
+                // so no issues with readdir_r
+
                 class directory {
                 public:
-                    directory(char const *name) : d(0),buf(0),de(0),read_result(0)
+                    directory(char const *name) : d(0),read_result(0)
                     {
-                        size_t buf_size = 0;
-                        #ifdef NAME_MAX
-                        buf_size = NAME_MAX;
-                        #else
-                        int rel_size = pathconf(dir.c_str(),_PC_NAME_MAX);
-                        if(rel_size < 0)
-                            buf_size = 16384;
-                        else if (rel_size > 1024*1024)
-                            buf_size = 1024 * 1024;
-                        else
-                            buf_size = rel_size;
-                        #endif
                         d=opendir(name);
                         if(!d)
                             return;
-                        try {
-                            buf = new char[sizeof(dirent) - sizeof(de->d_name) + buf_size];
-                        }catch(...) { closedir(d); throw; }
-                        de = reinterpret_cast<struct dirent *>(buf);
                     }
                     ~directory()
                     {
-                        delete [] buf;
-                        closedir(d);
+                        if(d)
+                            closedir(d);
                     }
                     bool is_open()
                     {
@@ -100,14 +87,14 @@ namespace boost {
                     }
                     char const *next()
                     {
-                        if(d && readdir_r(d,de,&read_result)==0 && read_result!=0)
-                            return de->d_name;
+                        if(d && readdir_r(d,&de,&read_result)==0 && read_result!=0)
+                            return de.d_name;
                         return 0;
                     }
                 private:
                     DIR *d;
-                    char *buf;
-                    struct dirent *de,*read_result;
+                    struct dirent de;
+                    struct dirent *read_result;
                 };
                
                 bool files_equal(std::string const &left,std::string const &right)
