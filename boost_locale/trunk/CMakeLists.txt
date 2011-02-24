@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 2.6)
 include(CheckCXXSourceCompiles)
+include(FindDoxygen)
 enable_testing()
 
 option(DISABLE_SHARED	"Disable shared libraries build" OFF)
 option(DISABLE_STATIC	"Disable static libraries build" OFF)
-
 option(DISABLE_ICU	"Disable ICU library/backend" OFF)
-
 option(DISABLE_STD_BACKEND	"Disable STD backend" OFF)
+option(ENABLE_DOCS	"Enable documentation generation" OFF)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR APPLE)
 	option(DISABLE_POSIX_BACKEND	"Disable POSIX backend" OFF)
@@ -186,6 +186,22 @@ if(BOOST_LOCALE_HAVE_ICU OR NOT NO_BOOST_LIBRARY_NEEDED)
 		message(FATAL "Can't find boost_thread, please provide apropriate CMAKE_LIBRARY_PATH")
 	endif()
 endif()
+
+if(NOT DOXYGEN_FOUND)
+	if(ENABLE_DOCS)
+		message("-- Doxygen not found, disaling documentation")
+	endif()
+	set(ENABLE_DOCS OFF)
+endif()
+
+if(ENABLE_DOCS)
+	add_custom_target(docs ALL
+		COMMAND ${DOXYGEN_EXECUTABLE} 
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/locale/doc)
+
+endif()
+
+
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
@@ -414,8 +430,10 @@ install(TARGETS ${BOOST_LOCALE_LIBS}
 install(DIRECTORY boost DESTINATION include
         PATTERN ".svn" EXCLUDE)
 
-install(DIRECTORY libs/locale/doc/html DESTINATION share/doc/boost_locale
-        PATTERN ".svn" EXCLUDE)
+if(ENABLE_DOCS)
+	install(DIRECTORY libs/locale/doc/html DESTINATION share/doc/boost_locale
+	        PATTERN ".svn" EXCLUDE)
+endif()
 
 install(DIRECTORY libs/locale/examples DESTINATION share/doc/boost_locale
         PATTERN ".svn" EXCLUDE)

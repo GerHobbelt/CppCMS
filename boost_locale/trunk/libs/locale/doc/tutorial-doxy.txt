@@ -1654,6 +1654,7 @@ This options can be passed to CMake to configure library according to your needs
 - \c DISABLE_POSIX_BACKEND  - Disable building "posix" backend (ON by default on all but Linux and Mac OS X)
 - \c DISABLE_WINAPI_BACKEND  - Disable building "winapi" backend (ON by default on POSIX platforms).
 - \c DISABLE_ICONV  - Disable iconv based conversion (ON by default on Windows)
+- \c ENABLE_DOCS  - Enable documentation build (requires doxygen)
 
 Useful CMake options
 
