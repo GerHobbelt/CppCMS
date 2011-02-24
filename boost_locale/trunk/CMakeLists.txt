@@ -114,7 +114,9 @@ endif(NOT DISABLE_ICONV)
 message("-- Looking for Boost")
 find_path(BOOST_INCLUDE_DIR boost/shared_ptr.hpp)
 
-include_directories(${ICU_INCLUDE_DIR})
+if(BOOST_LOCALE_HAVE_ICU)
+	include_directories(${ICU_INCLUDE_DIR})
+endif()
 
 if(BOOST_INCLUDE_DIR)
 	include_directories(${BOOST_INCLUDE_DIR})
@@ -293,7 +295,6 @@ endif(NOT DISABLE_SHARED)
 
 if(NOT DISABLE_STATIC)
 	add_library(boost_locale-static STATIC ${BOOST_LOCALE_SRC})
-	target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
 	if(BOOST_LOCALE_HAVE_ICU)
 		target_link_libraries(boost_locale-static ${ICU_UC} ${ICU_DATA} ${ICU_I18N})
 	endif()
