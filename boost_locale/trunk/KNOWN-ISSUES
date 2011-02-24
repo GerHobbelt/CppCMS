@@ -6,8 +6,8 @@ Known Issues:
   static constructors under MSVC, for example
   this would not work when init is global variable.
 
-      struct initializaer {
-	  initializaer() {
+      struct initializer {
+	  initializer() {
 		  boost::locale::generator gen(...)
 		  ...
 		  std::locale::global(gen(...));

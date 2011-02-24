@@ -1,6 +1,6 @@
 
 # Dummy Jamroot. 
-# When Boost.Locale is accepted and integrated nto Boost SVN should be
+# When Boost.Locale is accepted and integrated into Boost SVN should be
 # removed.
 
 import modules ;
