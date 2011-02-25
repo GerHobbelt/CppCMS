@@ -46,7 +46,7 @@ namespace util {
             };
         }
 
-        virtual int get_ineger_property(integer_property v) const
+        virtual int get_integer_property(integer_property v) const
         {
             switch(v) {
             case utf8_property:
