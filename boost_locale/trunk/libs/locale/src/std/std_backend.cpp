@@ -10,6 +10,7 @@
 #include <boost/locale/gnu_gettext.hpp>
 #include "all_generator.hpp"
 #include "../util/locale_data.hpp"
+#include "../util/gregorian.hpp"
 #include <boost/locale/util.hpp>
 
 #if defined(BOOST_WINDOWS)
@@ -163,6 +164,8 @@ namespace impl_std {
                 return create_parsing(base,name_,type,utf_mode_);
             case codepage_facet:
                 return create_codecvt(base,name_,type,utf_mode_);
+            case calendar_facet:
+                return util::install_gregorian_calendar(base,data_.country);
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;

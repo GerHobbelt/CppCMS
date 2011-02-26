@@ -8,13 +8,13 @@
 #ifndef BOOST_LOCALE_SRC_UTIL_GREGORIAN_HPP
 #define BOOST_LOCALE_SRC_UTIL_GREGORIAN_HPP
 
-#include <boost/locale/date_time_facet.hpp>
+#include <locale>
 
 namespace boost {
 namespace locale {
 namespace util {
 
-    abstract_calendar *create_gregorian_calendar(std::string const &terr);
+    std::locale install_gregorian_calendar(std::locale const &in,std::string const &terr);
 
 } // util
 } // locale 

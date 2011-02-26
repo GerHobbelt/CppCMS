@@ -11,6 +11,7 @@
 #include <string>
 #include <ios>
 #include <boost/locale/formatting.hpp>
+#include <boost/locale/info.hpp>
 #include <sstream>
 #include <stdlib.h>
 
@@ -19,6 +20,38 @@
 namespace boost {
 namespace locale {
 namespace util {
+
+template<typename CharType>
+struct formatting_size_traits {
+    static size_t size(std::basic_string<CharType> const &s,std::locale const &/*l*/)
+    {
+        return s.size();
+    }
+};
+
+template<>
+struct formatting_size_traits<char> {
+    static size_t size(std::string const &s,std::locale const &l)
+    {
+        if(!std::has_facet<info>(l))
+            return s.size();
+        if(!std::use_facet<info>(l).utf8())
+            return s.size();
+        // count code points, poor man's text size
+        size_t res = 0;
+        for(size_t i=0;i<s.size();i++) {
+            unsigned char c = s[i];
+            if(c <= 127)
+                res ++;
+            else if ((c & 0xC0) == 0xC0) { // first UTF-8 byte
+                res ++;
+            }
+        }
+        return res;
+    }
+};
+
+
 
 template<typename CharType>
 class base_num_format : public std::num_put<CharType>
@@ -179,7 +212,36 @@ private:
             }
             #endif
         }
-        return std::use_facet<std::time_put<char_type> >(ios.getloc()).put(out,ios,fill,&tm,format.c_str(),format.c_str()+format.size());
+        std::basic_ostringstream<char_type> tmp_out;
+        std::use_facet<std::time_put<char_type> >(ios.getloc()).put(tmp_out,tmp_out,fill,&tm,format.c_str(),format.c_str()+format.size());
+        string_type str = tmp_out.str();
+        std::streamsize on_left=0,on_right = 0;
+        std::streamsize points = 
+            formatting_size_traits<char_type>::size(str,ios.getloc());
+        if(points < ios.width()) {
+            std::streamsize n = ios.width() - points;
+            
+            std::ios_base::fmtflags flags = ios.flags() & std::ios_base::adjustfield;
+            
+            //
+            // we do not really know internal point, so we assume that it does not
+            // exists. so according to standard field should be right aligned
+            //
+            if(flags != std::ios_base::left)
+                on_left = n;
+            on_right = n - on_left;
+        }
+        while(on_left > 0) {
+            *out++ = fill;
+            on_left--;
+        }
+        std::copy(str.begin(),str.end(),out);
+        while(on_right > 0) {
+            *out++ = fill;
+            on_right--;
+        }
+        ios.width(0);
+        return out;
     }
 
 };  /// num_format

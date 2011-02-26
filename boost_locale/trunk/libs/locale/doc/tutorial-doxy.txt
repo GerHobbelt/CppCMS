@@ -1390,7 +1390,8 @@ There are situations when using non-ICU based localization is appropriate:
 
 All this backends have limited features: 
 
-- Non Gregorian calendar are not supported and calendar facets are not installed at all.
+- Only gregorian calendar is supported and its support based
+  on capabilites of mktime functionality (including dates range)
 - No boundary analysis provided.
 - Case handing is very simple and based on single codepoint conversion,
   however still handles UTF-8 better then standard library.
@@ -1399,7 +1400,6 @@ All this backends have limited features:
 - No percent formatting, no spellout or ordinal number formatting
 - Collation, with exception of \c winapi backend is limited to one level
   similar to what is done by \c strcoll
-
 
 \subsection std_backend std - Standard C++ library backend
 
@@ -1481,7 +1481,7 @@ problematic for this case.
 </tr>
 <tr>
   <th>Calendar</th>
-  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+  <td>Yes</td><td>Gregorian Only</td><td>Gregorian Only</td><td>Gregorian Only</td>
 </tr>
 <tr>
   <th>Boundary Analysis</th>

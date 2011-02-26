@@ -201,7 +201,7 @@ namespace util {
                     value = (value - 1 - first_day_of_week_ + 14) % 7 + 1;
                     // fall throght
                 case day_of_week_local:     ///< Local day of week, for example in France Monday is 1, in US Sunday is 1, [1..7]
-                    t.tm_mday = (value - 1) - (t.tm_wday - first_day_of_week_ + 7) % 7;
+                    t.tm_mday += (value - 1) - (t.tm_wday - first_day_of_week_ + 7) % 7;
                     break;
                 case day_of_week_in_month:  ///< Original number of the day of the week in month. (1st sunday, 2nd sunday etc)
                 case week_of_year:          ///< The week number in the year, 4 is the minimal number of days to be in month
@@ -602,10 +602,13 @@ namespace util {
                     { // roll
                         int cur_min = get_value(p,actual_minimum);
                         int cur_max = get_value(p,actual_maximum);
-                        int max_diff = cur_max - cur_min;
+                        int max_diff = cur_max - cur_min + 1;
                         if(max_diff > 0) {
                             int value = get_value(p,current);
-                            value = (value - cur_min + difference) % max_diff + cur_min;
+                            int addon = 0;
+                            if(difference < 0)
+                                addon = ((-difference/max_diff) + 1) * max_diff;
+                            value = (value - cur_min + difference + addon) % max_diff + cur_min;
                             set_value(p,value);
                         }
                     }
@@ -621,16 +624,16 @@ namespace util {
                 std::auto_ptr<gregorian_calendar> self(clone());
                 self->adjust_value(p,move,diff);
                 if(diff > 0){
-                    if(self->time_ <= other->time_)
-                        return diff;
-                    else
+                    if(self->time_ > other->time_)
                         return diff - 1;
+                    else
+                        return diff;
                 }
                 else {
-                    if(self->time_ >= other->time_)
-                        return diff;
-                    else
+                    if(self->time_ < other->time_)
                         return diff + 1;
+                    else
+                        return diff;
                 }
              }
 
@@ -680,7 +683,7 @@ namespace util {
                             diff += days_from_0(other->tm_.tm_year + 1900) -
                                     days_from_0(tm_.tm_year + 1900);
                         }
-                        return get_diff(period::month,diff,other) / factor;
+                        return get_diff(period::day,diff,other) / factor;
                     }
                 case am_pm:
                     return static_cast<int>( (other->time_ - time_) / (3600*12) );
@@ -736,7 +739,7 @@ namespace util {
         void from_tm(std::tm val)
         {
             val.tm_isdst = -1;
-            val.tm_wday = -1; // indecatpr of error
+            val.tm_wday = -1; // indecator of error
             time_t point = -1;
             if(is_local_) {
                 point = mktime(&val);
@@ -768,6 +771,7 @@ namespace util {
             }
             
             time_ = point - tzoff_;
+            tm_ = val;
         }
 
         void from_time(time_t point)
@@ -799,6 +803,26 @@ namespace util {
     abstract_calendar *create_gregorian_calendar(std::string const &terr)
     {
         return new gregorian_calendar(terr);
+    }
+
+    class gregorian_facet : public calendar_facet {
+    public:
+        gregorian_facet(std::string const &terr,size_t refs = 0) : 
+            calendar_facet(refs),
+            terr_(terr)
+        {
+        }
+        virtual abstract_calendar *create_calendar() const 
+        {
+            return create_gregorian_calendar(terr_);
+        }
+    private:
+        std::string terr_;
+    };
+    
+    std::locale install_gregorian_calendar(std::locale const &in,std::string const &terr)
+    {
+        return std::locale(in,new gregorian_facet(terr));
     }
 
 

@@ -13,6 +13,7 @@
 #include "posix_backend.hpp"
 
 #include "../util/locale_data.hpp"
+#include "../util/gregorian.hpp"
 #include <boost/locale/util.hpp>
 
 #include <langinfo.h>
@@ -102,6 +103,12 @@ namespace impl_posix {
                 return create_parsing(base,lc_,type);
             case codepage_facet:
                 return create_codecvt(base,nl_langinfo_l(CODESET,*lc_),type);
+            case calendar_facet:
+                {
+                    util::locale_data inf;
+                    inf.parse(real_id_);
+                    return util::install_gregorian_calendar(base,inf.country);
+                }
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;

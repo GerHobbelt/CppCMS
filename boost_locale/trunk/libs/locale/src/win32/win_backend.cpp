@@ -12,6 +12,7 @@
 #include "all_generator.hpp"
 #include "win_backend.hpp"
 #include <boost/locale/util.hpp>
+#include "../util/gregorian.hpp"
 #include "../util/locale_data.hpp"
 #include "api.hpp"
 
@@ -92,6 +93,12 @@ namespace impl_win {
                 return create_formatting(base,lc_,type);
             case parsing_facet:
                 return create_parsing(base,lc_,type);
+            case calendar_facet:
+                {
+                    util::locale_data inf;
+                    inf.parse(real_id_);
+                    return util::install_gregorian_calendar(base,inf.country);
+                }
             case message_facet:
                 {
                     gnu_gettext::messages_info minf;
