@@ -3,6 +3,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at 
 # http://www.boost.org/LICENSE_1_0.txt.
 
+
 project /boost/locale
     : source-location ../src
     ;
@@ -62,6 +63,7 @@ explicit has_icu ;
 # what user wants, and what sources have to be compiled in the end.
 rule configure ( properties * )
 {
+
     local result ;
     
     local found-iconv ;
@@ -98,14 +100,15 @@ rule configure ( properties * )
             result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
 
             for s in boundary codecvt collator conversion date_time formatter
-                     icu_backend numeric
+                     icu_backend numeric time_zone
             {
                 result += <source>icu/$(s).cpp ;
             }
+            result += <library>../../thread/build//boost_thread ;
         }
     }
         
-    if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties)
+    if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties) && !<target-os>cygwin in $(properties) 
     {
         ECHO "error: Boost.Locale need either iconv or ICU library to be built." ;
         EXIT ;
@@ -163,6 +166,7 @@ rule configure ( properties * )
           converter
           numeric
           win_backend
+	  lcid
           ;
         result += <source>win32/$(WINAPI_SOURCES).cpp ;
     }
@@ -181,7 +185,7 @@ rule configure ( properties * )
     
     if <boost.locale.posix>off in $(properties)
     {
-        result += <define>BOOST_LOCATE_NO_POSIX_BACKEND=1 ;        
+        result += <define>BOOST_LOCALE_NO_POSIX_BACKEND=1 ;        
     }
     else
     {
@@ -193,6 +197,11 @@ rule configure ( properties * )
           posix_backend
           ;
         result += <source>posix/$(POSIX_SOURCES).cpp ;
+    }
+
+    if <boost.locale.posix>on in $(properties) || <boost.locale.std>on in $(properties) || <boost.locale.posix>on in $(properties)
+    {
+	 result += <source>util/gregorian.cpp ;
     }
 
     return $(result) ;
@@ -213,7 +222,7 @@ lib boost_locale
     util/codecvt_converter.cpp
     util/default_locale.cpp
     util/info.cpp
-    util/locale_data.cpp 
+    util/locale_data.cpp  
     : <define>BOOST_THREAD_NO_LIB=1
       <link>shared:<define>BOOST_LOCALE_DYN_LINK=1
       <threading>multi
