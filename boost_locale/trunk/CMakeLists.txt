@@ -56,12 +56,13 @@ if(NOT CMAKE_BUILD_TYPE)
 	      FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+#
+# Configure proper Boost suffix of MSVC build
+#
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	if(MSVC)
 		set(ICU_SUFFIX "d")
-		if(NOT BOOST_SUFFIX)
-			set(BOOST_SUFFIX "-d")
-		endif()
 	endif()
 endif()
 
@@ -179,11 +180,33 @@ check_cxx_source_compiles(
 
 
 if(BOOST_LOCALE_HAVE_ICU OR NOT NO_BOOST_LIBRARY_NEEDED)
+	if(NOT BOOST_SUFFIX AND MSVC)
+		if(MSVC80)
+			set(BOOST_TOOLSET "-vc80")
+		elseif(MSVC90)
+			set(BOOST_TOOLSET "-vc90")
+		elseif(MSVC100)
+			set(BOOST_TOOLSET "-vc100")
+		else()
+			set(BOOST_TOOLSET "")
+			message("-- Undetected or unsupport version of MSVC please use -DBOOST_SUFFIX=XXX option") 
+		endif()
 
-	find_library(BOOST_THREAD NAMES boost_thread-mt${BOOST_SUFFIX} boost_thread${BOOST_SUFFIX})
+		if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+			set(BOOST_VARIANT "-gd")
+		else()
+			set(BOOST_VARIANT "")
+		endif()
+		
+		find_library(BOOST_THREAD NAMES 
+				boost_thread${BOOST_TOOLSET}-mt${BOOST_VARIANT} 
+				boost_thread${BOOST_TOOLSET}${BOOST_VARIANT})
+	else()
+		find_library(BOOST_THREAD NAMES boost_thread-mt${BOOST_SUFFIX} boost_thread${BOOST_SUFFIX})
+	endif()
 
 	if(NOT BOOST_THREAD)
-		message(FATAL "Can't find boost_thread, please provide apropriate CMAKE_LIBRARY_PATH")
+		message(FATAL "Can't find boost_thread, please provide apropriate CMAKE_LIBRARY_PATH and BOOST_SUFFIX")
 	endif()
 endif()
 
