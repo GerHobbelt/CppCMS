@@ -14,7 +14,7 @@
 #include <boost/locale/util.hpp>
 
 #ifdef BOOST_MSVC
-#  pragma warning(disable : 4244) // loose data 
+#  pragma warning(disable : 4244 4996) // loose data 
 #endif
 
 
@@ -213,7 +213,7 @@ namespace util {
                         to_unicode_tbl_[i] = illegal;
                     }
                 }
-                catch(conv::conversion_error const &e) {
+                catch(conv::conversion_error const &/*e*/) {
                     to_unicode_tbl_[i] = illegal;
                 }
             }

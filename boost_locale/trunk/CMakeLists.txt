@@ -174,7 +174,8 @@ set(CMAKE_REQUIRED_DEFINITIONS -DBOOST_ALL_NO_LIB)
 set(CMAKE_REQUIRED_FLAGS ${CXX_FLAGS})
 
 check_cxx_source_compiles(
-	"#include <boost/thread.hpp>
+	"#define BOOST_THREAD_NO_LIB
+	#include <boost/thread.hpp>
 	int main() { boost::mutex m; { boost::unique_lock<boost::mutex> l(m); } }"
 	NO_BOOST_LIBRARY_NEEDED)
 
@@ -185,7 +186,7 @@ if(BOOST_LOCALE_HAVE_ICU OR NOT NO_BOOST_LIBRARY_NEEDED)
 			set(BOOST_TOOLSET "-vc80")
 		elseif(MSVC90)
 			set(BOOST_TOOLSET "-vc90")
-		elseif(MSVC100)
+		elseif(MSVC10)
 			set(BOOST_TOOLSET "-vc100")
 		else()
 			set(BOOST_TOOLSET "")
@@ -437,7 +438,7 @@ endforeach(EX_TAR)
 
 
 if(NOT DISABLE_SHARED)
-	set_target_properties(boost_locale ${LOCALE_TESTS} ${LOCALE_EXAMPLES}
+	set_target_properties(boost_locale ${LOCALE_TESTS} ${LOCALE_EXAMPLES} ${PERF_TESTS}
 			PROPERTIES COMPILE_DEFINITIONS BOOST_LOCALE_DYN_LINK)
 endif(NOT DISABLE_SHARED)
 

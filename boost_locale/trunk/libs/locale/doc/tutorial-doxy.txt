@@ -2059,6 +2059,9 @@ which adds BOM to UTF-8 files by default.
   <td>Linux 2.6 x86_64</td><td>Intel 11.0</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
+  <td>Windows 7 32bit</td><td>MSVC 2010</td><td>icu/winapi/std</td><td>4.6</td><td>-</td>
+</tr>
+<tr>
   <td>Windows XP 32bit</td><td>MSVC 2008</td><td>icu/winapi/std</td><td>4.2</td><td>-</td>
 </tr>
 <tr>

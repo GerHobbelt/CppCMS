@@ -11,6 +11,10 @@
 #include <boost/config.hpp>
 #include <stdlib.h>
 
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4996)
+#endif
+
 #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX

@@ -7,12 +7,19 @@
 //
 #define BOOST_LOCALE_SOURCE
 
+#include <boost/config.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4996)
+#endif
+
 #include <locale>
 #include <stdexcept>
 #include <boost/locale/generator.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/locale/encoding.hpp>
 #include <vector>
+
+
 
 #include "all_generator.hpp"
 

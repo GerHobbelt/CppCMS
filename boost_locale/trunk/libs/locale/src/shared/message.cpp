@@ -11,6 +11,9 @@
 #include <boost/locale/gnu_gettext.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/locale/encoding.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(disable : 4996)
+#endif
 #if BOOST_VERSION >= 103600
 #include <boost/unordered_map.hpp>
 #else

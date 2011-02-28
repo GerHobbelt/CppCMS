@@ -9,6 +9,11 @@
 #define BOOST_LOCALE_DATE_TIME_FACET_HPP_INCLUDED
 
 #include <boost/locale/config.hpp>
+#ifdef BOOST_MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4275 4251 4231 4660)
+#endif
+
 #include <boost/cstdint.hpp>
 #include <locale>
 
@@ -187,6 +192,11 @@ namespace boost {
 
     } // locale
 } // boost
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
+
 
 #endif
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
