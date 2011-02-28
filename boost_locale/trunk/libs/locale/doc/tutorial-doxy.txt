@@ -1232,19 +1232,38 @@ Because temporary value of \c (a+b) is no longer exists when \c fmt is written t
 
 \page dates_times_timezones Working with dates, times, timezones and calendars.
 
-One of the important flaws of most libraries that provide operations over dates is the fact that they support only Gregorian calendar.
-It is correct for \c boost::date_time , it is correct for \c std::tm and standard functions like \c localtime, \c gmtime that
-assume that we use Gregorian calendar.
+\section dates_times_timezones_intro Introduction
+
+There are several important flaws of most libraries that provide operations over dates:
+
+-#  Most of them support only Gregorian calendar, so other important calendars that are in use in
+    many countries are not supported.
+    \n
+    It is correct for \c boost::date_time , it is correct for \c std::tm and standard functions like \c localtime, \c gmtime that
+    assume that we use Gregorian calendar.
+    .
+-#  Many tools do not provide information about local start of week. 
+    For example standard C and C++ library has \c mktime and \c localtime but they do not allow
+    user to know what is actually the first day of week that is locale dependent. In France
+    it would be Monday, in USA it would be Sunday.
+
 
 Boost.Locale provides generic \ref boost::locale::date_time "date_time", and \ref boost::locale::calendar "calendar" class 
 that allows to to perform operation on dates and time for non-Gregorian calendars
 like Hebrew, Islamic, Japanese and other calendars.
 
+\ref using_localization_backends "Non-ICU based backends" provide support for Gregorian calendar only,
+however unlike \c boost::date_time they fully aware of the local first day of week, thus, for example,
+if current day of week is monday, then setting current day of week to Sunday would move date 6 days
+forward in Russian or French locales and move one day backward in USA and Israel locales.
+
+\section dates_times_timezones_dt Handling Dates and Time
+
+
 - \ref boost::locale::calendar -- the class that represents generic information about the calender, independent from specific time point. For example you can get the maximal number of days in month for this calender.
 - \ref boost::locale::date_time  -- represents current time point. It is constructed from calendar and allows us to perform manipulation of various time periods.
 - \ref boost::locale::period -- holds an enumeration of various periods like, month, year, day, hour that allows us to 
 manipulate with dates. You can add periods, multiply them by integers and get set them or add them to \ref boost::locale::date_time  "date_time" objects.
-
 
 For example:
 
@@ -1300,6 +1319,84 @@ For example:
     // Now we can query the year now.
     std::cout << "Hebrew year is " << heb / year << std::endl;
 \endcode
+
+\note 
+
+Non-ICU based backends support same date-time range as \c mktime and \c localtime C library functions, thus
+for example under 32bit Unix platform it would be years 1901-2038 and for Windows it would be above dates
+above Jan 1st, 1970 as localtime and mktime would fail on negative values of \c time_t under Microsoft Windows.
+
+\section dates_times_timezones_tz Time Zone
+
+Current operating system time zone is used by default, however it can be changed at different
+levels
+
+-#  Calendar level: you can specify a timezone when creating a new instance of \ref boost::locale::calendar
+    in its constructor.
+-#  iostream level: you can use \ref boost::locale::as::time_zone "as::time_zone" manipulator to set specific
+    time zone to the iostream so all dates and times would be represented in this time zone
+-#  You can specify default global time zone by calling: \ref boost::locale::time_zone::global(std::string const &).
+    This time zone would be the default one for newly created iostream object and calendar instances.
+
+\note
+
+\ref using_localization_backends "Non-ICU based backends" provide support only of two kind if time zones:
+
+-#  Current OS time zone as it is represented using \c localtime and \c mktime standard 
+    library function - this is the default time zone
+-#  Simple time zone in format GMT+HH:MM - the time zone represented using fixed shift from
+    the UTC without support of daylight saving time.
+
+
+\section dates_times_timezones_io I/O Operations on date_time objects
+
+Writing a calendar object to iostream is equivalent to calling \ref boost::locale::date_time::time() "date_time::time()"
+function and writing it to the stream as number that represents POSIX time of this time point.
+
+So for example:
+
+\code
+    using namespace boost::locale;
+    date_time now;
+    std::cout << now << std::endl;
+\endcode
+
+Would just print a number, so in order to display current date, or time you need to use iostream manipulators:
+
+\code
+    using namespace boost::locale;
+    date_time now;
+    std::cout << as::date << now << std::endl;
+\endcode
+
+This is important to remember as \c date_time object is alway rendered and parsed in context
+of the \c iostream's locale and time zone and not in the context of specific \c date_time object.
+
+\section dates_times_timezones_qna Questions and Answers 
+
+
+<b>Why should I use Boost.Locale over Boost.DateTime when I need Gregorian calendar only?</b>
+
+-   Boost.DateTime is locale agnostic and ignores the fact that first day of week varies by
+    the locale.
+
+-   Boost.DateTime handles time as a single time point - real POSIX time so for example and 
+    time zone independently, thus for example, date_time(some_time.time() + 3600) != some_time + hour)
+    because of daylight savings time.
+
+<b>Why don't you use Boost.DateTime time zone support?</b>
+
+Boost.DateTime time zone support is broken. Time zones can't be represented with such
+simple table of rules like 1st Sunday of march. The daylight savings time may vary
+by year, political issues and many other things.
+
+Most moder operating systems Linux, *BSD, Mac OS X, OpenVMS, big software packages
+like ICU, Java, Python use so called Olson database for correct handling of time
+zones.
+
+So if you need full time zone database support use ICU that fully provides these
+capabilities.
+
 
 \page locale_information Getting information about current locale
 
