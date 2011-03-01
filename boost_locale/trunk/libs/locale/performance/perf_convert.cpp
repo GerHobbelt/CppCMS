@@ -16,6 +16,10 @@ using namespace boost::locale;
 
 int main(int argc,char **argv)
 {
+    if(argc!=2) {
+        std::cerr << "Usage backend locale" << std::endl;
+        return 1;
+    }
     /// Set global locale to requested
 
     /// Create a set that includes all strings sorted according to ABC order

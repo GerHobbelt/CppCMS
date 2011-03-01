@@ -62,6 +62,7 @@ frequent tasks useful without ICU as well.
     - \ref runnix_examples_under_windows 
     - \ref glossary
     - \ref tested_compilers_and_paltforms 
+    - \ref status_of_cpp0x_characters_support
 
 \page std_locales Introduction to C++ Standard Library localization support
 
@@ -2041,13 +2042,13 @@ which adds BOM to UTF-8 files by default.
   <th>Platform</th><th>Compiler</th><th>Backends</th><th>ICU version</th><th>Notes</th>
 </tr>
 <tr>
-  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8, 4.4, 4.6</td><td>-</td>
 </tr>
 <tr>
   <td>Linux 2.6 x86</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.6</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>4.4</td><td>-</td>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.4</td><td>icu/posix/std</td><td>4.2</td><td>-</td>
 </tr>
 <tr>
   <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
@@ -2098,17 +2099,18 @@ which adds BOM to UTF-8 files by default.
 
 \section status_of_cpp0x_characters_support Status of C++0x char16_t/char32_t support
 
-The support of C++0x char16_t and char32_t is experemental and mostly does not work and not
-indended to use currently in production with current latest compilers: GCC-4.5, MSVC10.
+The support of C++0x \c char16_t and \c char32_t is experimental, mostly does not work and not
+indented to be used in production with current latest compilers: GCC-4.5, MSVC10 till major
+compiler's flaws would be fixed.
 
 \subsection status_of_cpp0x_characters_support_gnu GNU GCC 4.5/C++0x Status
 
 GNU C++ compiler provides decent support of C++0x characters however:
 
 -# 	Standard library does not install any std::locale::facets for this support so any attempt
-    to format numbers using char16_t or char32_t streams would just fail.
--#	Standard library misses specialization for required char16_t/char32_t locale facets,
-	so "std" backends is not buildable as essential symbols missing, also codecvt facet
+    to format numbers using \c char16_t or \c char32_t streams would just fail.
+-#	Standard library misses specialization for required \c char16_t/char32_t locale facets,
+	so "std" backends is not build-able as essential symbols missing, also \c codecvt facet
 	can't be created as well.
 
 \subsection status_of_cpp0x_characters_support_msvc Visual Studio 2010 (MSVC10)/C++0x Status
@@ -2116,10 +2118,10 @@ GNU C++ compiler provides decent support of C++0x characters however:
 MSVC provides all required facets however:
 
 -# 	Standard library does not provide installations of std::locale::id for these facets
-	in DLL so it is not useable with /MD compiler flag and requires static link of the runtime
+	in DLL so it is not usable with \c /MD, \c /MDd compiler flags and requires static link of the runtime
 	library.
--#	char16_t and char32_t are not distinct types but rather aliases of unsigned short and unsigned
-	types which contradicts to C++0x requirements making it impossible to write char16_t/char32_t to stream
+-#	\c char16_t and \c char32_t are not distinct types but rather aliases of unsigned short and unsigned
+	types which contradicts to C++0x requirements making it impossible to write \c char16_t/char32_t to stream
 	and causing multiple faults.
 	
 

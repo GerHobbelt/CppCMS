@@ -12,7 +12,7 @@
 #include <boost/locale/encoding.hpp>
 
 template<typename Char>
-std::basic_string<Char> to_correct_string(std::string const &e,std::locale l)
+std::basic_string<Char> to_correct_string(std::string const &e,std::locale /*l*/)
 {
     return boost::locale::conv::to_utf<Char>(e,"UTF-8");
 }

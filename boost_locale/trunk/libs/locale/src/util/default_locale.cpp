@@ -36,6 +36,7 @@ namespace boost {
                 if(!lang || !*lang)
                     lang = getenv("LANG");
                 #ifndef BOOST_LOCALE_USE_WIN32_API
+                (void)use_utf8; // not relevant for non-windows
                 if(!lang || !*lang)
                     lang = "C";
                 return lang;

@@ -16,6 +16,10 @@ using namespace boost::locale;
 
 int main(int argc,char **argv)
 {
+    if(argc!=2) {
+        std::cerr << "Usage backend locale" << std::endl;
+        return 1;
+    }
     boost::locale::localization_backend_manager mgr = boost::locale::localization_backend_manager::global();
     mgr.select(argv[1]);
     generator gen(mgr);

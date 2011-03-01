@@ -168,7 +168,10 @@ namespace boost {
                 void load_file_direct(FILE *file)
                 {
                     uint32_t magic=0;
-                    fread(&magic,4,1,file);
+                    // if the size is wrong magic would be wrong
+                    // ok to ingnore fread result
+                    size_t four_bytes = fread(&magic,4,1,file);
+                    (void)four_bytes; // shut GCC
                     
                     if(magic == 0x950412de)
                         native_byteorder_ = true;
