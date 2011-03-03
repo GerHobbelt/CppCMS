@@ -61,6 +61,7 @@ to do the most common tasks.
 - \subpage building_boost_locale
 - \subpage appendix
     - \ref rationale
+    - \ref default_encoding_under_windows
     - \ref running_examples_under_windows 
     - \ref glossary
     - \ref tested_compilers_and_paltforms 
@@ -1691,6 +1692,7 @@ you would get an exception.
 \section appendix_toc Table of Contents 
 
 - \ref rationale
+- \ref default_encoding_under_windows
 - \ref running_examples_under_windows 
 - \ref glossary
 - \ref tested_compilers_and_paltforms 
@@ -1857,20 +1859,54 @@ to provide all the required information.
 - ICU fully understands POSIX locales and knows how to treat them correctly.
 - There are native locale names for most operating system APIs (with the exception of Windows)
 
+\section default_encoding_under_windows Default Encoding under Microsoft Windows
+
+All modern operating systems use Unicode.
+
+-   Unix operating system family use UTF-8 encoding by default.
+-   Microsoft Windows had migrated to Wide/UTF-16 API.
+    The narrow encodings had been deprecated and the native OS API became so called "Wide API"
+
+It is very hard to write portable Unicode aware applications.
+
+Boost locale fully supports both narrow and wide API. The default character
+encoding is assumed to be UTF-8 on Windows.
+
+So if the default operating system Locale is "English_USA.1251" the default
+locale for Boost.Locale on Windows would be "en_US.UTF-8".
+
+When the created locale object is installed globally then any libraries
+that use \c std::codecvt for conversion between narrow API and the native
+wide API would handle UTF-8 correctly.
+
+A good example of such library is Boost.Filesystem v3.
+
+However such behavior may broke existing software that assumes that the current
+encoding is single byte encodings like code page 1251.
+
+\ref boost::locale::generator class has a property \ref boost::locale::generator::use_ansi_encoding() "use_ansi_encoding()"
+that allows to change the behavior to legacy one and select an ANSI code page as
+default system encoding.
+
+So, when the current locale is "English_USA.1251" and the \c use_ansi_encoding is turned on
+then the default locale would be "en_US.windows-1251"
+
+\note \c winapi backend does not support ANSI encodings, thus UTF-8 encoding is always used for narrow characters.
+
 \section running_examples_under_windows Running Examples under Microsoft Windows
 
-All of the examples that come with Boost.Locale are designed for UTF-8, the default
-encoding on most Unix platforms, and would not behave correctly under Microsoft Windows
-since the default locale is instead an 8-bit codepage like 1252.
+All of the examples that come with Boost.Locale are designed for UTF-8 and it is
+the default encoding used by Boost.Locale.
 
-Boost.Locale takes the default locale from the environment variable LANG as well, so in order to 
-use UTF-8 encoding under the Windows console and see the output correctly, do the following:
+However, the default narrow encoding under Microsoft Windows is not UTF-8 and 
+the output of the applications would not be displayed correctly in the console.
+
+So in order to use UTF-8 encoding under the Windows console and see the output correctly, do the following:
 
 -# Open a \c cmd window
 -# Change the default font to a TrueType font: go to properties-\>font (right click on title-bar-\>properties-\>font) and
 change the font to a TrueType font like Lucida Console
 -# Change the default codepage to 65001 (UTF-8) by running <tt>chcp 65001</tt>
--# Set the LANG environment variable to the locale you need, for example: <tt>set LANG=ru_RU.UTF-8</tt>
 
 Now all of the examples should display UTF-8 characters correctly (if the font supports them).
 
