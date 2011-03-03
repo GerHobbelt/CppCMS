@@ -1872,7 +1872,7 @@ It is very hard to write portable Unicode aware applications.
 Boost locale fully supports both narrow and wide API. The default character
 encoding is assumed to be UTF-8 on Windows.
 
-So if the default operating system Locale is "English_USA.1251" the default
+So if the default operating system Locale is "English_USA.1252" the default
 locale for Boost.Locale on Windows would be "en_US.UTF-8".
 
 When the created locale object is installed globally then any libraries
@@ -1882,14 +1882,14 @@ wide API would handle UTF-8 correctly.
 A good example of such library is Boost.Filesystem v3.
 
 However such behavior may broke existing software that assumes that the current
-encoding is single byte encodings like code page 1251.
+encoding is single byte encodings like code page 1252.
 
 \ref boost::locale::generator class has a property \ref boost::locale::generator::use_ansi_encoding() "use_ansi_encoding()"
 that allows to change the behavior to legacy one and select an ANSI code page as
 default system encoding.
 
-So, when the current locale is "English_USA.1251" and the \c use_ansi_encoding is turned on
-then the default locale would be "en_US.windows-1251"
+So, when the current locale is "English_USA.1252" and the \c use_ansi_encoding is turned on
+then the default locale would be "en_US.windows-1252"
 
 \note \c winapi backend does not support ANSI encodings, thus UTF-8 encoding is always used for narrow characters.
 
