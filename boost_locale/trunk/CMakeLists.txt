@@ -6,7 +6,6 @@ enable_testing()
 option(DISABLE_SHARED	"Disable shared libraries build" OFF)
 option(DISABLE_STATIC	"Disable static libraries build" OFF)
 option(DISABLE_ICU	"Disable ICU library/backend" OFF)
-option(DISABLE_STD_BACKEND	"Disable STD backend" OFF)
 option(ENABLE_DOCS	"Enable documentation generation" OFF)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR APPLE)
@@ -19,6 +18,13 @@ if(WIN32)
 	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" OFF)
 else()
 	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" ON)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+	# stlport's std::locale is quite broken as well
+	option(DISABLE_STD_BACKEND	"Disable STD backend" ON)
+else()
+	option(DISABLE_STD_BACKEND	"Disable STD backend" OFF)
 endif()
 
 if(DISABLE_STD_BACKEND) 
