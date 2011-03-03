@@ -888,13 +888,13 @@ may ignore those parameters.
 \subsection msg_qna Questions and Answers
 
 -   Do I need GNU Gettext to use Boost.Locale?
-    \par
+    \n
     Boost.Locale provides a run-time environment to load and use GNU Gettext message catalogs, but it does
     not provide tools for generation, translation, compilation and managment of these catalogs.
     Boost.Locale only reimplements the GNU Gettext libintl.
-    \par
+    \n
     You would probably need:
-    \par
+    \n
     -#  Boost.Locale itself -- for runtime.
     -#  A tool for extracting strings from source code, and managing them: GNU Gettext provides good tools, but other
         implementations are available as well.
@@ -902,7 +902,7 @@ may ignore those parameters.
     
 -   Why doesn't Boost.Locale provide tools for extracting and management of message catalogs. Why should
     I use GPL-ed software? Are my programs or message catalogs affected by its license?
-    \par
+    \n
     -#  Boost.Locale does not link to or use any of the GNU Gettext code, so you need not worry about your code as
         the runtime library is fully reimplemented.
     -#  You may freely use GPL-ed software for extracting and managing catalogs, the same way as you are free to use
@@ -912,9 +912,9 @@ may ignore those parameters.
 
 -   Is there any reason to prefer the Boost.Locale implementation to the original GNU Gettext runtime library?
     In either case I would probably need some of the GNU tools.
-    \par
+    \n
     There are two important differences between the GNU Gettext runtime library and the Boost.Locale implementation:
-    \par
+    \n
     -#  The GNU Gettext runtime supports only one locale per process. It is not thread-safe to use multiple locales
         and encodings in the same process. This is perfectly fine for applications that interact directly with 
         a single user like most GUI applications, but is problematic for services and servers.
@@ -1248,11 +1248,29 @@ Because the temporary value of \c (a+b) no longer exists when \c fmt is written 
 
 \page dates_times_timezones Working with dates, times, timezones and calendars.
 
-One of the biggest flaws of most libraries that provide operations over dates is the fact that they only support the Gregorian calendar.
-\c boost::date_time , \c std::tm , and standard functions like \c localtime and \c gmtime , all assume the Gregorian calendar.
+\section dates_times_timezones_intro Introduction
+ 
+There are several important flaws in the standard C, C++ and Boost libraries that handle dates and time:
+
+-#  The biggest flaw of most libraries that provide operations over dates is the fact that they only support
+    the Gregorian calendar. \c boost::date_time , \c std::tm , and standard functions like \c localtime and \c gmtime,
+    all assume the Gregorian calendar.
+    .
+-#  The information about local start of week is not provided.
+    \n
+    For example the standard C and C++ library has \c mktime and \c localtime, but they do not give
+    user the information about the first day of week. This information is locale dependent.
+    It is Monday in France and it is Sunday in United States.
 
 Boost.Locale provides generic \ref boost::locale::date_time "date_time", and \ref boost::locale::calendar "calendar" classes 
 that allow you to perform operations on dates and times for non-Gregorian calendars such as Hebrew, Islamic, Japanese and others.
+
+\ref using_localization_backends "Non-ICU based backends" support the Gregorian calendar only.
+Unlike \c boost::date_time, they fully aware of the local first day of week. Thus,
+if the current day of week is Monday, than setting "current day of week" to Sunday would move the actual date 6 days
+forward in Russian or French locales and move one day backward in USA and Israeli locales.
+
+\section dates_times_timezones_dt Handling Dates and Time
 
 - \ref boost::locale::calendar -- represents generic information about the calendar, independent from a specific time point. For example, you can get the maximum number of days in a month for a specific calendar.
 - \ref boost::locale::date_time  -- represents a time point. It is constructed from a calendar and allows manipulation of various time periods.
@@ -1315,6 +1333,88 @@ For example:
     // Now we can query the year.
     std::cout << "Hebrew year is " << heb / year << std::endl;
 \endcode
+
+\note 
+
+Non-ICU based backends support the same date-time range as \c mktime and \c localtime C library functions.
+
+- Unix 32 bit: dates between 1901 and 2038
+- Unix 64 bit: dates from 1 BC 
+- Windows: dates from 1970. If the \c time_t is 32 bits wide, then the upper limit is year 2038
+
+\section dates_times_timezones_tz Time Zone
+
+The current operating system's time zone is used by default, however the time zone can be modified at
+several different levels:
+
+-#  Calendar level: you can specify a timezone when creating a new instance of \ref boost::locale::calendar
+    in its constructor.
+-#  iostream level: you can use \ref boost::locale::as::time_zone "as::time_zone" manipulator to set a specific
+    time zone to the iostream so all dates and times would be represented in this time zone
+-#  You can specify the default global time zone by calling: \ref boost::locale::time_zone::global(std::string const &).
+    This time zone would be the default one for newly created iostream object and calendar instances.
+
+\note
+
+\ref using_localization_backends "Non-ICU based backends" support only two kinds of time zones:
+
+-#  The current OS time zone, as it is handled by \c localtime and \c mktime the standard 
+    library functions - the default time zone
+-#  Simple time zone in format "GMT+HH:MM" - the time zone represented using fixed shift from
+    the UTC without support of daylight saving time.
+
+
+\section dates_times_timezones_io I/O Operations on date_time objects
+
+Writing a \ref boost::locale::date_time "date_time" object to iostream is equivalent
+to calling \ref boost::locale::date_time::time() "date_time::time()"
+function and writing it result to the stream as a number - the POSIX time of the specific
+time point.
+
+
+\code
+    using namespace boost::locale;
+    date_time now;
+    std::cout << now << std::endl;
+\endcode
+
+The example above would just print a number. Thus, you need to use iostream manipulators in order to display current date or time:
+
+\code
+    using namespace boost::locale;
+    date_time now;
+    std::cout << as::date << now << std::endl;
+\endcode
+
+This is important to remember that \c date_time object is alway rendered and parsed in the context
+of the \c iostream's locale and time zone and not in the context of specific \c date_time object.
+
+\section dates_times_timezones_qna Questions and Answers 
+
+
+<b>Why should I use Boost.Locale over Boost.DateTime when I need Gregorian calendar only?</b>
+
+-   Boost.DateTime is locale agnostic library and ignores the fact that the first day of week
+    varies by the locale.
+    .
+-   Boost.Locale provides a unified access to date and time in time zone aware way.
+    It represents a time as universal scalar - the POSIX time and over that build dates,
+    local times and time-zones handling.
+    \n
+    For example, <tt>date_time(some_time.time() + 3600)</tt> may be not equal to
+    <tt>some_time + hour</tt>, because of the daylight savings time.
+
+<b>Why don't you use Boost.DateTime time zone support?</b>
+
+Boost.DateTime's time zone support is broken. Time zones can not be represented with
+a simple table of rules where daylight saving depend only on certain n'th day of week in month.
+The daylight savings time may vary by year, political issues and many other things.
+
+Most of the modern operating systems (Linux, *BSD, Mac OS X, OpenVMS) and many important software packages
+(ICU, Java, Python) use so called Olson database in order to handle daylight saving time 
+correctly.
+
+If you need full time zone database support, then you should use ICU library.
 
 \page locale_information Getting information about the current locale
 
@@ -1399,7 +1499,8 @@ There are situations when using non-ICU based localization is appropriate:
 
 All of the alternate backends have these limitations:
 
-- Non-Gregorian calendars are not supported, and calendar facets are not installed at all.
+- Only the Gregorian calendar is supported and it is based
+  on capabilites of mktime functionality (including dates range)
 - No boundary analysis.
 - Case handing is very simple and based on single codepoint conversions,
   though they still handle UTF-8 better than the standard library.
@@ -1488,7 +1589,7 @@ problems with this.
 </tr>
 <tr>
   <th>Calendar</th>
-  <td>Yes</td><td>No</td><td>No</td><td>No</td>
+  <td>Yes</td><td>Gregorian Only</td><td>Gregorian Only</td><td>Gregorian Only</td>
 </tr>
 <tr>
   <th>Boundary Analysis</th>
@@ -1731,11 +1832,11 @@ Almost every(!) facet has design flaws:
 -   \c std::numpunct and \c std::moneypunct do not specify the code points for digit representation at all,
     so they cannot format numbers with the digits used under Arabic locales. For example,
     the number "103" is expected to be displayed as "١٠٣" in the \c ar_EG locale.
-    \par 
+    \n
     \c std::numpunct and \c std::moneypunct assume that the thousands separator is a single character. This is untrue
     for the UTF-8 encoding where only Unicode 0-0x7F range can be represented as a single character. As a result, localized numbers can't be
     represented correctly under locales that use the Unicode "EN SPACE" character for the thousands separator, such as Russian.
-    \par
+    \n
     This actually causes real problems under GCC and SunStudio compilers, where formatting numbers under a Russian locale creates invalid 
     UTF-8 sequences.
 -   \c std::time_put and \c std::time_get have several flaws:
@@ -1831,18 +1932,18 @@ There are several reasons:
     .   
     -   It is created in GMT or Local time clock, when `time()` gives a representation that is independent of time zones
         (usually GMT time), and only later should it be represented in a time zone that the user requests.
-        \par    
+        \n
         The timezone is not a property of time itself, but it is rather a property of time formatting.
         .
     -   \c ptime already defines \c operator<< and \c operator>> for time formatting and parsing.
     -   The existing facets for \c ptime formatting and parsing were not designed in a way that the user can override.
         The major formatting and parsing functions are not virtual. This makes it impossible to reimplement the formatting and
         parsing functions of \c ptime unless the developers of the Boost.DateTime library decide to change them.
-        \par    
+        \n
         Also, the facets of \c ptime are not "correctly" designed in terms of division of formatting information and 
         locale information. Formatting information should be stored within \c std::ios_base and information about
         locale-specific formatting should be stored in the facet itself.
-        \par
+        \n
         The user of the library should not have to create new facets to change simple formatting information like "display only
         the date" or "display both date and time."
 
@@ -1857,7 +1958,7 @@ do not actually know how the text should be encoded -- UTF-8, ISO-8859-1, ISO-88
 This may vary between different operating systems and is depend on the current installation. So it is critical
 to provide all the required information.
 - ICU fully understands POSIX locales and knows how to treat them correctly.
-- There are native locale names for most operating system APIs (with the exception of Windows)
+- They are native locale names for most operating system APIs (with the exception of Windows)
 
 \section default_encoding_under_windows Default Encoding under Microsoft Windows
 
@@ -1867,7 +1968,7 @@ All modern operating systems use Unicode.
 -   Microsoft Windows had migrated to Wide/UTF-16 API.
     The narrow encodings had been deprecated and the native OS API became so called "Wide API"
 
-It is very hard to write portable Unicode aware applications.
+As a result of radically different approaches, it is very hard to write portable Unicode aware applications.
 
 Boost locale fully supports both narrow and wide API. The default character
 encoding is assumed to be UTF-8 on Windows.
@@ -1970,7 +2071,7 @@ which adds a BOM to UTF-8 files by default.
 -   \b UTF-16 -- a variable-width Unicode transformation format. Each UCS code point is represented as a sequence of one or two 16-bit words.
     It is a very popular encoding for platforms such as the Win32 API, Java, C#, Python, etc. However, it is frequently confused with the
     _UCS-2_ fixed-width encoding, which can only represent characters in the <i>Basic Multilingual Plane (BMP)</i>.
-    \par 
+    \n
     This encoding is used for \c std::wstring under the Win32 platform, where <tt>sizeof(wchar_t)==2</tt>.
 -   \b UTF-32/UCS-4 - a fixed-width Unicode transformation format, where each code point is represented as a single 32-bit word. It has
     the advantage of simple code point representation, but is wasteful in terms of memory usage. It is used for \c std::wstring encoding
