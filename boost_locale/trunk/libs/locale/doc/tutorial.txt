@@ -1340,7 +1340,7 @@ Non-ICU based backends support the same date-time range as \c mktime and \c loca
 
 - Unix 32 bit: dates between 1901 and 2038
 - Unix 64 bit: dates from 1 BC 
-- Windows: dates from 1970. If the \c time_t is 32 bits wide, then the upper limit is year 2038
+- Windows: dates from 1970. If the \c time_t is 32 bits wide (mingw), then the upper limit is year 2038
 
 \section dates_times_timezones_tz Time Zone
 
@@ -2087,7 +2087,7 @@ which adds a BOM to UTF-8 files by default.
   <td>Linux 2.6 x86_64</td><td>GCC-4.3</td><td>icu/posix/std</td><td>3.8, 4.4, 4.6</td><td>-</td>
 </tr>
 <tr>
-  <td>Linux 2.6 x86</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.6</td><td>-</td>
+  <td>Linux 2.6 x86</td><td>GCC-4.1</td><td>icu/posix/std</td><td>3.6</td><td>(not tested recently)</td>
 </tr>
 <tr>
   <td>Linux 2.6 x86_64</td><td>GCC-4.4</td><td>icu/posix/std</td><td>4.2</td><td>-</td>
