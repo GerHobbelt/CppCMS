@@ -1,0 +1,23 @@
+
+# Dummy Jamroot. 
+# When Boost.Locale is accepted and integrated into Boost SVN should be
+# removed.
+
+import modules ;
+
+import feature ;
+feature.feature boost.locale.iconv : on off : optional incidental ;
+feature.feature boost.locale.icu : on off : optional incidental ;
+
+feature.feature boost.locale.posix : on off : optional incidental ;
+feature.feature boost.locale.std : on off : optional incidental ;
+feature.feature boost.locale.winapi : on off : optional incidental ;
+
+
+use-project /boost : [ modules.peek : BOOST_ROOT ] ;
+
+project 
+    : requirements <use>/boost//headers <include>.
+    ;
+
+build-project libs/locale/build ;
