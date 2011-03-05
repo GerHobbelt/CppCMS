@@ -1,8 +1,6 @@
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
 
-
 /*!
- 
 
 \mainpage Boost.Locale
 
@@ -24,22 +22,27 @@ and provides a useful API only for UTF-16 encoded text, ignoring other popular U
 UTF-8 and UTF-32 and limited but still popular national character sets like Latin1.
 
 Boost.Locale provides the natural glue between the C++ locales framework, iostreams, and the powerful
-ICU library in following areas:
+ICU library.
 
-- Correct case conversion, case folding and normalization.
-- Collation, including support for 4 Unicode collation levels.
+Boost.Locale provides non-ICU based localization support as well. It is based on
+the operating system native API or on the standard C++ library support.
+Sacrificing some less important features, Boost.Locale becomes less powerful but 
+lighter and easier to deploy and use library.
+
+\section main_intro_features Provided Features
+
+- Correct case conversion, case folding and <a href="http://en.wikipedia.org/wiki/Unicode_equivalence">normalization</a>.
+- <a href="http://en.wikipedia.org/wiki/Collation">Collation</a> (sorting), including support for 4 Unicode collation levels.
 - Date, time, timezone and calendar manipulations, formatting and parsing, including transparent
-support for calendars other than Gregorian.
+support for calendars <a href="http://en.wikipedia.org/wiki/List_of_calendars">other than Gregorian</a>.
 - Boundary analysis for characters, words, sentences and line-breaks.
 - Number formatting, spelling and parsing.
 - Monetary formatting and parsing.
-- Powerful message formatting including support for plural forms, using GNU catalogs.
+- Powerful message formatting (string translation) including support for plural forms, using GNU catalogs.
 - Character set conversion.
-- Transparent support for 8-bit character sets like Latin1.
-- Support for \c char, \c wchar_t and C++0x \c char16_t and \c char32_t strings and streams.
-
-It also allows you to use non-ICU-based localization tools, so you don't always need the ICU files
-to do the most common tasks.
+- Transparent support for 8-bit character sets like Latin1
+- Support for \c char and \c wchar_t
+- Experimental support for C++0x \c char16_t and \c char32_t strings and streams.
 
 \section main_tutorial Tutorials
 
