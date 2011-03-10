@@ -1985,6 +1985,25 @@ wide API would handle UTF-8 correctly.
 
 A good example of such library is Boost.Filesystem v3.
 
+For example
+
+\code
+#include <boost/locale.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+int main()
+{
+    // Create and install global locale
+    std::locale::global(boost::locale::generator().generate(""));
+    // Make boost.filesystem use it
+    boost::filesystem::path::imbue(std::locale());
+    // Now Works perfectly fine with UTF-8!
+    boost::filesystem::ofstream hello("שלום.txt"); 
+}
+
+\endcode
+
 However such behavior may broke existing software that assumes that the current
 encoding is single byte encodings like code page 1252.
 
