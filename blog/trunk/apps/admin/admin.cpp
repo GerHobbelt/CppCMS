@@ -4,6 +4,8 @@
 #include <apps/admin/page.h>
 #include <apps/admin/post.h>
 #include <apps/admin/caching.h>
+#include <apps/admin/options.h>
+#include <apps/admin/comment.h>
 #include <cppcms/url_mapper.h>
 #include <cppcms/http_response.h>
 #include <cppcms/session_interface.h>
@@ -14,13 +16,21 @@ admin_master::admin_master(cppcms::service &srv) : cppcms::application(srv)
 {
 	mapper().assign("links","");
 	mapper().assign("categories","");
-	mapper().assign("options","");
-	mapper().assign("comment","{1}");
 
 	attach( new caching(srv),
 		"caching",
 		"/cache{1}",
 		"/cache((/.*)?)",1);
+	
+	attach(	new options(srv),
+		"options",
+		"/options{1}",
+		"/options((/.*)?)",1);
+
+	attach(	new comment(srv),
+		"comment",
+		"/comment{1}",
+		"/comment((/.*)?)",1);
 
 	attach( new post(srv),
 		"post",

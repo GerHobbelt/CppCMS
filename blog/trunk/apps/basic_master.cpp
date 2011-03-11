@@ -117,6 +117,7 @@ namespace apps {
 
 		if(cache().fetch_data("general_info",c.info))
 			return;
+		cppcms::triggers_recorder rec(cache());
 		
 		cppdb::result r;
 
@@ -135,7 +136,7 @@ namespace apps {
 				c.info.contact = value;
 		}
 		cache().add_trigger("options");
-		cache().store_data("general_info",c.info);
+		cache().store_data("general_info",c.info,rec.detach());
 	}
 	basic_master::basic_master(cppcms::service &s) : cppcms::application(s)
 	{

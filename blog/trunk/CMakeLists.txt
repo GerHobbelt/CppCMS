@@ -51,6 +51,8 @@ set(ADMIN_TEMPLATES
 	views/admin/page.tmpl
 	views/admin/post.tmpl
 	views/admin/caching.tmpl
+	views/admin/options.tmpl
+	views/admin/comment.tmpl
 	)
 
 
@@ -69,6 +71,8 @@ set(BLOG_SRC
 	apps/admin/page.cpp
 	apps/admin/post.cpp
 	apps/admin/caching.cpp
+	apps/admin/options.cpp
+	apps/admin/comment.cpp
 	"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
 	"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
 	)
