@@ -70,6 +70,7 @@ support for calendars <a href="http://en.wikipedia.org/wiki/List_of_calendars">o
     - \ref tested_compilers_and_paltforms 
     - \ref status_of_cpp0x_characters_support
     - \ref special_thanks
+    - \ref copyright
 
 \page std_locales Introduction to C++ Standard Library localization support
 
@@ -1802,6 +1803,7 @@ you would get an exception.
 - \ref tested_compilers_and_paltforms 
 - \ref status_of_cpp0x_characters_support
 - \ref special_thanks
+- \ref copyright
 
 \section rationale Design Rationale 
 
@@ -2195,5 +2197,14 @@ MSVC provides all required facets however:
 -   Chad Nelson - for volunteering to manage the formal review and for the great language corrections 
     for this tutorial.
 -   Vladimir Prus - for development of Boost.Build support for Boost.Locale.
+
+\section copyright Copyrights
+
+
+  Copyright &copy; 2009-2011 Artyom Beilis (Tonkikh)
+
+  Distributed under the Boost Software License, Version 1.0. (See
+  accompanying file LICENSE_1_0.txt or copy at
+  http://www.boost.org/LICENSE_1_0.txt)
 
 */
