@@ -14,7 +14,7 @@ else()
 	option(DISABLE_POSIX_BACKEND	"Disable POSIX backend" ON)
 endif()
 
-if(WIN32) 
+if(WIN32 OR CYGWIN) 
 	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" OFF)
 else()
 	option(DISABLE_WINAPI_BACKEND	"Disable Win32API backend" ON)

@@ -6,6 +6,14 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef BOOST_LOCALE_WITH_ICU
+#include <iostream>
+int main()
+{
+        std::cout << "ICU is not build... Skipping" << std::endl;
+}
+#else
+
 #include <boost/locale/boundary.hpp>
 #include <boost/locale/generator.hpp>
 #include "test_locale.hpp"
@@ -277,5 +285,7 @@ int main()
     }
     FINALIZE();
 }
+
+#endif // NOICU
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 

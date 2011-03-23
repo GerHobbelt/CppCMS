@@ -6,6 +6,14 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifdef BOOST_LOCALE_NO_STD_BACKEND
+#include <iostream>
+int main()
+{
+        std::cout << "STD Backend is not build... Skipping" << std::endl;
+}
+#else
+
 #include <boost/locale/config.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/locale/localization_backend.hpp>
@@ -109,6 +117,8 @@ int main()
     FINALIZE();
 
 }
-// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
+#endif // NO STD
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
