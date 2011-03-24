@@ -8,9 +8,13 @@
 
 project 
     :   requirements 
-            <library>../build//boost_locale
-            <use>../build//build_options
-            
+            <library>/boost/locale//boost_locale
+            <use>../build//build_flags 
+				# Make sure we get all defines we need
+				# Otherwise we would have problem knowing
+				# what backends are actually in use
+			<link>shared
+			<define>BOOST_LOCALE_DYN_LINK=1
     ;
 
 # Shared boost.locale tests

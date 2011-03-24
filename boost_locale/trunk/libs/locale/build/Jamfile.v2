@@ -77,10 +77,11 @@ explicit has_icu ;
 # This function is called whenever the 'boost_locale' metatarget
 # below is generated and figures what external components we have,
 # what user wants, and what sources have to be compiled in the end.
-rule configure ( properties * )
+rule configure-full ( properties * : flags-only )
 {
 
     local result ;
+	local flags-result ;
     
     local found-iconv ;
     
@@ -104,7 +105,7 @@ rule configure ( properties * )
     }        
     if $(found-iconv) 
     {
-        result += <define>BOOST_LOCALE_WITH_ICONV=1 ;
+        flags-result += <define>BOOST_LOCALE_WITH_ICONV=1 ;
     }
 
     local found-icu ;
@@ -113,7 +114,7 @@ rule configure ( properties * )
         if [ configure.builds has_icu : $(properties) : "icu" ]
         {
             found-icu = true ;
-            result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
+			flags-result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
 
             for s in boundary codecvt collator conversion date_time formatter
                      icu_backend numeric time_zone
@@ -144,7 +145,7 @@ rule configure ( properties * )
     
     if <boost.locale.std>off in $(properties)
     {
-        result += <define>BOOST_LOCALE_NO_STD_BACKEND=1 ;
+        flags-result += <define>BOOST_LOCALE_NO_STD_BACKEND=1 ;
     }
     else
     {
@@ -173,7 +174,7 @@ rule configure ( properties * )
     
     if <boost.locale.winapi>off in $(properties)
     {
-        result += <define>BOOST_LOCALE_NO_WINAPI_BACKEND=1 ;
+        flags-result += <define>BOOST_LOCALE_NO_WINAPI_BACKEND=1 ;
     }
     else
     {
@@ -182,10 +183,15 @@ rule configure ( properties * )
             converter
             numeric
             win_backend
-            lcid
           ;
         result += <source>win32/$(WINAPI_SOURCES).cpp ;
     }
+	
+	if ( ! <boost.locale.winapi>off in $(properties) || ! <boost.locale.std>off in $(properties) )
+	   && ( <target-os>windows in $(properties) || <target-os>cygwin in $(properties) )
+	{
+        result += <source>win32/lcid.cpp ;
+	}
  
     if ! <boost.locale.posix> in $(properties:G)
     {
@@ -201,7 +207,7 @@ rule configure ( properties * )
     
     if <boost.locale.posix>off in $(properties)
     {
-        result += <define>BOOST_LOCALE_NO_POSIX_BACKEND=1 ;        
+        flags-result += <define>BOOST_LOCALE_NO_POSIX_BACKEND=1 ;        
     }
     else
     {
@@ -215,15 +221,38 @@ rule configure ( properties * )
         result += <source>posix/$(POSIX_SOURCES).cpp ;
     }
 
-    if <boost.locale.posix>on in $(properties) || <boost.locale.std>on in $(properties) || <boost.locale.posix>on in $(properties)
+    if <boost.locale.posix>on in $(properties) || <boost.locale.std>on in $(properties) || <boost.locale.winapi>on in $(properties)
     {
         result += <source>util/gregorian.cpp ;
     }
-
-    return $(result) ;
+	if "$(flags-only)" = "flags" 
+	{
+		return $(flags-result) ;
+	}
+	else {
+		result += $(flags-result) ;
+		return $(result) ;
+	}
 }
 
+rule configure ( properties * )
+{
+	local result = [ configure-full $(properties) : "all" ] ;
+	return $(result) ;
+	
+}
+
+rule configure-flags ( properties * )
+{
+	local result ;
+	result = [ configure-full $(properties) : "flags" ] ;
+	return $(result) ;
+	
+}
+
+
 alias build_options : : : : <conditional>@configure ;
+alias build_flags : : : : <conditional>@configure-flags ;
 
 lib boost_locale 
     : 
@@ -241,14 +270,14 @@ lib boost_locale
         util/info.cpp
         util/locale_data.cpp  
         # Configuration
-        build_options
+        #build_options
     :
       # Don't link explicitly, not required
       <define>BOOST_THREAD_NO_LIB=1
       <link>shared:<define>BOOST_LOCALE_DYN_LINK=1
       <threading>multi
       # Meanwhile remove this
-      #<conditional>@configure
+      <conditional>@configure
     ;
 
 boost-install boost_locale ;
