@@ -65,6 +65,7 @@ void summary::prepare(int cat_id,int page)
 		r = sql() << "SELECT name FROM cats WHERE id=?" << cat_id << cppdb::row;
 		if(r.empty()) {
 			response().make_error_response(404);
+			return;
 		}
 		r >> c.category_name;
 		c.id = cat_id;
