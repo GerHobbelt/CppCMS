@@ -10,6 +10,7 @@
  */
 
 #include <unicode/uversion.h>
+#include <unicode/locid.h>
 #include <unicode/utypes.h>
 #include <unicode/uchar.h>
 #include <unicode/coll.h>
@@ -20,7 +21,9 @@
 
 int main()
 {
+   icu::Locale loc;
    UErrorCode err = U_ZERO_ERROR;
    UChar32 c = ::u_charFromName(U_UNICODE_CHAR_NAME, "GREEK SMALL LETTER ALPHA", &err);
    return err;
 }
+
