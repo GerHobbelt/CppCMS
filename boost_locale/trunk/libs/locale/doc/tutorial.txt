@@ -1703,12 +1703,125 @@ you should be very careful and never assume one-code-point == one-utf16-characte
 
 \page building_boost_locale Building The library
 
-Boost.Locale presently requires the CMake build system. BBv2 support is not complete and will be added during
-integration.
+Boost.Locale presently supports  CMake build system and Boost Build.
 
-\section building_instr Build Instructions
+\note You need Boost 1.46 and above to use Boost.Build
 
-\subsection building_deps Dependencies
+- \ref building_boost_locale_bb
+- \ref building_boost_locale_cmake
+- \ref binary_compatibility
+
+
+\section building_boost_locale_bb Building With Boost.Build
+
+You need Boost 1.46 and above to use Boost.Build, it includes important
+patches that allow you to build the library correctly.
+
+\subsection bb_building_deps Dependencies
+
+- Boost 1.46 and above.
+- ICU library 3.6 or above is strongly recommended
+- If no ICU library is given, iconv support is required under POSIX platforms.
+
+\subsection bb_building_proc Building Process
+
+First of all we need to prepare our sources of Boost with Boost.Locale
+
+- Download latest version of Boost and extract its sources
+- Download the latest version of Boost.Locale and extract its sources
+- Copy boost and libs subdirectory of Boost.Locale sources into the location
+  of boost sources.
+- Bootstrap latest bjam version running bootstrap.sh or bootstrap.bat.
+
+Now all you need to do is invoke bjam command:
+
+\verbatim
+./bjam --with-locale stage
+\endverbatim
+
+Or on Windows
+\verbatim
+.\bjam --with-locale stage
+\endverbatim
+
+If you are using custom ICU build or you are using Microsoft Windows
+you need to provide a path to location of ICU library using \c -sICU_PATH option
+
+For example:
+
+-   If your icu build in placed at \c /opt/icu46 such that the files are placed like\n
+    \c /opt/icu46/include/unicode/uversion.h\n
+    \c /opt/icu46/include/unicode/calendar.h\n
+    \c ... \n
+    \c /opt/icu46/lib/libicudata.so \n
+    \c /opt/icu46/lib/libicui18n.so \n
+    \c ... \n
+    then you need to provide an option \c -sICU_PATH=/opt/icu46
+    \verbatim
+    ./bjam --with-locale -sICU_PATH=/opt/icu46  stage
+    \endverbatim
+-   If your icu build in placed at <tt>c:\\icu46</tt> such that the files are placed like \n
+    <tt>c:\\icu46\\include\\unicode\\uversion.h</tt>  \n
+    <tt>c:\\icu46\\include\\unicode\\calendar.h</tt> \n
+    <tt>...</tt> \n
+    <tt>c:\\icu46\\bin\\icudt.dll</tt> \n
+    <tt>c:\\icu46\\bin\\icuin.dll</tt> \n
+    <tt>...</tt> \n
+    <tt>c:\\icu46\\lib\\icudt.lib</tt> \n
+    <tt>c:\\icu46\\lib\\icuin.lib</tt> \n
+    <tt>...</tt> \n
+    then you need to provide an option \c -sICU_PATH=c:\\icu46
+    \verbatim
+    .\bjam --with-locale -sICU_PATH=c:\icu46  stage
+    \endverbatim
+
+\note Don't forget to put both debug and release versions of ICU libraries in this path
+when using Microsoft Visual Studio  so Boost.Build will link correctly debug and release
+versions of boost_locale library.
+
+\section bb_build_opts Build Options
+
+Boost.Locale supports following options with values \c off or \c on
+
+- \c boost.locale.icu=off disable build of ICU backend even if ICU library exists
+- \c boost.locale.iconv=off or \c boost.locale.iconv=on enable or disable use of iconv
+     library. It is off by default on Windows and Solaris
+- \c boost.locale.winapi=off - disable winapi backend, it is on by default on Windows and Cygwin
+- \c boost.locale.std=off or \c boost.locale.winapi=on Disable or enable std backends. \c std backend
+     is disabled by default when using Sun Studio.
+- \c boost.locale.posix=on or \c boost.locale.posix=off Enable or disable support of POSIX backend,
+     it is on by default on Linux and Mac OS X
+
+Also Boost.Locale supports following options
+
+- \c -sICU_PATH=/path/to/location/of/icu - the location of custom ICU library
+- \c -sICONV_PATH=/path/to/location/of/iconv - the location of custom iconv library
+
+
+For example:
+
+-   Build the library on Windows with ICU backend only:
+    \verbatim
+    .\bjam boost.locale.winapi=off boost.locale.std=off -sICU_PATH=c:\icu46 --with-locale stage
+    \endverbatim
+-   Build the library on Linux with std backend only
+    \verbatim
+    .\bjam boost.locale.posix=off boost.locale.icu=off --with-locale stage
+    \endverbatim
+
+\section bb_build_test Running Unit Tests
+
+You can run unit tests by invoking \c bjam with \c libs/locale/test project parameter
+\verbatim
+./bjam libs/locale/test
+\endverbatim
+
+\section building_boost_locale_cmake Building With CMake
+
+\note CMake build does not provide mangled library names like boost_locale-mt-gd.lib, so if you
+relay on auto-linking use Boost.Build.
+
+\subsection cmake_building_deps Dependencies
 
 - CMake 2.6 and above.
 - Boost 1.35 and above.
@@ -1716,7 +1829,7 @@ integration.
 - ICU library 3.6 or above is strongly recommended
 - If no ICU library is given, iconv support is required under POSIX platforms.
 
-\subsection building_proc Building Process
+\subsection cmake_building_proc Building Process
 
 The library build should be fairly simple for users familiar with CMake.
 
@@ -1752,7 +1865,7 @@ The simplest way to build the library is:
     Depending on your compiler.
 
 
-\section build_opts Build Options
+\section cmake_build_opts Build Options
 
 This options can be passed to CMake to configure the library to your needs.
 
@@ -1781,14 +1894,14 @@ Examples:
         cmake -G "NMake Makefiles" -DDISABLE_ICU_BACKEND=ON -DCMAKE_INCLUDE_PATH=c:/boost_1_43_0 ..
     \endcode
 
-\section bindary_compatibility Binary Compatibility
+\section binary_compatibility Binary Compatibility
 
 Boost.Locale is built with binary compatibility in mind. Switching localization back ends on or off,
 or using iconv or not, does not affect binary compatibility. So if a dynamic library was built
 with all possible backends, other dynamic libraries compiled with, for example, only the \c std, \c posix 
 or \c winapi backends would still be binary-compatible with it.
 
-However this definately has an effect on some features. For example, if you
+However this definitely has an effect on some features. For example, if you
 try to use boundary analysis or a calendar facet when the library does not support the icu backend
 you would get an exception.
 
