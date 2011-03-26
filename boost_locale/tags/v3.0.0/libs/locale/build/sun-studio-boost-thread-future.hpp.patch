@@ -1,0 +1,11 @@
+--- boost/thread/future.hpp-orig	2011-03-26 11:51:21.995507269 +0200
++++ boost/thread/future.hpp	2011-03-26 11:51:42.658436201 +0200
+@@ -419,7 +419,7 @@
+                 {
+                     for(count_type i=0;i<count;++i)
+                     {
+-                        locks[i]=boost::unique_lock<boost::mutex>(futures[i].future->mutex);
++                        locks[i]=boost::unique_lock<boost::mutex>(futures[i].future->mutex).move();
+                     }
+                 }
+                 
