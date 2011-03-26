@@ -1920,6 +1920,16 @@ you would get an exception.
 
 \section rationale Design Rationale 
 
+- \ref rationale_why
+- \ref why_icu
+- \ref why_icu_wrapper 
+- \ref why_icu_api_is_hidden
+- \ref why_gnu_gettext 
+- \ref why_posix_names
+- \ref why_linear_chunks
+- \ref why_abstract_api
+- \ref why_no_special_character_type
+
 \subsection rationale_why Why is it needed?
 
 Why do we need a localization library, when standard C++ facets (should) provide most of the required functionality:
@@ -2077,6 +2087,60 @@ This may vary between different operating systems and is depend on the current i
 to provide all the required information.
 - ICU fully understands POSIX locales and knows how to treat them correctly.
 - They are native locale names for most operating system APIs (with the exception of Windows)
+
+\subsection why_linear_chunks Why most parts of Boost.Locale work only on linear/contiguous chunks of text
+
+There are two reasons:
+
+- Boost.Locale relies heavily on the third-party APIs like ICU, POSIX or Win32 API, all of them
+  work only on linear chunks of text, so providing non-linear API would just hide the
+  real situation and would not bring read performance advantage.
+- In fact, all known libraries that work with Unicode: ICU, Qt, Glib, Win32 API, POSIX API 
+  and others accept an input as single linear chunk of text and there is a good reason for this:
+  \n
+  -#  Most of supported operations on text like collation, case handling usually work on small
+      chunks of text. For example: you probably would never want to compare two chapters of a book, but rather
+      their titles.
+  -#  We should remember that even very large texts require quite a small amount of memory, for example
+      the entire book "War and Peace" takes only about 3MB of memory.
+   \n
+
+However:
+
+-  There are API's that support stream processing. For example: character set conversion using
+\c std::codecvt API works on streams of any size without problems.
+-  When new API is introduced into Boost.Locale in future, such that it likely works
+   on large chunks of text, will provide an interface for non-linear text handling.
+
+
+\subsection why_abstract_api Why all Boost.Locale implementation is hidden behind abstract interfaces and does not use template metaprogramming?
+
+There are several major reasons:
+
+- This is how the C++'s \c std::locale class is build. Each feature is represented using a subclass of
+  \c std::locale::facet that provides an abstract API for specific operations it works on, see \ref std_locales.
+- This approach allows to switch underlying API without changing the actual application code even in run-time depending
+  on performance and localization requirements.
+- This approach reduces compilation times significantly. This is very important for library that may be
+  used in almost every part of specific program.
+
+\subsection why_no_special_character_type Why Boost.Locale does not provide char16_t/char32_t for non-C++0x platforms.
+
+There are several reasons:
+
+- C++0x defines \c char16_t and \c char32_t as distinct types, so substituting is with something like \c uint16_t or \c uint32_t
+  would not work as for example writing \c uint16_t to \c uint32_t stream would write a number to stream.
+- The C++ locales system would work only of standard facets like \c std::num_put are installed into the 
+  existing instance of \c std::locale, however in the many standard C++ libraries these facets are specialized for each
+  specific character that the standard library supports, so an attempt to create a new facet would
+  fail as it is not specialized.
+  
+These are exactly the reasons why Boost.Locale fails with current limited C++0x characters support on GCC-4.5 (the second reason)
+and MSVC-2010 (the first reason)
+
+So basically it is impossible to use non-C++ characters with the C++'s locales framework.
+
+The best and the most portable solution is to use the C++'s \c char type and UTF-8 encodings.
 
 \section default_encoding_under_windows Default Encoding under Microsoft Windows
 
@@ -2272,7 +2336,12 @@ which adds a BOM to UTF-8 files by default.
   <td>OpenSolaris/SunOS 5.11</td><td>GCC-3.4</td><td>icu/std</td><td>4.2</td><td>iconv is disabled</td>
 </tr>
 <tr>
-  <td>OpenSolaris/SunOS 5.11</td><td>SunCC 5.10/STLport4</td><td>icu</td><td>4.2</td><td>Some faults in collation, STLport issue<br/>iconv is disabled</td>
+  <td>OpenSolaris/SunOS 5.11</td><td>SunCC 5.10/STLport4</td><td>icu</td><td>4.2</td>
+  <td>
+    Some faults in collation, STLport issue<br/>
+    iconv is disabled<br/>
+    Boost-1.46.x requires patch for Boost.Thread, can be found in <tt>libs/locale/build</tt>
+  </td>
 </tr>
 </table>
 
