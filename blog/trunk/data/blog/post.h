@@ -1,6 +1,10 @@
 #pragma once
 #include <data/blog/master.h>
 
+namespace cppcms {
+	class session_interface;
+}
+
 namespace data {
 namespace blog {
 
@@ -38,16 +42,15 @@ namespace blog {
 		cppcms::widgets::textarea content;
 		cppcms::widgets::submit preview;
 		cppcms::widgets::submit send;
+		cppcms::widgets::text captcha;
 		cppcms::form inputs;
 		cppcms::form buttons;
 		comment_form()
 		{
 			using booster::locale::translate;
-			author.non_empty();
 			author.id("author");
 			author.limits(1,256);
 			author.message(translate("Author"));
-			mail.non_empty();
 			mail.id("email");
 			mail.limits(1,256);
 			mail.message(translate("E-Mail"));
@@ -62,10 +65,13 @@ namespace blog {
 			send.value(translate("Send"));
 			inputs+author+mail+url;
 			buttons + send + preview;
+			captcha.name("captcha"); // easier to use
 			add(inputs);
 			add(content);
 			add(buttons);
+			add(captcha);
 		}
+		bool validate(cppcms::session_interface &);
 	};
 
 	struct comment {

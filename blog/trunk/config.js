@@ -26,10 +26,13 @@
 	"session" : {
 		"expire" : "renew",
 		"timeout" : 604800,
-		"location" : "client",
+		"location" : "both",
 		"client" : {
 			"hmac" : "sha1",
 			"hmac_key" : "232074faa0fd37de20858bf8cd0a7d10"
+		},
+		"server" : {
+			"storage" : "files"
 		}
 	},
 	"cache" : {

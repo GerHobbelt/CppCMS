@@ -4,10 +4,42 @@
 #include <cppcms/url_mapper.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/cache_interface.h>
+#include <cppcms/session_interface.h>
 
 #include <booster/posix_time.h>
 
 #include <cppdb/frontend.h>
+namespace data {
+namespace blog {
+	bool comment_form::validate(cppcms::session_interface &session)
+	{
+		if(!cppcms::form::validate())
+			return false;
+		bool is_valid = true;
+		if(session.is_set("user"))
+			return true;
+		
+		if(!session.is_set("captcha") || session.get("captcha")!=captcha.value()) {
+			captcha.valid(false);
+			is_valid = false;
+		}
+
+		session.clear();
+		
+		if(author.value().empty()) {
+			author.valid(false);
+			is_valid = false;
+		}
+		if(mail.value().empty()) {
+			mail.valid(false);
+			is_valid = false;
+		}
+		
+		return is_valid;
+	}
+} // blog
+} // data
+
 
 namespace apps {
 namespace blog {
@@ -31,7 +63,7 @@ void post::postback(std::string sid)
 	}
 	data::blog::post c;
 	c.response.load(context());
-	if(c.response.validate()) {
+	if(c.response.validate(session())) {
 		cppdb::transaction tr(sql());
 		cppdb::result r=sql()<<"SELECT is_open FROM posts WHERE id=?" << id << cppdb::row;
 		if(r.empty()) {
@@ -48,13 +80,21 @@ void post::postback(std::string sid)
 		
 		if(c.response.send.value()) {
 			std::tm publish_time = booster::ptime::local_time(booster::ptime::now());
+			std::string author = c.response.author.value();
+			std::string mail = c.response.mail.value();
+			std::string link = c.response.url.value();
+			if(session().is_set("user")) {
+				mail.clear();
+				author=session().get("user");
+				link=url("/blog/summary");
+			}
 
 			sql()<<	"INSERT INTO comments(post_id,author,email,url,publish_time,content) "
 				"VALUES(?,?,?,?,?,?)" 
 				<< id 
-				<< c.response.author.value()
-				<< c.response.mail.value()
-				<< c.response.url.value()
+				<< author
+				<< mail
+				<< link
 				<< publish_time 
 				<< c.response.content.value() 
 				<< cppdb::exec;

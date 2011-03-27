@@ -62,6 +62,9 @@ void categories::prepare()
 			}
 			else {
 				int id = atoi(sid.c_str());
+				std::ostringstream ss;
+				ss << "cat_" << id;
+				std::string cat_key = ss.str();
 				if(form.remove.value()) {
 					cppdb::transaction tr(sql());
 					cppdb::result r = sql() << 
@@ -79,12 +82,14 @@ void categories::prepare()
 							sql() << "DELETE FROM cats WHERE id=?"<<id << cppdb::exec;
 							tr.commit();
 							cache().rise("cats");
+							cache().rise(cat_key);
 						}
 					}
 					else {
 						sql() << "DELETE FROM cats WHERE id=?"<<id << cppdb::exec;
 						tr.commit();
 						cache().rise("cats");
+						cache().rise(cat_key);
 					}
 				}
 				else {
@@ -94,6 +99,7 @@ void categories::prepare()
 						"WHERE id=? "<<form.cat.value() <<id << cppdb::exec;
 					tr.commit();
 					cache().rise("cats");
+					cache().rise(cat_key);
 				}
 			}
 		}

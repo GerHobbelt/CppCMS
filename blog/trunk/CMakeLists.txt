@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(blog)
 
 include_directories(${CMAKE_SOURCE_DIR})
+include(FindPkgConfig)
 
 # Options 
 
@@ -22,6 +23,11 @@ find_path(INC_BOOSTER booster/config.h)
 find_path(INC_CPPCMS cppcms/config.h)
 find_path(INC_CPPDB cppdb/frontend.h)
 find_path(INC_MARKDOWN mkdio.h)
+
+
+pkg_search_module(IM REQUIRED ImageMagick++ GraphicsMagick++)
+include_directories(${IM_INCLUDE_DIRS})
+
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -65,6 +71,7 @@ set(BLOG_SRC
 	apps/blog/summary.cpp
 	apps/feed/feed.cpp
 	apps/basic_master.cpp
+	apps/captcha.cpp
 	apps/main.cpp
 	apps/admin/admin.cpp
 	apps/admin/users.cpp
@@ -135,6 +142,7 @@ target_link_libraries(blog ${LIB_CPPCMS})
 target_link_libraries(blog ${LIB_BOOSTER})
 target_link_libraries(blog ${LIB_CPPDB})
 target_link_libraries(blog ${LIB_MARKDOWN})
+target_link_libraries(blog ${IM_LIBRARIES})
 target_link_libraries(blog_migrate ${LIB_CPPDB})
 
 if(EXE_MSGFMT)

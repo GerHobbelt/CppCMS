@@ -1,3 +1,4 @@
+#include <apps/captcha.h>
 #include <apps/blog/blog.h>
 #include <apps/feed/feed.h>
 #include <apps/admin/admin.h>
@@ -14,6 +15,11 @@ class blog : public cppcms::application{
 public:
 	blog(cppcms::service &s) : cppcms::application(s)
 	{
+		attach( new apps::captcha(s),
+			"captcha",
+			"/captcha{1}",
+			"/captcha((/?.*))",1);
+
 		attach( new apps::admin::admin_master(s),
 			"admin",
 			"/admin{1}",

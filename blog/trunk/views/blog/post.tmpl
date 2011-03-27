@@ -88,18 +88,77 @@
                                 return true;
                         }
                 }
+		function get_captcha()
+		{
+			var url = '<% url "/captcha" %>/' + Math.random().toString();
+			var r = '<img alt="captcha" width="120" height="60" src="' 
+				+ url 
+				+ '" /><br> <% gt "Captcha" %>: <input type="text" name="captcha" /> ' ;
+			<% if not response.captcha.valid() %>
+			r += '<% gt "Try Again" %>' ;
+			<% end %>
+			return r;
+		}
+		function get_captcha_if_postback()
+		{
+			if('<%= app().request().request_method() %>' == 'POST' && get_cookie('user').length == 0) {
+				return get_captcha();
+			}
+			else {
+				return '';
+			}
+		}
+        	function reload_captcha() 
+		{
+			document.getElementById('captcha').innerHTML = get_captcha();
+			return false;
+		}
+        	function update_captcha() 
+		{
+			var pc = document.getElementById('captcha');
+			if(pc.innerHTML == '' && get_cookie('user').length == 0 ) {
+				pc.innerHTML=get_captcha();
+			}
+			return true;
+		}
 	-->
 	</script>
 		<form method="post" action="<% url "/blog/post/postback" using id %>#preview" onsubmit="return test_form();" >
-		<table>
-			<% form as_table response.inputs %>
-	 	</table>
+		<script type="text/javascript">
+		<!--
+			write_if_admin('<div style="display:none">');
+		-->
+		</script>
+			<table>
+				<% form as_table response.inputs %>
+			</table>
+		<script type="text/javascript">
+		<!--
+			write_if_admin('</div>');
+		-->
+		</script>
 		<p>
 			<% gt "You can write your messages using <a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> syntax." %> 
 		</p>
-		<p><% form begin response.content %> cols="80" rows="10" <% form end response.content %></p>
+		<p><% form begin response.content %> cols="80" rows="10" onfocus='return update_captcha()' <% form end response.content %></p>
+		<script type="text/javascript">
+		<!-- 
+			document.write('<p id="captcha">' + get_captcha_if_postback() + '</p>'); 
+		-->
+		</script>
 		<p>
 			<% form as_space response.buttons %>
+			<script type="text/javascript">
+			<!--
+				write_if_admin('<span style="display:none">');
+			-->
+			</script>
+			<input type="submit" onclick='return reload_captcha()' value="<% gt "Realod Captcha" %>" />
+			<script type="text/javascript">
+			<!--
+				write_if_admin('</span>');
+			-->
+			</script>
 		</p>
 		</form>
 	<div id="removecomment">
