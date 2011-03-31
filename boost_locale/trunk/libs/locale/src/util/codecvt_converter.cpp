@@ -17,7 +17,7 @@
 #  pragma warning(disable : 4244 4996) // loose data 
 #endif
 
-
+#include <cstddef>
 #include <string.h>
 #include <vector>
 #include <algorithm>
