@@ -2297,6 +2297,12 @@ which adds a BOM to UTF-8 files by default.
   <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x</td><td>icu/posix/std</td><td>3.8</td><td>-</td>
 </tr>
 <tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.6</td><td>icu/posix/std</td><td>4.2, 4.6</td><td>-</td>
+</tr>
+<tr>
+  <td>Linux 2.6 x86_64</td><td>GCC-4.6/C++0x</td><td>icu/posix/std</td><td>4.2, 4.6</td><td>-</td>
+</tr>
+<tr>
   <td>Linux 2.6 x86_64</td><td>GCC-4.5/C++0x with char16_t/char32_t</td><td>icu</td><td>3.8</td>
   <td>
 	Some charXX_t faults in formatting<br>
