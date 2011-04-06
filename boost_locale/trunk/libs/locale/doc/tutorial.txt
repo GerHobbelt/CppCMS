@@ -500,6 +500,7 @@ invalid.
     - \ref multiple_gettext_domain
     - \ref direct_message_translation
 - \ref extracting_messages_from_code
+- \ref custom_file_system_support
 - \ref msg_qna
 
 \section messages_formatting_into Introduction
@@ -888,6 +889,69 @@ The full set of xgettext parameters suitable for Boost.Locale is:
 
 Of course, if you do not use "gettext" like translation, or you do not use wide or C++0x u16/u32 strings, you
 may ignore those parameters.
+
+\subsection custom_file_system_support Custom Filesystem Support
+
+When the access to actual file system is limited like in ActiveX controls or
+when the developer wants to ship all-in-one executable file, 
+it is useful to be able to load \c gettext  catalogs from a custom location
+- custom file system.
+
+Boost.Locale provides an option to install boost::locale::message_format facet 
+with customized options provided in boost::locale::gnu_gettext::messages_info structure.
+
+This structure contains \c boost::function based
+\ref boost::locale::gnu_gettext::messages_info::callback_type "callback"
+that allows user to provide custom functionality to load message catalog files.
+
+For example:
+
+\code
+
+// Configure all options for message catalog
+boost::locale::gnu_gettext::messages_info info;
+info.language = "he";
+info.country = "IL";
+info.encoding="UTF-8";
+info.paths.push_back(""); // You need some even empty path
+info.domains.push_back("my_app");
+info.callback = some_file_loader; // Provide a callback
+
+// Create a basic locale without messages support
+boost::locale::generator gen;
+std::locale base_locale = gen("he_IL.UTF-8");
+
+// Install messages catalogs for "char" support to the final locale
+// we are going to use
+std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_facet<char>(info))
+\endcode
+
+In order to setup \ref boost::locale::gnu_gettext::messages_info::language "language", \ref boost::locale::gnu_gettext::messages_info::country "country" and other members you may use boost::locale::info facet for convenience,
+
+\code
+
+// Configure all options for message catalog
+boost::locale::gnu_gettext::messages_info info;
+info.paths.push_back(""); // You need some even empty path
+info.domains.push_back("my_app");
+info.callback = some_file_loader; // Provide a callback
+
+// Create a basic locale without messages support
+boost::locale::generator gen;
+std::locale base_locale = gen(some_locale_name);
+
+// Use boost::locale::info to configure all parameters
+boost::locale::info const &properties = std::use_facet<boost::locale::info>(base_locale);
+info.language = properties.language();
+info.country  = properties.country();
+info.encoding = properties.encoding();
+info.variant  = properties.variant();
+
+// Install messages catalogs to the final locale
+std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_facet<char>(info))
+\endcode
+
+
 
 \subsection msg_qna Questions and Answers
 
