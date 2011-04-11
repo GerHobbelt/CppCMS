@@ -19,10 +19,10 @@
 	-->
 	</script>	
 </div>
-<% abstract | ext markdown2html %>
+<% abstract | ext latex | ext markdown2html %>
 <% if not empty content %>
 	<span id="more"></span>
-	<% content | ext  markdown2html %>
+	<% content | ext latex | ext  markdown2html %>
 <% end %>
 <div id="comments">
 <span id="comments_pos"></span>

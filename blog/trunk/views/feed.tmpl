@@ -51,7 +51,7 @@
 		<guid>http://<% host %><% url "/blog/post" using post.id %></guid>
 		<description>
 		&lt;div style=&quot;direction:<% if rtl %>rtl<% else %>ltr<% end %>&quot;&gt;
-		<% post.abstract | ext markdown2html | escape %>
+		<% post.abstract | ext latex | ext markdown2html | escape %>
 		<% if post.has_content %>
 		&lt;p&gt;
 		&lt;a href="<% url "/blog/post" using post.id %>"&gt;<% gt "more..." %>&lt;/a&gt;

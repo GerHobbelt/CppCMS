@@ -2,7 +2,18 @@
 #include <data/basic_master.h>
 #include <cppdb/frontend.h>
 #include <cppcms/json.h>
+#include <cppcms/urandom.h>
 #include <cppcms/xss.h>
+#include <booster/nowide/fstream.h>
+#include <booster/nowide/cstdio.h>
+#include <booster/log.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 extern "C" {
 	#include <mkdio.h>
 }
@@ -96,10 +107,225 @@ std::string markdown_to_html(std::string const &input)
 	return result;
 }
 
+class tex_to_gif {
+public:
+	tex_to_gif(cppcms::json::value const &config)
+	{
+		path_to_latex_ = config.get("blog.tex.latex","/usr/bin/latex");
+		path_to_dvigif_ = config.get("blog.tex.dvigif","/usr/bin/dvigif");
+		path_to_tmp_ = config.get("blog.tex.temp_dir","/tmp");
+		output_dir_ = config.get("blog.text.output_dir","");
+		if(output_dir_.empty())
+			output_dir_ = 	config.get<std::string>("file_server.document_root",".") 
+					+ "/" 
+					+ config.get<std::string>("blog.media") + "/tex";
+	}
+	~tex_to_gif()
+	{
+	}
+	std::string convert(std::string const &input) const
+	{
+		std::string name = cppcms::util::md5hex(input);
+		std::string www_name = name + ".gif";
+		std::string gif_name = output_dir_ + "/" + www_name;
+		struct stat st;
+		if(:: stat(gif_name.c_str(),&st) == 0) {
+			return www_name;
+		}
+		unsigned char buf[8];
+		cppcms::urandom_device rnd;
+		rnd.generate(buf,sizeof(buf));
+		char tmp_name[sizeof(buf) * 2 + 1];
+		for(unsigned i=0;i<sizeof(buf);i++)
+			snprintf(tmp_name + i*2,3,"%02x",buf[i]);
+		if(create_gif(input,tmp_name,gif_name))
+			return www_name;
+		return std::string(); 
+	}
+private:
+
+	bool os_spawn(char const *dir,std::string const &program,char const *params[]) const
+	{
+		int pid = fork();
+		if(pid < 0) {
+			BOOSTER_ERROR("blog") << "Fork failed:" << strerror(errno);
+			return false;
+		}
+		if(pid == 0) {
+			FILE *f;
+			f=freopen("/dev/null","r",stdin); (void)(f);
+			f=freopen("/dev/null","w",stdout);(void)(f);
+			f=freopen("/dev/null","w",stderr);(void)(f);
+			if(dir) {
+				int r = chdir(dir);
+				int err = errno;
+				if(r < 0) {
+					BOOSTER_ERROR("blog") << "Failed to change directory to " << dir << ":" << strerror(err);
+					exit(1);
+				}
+			}
+			execv(program.c_str(),const_cast<char**>(params));
+			int err = errno;
+			BOOSTER_ERROR("blog") << "Failed to execute " << program << ":" << strerror(err);
+			exit(1);
+		}
+		else {
+			int status=1,r;
+			do {
+				r = waitpid(pid,&status,0);
+			} while(r < 0 && errno == EINTR);
+			if(r < 0)
+				return false;
+			if(!WIFEXITED(status))
+				return false;
+			bool result = WEXITSTATUS(status) == 0;
+			if(!result) {
+				BOOSTER_ERROR("blog") << "Process " << program << " exited with status " <<WEXITSTATUS(status);
+			}
+			return result;
+
+		}
+	}
+
+	bool spawn(char const *dir,std::string const &program,std::string const &param) const
+	{
+		char const *params[3] = {program.c_str(),param.c_str() };
+		return os_spawn(dir,program,params);
+	}
+
+	bool spawn(char const *dir,std::string const &program,std::string const &param1,std::string const &param2) const
+	{
+		char const *params[4] = {program.c_str(),param1.c_str(),param2.c_str() };
+		return os_spawn(dir,program,params);
+	}
+
+	bool spawn(char const *dir,std::string const &program,std::string const &param1,std::string const &param2,std::string const &param3) const
+	{
+		char const *params[5] = {program.c_str(),param1.c_str(),param2.c_str(),param3.c_str() };
+		return os_spawn(dir,program,params);
+	}
+
+
+	bool create_gif(std::string const &tex,std::string const &random_name,std::string const &output) const
+	{
+		std::string fname = path_to_tmp_ + "/" + random_name;
+		struct scoped_clean {
+			std::string name;
+			scoped_clean(std::string const &n) : name(n) {}
+			~scoped_clean() {
+				using namespace booster::nowide;
+				remove((name+".tex").c_str());
+				remove((name+".aux").c_str());
+				remove((name+".log").c_str());
+				remove((name+".gif").c_str());
+				remove((name+".dvi").c_str());
+			}
+		} scope(fname);
+		std::string tex_file = fname + ".tex";
+		std::ofstream texsrc(tex_file.c_str());
+		if(!texsrc) {
+			return false;
+		}
+		texsrc << 
+			"\\documentclass[12pt]{article}\n"
+			"\\usepackage[latin1]{inputenc}\n"
+			"\\usepackage{amsmath}\n"
+			"\\usepackage{amsfonts}\n"
+			"\\usepackage{amssymb}\n"
+			"\\pagestyle{empty}\n"
+			"\\setlength{\\oddsidemargin}{-5in}\n"
+			"\\setlength{\\topmargin}{0cm}\n"
+			"\\setlength{\\headheight}{-5in}\n"
+			"\\setlength{\\headsep}{0cm}\n"
+			"\\begin{document}\n"
+			"\\[" << tex << "\\]\n"
+			"\\end{document}\n" << std::flush;
+
+		texsrc.close();
+
+		if(!spawn(path_to_tmp_.c_str(),path_to_latex_,"--interaction=nonstopmode",tex_file)) {
+			return false;
+		}
+
+		std::string gif_name = fname + ".gif";
+		if(!spawn(0,path_to_dvigif_,fname + ".dvi", "-o" , gif_name)){
+			return false;
+		}
+
+		if(booster::nowide::rename(gif_name.c_str(),output.c_str()) != 0){
+			char buf[1024];
+			booster::nowide::ifstream in_file(gif_name.c_str(),std::fstream::binary);
+			if(!in_file)
+				return false;
+			booster::nowide::ofstream out_file(output.c_str(),std::fstream::binary);
+			if(!out_file)
+				return false;
+			while(in_file.good() && !in_file.eof()) {
+				in_file.read(buf,sizeof(buf));
+				out_file.write(buf,in_file.gcount());
+			}
+			in_file.close();
+			out_file.close();
+			if(out_file.fail()) {
+				booster::nowide::remove(output.c_str());
+				return false;
+			}
+			return  true;
+		}
+		return true;
+	}
+
+	std::string path_to_latex_;
+	std::string path_to_dvigif_;
+	std::string path_to_tmp_;
+	std::string output_dir_;
+
+}; // tex_to_gif
+
+std::auto_ptr<tex_to_gif> tex_filter;
+
+std::string latex_filter(std::string const &in)
+{
+	std::string out;
+	if(!tex_filter.get()) {
+		out = in;
+		return out;
+	}
+	out.reserve(in.size());
+	size_t p_old=0,p1=0,p2=0;
+	while((p1=in.find("[tex]",p_old))!=std::string::npos && (p2=in.find("[/tex]",p_old))!=std::string::npos && p2>p1) {
+		out.append(in,p_old,p1-p_old);
+		p1+=5;
+		std::string tex(in,p1,p2-p1);
+		std::string wwwfile = tex_filter->convert(tex);
+		std::string html_tex = cppcms::util::escape(tex);
+		if(wwwfile.empty())  {
+			out+=html_tex;
+		}
+		else {
+			out+="<img src='";
+			out+= wwwfile;
+			out+=" alt='";
+			out+=html_tex;
+			out+="' align='absmiddle' />";
+		}
+		p_old=p2+6;
+	}
+	out.append(in,p_old,in.size()-p_old);
+	return out;
+}
+
+
 } // anon
 
 
 namespace apps {
+	void init_tex_filer(cppcms::json::value const &s)
+	{
+		if(s.get("blog.tex.enable",false)) {
+			tex_filter.reset(new tex_to_gif(s));
+		}
+	}
 	void basic_master::clear()
 	{
 		sql_->close();
@@ -113,6 +339,7 @@ namespace apps {
 		// Common filters
 		c.markdown2html = markdown_to_html;
 		c.xss = filter;
+		c.latex = latex_filter;
 
 
 		if(cache().fetch_data("general_info",c.info))

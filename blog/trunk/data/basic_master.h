@@ -3,6 +3,12 @@
 #include <booster/function.h>
 #include <cppcms/serialization.h>
 
+namespace cppcms {
+	namespace json {
+		class value;
+	}
+}
+
 namespace data {
 	struct general_info : public cppcms::serializable {
 		std::string blog_title;
@@ -22,7 +28,10 @@ namespace data {
 		std::string cookie_prefix;
 		booster::function<std::string(std::string const &)> markdown2html;
 		booster::function<std::string(std::string const &)> xss;
+		std::string (*latex)(std::string const &);
 	};
+
+	void init_tex_filer(cppcms::json::value const &v);
 }
 
 

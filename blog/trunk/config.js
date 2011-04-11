@@ -4,8 +4,15 @@
 		"media" : "/media",
 		"root" : "/blog",
 		"host" : "localhost:8080",
-		"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10"
+		"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10",
 		//"connection_string" : "mysql:database=cppcms;user=root;password=root;@pool_size=10;@use_prepared=on"
+		"tex" : {
+			"enable" : true,
+			//"latex" : "/usr/bin/latex",
+			// "dvigif" : "/usr/bin/dvigif",
+			// "temp_dir" : "/tmp",
+			// "output_dir" : "/var/www/media/tex"
+		}
 	},
 	"service" : {
 		"api" : "http",

@@ -24,5 +24,7 @@ namespace apps {
 		std::string media_;
 		std::string cookie_;
 	};
+	
+	void init_tex_filer(cppcms::json::value const &s);
 }
 

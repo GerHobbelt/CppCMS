@@ -45,6 +45,7 @@ int main(int argc,char **argv)
 	try {
 		cppcms::service srv(argc,argv);
 		srv.applications_pool().mount(cppcms::applications_factory<blog>());
+		apps::init_tex_filer(srv.settings());
 		srv.run();
 	}
 	catch(std::exception const &e) {
