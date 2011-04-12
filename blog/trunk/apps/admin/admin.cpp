@@ -15,8 +15,6 @@ namespace admin {
 
 admin_master::admin_master(cppcms::service &srv) : cppcms::application(srv) 
 {
-	mapper().assign("links","");
-
 	attach( new caching(srv),
 		"caching",
 		"/cache{1}",

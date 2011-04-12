@@ -61,19 +61,6 @@ create table post2cat (
 
 create index posts_in_cat on post2cat (is_open,cat_id,publish);
 
-create table link_cats (
-	id serial  primary key  not null,
-	name varchar(128) not null
-);
-
-create table links (
-	id serial  primary key  not null,
-	cat_id integer not null references link_cats(id),
-	title varchar(128) not null,
-	url varchar(128) not null,
-	description text not null
-);
-
 create table pages (
 	id serial  primary key  not null,
 	author_id integer not null,

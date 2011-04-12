@@ -114,11 +114,11 @@ public:
 		path_to_latex_ = config.get("blog.tex.latex","/usr/bin/latex");
 		path_to_dvigif_ = config.get("blog.tex.dvigif","/usr/bin/dvigif");
 		path_to_tmp_ = config.get("blog.tex.temp_dir","/tmp");
+		www_dir_ = config.get<std::string>("blog.media") + "/tex";
 		output_dir_ = config.get("blog.text.output_dir","");
 		if(output_dir_.empty())
 			output_dir_ = 	config.get<std::string>("file_server.document_root",".") 
-					+ "/" 
-					+ config.get<std::string>("blog.media") + "/tex";
+					+ "/" + www_dir_; 
 	}
 	~tex_to_gif()
 	{
@@ -126,8 +126,13 @@ public:
 	std::string convert(std::string const &input) const
 	{
 		std::string name = cppcms::util::md5hex(input);
-		std::string www_name = name + ".gif";
-		std::string gif_name = output_dir_ + "/" + www_name;
+		std::string final;
+		final.reserve(64);
+		final+= "/";
+		final+=name;
+		final+=".gif";
+		std::string www_name = www_dir_ + final;
+		std::string gif_name = output_dir_ + final;
 		struct stat st;
 		if(:: stat(gif_name.c_str(),&st) == 0) {
 			return www_name;
@@ -279,6 +284,7 @@ private:
 	std::string path_to_dvigif_;
 	std::string path_to_tmp_;
 	std::string output_dir_;
+	std::string www_dir_;
 
 }; // tex_to_gif
 
@@ -305,7 +311,7 @@ std::string latex_filter(std::string const &in)
 		else {
 			out+="<img src='";
 			out+= wwwfile;
-			out+=" alt='";
+			out+="' alt='";
 			out+=html_tex;
 			out+="' align='absmiddle' />";
 		}

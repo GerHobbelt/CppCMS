@@ -4,4 +4,6 @@ insert into text_options values('blog_description',(select value from options wh
 insert into text_options values('contact',(select value from options where id=2)); 
 update text_options set value='2' where id='dbversion';
 drop table options;
+drop table links;
+drop table link_cats;
 commit;

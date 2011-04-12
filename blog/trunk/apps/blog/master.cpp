@@ -63,29 +63,6 @@ void master::load_sidebar(data::blog::master &c)
 
 	cache().add_trigger("cats");
 
-	r=sql()<<
-		"SELECT link_cats.id,name,title,url,description "
-		"FROM link_cats,links "
-		"WHERE links.cat_id=link_cats.id "
-		"ORDER BY link_cats.id";
-	int previd = -1;
-	while(r.next()) {
-		int id;
-		std::string gname,title,url,descr;
-		r>>id>>gname>>title>>url>>descr;
-		if(id!=previd) {
-			c.sidebar.link_cats.push_back(data::blog::sidebar_info::link_cat());
-			data::blog::sidebar_info::link_cat content;
-			c.sidebar.link_cats.back().title=gname;
-		}
-		c.sidebar.link_cats.back().links.push_back(data::blog::sidebar_info::link_cat::link());
-		data::blog::sidebar_info::link_cat::link &link = c.sidebar.link_cats.back().links.back();
-		link.title = title;
-		link.href = url;
-		link.description = descr;
-	}
-	cache().add_trigger("links");
-
 	cache().store_data("sidebar_info",c.sidebar,recorder.detach());
 }
 

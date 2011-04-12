@@ -30,33 +30,12 @@ namespace blog {
 			}
 		};
 
-		struct link_cat : public cppcms::serializable  {
-			struct link : public cppcms::serializable {
-				std::string href;
-				std::string title;
-				std::string description;
-				void serialize(cppcms::archive &a)
-				{
-					a & href & title & description;
-				}
-			};
-			
-			std::string title;
-			std::list<link> links;
-
-			void serialize(cppcms::archive &a)
-			{
-				a & title & links ;
-			}
-		};
-
 		std::vector<page> pages;
 		std::vector<cat> cats;
-		std::list<link_cat> link_cats;
 
 		void serialize(cppcms::archive &a)
 		{
-			a & pages & cats & link_cats; 
+			a & pages & cats;
 		}
 
 	};

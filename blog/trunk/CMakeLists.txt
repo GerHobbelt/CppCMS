@@ -4,6 +4,8 @@ project(blog)
 include_directories(${CMAKE_SOURCE_DIR})
 include(FindPkgConfig)
 
+
+
 # Options 
 
 option(STATIC_VIEW "Build Static View instead of dynamically loaded one" OFF)
@@ -16,7 +18,9 @@ find_library(LIB_CPPCMS cppcms)
 find_library(LIB_CPPDB cppdb)
 find_library(LIB_MARKDOWN markdown)
 find_program(EXE_TMPL_CC cppcms_tmpl_cc)
-find_program(EXE_MSGFMT msgfmt)
+find_program(MSGFMT msgfmt)
+find_program(MSGMERGE msgmerge)
+find_program(XGETTEXT xgettext)
 find_program(EXE_SQLITE3 sqlite3)
 
 find_path(INC_BOOSTER booster/config.h)
@@ -41,14 +45,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 # Sources
 
-set(VIEW_NAME contendend)
-
-set(VIEW_TEMPLATES 
-	views/blog/contendend.tmpl
-	views/blog/post.tmpl
-	views/blog/page.tmpl
-	views/blog/summary.tmpl
-	)
+set(SKINS contendend)
 
 set(ADMIN_TEMPLATES 
 	views/admin/master.tmpl
@@ -95,7 +92,6 @@ include_directories(${INC_CPPCMS})
 include_directories(${INC_CPPDB})
 include_directories(${INC_MARKDOWN})
 
-set(VIEW_SRC "${CMAKE_CURRENT_BINARY_DIR}/${VIEW_NAME}.cpp")
 
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
@@ -116,24 +112,38 @@ add_custom_command(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	DEPENDS views/feed.tmpl)
 
-add_custom_command(
-	OUTPUT ${VIEW_SRC}
-	COMMAND ${EXE_TMPL_CC}
-		-s "${VIEW_NAME}"
-		${TMPL_CC_PARAMS}
-		-o ${VIEW_SRC}
-		${VIEW_TEMPLATES}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	DEPENDS ${VIEW_TEMPLATES})
+
+foreach(SKIN ${SKINS})
+	set(VIEW_NAME ${SKIN})
+	set(VIEW_TEMPLATES 
+		views/blog/basic_master.tmpl
+		views/blog/skins/${SKIN}.tmpl
+		views/blog/post.tmpl
+		views/blog/page.tmpl
+		views/blog/summary.tmpl
+		)
+
+	set(VIEW_SRC "${CMAKE_CURRENT_BINARY_DIR}/${VIEW_NAME}.cpp")
+
+	add_custom_command(
+		OUTPUT ${VIEW_SRC}
+		COMMAND ${EXE_TMPL_CC}
+			-s "${VIEW_NAME}"
+			${TMPL_CC_PARAMS}
+			-o ${VIEW_SRC}
+			${VIEW_TEMPLATES}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		DEPENDS ${VIEW_TEMPLATES})
 
 
-if(STATIC_VIEW)
-	set(BLOG_SRC ${BLOG_SRC} ${VIEW_SRC})
-else()
-	add_library(${VIEW_NAME} SHARED ${VIEW_SRC})
-	target_link_libraries(${VIEW_NAME} ${LIB_CPPCMS})
-	target_link_libraries(${VIEW_NAME} ${LIB_BOOSTER})
-endif()
+	if(STATIC_VIEW)
+		set(BLOG_SRC ${BLOG_SRC} ${VIEW_SRC})
+	else()
+		add_library(${VIEW_NAME} SHARED ${VIEW_SRC})
+		target_link_libraries(${VIEW_NAME} ${LIB_CPPCMS})
+		target_link_libraries(${VIEW_NAME} ${LIB_BOOSTER})
+	endif()
+endforeach()
 
 
 add_executable(blog ${BLOG_SRC})
@@ -162,5 +172,70 @@ if(EXE_MSGFMT)
 else()
 	message("-- msgfmt not found, translations not generatied")
 endif()
+
+#  Localization
+
+set(LOCALES he)
+
+set(MO_FILES)
+set(UPDATE_PO_LIST)
+set(POT_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/po/blog.pot")
+
+file(GLOB_RECURSE GETTEXT_SRC apps/*.h apps/*.cpp data/*.h data/*.cpp)
+
+set(SKINCPP)
+foreach(SKIN ${SKINS})
+	set(SKINCPP ${SKINCPP} "${CMAKE_CURRENT_BINARY_DIR}/${SNIN}.cpp")
+endforeach()
+
+add_custom_command(
+	OUTPUT ${POT_TEMPLATE}
+	COMMAND 
+		${XGETTEXT} 
+		--keyword=translate:1,1t
+		--keyword=translate:1c,2,2t 
+		--keyword=translate:1,2,3t
+		--keyword=translate:1c,2,3,4t   
+		--keyword=gettext:1
+		--keyword=pgettext:1c,2               
+		--keyword=ngettext:1,2
+		--keyword=npgettext:1c,2,3 
+		--keyword=_
+		--keyword=N_
+		${GETTEXT_SRC}
+		"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
+		"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
+		${SKINCPP}
+		--output=${POT_TEMPLATE}
+	DEPENDS 
+		${BLOG_SRC}
+		${SKINCPP}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+
+add_custom_target(update-po)
+
+foreach(LOCALE ${LOCALES})
+	set(MODIR "${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES")
+	file(MAKE_DIRECTORY "${MODIR}")
+	set(MOFILE "${MODIR}/blog.mo")
+	set(POFILE "${CMAKE_CURRENT_SOURCE_DIR}/po/${LOCALE}.po")
+	
+	add_custom_command(
+		OUTPUT ${MOFILE}
+		COMMAND ${MSGFMT} ${POFILE} -o ${MOFILE}
+		DEPENDS ${POFILE})
+	
+	add_custom_target(update-po-${LOCALE}
+		COMMAND ${MSGMERGE} -U ${POFILE} ${CMAKE_CURRENT_SOURCE_DIR}/po/blog.pot 
+		DEPENDS ${POT_TEMPLATE}
+		)
+	add_dependencies(update-po update-po-${LOCALE})
+
+	set(MO_FILES ${MO_FILES} ${MOFILE})
+	set(UPDATE_PO_LIST ${UPDATE_PO_LIST} update-po-${LOCALE})
+endforeach()
+
+add_custom_target(create-po ALL DEPENDS ${MO_FILES})
 
 

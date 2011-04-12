@@ -1,6 +1,6 @@
 <% c++ #include "data/blog/master.h" %>
 <% skin %>
-<% view master uses data::blog::master %>
+<% view master uses data::blog::master extends basic_master %>
 <% template title() %><% info.blog_title %><% end template %>
 <% template menu() %>
 <a href="<% url "/blog/summary" %>"><% gt "Home" %></a>
@@ -30,39 +30,7 @@
 <link rel="alternate" type="application/rss+xml" title="RSS Comments" href="<% url "/feed/comments" %>" >
 </head>
 <body>
-	<script type="text/javascript">
-	<!--
-                function set_cookie(c_name,value,expiredays)
-                {
-                        var exdate=new Date();
-                        exdate.setDate(exdate.getDate()+expiredays);
-                        document.cookie='<% cookie_prefix %>_' + c_name+ "=" + encodeURIComponent(value)+
-                        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+
-                        ';path=/';
-                }
-                function get_cookie(c_name)
-                {
-                	c_name='<% cookie_prefix %>_' + c_name; 
-                        if (document.cookie.length>0){
-                                c_start=document.cookie.indexOf(c_name + "=");
-                                if (c_start!=-1){ 
-                                        c_start=c_start + c_name.length+1; 
-                                        c_end=document.cookie.indexOf(";",c_start);
-                                        if (c_end==-1) c_end=document.cookie.length;
-                                                return decodeURIComponent(document.cookie.substring(c_start,c_end));
-                                } 
-                        }
-                        return "";
-                }
-		function write_if_admin(message)
-		{
-			if(get_cookie('user').length > 0) {
-				document.write(message);
-			}
-		}
-	-->
-	</script>
-
+<% include scripts() %>
 <div id="page">
 <div id="header">
 <div id="navall" >
@@ -128,29 +96,11 @@
 	</ul>
 <% end %>
 
-<% foreach cat in sidebar.link_cats %>
-	<% item %>
-	<h2><% cat.title %></h2>
-	<% foreach link in cat.links %>
-		<ul>
-		<% item %>
-			<li>
-				<a href="<% link.href %>"><% link.title %> </a>
-				<% if not empty link.description %> &mdash; <% link.description %><% end %>
-			</li>
-		<% end %>
-		</ul>
-	<% empty %>
-		<p><% gt "No links" %></p>
-	<% end %>
-	<% end %>
-<% end %>
-
 <div id="copyright">
 <% if not empty info.copyright_string %>
 	<%= info.copyright_string | ext markdown2html %>
 <% else %>
-	<% gt "© All Rights Reserved" %>
+	<% gt "&copy; All Rights Reserved" %>
 <% end %>
 </div>
 <% end cache %>

@@ -32,7 +32,7 @@
 	},
 	"session" : {
 		"expire" : "renew",
-		"timeout" : 604800,
+		"timeout" : 604800, // a week
 		"location" : "both",
 		"client" : {
 			"hmac" : "sha1",
@@ -52,8 +52,8 @@
 			"domains" : [ "blog" ]
 		},
 		"locales" : [ 
-			"en_US.UTF-8",
 			"he_IL.UTF-8",
+			"en_US.UTF-8",
 		]
 	}
 }
