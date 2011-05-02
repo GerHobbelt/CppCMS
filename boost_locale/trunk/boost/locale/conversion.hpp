@@ -28,7 +28,7 @@ namespace boost {
 
         
         ///
-        /// This class provides base flags for text manipulation, it is used as base for converter facet.
+        /// This class provides base flags for text manipulation. It is used as base for converter facet.
         ///
         class converter_base {
         public:
@@ -137,9 +137,9 @@ namespace boost {
         ///
         /// Normalize Unicode string \a str according to normalization mode \a n
         ///
-        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not takes
+        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
-        /// of Unicode character set.
+        /// of a Unicode character set.
         /// 
         template<typename CharType>
         std::basic_string<CharType> normalize(std::basic_string<CharType> const &str,norm_type n=norm_default,std::locale const &loc=std::locale())
@@ -150,9 +150,9 @@ namespace boost {
         ///
         /// Normalize NUL terminated Unicode string \a str according to normalization mode \a n
         ///
-        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not takes
+        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
-        /// of Unicode character set.
+        /// of a Unicode character set.
         /// 
         template<typename CharType>
         std::basic_string<CharType> normalize(CharType const *str,norm_type n=norm_default,std::locale const &loc=std::locale())
@@ -166,9 +166,9 @@ namespace boost {
         ///
         /// Normalize Unicode string in range [begin,end) according to normalization mode \a n
         ///
-        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not takes
+        /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
-        /// of Unicode character set.
+        /// of a Unicode character set.
         /// 
         template<typename CharType>
         std::basic_string<CharType> normalize(CharType const *begin,CharType const *end,norm_type n=norm_default,std::locale const &loc=std::locale())

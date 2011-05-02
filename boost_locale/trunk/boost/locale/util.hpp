@@ -55,20 +55,20 @@ namespace util {
     /// This class is used for creation of std::codecvt facet for converting utf-16/utf-32 encoding
     /// to encoding supported by this converter
     ///
-    /// Please not, this converter should be fully stateless. By meaning fully stateless it should
+    /// Please note, this converter should be fully stateless. Fully stateless means it should
     /// never assume that it is called in any specific order on the text. Even if the
     /// encoding itself seems to be stateless like windows-1255 or shift-jis, some
     /// encoders (most notably iconv) can actually compose several code-point into one or
-    /// decompose then in case composite characters are found. So be very careful when implementing
+    /// decompose them in case composite characters are found. So be very careful when implementing
     /// these converters for certain character set.
     ///
     class base_converter {
     public:
 
         ///
-        /// This value should be returned in illegal input sequence or code-point is observed:
-        /// For example if UCS-32 code-point in rage reserved for UTF-16 surrogates ais met 
-        /// or invalid UTF-8 sequence is found
+        /// This value should be returned when an illegal input sequence or code-point is observed:
+        /// For example if a UCS-32 code-point is in the range reserved for UTF-16 surrogates
+        /// or an invalid UTF-8 sequence is found
         ///
         static const uint32_t illegal=0xFFFFFFFF;
 
@@ -82,7 +82,7 @@ namespace util {
         {
         }
         ///
-        /// Return the maximal length that one Unicode code-point can be converted, for example
+        /// Return the maximal length that one Unicode code-point can be converted to, for example
         /// for UTF-8 it is 4, for Shift-JIS it is 2 and ISO-8859-1 is 1
         ///
         virtual int max_len() const 
@@ -90,13 +90,13 @@ namespace util {
             return 1;
         }
         ///
-        /// Returns true if calling functions from_unicode, to_unicode, max_len is thread safe.
+        /// Returns true if calling the functions from_unicode, to_unicode, and max_len is thread safe.
         ///
-        /// Rule of thumb: if this class implementation uses simple tables that are unchanged
-        /// or is pure algorithmic like UTF-8 - so it does not share any mutable bit for
+        /// Rule of thumb: if this class' implementation uses simple tables that are unchanged
+        /// or is purely algorithmic like UTF-8 - so it does not share any mutable bit for
         /// independent to_unicode, from_unicode calls, you may set it to true, otherwise,
         /// for example if you use iconv_t descriptor or UConverter as conversion object return false,
-        /// and this object would be cloned for each use.
+        /// and this object will be cloned for each use.
         ///
         virtual bool is_thread_safe() const 
         {

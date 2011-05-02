@@ -24,12 +24,12 @@ namespace locale {
     ///
     /// \defgroup collation Collation 
     ///
-    /// This module that introduces collation related classes
+    /// This module introduces collation related classes
     ///
     /// @{
 
     ///
-    /// \brief a base class that included collation level flags
+    /// \brief a base class that includes collation level flags
     ///
 
     class collator_base {
@@ -49,8 +49,8 @@ namespace locale {
     ///
     /// \brief Collation facet. 
     ///
-    /// It reimplements standard C++ stc::collate
-    /// allowing usage of std::locale class for direct string comparison
+    /// It reimplements standard C++ std::collate,
+    /// allowing usage of std::locale for direct string comparison
     ///
     template<typename CharType>
     class collator : 
@@ -59,7 +59,7 @@ namespace locale {
     {
     public:
         ///
-        /// Type of underlying character
+        /// Type of the underlying character
         ///
         typedef CharType char_type;
         ///
@@ -178,7 +178,7 @@ namespace locale {
 
     ///
     /// \brief This class can be used in STL algorithms and containers for comparison of strings
-    /// with different level then primary
+    /// with a level other than primary
     ///
     /// For example:
     ///

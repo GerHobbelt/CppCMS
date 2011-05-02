@@ -156,7 +156,7 @@ private:
             
             //
             // We do not really know internal point, so we assume that it does not
-            // exists. So according to standard field should be right aligned
+            // exist. So according to the standard field should be right aligned
             //
             if(flags != std::ios_base::left)
                 on_left = n;
@@ -252,7 +252,7 @@ private:
     
 
     //
-    // This is not really efficient solusion, but it works
+    // This is not really an efficient solution, but it works
     //
     template<typename ValueType>
     iter_type do_real_get(iter_type in,iter_type end,std::ios_base &ios,std::ios_base::iostate &err,ValueType &val) const

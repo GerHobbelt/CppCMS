@@ -222,7 +222,7 @@ namespace impl_win {
 
     inline std::wstring wcsnormalize(norm_type norm,wchar_t const *begin,wchar_t const *end)
     {
-        // We use FoldString, under Vista it actually does noramlization;
+        // We use FoldString, under Vista it actually does normalization;
         // under XP and below it does something similar, half job, better then nothing
         unsigned flags = 0;
         switch(norm) {

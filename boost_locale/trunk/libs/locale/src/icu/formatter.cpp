@@ -26,7 +26,7 @@
 #include "time_zone.hpp"
 
 #ifdef BOOST_MSVC
-#  pragma warning(disable : 4244) // loose data 
+#  pragma warning(disable : 4244) // lose data 
 #endif
 
 

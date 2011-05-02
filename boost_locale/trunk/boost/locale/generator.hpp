@@ -123,13 +123,13 @@ namespace boost {
             ///
             /// \note
             ///
-            /// - Under Windows platform the path is treated as path in locale's encoding so when
+            /// - Under the Windows platform the path is treated as a path in the locale's encoding so
             ///   if you create locale "en_US.windows-1251" then path would be treated as cp1255,
-            ///   and if it is en_US.UTF-8 it is treated as UTF-8. File name is always opened as 
-            ///   wide file name as Wide file names are the native file name on Windows.
+            ///   and if it is en_US.UTF-8 it is treated as UTF-8. File name is always opened with 
+            ///   a wide file name as wide file names are the native file name on Windows.
             ///
-            /// - Under POSIX platforms all paths passed as-is regardless of encoding as the narrow
-            ///   encodings are the native encodings for POSIX platform.
+            /// - Under POSIX platforms all paths passed as-is regardless of encoding as narrow
+            ///   encodings are the native encodings for POSIX platforms.
             ///   
             /// 
             void add_messages_path(std::string const &path);
@@ -163,8 +163,8 @@ namespace boost {
             /// Select ANSI encodings as default system encoding rather then UTF-8 by default
             /// under Windows.
             ///
-            /// The default is the most protable and most powerful encoding UTF-8, but yet user
-            /// may select "system" one if it deals with legacy applications
+            /// The default is the most portable and most powerful encoding, UTF-8, but the user
+            /// can select "system" one if he deals with legacy applications
             ///
             void use_ansi_encoding(bool enc);
 
@@ -173,8 +173,8 @@ namespace boost {
             ///
             std::locale generate(std::string const &id) const;
             ///
-            /// Generate a locale with id \a id, use \a base as a locale for which all facets are added,
-            /// instead of std::locale::classic() one
+            /// Generate a locale with id \a id. Use \a base as a locale to which all facets are added,
+            /// instead of std::locale::classic().
             ///
             std::locale generate(std::locale const &base,std::string const &id) const;
             ///

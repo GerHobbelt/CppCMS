@@ -29,7 +29,7 @@ namespace boost {
         class BOOST_LOCALE_DECL info : public std::locale::facet
         {
         public:
-            static std::locale::id id; ///< This member defines uniquely this facet, required by STL 
+            static std::locale::id id; ///< This member uniquely defines this facet, required by STL 
 
             ///
             /// String information about the locale

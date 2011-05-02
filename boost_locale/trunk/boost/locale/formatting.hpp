@@ -92,7 +92,7 @@ namespace boost {
         ///
         /// \brief This class holds an external data - beyond existing fmtflags that std::ios_base holds
         ///
-        /// You almost never create this object directly, you rather access it via ios_info::get(stream_object)
+        /// You should almost never create this object directly. Instead, you should access it via ios_info::get(stream_object)
         /// static member function. It automatically creates default formatting data for that stream
         ///
         class BOOST_LOCALE_DECL ios_info {

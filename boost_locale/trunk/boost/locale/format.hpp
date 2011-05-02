@@ -25,7 +25,7 @@ namespace boost {
         ///
         /// \defgroup format Format
         ///
-        /// This module provides printf like functionality integrated to iostreams and suitable for localization
+        /// This module provides printf like functionality integrated into iostreams and suitable for localization
         ///
         /// @{
         ///
@@ -131,7 +131,7 @@ namespace boost {
         ///
         /// \brief a printf like class that allows type-safe and locale aware message formatting
         ///
-        /// This class creates formatted message similarly to printf or boost::format and receives
+        /// This class creates a formatted message similar to printf or boost::format and receives
         /// formatted entries via operator %.
         ///
         /// For example
@@ -139,19 +139,19 @@ namespace boost {
         ///  cout << format("Hello {1}, you are {2} years old") % name % age << endl;
         /// \endcode
         ///
-        /// Formatting is enclosed between curl brackets \c { \c }  and defined by comma separated list of flags in format key[=value]
+        /// Formatting is enclosed between curly brackets \c { \c } and defined by a comma separated list of flags in the format key[=value]
         /// value may also be text included between single quotes \c ' that is used for special purposes where inclusion of non-ASCII
         /// text is allowed
         ///
         /// For example:
         ///
         /// \code 
-        ///   cout << format("The hight of water at {1,time} is {2,num=fixed,precision=3}") % time % height;
+        ///   cout << format("The height of water at {1,time} is {2,num=fixed,precision=3}") % time % height;
         /// \endcode
         ///
-        /// The special key -- number without value defines a position of input parameter.
+        /// The special key -- a number without a value defines the position of an input parameter.
         /// List of keys:
-        /// -   \c [0-9]+ -- digits, the index of formatted parameter -- mandatory key.
+        /// -   \c [0-9]+ -- digits, the index of a formatted parameter -- mandatory key.
         /// -   \c num or \c number -- format a number. Optional values are:
         ///     -  \c hex -- display hexadecimal number
         ///     -  \c oct -- display in octal format

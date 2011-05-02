@@ -67,21 +67,21 @@ namespace boost {
             }
 
             ///
-            /// This function returns a pointer to string for a message defined by a \a context
-            /// and identification string \a id, both create a single key for message lookup in
+            /// This function returns a pointer to the string for a message defined by a \a context
+            /// and identification string \a id. Both create a single key for message lookup in
             /// a domain defined by \a domain_id.
             ///
-            /// If translated string is found, it is returned, otherwise NULL is returned
+            /// If a translated string is found, it is returned, otherwise NULL is returned
             /// 
             ///
             virtual char_type const *get(int domain_id,char const *context,char const *id) const = 0;
             ///
-            /// This function returns a pointer to string for a plural message defined by a \a context
-            /// and identification string \a single_id, both create a single key for message lookup in
-            /// a domain defined \a domain_id. \a n used to pick a correct translation string for specific
+            /// This function returns a pointer to the string for a plural message defined by a \a context
+            /// and identification string \a single_id. Both create a single key for message lookup in
+            /// a domain defined \a domain_id. \a n is used to pick the correct translation string for a specific
             /// number.
             ///
-            /// If translated string is found, it is returned, otherwise NULL is returned
+            /// If a translated string is found, it is returned, otherwise NULL is returned
             /// 
             ///
             virtual char_type const *get(int domain_id,char const *context,char const *single_id,int n) const = 0;
@@ -102,10 +102,10 @@ namespace boost {
         };
 
         ///
-        /// \brief This class represents a message that can be converted to specific locale message
+        /// \brief This class represents a message that can be converted to a specific locale message
         ///
-        /// It holds original ASCII string that is queried in the dictionary when converting to output string.
-        /// The created string may be UTF-8, UTF-16, UTF-32 or other 8-bit encoded string according to target 
+        /// It holds the original ASCII string that is queried in the dictionary when converting to the output string.
+        /// The created string may be UTF-8, UTF-16, UTF-32 or other 8-bit encoded string according to the target 
         /// character type and locale encoding.
         ///
         struct message {
@@ -124,7 +124,7 @@ namespace boost {
 
             ///
             /// Create a simple message from 0 terminated string. The string should exist
-            /// until message is destroyed. Generally useful with static constant strings
+            /// until the message is destroyed. Generally useful with static constant strings
             /// 
             explicit message(char const *id) :
                 n_(0),
@@ -136,9 +136,9 @@ namespace boost {
 
             ///
             /// Create a simple plural form message from 0 terminated strings. The strings should exist
-            /// until message is destroyed. Generally useful with static constant strings.
+            /// until the message is destroyed. Generally useful with static constant strings.
             ///
-            /// \a n is the number, \a single and \a plural are single and plural forms of message
+            /// \a n is the number, \a single and \a plural are singular and plural forms of the message
             /// 
             explicit message(char const *single,char const *plural,int n) :
                 n_(n),
@@ -151,7 +151,7 @@ namespace boost {
             ///
             /// Create a simple message from 0 terminated strings, with context
             /// information. The string should exist
-            /// until message is destroyed. Generally useful with static constant strings
+            /// until the message is destroyed. Generally useful with static constant strings
             /// 
             explicit message(char const *context,char const *id) :
                 n_(0),
@@ -163,9 +163,9 @@ namespace boost {
 
             ///
             /// Create a simple plural form message from 0 terminated strings, with context. The strings should exist
-            /// until message is destroyed. Generally useful with static constant strings.
+            /// until the message is destroyed. Generally useful with static constant strings.
             ///
-            /// \a n is the number, \a single and \a plural are single and plural forms of message
+            /// \a n is the number, \a single and \a plural are singular and plural forms of the message
             /// 
             explicit message(char const *context,char const *single,char const *plural,int n) :
                 n_(n),
@@ -177,7 +177,7 @@ namespace boost {
 
 
             ///
-            /// Create a simple message from string.
+            /// Create a simple message from a string.
             ///
             explicit message(std::string const &id) :
                 n_(0),
@@ -191,7 +191,7 @@ namespace boost {
             ///
             /// Create a simple plural form message from strings.
             ///
-            /// \a n is the number, \a single and \a plural are single and plural forms of message
+            /// \a n is the number, \a single and \a plural are single and plural forms of the message
             /// 
             explicit message(std::string const &single,std::string const &plural,int number) :
                 n_(number),
@@ -204,7 +204,7 @@ namespace boost {
             }
 
             ///
-            /// Create a simple message from string with context.
+            /// Create a simple message from a string with context.
             ///
             explicit message(std::string const &context,std::string const &id) :
                 n_(0),
@@ -219,7 +219,7 @@ namespace boost {
             ///
             /// Create a simple plural form message from strings.
             ///
-            /// \a n is the number, \a single and \a plural are single and plural forms of message
+            /// \a n is the number, \a single and \a plural are single and plural forms of the message
             /// 
             explicit message(std::string const &context,std::string const &single,std::string const &plural,int number) :
                 n_(number),
@@ -233,7 +233,7 @@ namespace boost {
             }
 
             ///
-            /// Message class can be explicitly converter to string class
+            /// Message class can be explicitly converted to string class
             ///
 
             template<typename CharType>
@@ -243,7 +243,7 @@ namespace boost {
             }
 
             ///
-            /// Translate message to the string in default global locale, using default domain
+            /// Translate message to a string in the default global locale, using default domain
             ///
             template<typename CharType>
             std::basic_string<CharType> str() const
@@ -253,7 +253,7 @@ namespace boost {
             }
             
             ///
-            /// Translate message to string in the locale \a locale, using default domain
+            /// Translate message to a string in the locale \a locale, using default domain
             ///
             template<typename CharType>
             std::basic_string<CharType> str(std::locale const &locale) const
@@ -262,7 +262,7 @@ namespace boost {
             }
            
             ///
-            /// Translate message to string using locale \a locale and message domain  \ a domain_id
+            /// Translate message to a string using locale \a locale and message domain  \ a domain_id
             /// 
             template<typename CharType>
             std::basic_string<CharType> str(std::locale const &locale,std::string domain_id) const
@@ -274,7 +274,7 @@ namespace boost {
             }
 
             ///
-            /// Translate message to string using defailt locale message domain  \ a domain_id
+            /// Translate message to a string using the default locale and message domain  \ a domain_id
             /// 
             template<typename CharType>
             std::basic_string<CharType> str(std::string domain_id) const
@@ -288,7 +288,7 @@ namespace boost {
 
             
             ///
-            /// Translate message to string using locale \a loc and message domain index  \ a id
+            /// Translate message to a string using locale \a loc and message domain index  \ a id
             /// 
             template<typename CharType>
             std::basic_string<CharType> str(std::locale const &loc,int id) const

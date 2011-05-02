@@ -23,7 +23,7 @@ feature.feature boost.locale.posix : on off : optional propagated ;
 feature.feature boost.locale.std : on off : optional propagated ;
 feature.feature boost.locale.winapi : on off : optional propagated ;
 
-# Configureation of libraries
+# Configuration of libraries
 
 ## iconv
 

@@ -135,7 +135,7 @@ namespace boost {
                 }
 
                 ///
-                /// Offset from the begging of the text where a break occurs.
+                /// Offset from the beggining of the text where a break occurs.
                 ///
                 uint32_t offset;
                 ///
@@ -345,16 +345,16 @@ namespace boost {
             ///
             /// \brief Class the holds boundary mapping of the text that can be used with iterators
             ///
-            /// When the object is created in creates index and provides access to it with iterators.
-            /// it is used mostly together with break_iterator and token_iterator. For each boundary point it
-            /// provides the description mark of it that allows distinguish between different types of boundaries.
-            /// For example it marks if sentence terminates because a mark like "?" or "." was found or because
-            /// new line symbol is present in the text.
+            /// When the object is created it creates index and provides access to it with iterators.
+            /// It is used mostly with break_iterator and token_iterator. For each boundary point it
+            /// provides the description mark that allows distinguishing between different types of boundaries.
+            /// For example, it marks whether a sentence terminates because a mark like "?" or "." was found or because
+            /// a new line symbol is present in the text.
             ///
-            /// These marks can be read out with token_iterator::mark() and break_iterator::mark() member functions.
+            /// These marks can be read out with the token_iterator::mark() and break_iterator::mark() member functions.
             ///
-            /// This class stores iterators to the original text, so you should be careful with iterators
-            /// invalidation. If the iterators on original text are invalid you can't use this mapping any more.
+            /// This class stores iterators to the original text, so you should be careful about iterator
+            /// invalidation. If the iterators on the original text are invalid, you can't use this mapping any more.
             ///
 
             template<class RangeIterator>
@@ -365,7 +365,7 @@ namespace boost {
                 ///
                 typedef RangeIterator iterator;
                 ///
-                /// Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate over the original text.
                 ///
                 typedef typename RangeIterator::base_iterator base_iterator;
                 ///
@@ -374,7 +374,7 @@ namespace boost {
                 typedef typename std::iterator_traits<base_iterator>::value_type char_type;
 
                 ///
-                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
+                /// Create a mapping of type \a type of the text in the range [\a begin, \a end) using locale \a loc
                 ///
                 mapping(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
@@ -382,7 +382,7 @@ namespace boost {
                 }
 
                 ///
-                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc and set the boundaries
+                /// Create a mapping of type \a type of the text in the range [\a begin, \a end) using locale \a loc and set the boundaries
                 /// mask to \a mask
                 ///
                 mapping(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
@@ -391,7 +391,7 @@ namespace boost {
                 }
 
                 ///
-                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc
+                /// Create a mapping of type \a type of the text in the range [\a begin, \a end) using locale \a loc
                 ///
                 void map(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc = std::locale())
                 {
@@ -399,7 +399,7 @@ namespace boost {
                 }
 
                 ///
-                /// Create a mapping of type \a type of the text in range [\a begin, \a end) using locale \a loc, and set a mask to \a mask
+                /// Create a mapping of type \a type of the text in the range [\a begin, \a end) using locale \a loc, and set a mask to \a mask
                 ///
                 void map(boundary_type type,base_iterator begin,base_iterator end,unsigned mask,std::locale const &loc = std::locale())
                 {
@@ -525,12 +525,12 @@ namespace boost {
             ///
             /// \brief token_iterator is an iterator that returns text chunks between boundary positions
             ///
-            /// Token iterator may behave in two different ways: select specific tokens in only tide way and
+            /// Token iterator can behave in two different ways: select specific tokens in only tide way and
             /// select them widely. For tide selection (default) it would not return text chunks that
             /// do not fit the selection mask. For example, for word iteration with mask "word_letters"
             /// for text "I met him at 7" it would return "I", "met", "him", "at" ignoring white spaces
-            /// punctuation and numbers, But sometimes, you need to perform full selection of almost entry text
-            /// for example for sentence boundaries and sentence_term mask you may want to specify full_select(true), 
+            /// punctuation and numbers. But sometimes, you need to perform full selection of almost entry text.
+            /// For example, for sentence boundaries and sentence_term mask you may want to specify full_select(true), 
             /// So "Hello! How<LF>are you?" would return you biggest possible chunks "Hello!", " How<LF>are you?".
             ///
             
@@ -546,11 +546,11 @@ namespace boost {
                 ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 ///
-                /// Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate over the original text.
                 ///
                 typedef IteratorType base_iterator;
                 ///
-                /// The type of mapping that iterator can iterate over it
+                /// The type of mapping that the iterator can iterate over it
                 /// 
                 typedef mapping<token_iterator<IteratorType,ValueType> > mapping_type;
                                 
@@ -566,7 +566,7 @@ namespace boost {
                 }
 
                 ///
-                /// set position of the token iterator to the location of underlying iterator.
+                /// set the position of the token iterator to the location of underlying iterator.
                 ///
                 /// This operator sets the token iterator to first token following that position. For example:
                 ///
@@ -592,7 +592,7 @@ namespace boost {
                 }
 
                 ///
-                /// Create token iterator for mapping \a map with location at begin or end according to value of flag \a begin,
+                /// Create a token iterator for mapping \a map with location at begin or end according to value of flag \a begin,
                 /// and a mask \a mask
                 ///
                 /// It is strongly recommended to use map.begin(), map.end() instead.
@@ -711,7 +711,7 @@ namespace boost {
                 }
                 
                 ///
-                /// Compare two iterators. They equal if they point to same map, have same position and same mask
+                /// Compare two iterators. They are equal if they point to same map and have the same position and mask
                 ///
                 bool operator==(token_iterator const &other) const
                 {
@@ -779,13 +779,13 @@ namespace boost {
             ///
             /// \brief break_iterator is bidirectional iterator that returns text boundary positions
             ///
-            /// It returns rather iterators to break position then text chunks themselves. It stops only
-            /// on boundaries that their marks fit the required mask. Also beginning of text and end of 
-            /// text are valid boundaries regardless their marks.
+            /// It returns iterators pointing to the break positions rather than the text chunks themselves. It stops only
+            /// on boundaries whose marks fit the required mask. Also beginning of text and end of 
+            /// text are valid boundaries regardless of their marks.
             ///
-            /// Please note for text in range [text_begin,text_end) and break_iterator it over it
-            /// in range [begin,end): if *it==text_end then it!=end. And if it==end then *it is invalid.
-            /// Thus for example for work iterator over text "hello", break iterator returns at beginning
+            /// Please note that for text in the range [text_begin,text_end) and break_iterator it over
+            /// the range [begin,end): if *it==text_end then it!=end. And if it==end then *it is invalid.
+            /// Thus for example for over the text "hello", break iterator returns
             /// text_begin ("|hello"), then text_end ("hello|") and then it points to end.
             ///
             template<typename IteratorType>
@@ -797,11 +797,11 @@ namespace boost {
                 ///
                 typedef typename std::iterator_traits<IteratorType>::value_type char_type;
                 ///
-                /// Underlying iterator that is used to iterate original text.
+                /// Underlying iterator that is used to iterate over the original text.
                 ///
                 typedef IteratorType base_iterator;
                 ///
-                /// The type of mapping that iterator can iterate over it
+                /// The type of mapping that the iterator can iterate over.
                 /// 
                 typedef mapping<break_iterator<IteratorType> > mapping_type;
                 
@@ -855,7 +855,7 @@ namespace boost {
                 }
 
                 ///
-                /// Compare two iterators. They equal if they point to same map, have same position and same mask
+                /// Compare two iterators. They are equal if they point to the same map and have the same position and mask
                 ///
                 bool operator==(break_iterator const &other) const
                 {

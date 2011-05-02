@@ -11,8 +11,8 @@
 namespace boost { 
 namespace locale {
     ///
-    /// \brief a smart pointer similar to std::auto_ptr but it is non-copyable and
-    /// underlying object has same constness as the pointer itself (not like in ordinary pointer).
+    /// \brief a smart pointer similar to std::auto_ptr but it is non-copyable and the
+    /// underlying object has the same constness as the pointer itself (unlike an ordinary pointer).
     ///
     template<typename T>
     class hold_ptr {
