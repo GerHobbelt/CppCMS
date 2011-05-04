@@ -1222,12 +1222,25 @@ The syntax is described by following grammar:
     format : '{' parameters '}'
     parameters: parameter | parameter ',' parameters;
     parameter : key ["=" value] ;
-    key : [0-9a-zA-Z<>] ;
+    key : [0-9a-zA-Z<>]+ ;
     value : ascii-string-excluding-"}"-and="," | local-string ; 
     local-string : quoted-text | quoted-text local-string;
     quoted-text : '[^']*' ;
 \endverbatim
 
+
+You can include literal '{' and '}' by inserting double "{{" or "}}"
+to the text.
+
+\code
+cout << format(translate("Unexpected `{{' in line {1} in file {2}")) % pos % file;
+\endcode
+
+Would display something like
+
+\verbatim
+Unexpected `{' in line 5 in file source.cpp
+\endverbatim
 
 The following format key-value pairs are supported:
 
@@ -1246,7 +1259,7 @@ The following format key-value pairs are supported:
     -   \c nat or \c national -- display using national currency symbol.
     .
 -   \c per or \c percent -- format a percentage value.
--   \c date, \c time , \c datetime or \c dt -- format a date, a time, or a date and time. Options are:
+-   \c date, \c time, \c datetime or \c dt -- format a date, a time, or a date and time. Options are:
     .
     -   \c s or \c short -- display in short format.
     -   \c m or \c medium -- display in medium format.
@@ -1265,7 +1278,15 @@ The following format key-value pairs are supported:
     \code
     cout << format("This article was published at {1,date=l} (Gregorian) {1,locale=he_IL@calendar=hebrew,date=l} (Hebrew)") % date;
     \endcode
-
+-   \c timezone or \c tz -- the name of the timezone to display the time in. For example:\n
+    \code
+    cout << format("Time is: Local {1,time}, ({1,time,tz=EET} Eastern European Time)") % date;
+    \endcode
+-   \c local - display the time in local time
+-   \c gmt - display the time in UTC time scale
+    \code
+    cout << format("Local time is: {1,time,local}, universal time is {1,time,gmt}") % time;
+    \endcode
 
 The constructor for the \ref boost::locale::format "format" class can take an object of type \ref boost::locale::message "message", simplifying integration with message translation code.
 
@@ -1696,7 +1717,7 @@ For example:
     // Get global backend
 
     my.select("std"); 
-    // select \c std backend as default
+    // select std backend as default
 
     generator gen(my); 
     // create a generator that uses this backend.
