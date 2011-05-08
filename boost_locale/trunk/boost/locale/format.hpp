@@ -187,6 +187,7 @@ namespace boost {
         class basic_format {
         public:
             typedef CharType char_type; ///< Underlying character type
+            typedef basic_message<char_type> message_type; ///< The translation message type
             /// \cond INTERNAL
             typedef details::formattible<CharType> formattible_type; 
             /// \endcond 
@@ -208,7 +209,7 @@ namespace boost {
             /// Create a format class using message \a trans. The message if translated first according
             /// to the rules of target locale and then interpreted as format string
             ///
-            basic_format(message const &trans) : 
+            basic_format(message_type const &trans) : 
                 message_(trans),
                 translate_(true),
                 parameters_count_(0)
@@ -243,7 +244,7 @@ namespace boost {
             {
                 string_type format;
                 if(translate_)
-                    format = message_.str<CharType>(out.getloc(),ios_info::get(out).domain_id());
+                    format = message_.str(out.getloc(),ios_info::get(out).domain_id());
                 else
                     format = format_;
                
@@ -392,7 +393,7 @@ namespace boost {
 
             static unsigned const base_params_ = 8;
             
-            message message_;
+            message_type message_;
             string_type format_;
             bool translate_;
 

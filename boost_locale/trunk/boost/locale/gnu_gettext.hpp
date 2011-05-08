@@ -40,10 +40,39 @@ namespace gnu_gettext {
         std::string encoding;   ///< Required target charset encoding. Ignored for wide characters.
                                 ///< For narrow, should specify the correct encoding required for this catalog
         std::string locale_category; ///< Locale category, is set by default to LC_MESSAGES, but may be changed
-        std::vector<std::string> domains;   ///< Message domains - application name, like my_app. So files named my_app.mo
-                                            ///< would be loaded
-        std::vector<std::string> paths;     ///< Paths to search files in. Under MS Windows it uses encoding
-                                            ///< parameter to convert them to wide OS specific paths.
+        struct domain {
+            std::string name;
+            std::string encoding;
+            domain() {}
+            domain(std::string const &n) 
+            {
+                size_t pos = n.find("/");
+                if(pos==std::string::npos) {
+                    name = n;
+                    encoding = "UTF-8";
+                }
+                else {
+                    name = n.substr(0,pos);
+                    encoding = n.substr(pos+1);
+                }
+
+            }
+
+            bool operator==(domain const &other) const
+            {
+                return name==other.name;
+            }
+            bool operator!=(domain const &other) const
+            {
+                return !(*this==other);
+            }
+
+        };
+        typedef std::vector<domain> domains_type;
+        domains_type domains;           ///< Message domains - application name, like my_app. So files named my_app.mo
+                                        ///< would be loaded
+        std::vector<std::string> paths; ///< Paths to search files in. Under MS Windows it uses encoding
+                                        ///< parameter to convert them to wide OS specific paths.
         
         ///
         /// The callback for custom file system support. This callback should read the file named \a file_name

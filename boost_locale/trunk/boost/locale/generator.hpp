@@ -106,6 +106,22 @@ namespace boost {
             /// Add a new domain of messages that would be generated. It should be set in order to enable
             /// messages support.
             ///
+            /// Messages domain has following format: "name" or "name/encoding"
+            /// where name is the base name of the "mo" file where the catalog is stored
+            /// without ".mo" extension. For example for file \c /usr/share/locale/he/LC_MESSAGES/blog.mo
+            /// it would be \c blog.
+            ///
+            /// You can optionally specify the encoding of the keys in the sources by adding "/encoding_name"
+            /// For example blog/cp1255.
+            ///
+            /// If not defined all keys are assumed to be UTF-8 encoded.
+            ///
+            /// \note When you select a domain for the program using dgettext or message API, you
+            /// do not specify the encoding part. So for example if the provided
+            /// domain name was "blog/windows-1255" then for translation
+            /// you should use dgettext("blog","Hello")
+            ///
+            ///
             void add_messages_domain(std::string const &domain);
             ///
             /// Set default message domain. If this member was not called, the first added messages domain is used.
