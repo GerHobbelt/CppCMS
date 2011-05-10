@@ -621,7 +621,7 @@ The basic function that allows us to translate a message is boost::locale::trans
     -   boost::locale::translate(char const *single,char const *plural,int number)
     -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
     .
-    Translate a message, or a message in a given context. The source text \b is not copied.
+    Translate a message, or a message in a given context. The source text \b is copied.
     .
     -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
     -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
@@ -878,12 +878,6 @@ The full set of xgettext parameters suitable for Boost.Locale is:
              --keyword=translate:1,2,3t --keyword=translate:1c,2,3,4t   \
              --keyword=gettext:1 --keyword=pgettext:1c,2                \
              --keyword=ngettext:1,2 --keyword=npgettext:1c,2,3          \
-             --keyword=wgettext:1 --keyword=wpgettext:1c,2              \
-             --keyword=wngettext:1,2 --keyword=wnpgettext:1c,2,3        \
-             --keyword=u16gettext:1 --keyword=u16pgettext:1c,2          \
-             --keyword=u16ngettext:1,2 --keyword=u16npgettext:1c,2,3    \
-             --keyword=u32gettext:1 --keyword=u32pgettext:1c,2          \
-             --keyword=u32ngettext:1,2 --keyword=u32npgettext:1c,2,3    \
              source_file_1.cpp ... source_file_N.cpp
 \endcode
 
@@ -1363,7 +1357,7 @@ forward in Russian or French locales and move one day backward in USA and Israel
 
 - \ref boost::locale::calendar -- represents generic information about the calendar, independent from a specific time point. For example, you can get the maximum number of days in a month for a specific calendar.
 - \ref boost::locale::date_time  -- represents a time point. It is constructed from a calendar and allows manipulation of various time periods.
-- \ref boost::locale::period -- holds an enumeration of various periods, such as month, year, day, and hour, allowing
+- \ref boost::locale::period -- holds a list of functions that represent various periods, such as month, year, day, and hour, allowing
 manipulation of dates and times. You can add periods, multiply them by integers, get or set them, or add them to
 \ref boost::locale::date_time "date_time" objects.
 
@@ -1373,27 +1367,37 @@ For example:
 \code
     using namespace boost::locale;
     date_time now; // Create date_time class with default calendar initialized to current time
-    date_time tomorrow = now + period::day;
+    date_time tomorrow = now + period::day();
     cout << "Let's meet tomorrow at " << as::date << tomorrow << endl;
-    date_time some_point = period::year * 1995 + period::january + period::day*1;
+    date_time some_point = period::year(1995) + period::january() + period::day(1);
     // Set some_point's date to 1995-Jan-1.
     cout << "The "<< as::date << some_point " is the " 
-        << as::ordinal << some_point / period::day_of_week_local << " day of the week"  << endl;
+        << as::ordinal << some_point / period::day_of_week_local() << " day of the week"  << endl;
 \endcode
 
 You can calculate the difference between dates by dividing the difference by a period:
 
 \code
     date_time now;
-    cout << " There are " << (now + 2 * period::month - now) / period::day << " days "
-            "between " << as::date << now << " and " << now + 2*period::month << endl;
+    cout << " There are " << (now + 2 * period::month() - now) / period::day() << " days "
+            "between " << as::date << now << " and " << now + 2*period::month() << endl;
 \endcode
+
+You can also use different syntax (less operator overloading) 
+
+\code
+    date_time now;
+    cout << " There are " << period::day(now + period::month(2) - now) << " days "
+            "between " << as::date << now << " and " << now + period::month(2) << endl;
+\endcode
+
+
 
 \ref boost::locale::date_time "date_time"  -- provides the member functions \ref boost::locale::date_time::minimum() "minimum" and
 \ref boost::locale::date_time::maximum() "maximum" to get the information about smallest and largest
 possible values of a certain period for a specific time.
 
-For example, for February the <tt>maximum(period::date)</tt> would be 28 (or 29 for a leap year), and for January it would be 31.
+For example, for February the <tt>maximum(period::day())</tt> would be 28 (or 29 for a leap year), and for January it would be 31.
 
 \note Be very careful with assumptions about calendars. For example, in the Hebrew calendar, the
 number of months is different for leap years and non-leap years.
@@ -1415,7 +1419,7 @@ For example:
     std::locale l_gregorian=gen("en_US");
     
     // Create a Gregorian date from fields
-    date_time greg(2010*year + february + 5*day,l_gregorian);
+    date_time greg(year(2010) + february() + day(5),l_gregorian);
     // Assign a time point taken from the Gregorian date to date_time with
     // the Hebrew calendar
     date_time heb(greg.time(),l_hebrew);
@@ -1491,7 +1495,7 @@ of the \c iostream's locale and time zone and not in the context of specific \c 
     local times and time-zones handling.
     \n
     For example, <tt>date_time(some_time.time() + 3600)</tt> may be not equal to
-    <tt>some_time + hour</tt>, because of the daylight savings time.
+    <tt>some_time + hour()</tt>, because of the daylight savings time.
 
 <b>Why don't you use Boost.DateTime time zone support?</b>
 

@@ -98,27 +98,27 @@ std::locale calendar::get_locale() const
 
 int calendar::minimum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::absolute_minimum);
+    return impl_->get_value(f.mark(),abstract_calendar::absolute_minimum);
 }
 
 int calendar::greatest_minimum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::greatest_minimum);
+    return impl_->get_value(f.mark(),abstract_calendar::greatest_minimum);
 }
 
 int calendar::maximum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::absolute_maximum);
+    return impl_->get_value(f.mark(),abstract_calendar::absolute_maximum);
 }
 
 int calendar::least_maximum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::least_maximum);
+    return impl_->get_value(f.mark(),abstract_calendar::least_maximum);
 }
 
 int calendar::first_day_of_week() const
 {
-    return impl_->get_value(period::first_day_of_week,abstract_calendar::current);
+    return impl_->get_value(period::marks::first_day_of_week,abstract_calendar::current);
 }
 
 bool calendar::operator==(calendar const &other) const
@@ -150,7 +150,7 @@ date_time::date_time(date_time const &other,date_time_period_set const &s)
 {
     impl_.reset(other.impl_->clone());
     for(unsigned i=0;i<s.size();i++) {
-        impl_->set_value(s[i].type,s[i].value);
+        impl_->set_value(s[i].type.mark(),s[i].value);
     }
     impl_->normalize();
 }
@@ -193,7 +193,7 @@ date_time::date_time(date_time_period_set const &s) :
 {
     impl_->set_timezone(time_zone::global());
     for(unsigned i=0;i<s.size();i++) {
-        impl_->set_value(s[i].type,s[i].value);
+        impl_->set_value(s[i].type.mark(),s[i].value);
     }
     impl_->normalize();
 }
@@ -201,7 +201,7 @@ date_time::date_time(date_time_period_set const &s,calendar const &cal) :
     impl_(cal.impl_->clone())
 {
     for(unsigned i=0;i<s.size();i++) {
-        impl_->set_value(s[i].type,s[i].value);
+        impl_->set_value(s[i].type.mark(),s[i].value);
     }
     impl_->normalize();
 }
@@ -209,20 +209,20 @@ date_time::date_time(date_time_period_set const &s,calendar const &cal) :
 date_time const &date_time::operator=(date_time_period_set const &s)
 {
     for(unsigned i=0;i<s.size();i++)
-        impl_->set_value(s[i].type,s[i].value);
+        impl_->set_value(s[i].type.mark(),s[i].value);
     impl_->normalize();
     return *this;
 }
 
 void date_time::set(period_type f,int v)
 {
-    impl_->set_value(f,v);
+    impl_->set_value(f.mark(),v);
     impl_->normalize();
 }
 
 int date_time::get(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::current);
+    return impl_->get_value(f.mark(),abstract_calendar::current);
 }
 
 date_time date_time::operator+(date_time_period const &v) const
@@ -255,25 +255,25 @@ date_time date_time::operator>>(date_time_period const &v) const
 
 date_time const &date_time::operator+=(date_time_period const &v) 
 {
-    impl_->adjust_value(v.type,abstract_calendar::move,v.value);
+    impl_->adjust_value(v.type.mark(),abstract_calendar::move,v.value);
     return *this;
 }
 
 date_time const &date_time::operator-=(date_time_period const &v) 
 {
-    impl_->adjust_value(v.type,abstract_calendar::move,-v.value);
+    impl_->adjust_value(v.type.mark(),abstract_calendar::move,-v.value);
     return *this;
 }
 
 date_time const &date_time::operator<<=(date_time_period const &v) 
 {
-    impl_->adjust_value(v.type,abstract_calendar::roll,v.value);
+    impl_->adjust_value(v.type.mark(),abstract_calendar::roll,v.value);
     return *this;
 }
 
 date_time const &date_time::operator>>=(date_time_period const &v) 
 {
-    impl_->adjust_value(v.type,abstract_calendar::roll,-v.value);
+    impl_->adjust_value(v.type.mark(),abstract_calendar::roll,-v.value);
     return *this;
 }
 
@@ -412,17 +412,17 @@ void date_time::swap(date_time &other)
 
 int date_time::difference(date_time const &other,period_type f) const
 {
-    return impl_->difference(other.impl_.get(),f);
+    return impl_->difference(other.impl_.get(),f.mark());
 }
 
 int date_time::maximum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::actual_maximum);
+    return impl_->get_value(f.mark(),abstract_calendar::actual_maximum);
 }
 
 int date_time::minimum(period_type f) const
 {
-    return impl_->get_value(f,abstract_calendar::actual_minimum);
+    return impl_->get_value(f.mark(),abstract_calendar::actual_minimum);
 }
 
 bool date_time::is_in_daylight_saving_time() const
