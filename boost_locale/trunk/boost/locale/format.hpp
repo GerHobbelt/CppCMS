@@ -62,7 +62,7 @@ namespace boost {
                 template<typename Type>
                 formattible(Type const &value)
                 {
-                    pointer_ = reinterpret_cast<void const *>(&value);
+                    pointer_ = static_cast<void const *>(&value);
                     writer_ = &write<Type>;
                 }
 
@@ -89,7 +89,7 @@ namespace boost {
                 template<typename Type>
                 static void write(stream_type &output,void const *ptr)
                 {
-                    output << *reinterpret_cast<Type const *>(ptr);
+                    output << *static_cast<Type const *>(ptr);
                 }
                 
                 void const *pointer_;
@@ -101,7 +101,7 @@ namespace boost {
                 format_parser(std::ios_base &ios,void *,void (*imbuer)(void *,std::locale const &));
                 ~format_parser();
                 
-                unsigned get_posision();
+                unsigned get_position();
                 
                 void set_one_flag(std::string const &key,std::string const &value);
 
@@ -143,6 +143,9 @@ namespace boost {
         /// value may also be text included between single quotes \c ' that is used for special purposes where inclusion of non-ASCII
         /// text is allowed
         ///
+        /// Including of literal \c { and \c } is possible by specifying double brackets \c {{ and \c }} accordingly.
+        ///
+        ///
         /// For example:
         ///
         /// \code 
@@ -180,8 +183,19 @@ namespace boost {
         /// -  \c precision or \c p -- set precision (requires parameter).
         /// -  \c locale -- with parameter -- switch locale for current operation. This command generates locale
         ///     with formatting facets giving more fine grained control of formatting. For example:
+        /// -  \c timezone or \c tz -- the name of the timezone to display the time in. For example:\n
+        ///    \code
+        ///    cout << format("Time is: Local {1,time}, ({1,time,tz=EET} Eastern European Time)") % date;
+        ///    \endcode
+        /// -  \c local - display the time in local time
+        /// -  \c gmt - display the time in UTC time scale
+        ///    \code
+        ///    cout << format("Local time is: {1,time,local}, universal time is {1,time,gmt}") % time;
+        ///    \endcode
         /// 
         /// 
+        /// Invalid formatting strings are slightly ignored. This would prevent from translator
+        /// to crash the program in unexpected location.
         /// 
         template<typename CharType>
         class basic_format {
@@ -254,6 +268,33 @@ namespace boost {
                         
             
         private:
+
+            class format_guard {
+            public:
+                format_guard(details::format_parser &fmt) : 
+                    fmt_(&fmt),
+                    restored_(false)
+                {
+                }
+                void restore()
+                {
+                    if(restored_)
+                        return;
+                    fmt_->restore();
+                    restored_ = true;
+                }
+                ~format_guard()
+                {
+                    try {
+                        restore();
+                    }
+                    catch(...) {
+                    }
+                }
+            private:
+                details::format_parser *fmt_;
+                bool restored_;
+            };
             
             void format_output(stream_type &out,string_type const &sformat) const
             {
@@ -286,7 +327,9 @@ namespace boost {
                     }
                     pos++;
                   
-                    details::format_parser fmt(out,reinterpret_cast<void *>(&out),&basic_format::imbue_locale);
+                    details::format_parser fmt(out,static_cast<void *>(&out),&basic_format::imbue_locale);
+
+                    format_guard guard(fmt);
 
                     while(pos < size) { 
                         std::string key;
@@ -339,19 +382,19 @@ namespace boost {
                         else 
                             fmt.set_flag_with_str(key,value);
                         
-                        if(format[pos]==',') {
+                        if(format[pos]==comma) {
                             pos++;
                             continue;
                         }
-                        else if(format[pos]=='}')  {
-                            unsigned position = fmt.get_posision();
+                        else if(format[pos]==cbrk)  {
+                            unsigned position = fmt.get_position();
                             out << get(position);
-                            fmt.restore();
+                            guard.restore();
                             pos++;
                             break;
                         }
                         else {                        
-                            fmt.restore();
+                            guard.restore();
                             break;
                         }
                     }

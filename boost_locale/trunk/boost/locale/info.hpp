@@ -14,8 +14,6 @@
 #endif
 #include <locale>
 #include <string>
-#include <map>
-#include <memory>
 
 
 namespace boost {
@@ -34,20 +32,20 @@ namespace boost {
             ///
             /// String information about the locale
             ///
-            typedef enum {
+            enum string_propery {
                 language_property,  ///< ISO 639 language id
                 country_property,   ///< ISO 3166 country id
                 variant_property,   ///< Variant for locale
                 encoding_property,   ///< encoding name
                 name_property       ///< locale name
-            } string_propery;
+            };
 
             ///
             /// Integer information about locale
             ///
-            typedef enum {
+            enum integer_property {
                 utf8_property       ///< Non zero value if uses UTF-8 encoding
-            } integer_property;
+            };
 
           
             ///

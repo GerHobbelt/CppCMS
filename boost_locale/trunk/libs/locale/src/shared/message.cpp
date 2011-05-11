@@ -745,13 +745,13 @@ namespace boost {
             };
 
             template<>
-            message_format<char> *create_messages_facet(messages_info &info)
+            message_format<char> *create_messages_facet(messages_info const &info)
             {
                 return new mo_message<char>(info);
             }
 
             template<>
-            message_format<wchar_t> *create_messages_facet(messages_info &info)
+            message_format<wchar_t> *create_messages_facet(messages_info const &info)
             {
                 return new mo_message<wchar_t>(info);
             }
@@ -759,7 +759,7 @@ namespace boost {
             #ifdef BOOST_HAS_CHAR16_T
 
             template<>
-            message_format<char16_t> *create_messages_facet(messages_info &info)
+            message_format<char16_t> *create_messages_facet(messages_info const &info)
             {
                 return new mo_message<char16_t>(info);
             }
@@ -768,7 +768,7 @@ namespace boost {
             #ifdef BOOST_HAS_CHAR32_T
 
             template<>
-            message_format<char32_t> *create_messages_facet(messages_info &info)
+            message_format<char32_t> *create_messages_facet(messages_info const &info)
             {
                 return new mo_message<char32_t>(info);
             }

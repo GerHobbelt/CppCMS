@@ -203,7 +203,7 @@ namespace boost {
                 char const *end=text;
                 while(*end)
                     end++;
-                return between(text,end,to_encoding,from_encoding,how);
+                return boost::locale::conv::between(text,end,to_encoding,from_encoding,how);
             }
 
             ///
@@ -215,7 +215,7 @@ namespace boost {
                                 std::string const &from_encoding,
                                 method_type how=default_method)
             {
-                return between(text.c_str(),text.c_str()+text.size(),to_encoding,from_encoding,how);
+                return boost::locale::conv::between(text.c_str(),text.c_str()+text.size(),to_encoding,from_encoding,how);
             }
 
 

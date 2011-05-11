@@ -17,9 +17,11 @@
 #define WITH_CASE_MAPS
 #endif
 
+
 #include "cdata.hpp"
 #include "uconv.hpp"
 
+#include <vector>
 
 namespace boost {
 namespace locale {

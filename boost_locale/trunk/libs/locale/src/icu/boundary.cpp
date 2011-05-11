@@ -166,10 +166,10 @@ index_type do_map(boundary_type t,CharType const *begin,CharType const *end,icu:
         bi->setText(str);
         index_type indirect = map_direct(t,bi.get(),str.length());
         indx=indirect;
-        for(unsigned i=1;i<indirect.size();i++) {
-            unsigned offset_inderect=indirect[i-1].offset;
-            unsigned diff = indirect[i].offset - offset_inderect;
-            unsigned offset_direct=indx[i-1].offset;
+        for(size_t i=1;i<indirect.size();i++) {
+            size_t offset_inderect=indirect[i-1].offset;
+            size_t diff = indirect[i].offset - offset_inderect;
+            size_t offset_direct=indx[i-1].offset;
             indx[i].offset=offset_direct + cvt.cut(str,begin,end,diff,offset_inderect,offset_direct);
         }
     }

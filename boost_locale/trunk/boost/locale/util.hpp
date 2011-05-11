@@ -8,8 +8,10 @@
 #ifndef BOOST_LOCALE_UTIL_HPP
 #define BOOST_LOCALE_UTIL_HPP
 #include <locale>
+#include <typeinfo>
 #include <boost/cstdint.hpp>
 #include <boost/locale/generator.hpp>
+#include <boost/assert.hpp>
 
 #include <vector>
 namespace boost {
@@ -44,6 +46,15 @@ namespace util {
     ///
     /// Note: all information is based only on parsing of string \a name;
     ///
+    /// The name has following format: language[_COUNTRY][.encoding][\@variant]
+    /// Where language is ISO-639 language code like "en" or "ru", COUNTRY is ISO-3166
+    /// country identifier like "US" or "RU". the Encoding is a charracter set name
+    /// like UTF-8 or ISO-8859-1. Variant is backend specific variant like \c euro or
+    /// calendar=hebrew.
+    ///
+    /// If some parameters are missing they are specified as blanks, default encoding
+    /// is assumed to be US-ASCII and missing language is assumed to be "C"
+    ///
     BOOST_LOCALE_DECL
     std::locale create_info(std::locale const &in,std::string const &name); 
 
@@ -73,8 +84,8 @@ namespace util {
         static const uint32_t illegal=0xFFFFFFFF;
 
         ///
-        /// This value is returned in case of incomplete input sequence or for to_unicode or 
-        /// too small buffer for from_unicode functions
+        /// This value is returned in following cases: The of incomplete input sequence was found or 
+        /// insufficient output buffer was provided so complete output could not be written.
         ///
         static const uint32_t incomplete=0xFFFFFFFE;
         
@@ -107,6 +118,7 @@ namespace util {
         ///
         virtual base_converter *clone() const 
         {
+            BOOST_ASSERT(typeid(*this)==typeid(base_converter));
             return new base_converter();
         }
 

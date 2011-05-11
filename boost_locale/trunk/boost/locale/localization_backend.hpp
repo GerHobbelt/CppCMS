@@ -16,6 +16,7 @@
 #include <string>
 #include <locale>
 #include <vector>
+#include <memory>
 
 namespace boost {
     namespace locale {

@@ -29,39 +29,39 @@ namespace boost {
         class localization_backend;
         class localization_backend_manager;
 
-        static const unsigned nochar_facet    = 0;        ///< Unspecified character category for character independed facets
-        static const unsigned char_facet      = 1 << 0;   ///< 8-bit character facets
-        static const unsigned wchar_t_facet   = 1 << 1;   ///< wide character facets
-        static const unsigned char16_t_facet  = 1 << 2;   ///< C++0x char16_t facets
-        static const unsigned char32_t_facet  = 1 << 3;   ///< C++0x char32_t facets
+        static const uint32_t nochar_facet    = 0;        ///< Unspecified character category for character independed facets
+        static const uint32_t char_facet      = 1 << 0;   ///< 8-bit character facets
+        static const uint32_t wchar_t_facet   = 1 << 1;   ///< wide character facets
+        static const uint32_t char16_t_facet  = 1 << 2;   ///< C++0x char16_t facets
+        static const uint32_t char32_t_facet  = 1 << 3;   ///< C++0x char32_t facets
 
-        static const unsigned character_first_facet = char_facet;  ///< First facet specific for character type
-        static const unsigned character_last_facet = char32_t_facet; ///< Last facet specific for character typr
-        static const unsigned all_characters = 0xFFFF;     ///< Special mask -- generate all
+        static const uint32_t character_first_facet = char_facet;  ///< First facet specific for character type
+        static const uint32_t character_last_facet = char32_t_facet; ///< Last facet specific for character typr
+        static const uint32_t all_characters = 0xFFFF;     ///< Special mask -- generate all
         
-        typedef unsigned character_facet_type; ///<type that specifies the character type that locales can be generated for
+        typedef uint32_t character_facet_type; ///<type that specifies the character type that locales can be generated for
 
-        static const unsigned     convert_facet   = 1 << 0;   ///< Generate convertsion facets
-        static const unsigned     collation_facet = 1 << 1;   ///< Generate collation facets
-        static const unsigned     formatting_facet= 1 << 2;   ///< Generate numbers, currency, date-time formatting facets
-        static const unsigned     parsing_facet   = 1 << 3;   ///< Generate numbers, currency, date-time formatting facets
-        static const unsigned     message_facet   = 1 << 4;   ///< Generate message facets
-        static const unsigned     codepage_facet  = 1 << 5;   ///< Generate codepage conversion facets (derived from std::codecvt)
-        static const unsigned     boundary_facet  = 1 << 6;   ///< Generate boundary analysis facet
+        static const uint32_t     convert_facet   = 1 << 0;   ///< Generate convertsion facets
+        static const uint32_t     collation_facet = 1 << 1;   ///< Generate collation facets
+        static const uint32_t     formatting_facet= 1 << 2;   ///< Generate numbers, currency, date-time formatting facets
+        static const uint32_t     parsing_facet   = 1 << 3;   ///< Generate numbers, currency, date-time formatting facets
+        static const uint32_t     message_facet   = 1 << 4;   ///< Generate message facets
+        static const uint32_t     codepage_facet  = 1 << 5;   ///< Generate codepage conversion facets (derived from std::codecvt)
+        static const uint32_t     boundary_facet  = 1 << 6;   ///< Generate boundary analysis facet
             
-        static const unsigned     per_character_facet_first = convert_facet; ///< First facet specific for character
-        static const unsigned     per_character_facet_last = boundary_facet; ///< Last facet specific for character
+        static const uint32_t     per_character_facet_first = convert_facet; ///< First facet specific for character
+        static const uint32_t     per_character_facet_last = boundary_facet; ///< Last facet specific for character
 
-        static const unsigned     calendar_facet  = 1 << 16;   ///< Generate boundary analysis facet
-        static const unsigned     information_facet = 1 << 17;   ///< Generate general locale information facet
+        static const uint32_t     calendar_facet  = 1 << 16;   ///< Generate boundary analysis facet
+        static const uint32_t     information_facet = 1 << 17;   ///< Generate general locale information facet
 
-        static const unsigned    non_character_facet_first = calendar_facet; ///< First character independed facet 
-        static const unsigned    non_character_facet_last = information_facet;///< Last character independed facet 
+        static const uint32_t    non_character_facet_first = calendar_facet; ///< First character independed facet 
+        static const uint32_t    non_character_facet_last = information_facet;///< Last character independed facet 
 
             
-        static const unsigned    all_categories  = 0xFFFFFFFFu;   ///< Generate all of them
+        static const uint32_t    all_categories  = 0xFFFFFFFFu;   ///< Generate all of them
         
-        typedef unsigned locale_category_type; ///< a type used for more fine grained generation of facets
+        typedef uint32_t locale_category_type; ///< a type used for more fine grained generation of facets
 
         ///
         /// \brief the major class used for locale generation
@@ -87,20 +87,20 @@ namespace boost {
             ///
             /// Set types of facets that should be generated, default all
             ///
-            void categories(unsigned cats);
+            void categories(locale_category_type cats);
             ///
             /// Get types of facets that should be generated, default all
             ///
-            unsigned categories() const;
+            locale_category_type categories() const;
             
             ///
             /// Set the characters type for which the facets should be generated, default all supported
             ///
-            void characters(unsigned chars);
+            void characters(character_facet_type chars);
             ///
             /// Get the characters type for which the facets should be generated, default all supported
             ///
-            unsigned characters() const;
+            character_facet_type characters() const;
 
             ///
             /// Add a new domain of messages that would be generated. It should be set in order to enable

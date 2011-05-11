@@ -230,12 +230,8 @@ namespace impl_icu {
                 other_time = p.seconds * 1000.0 + p.nanoseconds / 1000000.0;
             }
 
-            int diff = 0;
-            
-            {
-                guard l(lock_);
-                diff = self->fieldDifference(other_time,to_icu(p),err);
-            }
+            int diff = self->fieldDifference(other_time,to_icu(p),err);
+
             check_and_throw_dt(err);
             return diff;
         }

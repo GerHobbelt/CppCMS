@@ -105,24 +105,24 @@ namespace gnu_gettext {
     ///
 
     template<typename CharType>
-    message_format<CharType> *create_messages_facet(messages_info &info);
+    message_format<CharType> *create_messages_facet(messages_info const &info);
 
     /// \cond INTERNAL
     
     template<>
-    BOOST_LOCALE_DECL message_format<char> *create_messages_facet(messages_info &info);
+    BOOST_LOCALE_DECL message_format<char> *create_messages_facet(messages_info const &info);
     
     template<>
-    BOOST_LOCALE_DECL message_format<wchar_t> *create_messages_facet(messages_info &info);
+    BOOST_LOCALE_DECL message_format<wchar_t> *create_messages_facet(messages_info const &info);
 
     #ifdef BOOST_HAS_CHAR16_T
     template<>
-    BOOST_LOCALE_DECL message_format<char16_t> *create_messages_facet(messages_info &info);
+    BOOST_LOCALE_DECL message_format<char16_t> *create_messages_facet(messages_info const &info);
     #endif
     
     #ifdef BOOST_HAS_CHAR32_T
     template<>
-    BOOST_LOCALE_DECL message_format<char32_t> *create_messages_facet(messages_info &info);
+    BOOST_LOCALE_DECL message_format<char32_t> *create_messages_facet(messages_info const &info);
     #endif
 
     /// \endcond

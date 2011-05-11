@@ -231,6 +231,7 @@ namespace boost {
                     type=&typeid(Char);
                     Char const *end = s;
                     while(*end!=0) end++;
+                    // if ptr = 0 it does not matter what is value of size
                     size = sizeof(Char)*(end - s+1);
                     ptr = new char[size];
                     memcpy(ptr,s,size);

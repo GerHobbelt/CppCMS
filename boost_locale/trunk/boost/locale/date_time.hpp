@@ -417,7 +417,7 @@ namespace boost {
             ///
             /// Get item at position \a n the set, n should be in range [0,size)
             ///
-            date_time_period const &operator[](unsigned n) const 
+            date_time_period const &operator[](size_t n) const 
             {
                 if(n >= size())
                     throw std::out_of_range("Invalid index to date_time_period");

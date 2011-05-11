@@ -766,8 +766,7 @@ namespace boost {
             ///
             inline details::set_domain domain(std::string const &id)
             {
-                details::set_domain tmp;
-                tmp.domain_id = id;
+                details::set_domain tmp = { id };
                 return tmp;
             }
             /// @}

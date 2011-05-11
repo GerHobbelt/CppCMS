@@ -26,14 +26,14 @@ namespace locale {
         ///
         /// Create a pointer that holds \a v, ownership is transfered to smart pointer
         ///
-        hold_ptr(T *v) : ptr_(v) {}
+        explicit hold_ptr(T *v) : ptr_(v) {}
 
         ///
         /// Destroy smart pointer and the object it owns.
         ///
         ~hold_ptr() 
         {
-            if(ptr_) delete ptr_;
+            delete ptr_;
         }
 
         ///

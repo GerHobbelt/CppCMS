@@ -58,7 +58,7 @@ namespace boost {
                     imbue(d->saved_locale);
             }
 
-            unsigned format_parser::get_posision()
+            unsigned format_parser::get_position()
             {
                 return d->position;
             }
