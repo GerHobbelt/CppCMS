@@ -66,6 +66,9 @@ void test_iterator(icu::CharacterIterator &ref,icu::CharacterIterator &it,Iterat
         cr=ref.first();
         c=it.first();
         for(;;) {
+            if(cr!=c) {
+                std::cerr <<std::hex << cr << " " << c << std::endl;
+            }
             TEST(cr==c);
             TEST(ref.hasNext() == it.hasNext());
             TEST(ref.getIndex() == it.getIndex());
@@ -291,8 +294,18 @@ void test_iterator(icu::CharacterIterator &ref,icu::CharacterIterator &it,Iterat
 template<typename CharType,bool bmp=false,int size=sizeof(CharType)>
 struct create_iterator_traits;
 
-template<typename CharType,bool bmp>
-struct create_iterator_traits<CharType,bmp,1>
+template<typename CharType,int size>
+struct create_iterator_traits<CharType,true,size>
+{
+    template<typename IteratorType>
+    static icu::CharacterIterator *create(IteratorType b,IteratorType e)
+    {
+        return boost::locale::impl_icu::latin1_iterator<IteratorType>(b,e);
+    }
+};
+
+template<typename CharType>
+struct create_iterator_traits<CharType,false,1>
 {
     template<typename IteratorType>
     static icu::CharacterIterator *create(IteratorType b,IteratorType e)
@@ -312,17 +325,7 @@ struct create_iterator_traits<CharType,false,2>
 };
 
 template<typename CharType>
-struct create_iterator_traits<CharType,true,2>
-{
-    template<typename IteratorType>
-    static icu::CharacterIterator *create(IteratorType b,IteratorType e)
-    {
-        return boost::locale::impl_icu::latin1_iterator<IteratorType>(b,e);
-    }
-};
-
-template<typename CharType,bool bmp>
-struct create_iterator_traits<CharType,bmp,4>
+struct create_iterator_traits<CharType,false,4>
 {
     template<typename IteratorType>
     static icu::CharacterIterator *create(IteratorType b,IteratorType e)
@@ -344,7 +347,7 @@ void test_single_iter(IteratorType begin,IteratorType end,int *distances,icu::Un
         test_iterator(*ref,*it,begin,distances);
     }
     std::cout << "--- Boost.Locale text iterator" << std::endl;
-    {
+    if(0){
         boost::locale::basic_text<char_type> txt(begin,end);
         typedef typename boost::locale::basic_text<char_type>::iterator iterator;
         std::auto_ptr<icu::CharacterIterator> ref(new icu::StringCharacterIterator(ustr));
@@ -472,27 +475,162 @@ void run_test_on_sample(char const * const *str_set)
     }
 }
 
+template<typename IteratorType>
+void test_single_mbcs(IteratorType begin,IteratorType end,int *distances,icu::UnicodeString &ustr)
+{
+    typedef typename std::iterator_traits<IteratorType>::value_type char_type;
+    std::cout << "--- Normal Iterator" << std::endl;
+    {
+        std::auto_ptr<icu::CharacterIterator> ref(new icu::StringCharacterIterator(ustr));
+        std::auto_ptr<icu::CharacterIterator> it(boost::locale::impl_icu::mbcs_iterator<IteratorType>(begin,end,"UTF-8"));
+        test_iterator(*ref,*it,begin,distances);
+    }
+    std::cout << "--- Boost.Locale text iterator" << std::endl;
+    if(0){
+        boost::locale::text txt(begin,end);
+        typedef boost::locale::text::iterator iterator;
+        std::auto_ptr<icu::CharacterIterator> ref(new icu::StringCharacterIterator(ustr));
+        std::auto_ptr<icu::CharacterIterator> it(boost::locale::impl_icu::mbcs_iterator<iterator>(txt.begin(),txt.end(),"UTF-8"));
+        test_iterator(*ref,*it,txt.begin(),distances);
+    }
+}
+
+void test_all_mbcs(icu::UnicodeString &ustr,char const *str,int *distrances)
+{
+
+    char const *sbegin = str;
+    char const *send = str;
+    while(*send)
+        send++;
+
+    {
+        
+        std::cout << "-- char_type const *" << std::endl;
+        test_single_mbcs<char const *>(sbegin,send,distrances,ustr);
+    }
+
+    {
+        std::cout << "-- std::basic_string<>::iterator" << std::endl;
+        std::string s(str);
+        test_single_mbcs<std::string::iterator>(s.begin(),s.end(),distrances,ustr);
+    }
+
+    {
+        std::cout << "-- std::list<char>::iterator" << std::endl;
+        std::list<char> s(sbegin,send);
+        test_single_mbcs<std::list<char>::iterator>(s.begin(),s.end(),distrances,ustr);
+    }
+}
+
+
+
+void run_test_on_mbcs(char const * const *str_set)
+{
+    int dist[256] = {0};
+    char str[256] = {0};
+    
+    std::cout << "- MBCS (full conversion)" << std::endl;
+
+    create_index_utf8(str_set,dist,str);
+
+    icu::UnicodeString ustr(str,"UTF-8");
+
+    test_all_mbcs(ustr,str,dist);
+
+}
+
+
+template<typename CharType,bool bmp>
+void test_all_mbcs(icu::UnicodeString &ustr,CharType const *str,int *distrances)
+{
+
+    CharType const *sbegin = str;
+    CharType const *send = str;
+    while(*send)
+        send++;
+
+    {
+        
+        std::cout << "-- char_type const *" << std::endl;
+        test_single_iter<CharType const *,bmp>(sbegin,send,distrances,ustr);
+    }
+
+    {
+        std::cout << "-- std::basic_string<>::iterator" << std::endl;
+        std::basic_string<CharType> s(str);
+        test_single_iter<typename std::basic_string<CharType>::iterator,bmp>(s.begin(),s.end(),distrances,ustr);
+    }
+
+    {
+        std::cout << "-- std::list<char>::iterator" << std::endl;
+        std::list<CharType> s(sbegin,send);
+        test_single_iter<typename std::list<CharType>::iterator,bmp>(s.begin(),s.end(),distrances,ustr);
+    }
+}
+
+
+
+
+
+void run_test_on_bmp_sample(char const *str)
+{
+
+    icu::UnicodeString ustr(str,"ISO-8859-1");
+
+    int dist[256];
+    for(int i=0;i<256;i++)
+        dist[i]=i;
+    
+    std::cout << "- Latin 1 for char *" << std::endl;
+    test_all<char,true>(ustr,str,dist);
+
+    std::cout << "- UCS-2 for UChar *" << std::endl;
+    test_all<UChar,true>(ustr,ustr.getTerminatedBuffer(),dist);
+}
+
+
+
+
+
 int main()
 {
     {
         char const * const str[]={"ש","ל","ו","ם"," ","ע","ו","ל","ם"," ","𐌳","𐍉","א"," ","日","本","語","!",0};
         std::cout << "Sample 1: mixed 1,2,3,4 utf8 lengthes" << std::endl;
         run_test_on_sample(str);
+        run_test_on_mbcs(str);
     }
     {
         char const * const str[]={"𐌳","א"," ","日","本","語","!",0};
         std::cout << "Sample 2: Start with non-BMP" << std::endl;
         run_test_on_sample(str);
+        run_test_on_mbcs(str);
     }
     {
         char const * const str[]={"ש","ל","𐍉",0};
         std::cout << "Sample 3: end with non-BMP" << std::endl;
         run_test_on_sample(str);
+        run_test_on_mbcs(str);
+    }
+    {
+        char const * const str[]={"ש","ל","ו","ם"," ","ע","ו","ל","ם",0};
+        std::cout << "Sample 4: with BMP only" << std::endl;
+        run_test_on_sample(str);
+        run_test_on_mbcs(str);
     }
     {
         char const * const str[]={0};
-        std::cout << "Sample 4: Empty" << std::endl;
+        std::cout << "Sample 5: Empty" << std::endl;
         run_test_on_sample(str);
+        run_test_on_mbcs(str);
+    }
+    {
+        std::cout << "Sample 6: BMP/UTF-16 text" << std::endl;
+        run_test_on_bmp_sample("Hello World \xD0\xD1 \xA9 ");
+    }
+    {
+        std::cout << "Sample 7: BMP/UTF-16 Empty text" << std::endl;
+        run_test_on_bmp_sample("");
     }
 
 }

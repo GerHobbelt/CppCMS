@@ -9,8 +9,10 @@
 #define BOOST_SRC_LOCALE_TEXT_BRIDGE_HPP
 #include <unicode/chariter.h>
 #include <unicode/ustring.h>
+#include "uconv.hpp"
 
 #include <boost/locale/text.hpp>
+#include <boost/shared_ptr.hpp>
 #include <typeinfo>
 
 namespace boost {
@@ -35,10 +37,10 @@ namespace impl_icu {
         }
     };
 
-    struct simple_encoding_converter {
+    struct sbcs_converter {
     public:
         static const bool bmp_only = true;
-        simple_encoding_converter(UChar const *t) : table_(t) {}
+        sbcs_converter(UChar const *t) : table_(t) {}
         UChar operator()(char v) const
         {
             return table_[static_cast<unsigned char>(v)];
@@ -49,38 +51,25 @@ namespace impl_icu {
 
 
     static char utf_class_id;
-    
+   
     template<typename IteratorType>
     class basic_utf_char_iter : public icu::CharacterIterator {
     public:
-        basic_utf_char_iter(IteratorType b,IteratorType e) :
+        basic_utf_char_iter()
+        {
+        }
+
+        virtual IteratorType base_iterator() const  = 0;
+
+    };
+
+    template<typename RealType,typename IteratorType,typename InputIteratorType = IteratorType>
+    class utf_char_iter_base : public basic_utf_char_iter<InputIteratorType> {
+    public:
+        utf_char_iter_base(IteratorType b,IteratorType e) :
             it(b),
             it_begin(b),
             it_end(e)
-        {
-        }
-        
-        IteratorType const &base_iterator() const
-        {
-            return it;
-        }
-        
-        IteratorType &base_iterator()
-        {
-            return it;
-        }
-
-    protected:
-        IteratorType it;
-        IteratorType it_begin;
-        IteratorType it_end;
-    };
-
-    template<typename RealType,typename IteratorType>
-    class utf_char_iter_base : public basic_utf_char_iter<IteratorType> {
-    public:
-        utf_char_iter_base(IteratorType b,IteratorType e) :
-            basic_utf_char_iter<IteratorType>(b,e)
         {
             this->begin = this->pos = this->end = this->textLength = 0;
             index = 0;
@@ -96,7 +85,7 @@ namespace impl_icu {
                 return FALSE;
             }
             utf_char_iter_base const &other = static_cast<utf_char_iter_base const &>(other_in);
-            return this->it == other.it && index == other.index;
+            return it == other.it && index == other.index;
         }
         int32_t hashCode() const
         {
@@ -111,7 +100,7 @@ namespace impl_icu {
                 index++;
                 return value[1];
             }
-            if(this->it == this->it_end)
+            if(it == it_end)
                 return icu::CharacterIterator::DONE;
             this->pos++;
             index = 0;
@@ -132,7 +121,7 @@ namespace impl_icu {
             else {
                 this->pos++;
             }
-            if(this->it == this->it_end)
+            if(it == it_end)
                 return icu::CharacterIterator::DONE;
             index = 0;
             real().extract_next();
@@ -188,17 +177,13 @@ namespace impl_icu {
         }
         UBool hasNext() 
         {
-            return this->it!=this->it_end || index < size;
-        }
-        icu::CharacterIterator *clone() const
-        {
-            return new RealType(real());
+            return it!=it_end || index < size;
         }
         UChar first() 
         {
             this->pos = 0;
             index = 0;
-            this->it = this->it_begin;
+            it = it_begin;
             real().extract_curr();
             return current();
         }
@@ -206,7 +191,7 @@ namespace impl_icu {
         {
             this->pos = 0;
             index = 0;
-            this->it = this->it_begin;
+            it = it_begin;
             real().extract_curr();
             return current32();
         }
@@ -313,7 +298,7 @@ namespace impl_icu {
         int32_t move32(int32_t new_pos,icu::CharacterIterator::EOrigin o)
         {
             if(o==icu::CharacterIterator::kStart) {
-                this->it = this->it_begin;
+                it = it_begin;
                 this->pos = 0;
                 index = 0;
             }
@@ -326,7 +311,7 @@ namespace impl_icu {
         int32_t move(int32_t new_pos,icu::CharacterIterator::EOrigin o)
         {
             if(o==icu::CharacterIterator::kStart) {
-                this->it = this->it_begin;
+                it = it_begin;
                 this->pos = 0;
                 index = 0;
             }
@@ -350,24 +335,36 @@ namespace impl_icu {
         int index;
         int size;
         UChar value[2];
+
+        IteratorType it;
+        IteratorType it_begin;
+        IteratorType it_end;
+
     };
 
-    template<typename IteratorType,typename Converter>
-    class utf16_char_iter : public utf_char_iter_base<
-                                        utf16_char_iter<IteratorType,Converter>,
-                                        IteratorType
-                                    >
+    template<typename IteratorType,typename Converter,typename InputIterator = IteratorType>
+    class base_utf16_char_iter : public utf_char_iter_base<
+                                            base_utf16_char_iter<IteratorType,Converter,InputIterator>,
+                                            IteratorType,
+                                            InputIterator
+                                        >
     {
     public:
         typedef typename std::iterator_traits<IteratorType>::value_type char_type;
 
-        utf16_char_iter(IteratorType b,IteratorType e,Converter c) :
-            utf_char_iter_base<utf16_char_iter<IteratorType,Converter>,IteratorType>(b,e),
+        base_utf16_char_iter(IteratorType b,IteratorType e,Converter c) :
+            utf_char_iter_base<
+                    base_utf16_char_iter<IteratorType,Converter,InputIterator>,
+                    IteratorType,
+                    InputIterator
+                >
+                (b,e),
             real_end_pos(-1),
             converter(c)
         {
             extract_curr();
         }
+
         void advance32(int32_t offset)
         {
             if(Converter::bmp_only) {
@@ -508,8 +505,94 @@ namespace impl_icu {
         }
     private:
         int32_t real_end_pos;
+    protected:
         Converter converter;
     };
+
+    template<typename IteratorType,typename Converter>
+    class utf16_char_iter : public base_utf16_char_iter<IteratorType,Converter>
+    {
+    public:
+        utf16_char_iter(IteratorType b,IteratorType e,Converter c) :
+            base_utf16_char_iter<IteratorType,Converter>(b,e,c)
+        {
+        }
+        
+        icu::CharacterIterator *clone() const
+        {
+            return new utf16_char_iter(*this);
+        }
+        virtual IteratorType base_iterator() const
+        {
+            return this->it;
+        }
+
+    };
+
+    template<typename IteratorType,typename Converter>
+    class mbcs_char_iter : public base_utf16_char_iter<UChar const *,Converter,IteratorType>
+    {
+    public:
+        mbcs_char_iter(Converter const &c) :
+            base_utf16_char_iter<UChar const *,Converter,IteratorType>(c.begin(),c.end(),c)
+        {
+        }
+        
+        icu::CharacterIterator *clone() const
+        {
+            return new mbcs_char_iter(*this);
+        }
+ 
+        virtual IteratorType base_iterator() const
+        {
+            return this->converter.iterator_for_offset(this->it - this->it_begin);
+        }
+    };
+
+    template<typename InputIterator,bool BmpOnly = false>
+    class mbcs_converter
+    {
+    public:
+        static const bool bmp_only = BmpOnly;
+        mbcs_converter(InputIterator f,std::vector<UChar> &data,std::vector<size_t> &offsets) :
+            first_iter_(f)
+        {
+            data_.reset(new std::vector<UChar>());
+            data_->swap(data);
+            offsets_.reset(new std::vector<size_t>());
+            offsets_->swap(offsets);
+        }
+        UChar operator()(UChar c) const
+        {
+            return c;
+        }
+        InputIterator iterator_for_offset(size_t off) const
+        {
+            InputIterator tmp = first_iter_;
+            std::advance(tmp,(*offsets_)[off]);
+            return tmp;
+        }
+        UChar const *begin() const
+        {
+            static UChar valid_place;
+            if(data_->empty())
+                return &valid_place;
+            else
+                return &data_->front();
+        }
+        UChar const *end() const
+        {
+            return begin() + data_->size();
+        }
+
+    private:
+        InputIterator first_iter_;
+        boost::shared_ptr<std::vector<UChar> > data_;
+        boost::shared_ptr<std::vector<size_t> > offsets_;
+
+    };
+
+
 
 
     template<typename IteratorType>
@@ -524,6 +607,16 @@ namespace impl_icu {
             curr_len(0)
         {
             extract_curr();
+        }
+        
+        icu::CharacterIterator *clone() const
+        {
+            return new utf8_char_iter(*this);
+        }
+
+        virtual IteratorType base_iterator() const
+        {
+            return this->it;
         }
         
         void advance32(int32_t offset)
@@ -652,6 +745,17 @@ namespace impl_icu {
             extract_curr();
         }
         
+        icu::CharacterIterator *clone() const
+        {
+            return new utf32_char_iter(*this);
+        }
+
+        
+        virtual IteratorType base_iterator() const
+        {
+            return this->it;
+        }
+        
         void advance32(int32_t offset)
         {
             /// FIXME
@@ -730,12 +834,100 @@ namespace impl_icu {
         int32_t real_end_pos;
     };
 
+
     template<typename Iterator>
     basic_utf_char_iter<Iterator> *utf8_iterator(Iterator b,Iterator e)
     {
         return new utf8_char_iter<Iterator>(b,e);
     }
     
+    template<typename Iterator>
+    basic_utf_char_iter<Iterator> *mbcs_iterator(Iterator b,Iterator e,std::string const &encoding)
+    {
+        typedef typename std::iterator_traits<Iterator>::value_type char_type;
+
+        // Free converter when needed
+
+        struct lc_conv {
+            UConverter *operator()() const
+            {
+                return ucv;
+            }
+            ~lc_conv()
+            {
+                if(ucv)
+                    ucnv_close(ucv);
+            }
+
+            lc_conv(char const *enc)
+            {
+                UErrorCode err=U_ZERO_ERROR;
+                ucv = ucnv_open(enc,&err);
+                if(U_FAILURE(err)) {
+                    if(ucv) ucnv_close(ucv);
+                    check_and_throw_icu_error(err);
+                }
+            }
+        private:
+            UConverter *ucv;
+        } cv(encoding.c_str());
+
+
+        std::vector<char_type> buffer;
+
+        size_t len = std::distance(b,e);
+        buffer.resize(len+1);
+        std::copy(b,e,buffer.begin());
+        
+        char_type const *begin = &buffer[0];
+        char_type const *end = begin + len;
+
+        std::vector<UChar> data;
+        std::vector<size_t> offsets;
+
+        data.reserve(len);
+        offsets.reserve(len);
+
+        char_type const *curr = begin;
+        bool bmp_only = true;
+        while(curr!=end) { 
+            UErrorCode err=U_ZERO_ERROR;
+            size_t offset = curr - begin;
+            UChar32 c=ucnv_getNextUChar(cv(),&curr,end,&err);
+            if(U_FAILURE(err))
+                break;
+            offsets.push_back(offset);
+            if(U_IS_BMP(c)) {
+                data.push_back(static_cast<UChar>(c));
+            }
+            else {
+                offsets.push_back(offset);
+                data.push_back(U16_LEAD(c));
+                data.push_back(U16_TRAIL(c));
+                bmp_only = false;
+            }
+        }
+        
+        offsets.push_back(len);
+        if(bmp_only) {
+            typedef mbcs_converter<Iterator,true> cvt_type;
+            cvt_type cvt(b,data,offsets);
+            return new mbcs_char_iter<Iterator,cvt_type>(cvt);
+        }
+        else {
+            typedef mbcs_converter<Iterator,false> cvt_type;
+            cvt_type cvt(b,data,offsets);
+            return new mbcs_char_iter<Iterator,cvt_type>(cvt);
+        }
+    }
+        
+    
+    template<typename Iterator>
+    basic_utf_char_iter<Iterator> *sbcs_iterator(Iterator b,Iterator e,UChar const *table)
+    {
+        return new utf16_char_iter<Iterator,sbcs_converter>(b,e,sbcs_converter(table));
+    }
+
     template<typename Iterator>
     basic_utf_char_iter<Iterator> *latin1_iterator(Iterator b,Iterator e)
     {
@@ -753,6 +945,7 @@ namespace impl_icu {
     {
         return new utf32_char_iter<Iterator>(b,e);
     }
+
 
 
 
