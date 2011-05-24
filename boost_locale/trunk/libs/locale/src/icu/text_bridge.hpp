@@ -66,6 +66,7 @@ namespace impl_icu {
     template<typename RealType,typename IteratorType,typename InputIteratorType = IteratorType>
     class utf_char_iter_base : public basic_utf_char_iter<InputIteratorType> {
     public:
+        typedef typename std::iterator_traits<IteratorType>::value_type char_type;
         utf_char_iter_base(IteratorType b,IteratorType e) :
             it(b),
             it_begin(b),
@@ -331,6 +332,7 @@ namespace impl_icu {
         {
             return static_cast<RealType const &>(*this);
         }
+        
 
         int index;
         int size;
@@ -606,6 +608,23 @@ namespace impl_icu {
             real_end_pos(-1),
             curr_len(0)
         {
+            /*IteratorType tmp = begin;
+            size_t len = 0;
+            bool invalid_utf8=false;
+            while(tmp!=end && !invalid_utf8) {
+                char c=*tmp;
+                ++tmp;
+                int n = U8_COUNT_TRAIL_BYTES(c);
+                if(n==3)
+                    len+=2;
+                else
+                    len+=1;
+                while(tmp!=end && n>0) {
+                    ++tmp;
+                    n--;
+                }
+            }
+            this->end=this->textLength = len;*/
             extract_curr();
         }
         
@@ -636,7 +655,7 @@ namespace impl_icu {
         void advance(int32_t offset)
         {
             /// FIXME
-            extract_curr();     
+            /*extract_curr();     
             while(offset > 0 && this_type::hasNext()){
                 this_type::next();
                 offset--;
@@ -644,6 +663,87 @@ namespace impl_icu {
             while(offset < 0 && this->pos > 0) {
                 this_type::previous();
                 offset++;
+            }*/
+            if(this->size == 2 && this->index == 1) {
+                offset++;
+                this->pos--;
+                this->index=0;
+            }
+            if(offset + this->pos > this->end) {
+                offset = this->end - this->pos;
+            }
+            if(offset > 0) {
+                int trail=curr_len;
+                int count=0;
+                while(offset > 0 && this->it!=this->it_end) {
+                    char lead=*this->it;
+                    trail = U8_COUNT_TRAIL_BYTES(lead) + 1;
+                    if(trail == 4) {
+                        this->pos+=2;
+                        offset-=2;
+                    }
+                    else {
+                        this->pos++;
+                        offset--;
+                    }
+                    while(trail > 0 && this->it!=this->it_end) {
+                        ++this->it;
+                        trail--;
+                        count++;
+                    }
+                    curr_len = trail - count;
+                }
+                if(offset < 0) {
+                    extract_curr();
+                    this_type::previous();
+                }
+                else {
+                    extract_curr();
+                    this->index = 0;
+                }
+            }
+            else if(offset == 0) {
+                extract_curr();
+            }
+            else { // offset < 0
+
+                while(offset < 0 && this->pos > 0) {
+                    this_type::previous();
+                    offset++;
+                }
+                extract_curr();
+                #if 0
+                // FIXME start
+                if(this->pos + offset < 0) {
+                    this->pos = 0;
+                    this->it = this->it_begin;
+                    this->index = 0;
+                    extract_curr();
+                    return;
+                }
+                while(offset < 0) {
+                    char c;
+                    do {
+                        --this->it;
+                        c=*this->it;
+                    }while(U8_IS_TRAIL(c));
+                    curr_len = U8_COUNT_TRAIL_BYTES(c) + 1;
+                    if(curr_len == 4) {
+                        offset +=2;
+                        this->size = 2;
+                    }
+                    else {
+                        offset++;
+                        this->size = 1;
+                    }
+                }
+                this->index = 0;
+                extract_curr();
+                if(offset > 0) {
+                    this_type::next();
+                }
+                // FIXME end
+                #endif
             }
         }
         void go_to_end()
@@ -678,7 +778,15 @@ namespace impl_icu {
             else {
                 char buf[4] = {lead};
                 int lead_len = U8_COUNT_TRAIL_BYTES(lead) + 1;
-                curr_len = copy_range(this->it,this->it_end,buf,buf+lead_len) - buf;
+                curr_len = 1;
+                do{
+                    ++this->it;
+                    if(this->it == this->it_end)
+                        break;
+                    buf[curr_len] = *this->it;
+                    curr_len ++;
+                } while(curr_len < lead_len);
+                std::advance(this->it,-curr_len + 1);
                 int i = 0;
                 UChar32 uc = 0;
                 U8_NEXT_UNSAFE(buf,i,uc);

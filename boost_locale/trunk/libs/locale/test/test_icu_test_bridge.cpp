@@ -66,9 +66,6 @@ void test_iterator(icu::CharacterIterator &ref,icu::CharacterIterator &it,Iterat
         cr=ref.first();
         c=it.first();
         for(;;) {
-            if(cr!=c) {
-                std::cerr <<std::hex << cr << " " << c << std::endl;
-            }
             TEST(cr==c);
             TEST(ref.hasNext() == it.hasNext());
             TEST(ref.getIndex() == it.getIndex());
@@ -162,6 +159,10 @@ void test_iterator(icu::CharacterIterator &ref,icu::CharacterIterator &it,Iterat
         cr=ref.last32();
         c=it.last32();
         for(;;) {
+            if(cr!=c) {
+                std::cerr << ref.getIndex() << " " << it.getIndex() << std::endl;
+                std::cerr <<std::hex << cr << " " << c << std::endl;
+            }
             TEST(cr==c);
             TEST(ref.current32() == it.current32());
             TEST(ref.getIndex() == it.getIndex());
@@ -347,7 +348,7 @@ void test_single_iter(IteratorType begin,IteratorType end,int *distances,icu::Un
         test_iterator(*ref,*it,begin,distances);
     }
     std::cout << "--- Boost.Locale text iterator" << std::endl;
-    if(0){
+    {
         boost::locale::basic_text<char_type> txt(begin,end);
         typedef typename boost::locale::basic_text<char_type>::iterator iterator;
         std::auto_ptr<icu::CharacterIterator> ref(new icu::StringCharacterIterator(ustr));
@@ -486,7 +487,7 @@ void test_single_mbcs(IteratorType begin,IteratorType end,int *distances,icu::Un
         test_iterator(*ref,*it,begin,distances);
     }
     std::cout << "--- Boost.Locale text iterator" << std::endl;
-    if(0){
+    {
         boost::locale::text txt(begin,end);
         typedef boost::locale::text::iterator iterator;
         std::auto_ptr<icu::CharacterIterator> ref(new icu::StringCharacterIterator(ustr));

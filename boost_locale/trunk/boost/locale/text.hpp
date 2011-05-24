@@ -9,6 +9,7 @@
 #define BOOST_LOCALE_TEXT_HPP
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/assert.hpp>
 #include <numeric>
 #include <iterator>
 #include <vector>
@@ -23,14 +24,31 @@ namespace locale {
     template<typename CharType>
     class basic_abstract_text_range;
     
+    template<typename Iterator>
+    class basic_text_range;
+    
     template<typename CharType>
     class basic_text_iterator;
+    
+    template<typename IteratorType>
+    IteratorType dynamic_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in);
+    template<typename IteratorType>
+    IteratorType static_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in);
+
+    namespace details {
+        template<typename CharType>
+        class abstract_iterator;
+    }
     
     template<typename ObjectType>
     class clone_ptr {
     public:
         clone_ptr() : p_(0) 
         {
+        }
+        ~clone_ptr()
+        {
+            delete p_;
         }
         explicit clone_ptr(ObjectType *p) : p_(p)
         {
@@ -73,147 +91,262 @@ namespace locale {
         ObjectType *p_;
     };
 
+    template<typename CharType>
+    class basic_text_iterator;
 
     template<typename CharType>
     class basic_abstract_text_range {
     public:
-        basic_abstract_text_range() : 
-            end_pos_(-1) // npos
+        typedef CharType char_type;
+        typedef basic_text_iterator<CharType> iterator_type;
+        
+        basic_abstract_text_range() :
+            fast_buffer_(0)
         {
         }
         virtual basic_abstract_text_range *clone() const = 0;
-        virtual basic_abstract_text_range_iterator<CharType> *begin() = 0;
-        virtual basic_abstract_text_range_iterator<CharType> *end() = 0;
+        virtual iterator_type begin() = 0;
+        virtual iterator_type end() = 0;
     protected:
-        friend class basic_abstract_text_range_iterator<CharType>;
-        size_t end_pos_;
+        char_type const *fast_buffer_;
+        friend class basic_text_iterator<char_type>;
+    };
+        
+    template<typename CharType,typename SomeIteratorType>
+    struct linear_iterator_traits {
+        static const bool is_linear = false;
     };
 
     template<typename CharType>
-    class basic_abstract_text_range_iterator {
+    struct linear_iterator_traits<CharType,typename std::basic_string<CharType>::iterator> {
+        static const bool is_linear = true;
+    };
+
+    template<typename CharType>
+    struct linear_iterator_traits<CharType,typename std::basic_string<CharType>::const_iterator> {
+        static const bool is_linear = true;
+    };
+    
+    template<typename CharType>
+    struct linear_iterator_traits<CharType,typename std::vector<CharType>::iterator> {
+        static const bool is_linear = true;
+    };
+
+    template<typename CharType>
+    struct linear_iterator_traits<CharType,typename std::vector<CharType>::const_iterator> {
+        static const bool is_linear = true;
+    };
+
+    template<typename CharType>
+    struct linear_iterator_traits<CharType,CharType *> {
+        static const bool is_linear = true;
+    };
+
+    template<typename CharType>
+    struct linear_iterator_traits<CharType,CharType const *> {
+        static const bool is_linear = true;
+    };
+
+
+    namespace details {
+
+        template<typename ValueType>
+        class abstract_iterator {
+            void operator=(abstract_iterator const &);
+        public:
+            abstract_iterator() :
+                current_position(0)
+            {
+            }
+            
+            size_t current_position;
+
+            virtual abstract_iterator *clone() const = 0;
+            virtual ValueType const &do_dereference(size_t position) = 0;
+            virtual ~abstract_iterator() 
+            {
+            }
+        };
+        template<typename T>
+        class real_iterator : public abstract_iterator<typename std::iterator_traits<T>::value_type> {
+        public:
+            typedef typename std::iterator_traits<T>::value_type char_type;
+            virtual real_iterator *clone() const { return new real_iterator(*this); }
+            real_iterator(T i,size_t p) : it(i) 
+            {
+                this->current_position = p;
+            }
+            char_type const &do_dereference(size_t position) 
+            {
+                std::advance(it,ptrdiff_t(position - this->current_position));
+                this->current_position = position;
+                return *it;
+            }
+            T it;
+        };
+
+        template<typename IteratorType,typename Tag=typename std::iterator_traits<IteratorType>::iterator_category>
+        struct distance_traits {
+            static ptrdiff_t distance(IteratorType begin,IteratorType end,IteratorType start,IteratorType target)
+            {
+                IteratorType start_forward = start;
+                IteratorType start_backward = start;
+                ptrdiff_t count = 0;
+                while(start_forward!=target && start_backward!=target) {
+                    if(start_forward!=end)
+                        ++start_forward;
+                    if(start_backward!=begin)
+                        --start_backward;
+                    count++;
+                }
+                if(start_forward==target)
+                    return count;
+                else
+                    return -count;
+            }
+        };
+
+        template<typename IteratorType>
+        struct distance_traits<IteratorType,std::random_access_iterator_tag> {
+            static ptrdiff_t distance(IteratorType /*begin*/,IteratorType /*end*/,IteratorType start,IteratorType target)
+            {
+                return target - start;
+            }
+        };
+
+    } // details
+
+    template<typename CharType>
+    class basic_text_iterator : public boost::iterator_facade<
+                                            basic_text_iterator<CharType>,
+                                            CharType,
+                                            boost::random_access_traversal_tag,
+                                            CharType const &
+                                        >
+    {
     public:
         typedef CharType char_type;
-        typedef basic_abstract_text_range<CharType> text_range_type;
-
-        static const size_t npos = -1;
-
-        basic_abstract_text_range_iterator(text_range_type *r) :
-            range_(r)
+        typedef basic_abstract_text_range<char_type> range_type;
+        
+        basic_text_iterator() : 
+            range_(0)
         {
         }
         
+        basic_text_iterator(range_type *r,size_t pos) :
+            range_(r),
+            position_(pos)
+        {
+        }
+
+        template<typename It>
+        basic_text_iterator(range_type *r,size_t pos,It i) :
+            range_(r),
+            position_(pos),
+            it_(new details::real_iterator<It>(i,pos))
+        {
+        }
+
+
         char_type const &dereference() const
         {
-            return current_;
+            if(it_.get())
+                return it_->do_dereference(position_);
+            return range_->fast_buffer_[position_];
         }
-        bool equal(basic_abstract_text_range_iterator const &other) const
+
+        bool equal(basic_text_iterator const &other) const
         {
-            return normalize_position(position_) == normalize_position(other.position_);
+            return position_ == other.position_;
         }
         void increment()
         {
-            do_increment();
+            position_++;
         }
-        void decrement() 
+        void decrement()
         {
-            do_decrement();
+            position_--;
         }
-        void advance(ptrdiff_t n) 
+        void advance(ptrdiff_t n)
         {
-            do_advance(n);
+            position_+=n;
         }
-
-        ptrdiff_t advance(  ptrdiff_t n,
-                            basic_abstract_text_range_iterator const &low,
-                            basic_abstract_text_range_iterator const &high)
+        ptrdiff_t distance_to(basic_text_iterator const &other) const
         {
-            return do_advance(n,low,high);
+            return other.position_ - position_;
         }
+    private:
+        friend class basic_abstract_text_range<char_type>;
 
-        virtual basic_abstract_text_range_iterator *clone() const = 0;
+        template<typename IteratorType>
+        friend class basic_text_range;
 
-        char_type *copy(basic_abstract_text_range_iterator const &to,char_type *begin,char_type const *end) const
-        {
-            return do_copy(to,begin,end);
-        }
+        template<typename IteratorType>
+        friend IteratorType dynamic_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in);
 
-        ptrdiff_t distance_to(basic_abstract_text_range_iterator const &other) const
-        {
-            size_t pos = normalize_position(position_);
-            size_t other_pos = normalize_position(other.position_);
-            
-            if((pos != npos && other_pos != npos) || (pos==other_pos)) {
-                if(pos < other_pos)
-                    return other_pos - pos;
-                else
-                    return -static_cast<ptrdiff_t>(pos - other_pos);
-            }
+        template<typename IteratorType>
+        friend IteratorType static_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in);
 
-            return do_distance_to(other);
-        }
-        
-    protected:
-
-        size_t normalize_position(size_t pos) const
-        {
-            if(pos == npos && range_->end_pos_!=npos)
-                pos = range_->end_pos_;
-            return pos;
-        }
-
-        virtual void do_increment() = 0;
-        virtual void do_decrement() = 0;
-        virtual void do_advance(ptrdiff_t n) = 0;
-        virtual ptrdiff_t do_distance_to(basic_abstract_text_range_iterator const &other) const = 0;
-        virtual ptrdiff_t do_advance(   ptrdiff_t n,
-                                        basic_abstract_text_range_iterator const &low,
-                                        basic_abstract_text_range_iterator const &high) = 0;
-        virtual char_type *do_copy( basic_abstract_text_range_iterator const &to,
-                                    char_type *begin,
-                                    char_type const *end) const = 0;
-        
-        size_t position_; 
-        char_type current_;
-        text_range_type *range_;
+        // Actual range
+        range_type const *range_;
+        size_t position_;
+        clone_ptr<details::abstract_iterator<char_type> > it_;
     };
 
     template<typename Iterator>
-    class basic_text_range_iterator;
-
-    template<typename Iterator>
-    class basic_text_range : public basic_abstract_text_range<typename std::iterator_traits<Iterator>::value_type> 
+    class basic_text_range : public basic_abstract_text_range<typename std::iterator_traits<Iterator>::value_type>
     {
     public:
-
-        typedef Iterator iterator_type;
-
+        typedef basic_abstract_text_range<typename std::iterator_traits<Iterator>::value_type> base_type;
+        typedef typename std::iterator_traits<Iterator>::value_type char_type;
+        typedef basic_text_iterator<char_type> iterator_type;
         basic_text_range(Iterator b,Iterator e) :
             begin_(b),
             end_(e)
         {
+            if(linear_iterator_traits<char_type,Iterator>::is_linear) {
+                if(begin_ != end_)
+                    this->fast_buffer_ = &*begin_;
+                else {
+                    static const char_type tmp = 0;
+                    this->fast_buffer_ = &tmp;
+                }
+            }
+            size_ = std::distance(begin_,end_);
         }
-        basic_text_range *clone() const 
+        virtual basic_text_range *clone() const
         {
             return new basic_text_range(*this);
         }
-
-        basic_text_range_iterator<Iterator> *begin();
-        basic_text_range_iterator<Iterator> *end();
-
-        iterator_type real_begin() const 
+        iterator_type begin()
         {
-            begin_;
+            if(this->fast_buffer_) {
+                iterator_type it(this,0);
+                return it;
+            }
+            else {
+                iterator_type it(this,0,begin_);
+                return it;
+            }
         }
-        iterator_type real_end() const 
+        iterator_type end()
         {
-            end_;
+            if(this->fast_buffer_) {
+                iterator_type it(this,size_);
+                return it;
+            }
+            else {
+                iterator_type it(this,size_,end_);
+                return it;
+            }
         }
-
-    protected:
-        friend class basic_text_range_iterator<Iterator>;
-        iterator_type begin_;
-        iterator_type end_;
+    private:
+       
+        Iterator begin_;
+        Iterator end_;
+        size_t size_;
     };
+
 
     namespace details {
         template<typename Iterator,typename Tag=typename std::iterator_traits<Iterator>::iterator_category>
@@ -254,331 +387,73 @@ namespace locale {
             }
         };
 
-        template<typename CharType>
-        struct advance_traits<basic_text_iterator<CharType>,std::random_access_iterator_tag> {
-            typedef basic_text_iterator<CharType> iterator;
-            static ptrdiff_t advance(iterator &it,ptrdiff_t n,iterator const &begin,iterator const &end)
-            {
-                return it.advance(n,begin,end);
-            }
-        };
+
     } // details
 
-
-    template<typename Iterator> 
-    class basic_text_range_iterator : public basic_abstract_text_range_iterator<typename std::iterator_traits<Iterator>::value_type> 
-    {
-    public:
-        typedef basic_text_range<Iterator> range_type;
-        typedef typename std::iterator_traits<Iterator>::value_type char_type;
-        static const size_t npos = basic_abstract_text_range_iterator<typename std::iterator_traits<Iterator>::value_type>::npos;
-
-        basic_text_range_iterator(range_type *r,bool begin) : 
-            basic_abstract_text_range_iterator<typename std::iterator_traits<Iterator>::value_type>(r)
-        {
-            if(begin) {
-                it_ = r->begin_;
-                this->position_ = 0;
-                update_current();
-            }
-            else {
-                it_ = r->end_;
-                this->position_ = r->end_pos_;
-            }
-        }
-        virtual basic_text_range_iterator *clone() const
-        {
-            return new basic_text_range_iterator(*this);
-        }
-        virtual void do_increment() 
-        {
-            ++it_;
-            ++this->position_;
-            update_current();
-        }
-        virtual void do_decrement() 
-        {
-            if(this->position_ == npos) {
-                if(range()->end_pos_ == npos) 
-                    range()->end_pos_ = std::distance(range()->begin_,range()->end_);
-                this->position_ = range()->end_pos_;
-            }
-            --it_;
-            --this->position_;
-            this->current_ = *it_;
-        }
-        virtual ptrdiff_t do_advance(   ptrdiff_t n,
-                                        basic_abstract_text_range_iterator<char_type> const &base_low,
-                                        basic_abstract_text_range_iterator<char_type> const &base_high)
-        {
-            basic_text_range_iterator const &low = static_cast<basic_text_range_iterator const &>(base_low);
-            basic_text_range_iterator const &high = static_cast<basic_text_range_iterator const &>(base_high);
-            ptrdiff_t diff = details::advance_traits<Iterator>::advance(it_,n,low.it_,high.it_);
-            this->position_+=diff;
-            update_current();
-            return diff;
-        }
-        virtual void do_advance(ptrdiff_t n) 
-        {
-            std::advance(it_,n);
-            this->position_+=n;
-            update_current();
-        }
-        virtual ptrdiff_t do_distance_to(basic_abstract_text_range_iterator<char_type> const &other_base) const 
-        {
-            basic_text_range_iterator const &other = static_cast<basic_text_range_iterator const &>(other_base);
-            ptrdiff_t dist = 0;
-            if(this->position_ < other.position_) {
-                dist = std::distance(it_,other.it_);
-                if(range()->end_pos_ != npos && other.it_ == range()->end_ ) {
-                    range()->end_pos_ = this->position_ + dist;
-                }
-            }
-            else {
-                dist = - std::distance(other.it_,it_);
-                if(range()->end_pos_ != npos && it_ == range()->end_ ) {
-                    range()->end_pos_ = other.position_ - dist;
-                }
-            }
-            return dist;
-
-        }
-        virtual char_type *do_copy( basic_abstract_text_range_iterator<char_type> const &base_to,
-                                    char_type *begin,
-                                    char_type const *end) const 
-        {
-            Iterator from = it_;
-            Iterator to = static_cast<basic_text_range_iterator const &>(base_to).it_;
-            while(from!=to && begin!=end) {
-                *begin++ = *from++;
-            }
-            return begin;
-        }
-
-        Iterator real() const
-        {
-            return it_;
-        }
-
-    private:
-
-        void update_current()
-        {
-            if(it_!=range()->end_)
-                this->current_ = *it_;
-            else
-                range()->end_pos_ = this->position_;
-        }
-        range_type *range() const
-        {
-            return static_cast<range_type *>(this->range_);
-        }
-
-        Iterator it_;
-    };
-
-    template<typename Iterator>
-    basic_text_range_iterator<Iterator> *basic_text_range<Iterator>::begin() 
-    {
-        return new basic_text_range_iterator<Iterator>(this,true);
-    }
-
-    template<typename Iterator>
-    basic_text_range_iterator<Iterator> *basic_text_range<Iterator>::end() 
-    {
-        return new basic_text_range_iterator<Iterator>(this,false);
-    }
-
-    template<typename CharType>
-    class basic_text_iterator : 
-        public boost::iterator_facade<
-                        basic_text_iterator<CharType> ,
-                        CharType,
-                        boost::random_access_traversal_tag,
-                        CharType const &
-                    >
-    {
-    public:
-        typedef basic_abstract_text_range<CharType> text_range;
-        typedef basic_abstract_text_range_iterator<CharType> text_range_iterator;
-        typedef CharType char_type;
-
-        basic_text_iterator() 
-        {
-        }
-        basic_text_iterator(text_range_iterator *it) : it_(it)
-        {
-        }
-        
-        text_range_iterator const &get_range_iterator() const
-        {
-            return  *it_;
-        }
-        char_type const &dereference() const
-        {
-            return it_->dereference();
-        }
-        bool equal(basic_text_iterator const &other) const
-        {
-            return it_->equal(*other.it_);
-        }
-        void increment()
-        {
-            it_->increment();
-        }
-        void decrement()
-        {
-            it_->decrement();
-        }
-        ptrdiff_t advance(ptrdiff_t n,basic_text_iterator const &b,basic_text_iterator const &e)
-        {
-            return it_->advance(n,*b.it_,*e.it_);
-        }
-        void advance(ptrdiff_t n)
-        {
-            it_->advance(n);
-        }
-        ptrdiff_t distance_to(basic_text_iterator const &other) const
-        {
-            return it_->distance_to(*other.it_);
-        }
-
-        text_range_iterator const &real_iterator() const 
-        {
-            return *it_;
-        }
-        text_range_iterator &real_iterator() 
-        {
-            return *it_;
-        }
-        
-    private:
-        clone_ptr<text_range_iterator> it_;
-    };
-
-    template<typename CharType>
-    class basic_text {
-    public:
-        typedef basic_text_iterator<CharType> iterator;
-        typedef CharType char_type;
-
-        basic_text()
-        {
-        }
-
-        template<typename IteratorType>
-        basic_text(IteratorType b,IteratorType e)
-        {
-            range_.reset(new basic_text_range<IteratorType>(b,e));
-        }
-
-        iterator begin()
-        {
-            return iterator(range_->begin());
-        }
-        iterator end()
-        {
-            return iterator(range_->end());
-        }
-
-        std::pair<CharType const *,CharType const *> get_range_as_pointers()
-        {
-            std::pair<CharType const *,CharType const *> result;
-            
-            result.first = 0;
-            result.second = 0;
-
-            if( 
-                cast_to<char_type *>(result)
-                || cast_to<char_type const *>(result)
-                || cast_to<typename std::vector<char_type>::iterator>(result)
-                || cast_to<typename std::vector<char_type>::const_iterator>(result)
-                || cast_to<typename std::basic_string<char_type>::iterator>(result)
-                || cast_to<typename std::basic_string<char_type>::const_iterator>(result) 
-            )
-            {
-                return result;
-            }
-            return result;
-        }
-        
-    private:
-        template<typename IteratorType>
-        bool cast_to(std::pair<CharType const *,CharType const *> &result)
-        {
-            typedef basic_text_range<IteratorType> real_range_type;
-            real_range_type *real_range = dynamic_cast<real_range_type *>(range_.get());
-            if(!real_range)
-                return false;
-            IteratorType begin = real_range->real_begin();
-            IteratorType end = real_range->real_end();
-            if(begin!=end) {
-                result.first = &*begin;
-                result.second = result.first + (end - begin);
-            }
-            else {
-                static CharType tmp;
-                result.first = &tmp;
-                result.second = &tmp;
-            }
-            return true;
-        }
-        clone_ptr<basic_abstract_text_range<CharType> > range_;
-    };
-
-    namespace details {
-        template<typename IteratorIn>
-        struct copy_range_traits {
-            
-            typedef typename std::iterator_traits<IteratorIn>::value_type char_type;
-            typedef IteratorIn iterator_type;
-            
-            static char_type *copy(iterator_type ib,iterator_type const &ie,char_type *ob,char_type const *oe)
-            {
-                while(ib!=ie && ob!=oe)
-                    *ob++ = *ib++;
-                return ob;
-            }
-        };
-        template<typename CharType>
-        struct copy_range_traits<basic_text_iterator<CharType> > {
-            typedef CharType char_type;
-            typedef basic_text_iterator<CharType> iterator_type;
-
-            static char_type *copy(iterator_type const &ib,iterator_type const &ie,char_type *ob,char_type const *oe)
-            {
-                return ib.get_range_iterator().copy(ie.get_range_iterator(),ob,oe);
-            }
-        };
-    }
-
-    template<typename IteratorType>
-    typename std::iterator_traits<IteratorType>::value_type 
-    *copy_range(IteratorType const &ib,
-                IteratorType const &ie,
-                typename std::iterator_traits<IteratorType>::value_type *ob,
-                typename std::iterator_traits<IteratorType>::value_type const *oe)
-    {
-        return details::copy_range_traits<IteratorType>::copy(ib,ie,ob,oe);
-    }
-    
     template<typename IteratorType>
     IteratorType dynamic_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in)
     {
-        return dynamic_cast<basic_text_range_iterator<IteratorType> const &>(in.real_iterator()).real();
+        if(in.fast_buffer_) {
+            typedef basic_text_range<IteratorType> range_type;
+            range_type const &r=dynamic_cast<range_type const &>(*in.range_);
+            IteratorType result = r.begin_;
+            std::advance(result,in.position_);
+            return result;
+        }
+        else {
+            typedef details::real_iterator<IteratorType> iterator_type;
+            iterator_type const &it = dynamic_cast<iterator_type const &>(*in.it_);
+            IteratorType result = it.it;
+            ptrdiff_t diff = in.position_ - it.current_position;
+            std::advance(result,diff);
+            return result;
+        }
     }
     
     template<typename IteratorType>
     IteratorType static_text_iterator_cast(basic_text_iterator<typename IteratorType::value_type> const &in)
     {
-        return dynamic_cast<basic_text_range_iterator<IteratorType> const &>(in.real_iterator()).real();
+        if(in.fast_buffer_) {
+            typedef basic_text_range<IteratorType> range_type;
+            range_type const &r=static_cast<range_type const &>(*in.range_);
+            IteratorType result = r.begin_;
+            std::advance(result,in.position_);
+            return result;
+        }
+        else {
+            typedef details::real_iterator<IteratorType> iterator_type;
+            iterator_type const &it = static_cast<iterator_type const &>(*in.it_);
+            IteratorType result = it.it;
+            ptrdiff_t diff = in.position_ - it.current_position;
+            std::advance(result,diff);
+            return result;
+        }
     }
+    
+    template<typename CharType>
+    class basic_text {
+    public:
+        typedef basic_abstract_text_range<CharType> range_type;
+        typedef basic_text_iterator<CharType> iterator;
+        iterator begin()
+        {
+            return range_->begin();
+        }
+        iterator end()
+        {
+            return range_->end();
+        }
+        template<typename IteratorType>
+        basic_text(IteratorType b,IteratorType e)
+        {
+            range_.reset(new basic_text_range<IteratorType>(b,e));
+        }
+    private:
+        clone_ptr<range_type> range_;
+    };
 
     typedef basic_text<char> text;
     typedef basic_text<wchar_t> wtext;
-
-    namespace details {
-    }
 
     template<typename Iterator>
     ptrdiff_t advance_in_range(Iterator &it,ptrdiff_t n,Iterator const &l,Iterator const &h)
