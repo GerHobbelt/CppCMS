@@ -3,8 +3,7 @@
 <% view summary uses data::blog::summary extends master %>
 <% template menu_addons() %>
 <% if id %>
-&nbsp;/&nbsp; 
-<a href="<% url "/feed/posts" using id %>"><% gt "RSS for {1}" using category_name %></a>
+<% include menu_addon_prefix() %><a href="<% url "/feed/posts" using id %>"><% gt "RSS for {1}" using category_name %></a><% include menu_addon_suffix() %>
 <% end %>
 <% end template %>
 <% template master_content() %>

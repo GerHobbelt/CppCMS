@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-04-12 16:52+0300\n"
-"PO-Revision-Date: 2011-04-12 16:00+0300\n"
+"PO-Revision-Date: 2011-04-13 08:26+0300\n"
 "Last-Translator: Artyom <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <>\n"
 "Language: \n"
@@ -421,7 +421,7 @@ msgstr "חובה לאפשר JavaScript כדי להגיב."
 
 #: views/blog/summary.tmpl:7
 msgid "RSS for {1}"
-msgstr "‏RSS עבור {1}"
+msgstr "‏{1} ב־RSS‏"
 
 #: views/blog/summary.tmpl:12
 msgid "Posts in category &#8216;{1}&#8217;."

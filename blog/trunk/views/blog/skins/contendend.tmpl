@@ -13,6 +13,8 @@
 <a href="<% url "/admin/summary" %>"><% gt "Enter" %></a>
 <% end template %>
 <% template menu_addons() %><% end template %>
+<% template menu_addon_prefix() %> &nbsp;/&nbsp; <% end template %>
+<% template menu_addon_suffix() %><% end template %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -20,11 +22,11 @@
 <head>
 <title><% include title() %></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link href="<%= media  %>/style.css" rel="stylesheet" type="text/css" />
+<link href="<%= media  %>/contendend.css" rel="stylesheet" type="text/css" />
 <% if rtl %>
-	<link href="<%= media %>/style-rtl.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/contendend-rtl.css" rel="stylesheet" type="text/css" />
 <% else %>
-	<link href="<%= media %>/style-ltr.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/contendend-ltr.css" rel="stylesheet" type="text/css" />
 <% end %>
 <link rel="alternate" type="application/rss+xml" title="RSS Posts" href="<% url "/feed/posts" %>" >
 <link rel="alternate" type="application/rss+xml" title="RSS Comments" href="<% url "/feed/comments" %>" >
@@ -41,8 +43,8 @@
 		</ul>
 	</div>
 </div>
-<div id="title"><% info.blog_title %></div>
-<div id="slogan"><% info.blog_description %></div>
+<div id="title"><%= info.blog_title %></div>
+<div id="slogan"><%= info.blog_description %></div>
 </div> <!-- end header -->
 
 <div id="path">

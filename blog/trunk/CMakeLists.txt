@@ -18,8 +18,8 @@ find_library(LIB_CPPCMS cppcms)
 find_library(LIB_CPPDB cppdb)
 find_library(LIB_MARKDOWN markdown)
 find_program(EXE_TMPL_CC cppcms_tmpl_cc)
-find_program(MSGFMT msgfmt)
-find_program(MSGMERGE msgmerge)
+find_program(EXE_MSGFMT msgfmt)
+find_program(EXE_MSGMERGE msgmerge)
 find_program(XGETTEXT xgettext)
 find_program(EXE_SQLITE3 sqlite3)
 
@@ -45,7 +45,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 # Sources
 
-set(SKINS contendend)
+set(SKINS contendend orangesky)
 
 set(ADMIN_TEMPLATES 
 	views/admin/master.tmpl
@@ -179,9 +179,15 @@ set(LOCALES he)
 
 set(MO_FILES)
 set(UPDATE_PO_LIST)
-set(POT_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/po/blog.pot")
+set(POT_TEMPLATE blog.pot)
 
-file(GLOB_RECURSE GETTEXT_SRC apps/*.h apps/*.cpp data/*.h data/*.cpp)
+file(GLOB_RECURSE GETTEXT_SRC 
+	apps/*.h 
+	apps/*.cpp 
+	data/*.h 
+	data/*.cpp)
+
+message(${GETTEXT_SRC})
 
 set(SKINCPP)
 foreach(SKIN ${SKINS})
@@ -223,11 +229,11 @@ foreach(LOCALE ${LOCALES})
 	
 	add_custom_command(
 		OUTPUT ${MOFILE}
-		COMMAND ${MSGFMT} ${POFILE} -o ${MOFILE}
+		COMMAND ${EXE_MSGFMT} ${POFILE} -o ${MOFILE}
 		DEPENDS ${POFILE})
 	
 	add_custom_target(update-po-${LOCALE}
-		COMMAND ${MSGMERGE} -U ${POFILE} ${CMAKE_CURRENT_SOURCE_DIR}/po/blog.pot 
+		COMMAND ${EXE_MSGMERGE} -U ${POFILE} ${POT_TEMPLATE}
 		DEPENDS ${POT_TEMPLATE}
 		)
 	add_dependencies(update-po update-po-${LOCALE})

@@ -142,7 +142,7 @@
 				write_if_admin('<span style="display:none">');
 			-->
 			</script>
-			<input type="submit" onclick='return reload_captcha()' value="<% gt "Realod Captcha" %>" />
+			<input type="submit" onclick='return reload_captcha()' value="<% gt "Reaload Captcha" %>" />
 			<script type="text/javascript">
 			<!--
 				write_if_admin('</span>');
@@ -159,6 +159,7 @@
 	<!--
                 function setup_form()
                 {
+			document.getElementById('removecomment').innerHTML= "";
                         if((name=get_cookie('visitor_name'))!="") {
                                 document.getElementById('author').value = name;
                                 document.getElementById('email').value = get_cookie('visitor_email');
