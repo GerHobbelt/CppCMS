@@ -57,6 +57,7 @@ set(ADMIN_TEMPLATES
 	views/admin/options.tmpl
 	views/admin/comment.tmpl
 	views/admin/categories.tmpl
+	views/admin/config.tmpl
 	)
 
 
@@ -69,6 +70,7 @@ set(BLOG_SRC
 	apps/feed/feed.cpp
 	apps/basic_master.cpp
 	apps/captcha.cpp
+	apps/config.cpp
 	apps/main.cpp
 	apps/admin/admin.cpp
 	apps/admin/users.cpp
@@ -179,7 +181,7 @@ set(LOCALES he)
 
 set(MO_FILES)
 set(UPDATE_PO_LIST)
-set(POT_TEMPLATE blog.pot)
+set(POT_TEMPLATE po/blog.pot)
 
 file(GLOB_RECURSE GETTEXT_SRC 
 	apps/*.h 
@@ -187,12 +189,13 @@ file(GLOB_RECURSE GETTEXT_SRC
 	data/*.h 
 	data/*.cpp)
 
-message(${GETTEXT_SRC})
 
 set(SKINCPP)
 foreach(SKIN ${SKINS})
-	set(SKINCPP ${SKINCPP} "${CMAKE_CURRENT_BINARY_DIR}/${SNIN}.cpp")
+	set(SKINCPP ${SKINCPP} "${CMAKE_CURRENT_BINARY_DIR}/${SKIN}.cpp")
 endforeach()
+
+set(EXTRACT_SRC ${GETTEXT_SRC} ${CMAKE_CURRENT_BINARY_DIR}/feed.cpp ${CMAKE_CURRENT_BINARY_DIR}/admin.cpp ${SKINCPP})
 
 add_custom_command(
 	OUTPUT ${POT_TEMPLATE}
@@ -208,14 +211,9 @@ add_custom_command(
 		--keyword=npgettext:1c,2,3 
 		--keyword=_
 		--keyword=N_
-		${GETTEXT_SRC}
-		"${CMAKE_CURRENT_BINARY_DIR}/feed.cpp"
-		"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
-		${SKINCPP}
+		${EXTRACT_SRC}
 		--output=${POT_TEMPLATE}
-	DEPENDS 
-		${BLOG_SRC}
-		${SKINCPP}
+	DEPENDS ${EXTRACT_SRC}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	)
 
@@ -234,6 +232,7 @@ foreach(LOCALE ${LOCALES})
 	
 	add_custom_target(update-po-${LOCALE}
 		COMMAND ${EXE_MSGMERGE} -U ${POFILE} ${POT_TEMPLATE}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		DEPENDS ${POT_TEMPLATE}
 		)
 	add_dependencies(update-po update-po-${LOCALE})

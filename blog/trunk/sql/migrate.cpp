@@ -1,4 +1,5 @@
 #include <cppdb/frontend.h>
+#include <apps/dbversion.h>
 #include <iostream>
 
 
@@ -7,11 +8,11 @@ void copy(cppdb::session &from,cppdb::session &to)
 	cppdb::result r;
 	std::cout << "- checking versions" << std::endl;
 	r = from << "SELECT value from text_options where id='dbversion'" << cppdb::row;
-	if(r.empty() || r.get<std::string>(0)!="2") {
+	if(r.empty() || r.get<std::string>(0)!=CPPBLOG_DBVERSION) {
 		throw std::runtime_error("Invalid source DB version");
 	}
 	r = to << "SELECT value from text_options where id='dbversion'" << cppdb::row;
-	if(r.empty() || r.get<std::string>(0)!="2") {
+	if(r.empty() || r.get<std::string>(0)!=CPPBLOG_DBVERSION) {
 		throw std::runtime_error("Invalid target DB version");
 	}
 	to << "DELETE from text_options where id='dbversion'" << cppdb::exec;
@@ -75,25 +76,6 @@ void copy(cppdb::session &from,cppdb::session &to)
 			<< r.get<int>(1)
 			<< r.get<std::tm>(2)
 			<< r.get<int>(3)
-			<< cppdb::exec;
-	}
-	std::cout << "- link_cats" << std::endl;
-	r = from << "SELECT id,name from link_cats";
-	while(r.next()) {
-		to << "insert into link_cats values(?,?)" 
-			<< r.get<int>(0)
-			<< r.get<std::string>(1)
-			<< cppdb::exec;
-	}
-	std::cout << "- links" << std::endl;
-	r = from << "SELECT id,cat_id,title,url,description from links";
-	while(r.next()) {
-		to << "insert into links values(?,?,?,?,?)" 
-			<< r.get<int>(0)
-			<< r.get<int>(1)
-			<< r.get<std::string>(2)
-			<< r.get<std::string>(3)
-			<< r.get<std::string>(4)
 			<< cppdb::exec;
 	}
 	std::cout << "- pages" << std::endl;

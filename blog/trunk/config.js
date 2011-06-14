@@ -5,7 +5,7 @@
 		"root" : "/blog",
 		"host" : "localhost:8080",
 		"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10",
-		//"connection_string" : "mysql:database=cppcms;user=root;password=root;@pool_size=10;@use_prepared=on",
+		//"connection_string" : "mysql:database=newpress;user=root;password=root;@pool_size=10;@use_prepared=on",
 		"tex" : {
 			"enable" : true,
 			//"latex" : "/usr/bin/latex",
@@ -15,18 +15,18 @@
 		}
 	},
 	"service" : {
-		//"api" : "http",
+		"api" : "http",
 		//"port" : 8080
 		//"api" : "fastcgi",
-		"api" : "scgi",
-		"socket" : "/tmp/sock"
+		//"api" : "scgi",
+		//"socket" : "/tmp/sock"
 	},
 	"http" : {
 		"script" : "/blog" 
 	},
 	"views" : {
-		 "default_skin" : "contendend" ,
-		 //"default_skin" : "orangesky" ,
+		 //"default_skin" : "contendend" ,
+		 "default_skin" : "orangesky" ,
 		 "paths" : [ "./" ],
 		 "skins" : [ "contendend" , "orangesky" ],
 	},
@@ -56,8 +56,8 @@
 			"domains" : [ "blog" ]
 		},
 		"locales" : [ 
-			"en_US.UTF-8",
 			"he_IL.UTF-8",
+			"en_US.UTF-8",
 		]
 	}
 }

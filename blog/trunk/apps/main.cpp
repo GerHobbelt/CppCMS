@@ -1,4 +1,5 @@
 #include <apps/captcha.h>
+#include <apps/config.h>
 #include <apps/blog/blog.h>
 #include <apps/feed/feed.h>
 #include <apps/admin/admin.h>
@@ -6,6 +7,7 @@
 #include <cppcms/service.h>
 #include <cppcms/applications_pool.h>
 #include <cppcms/url_mapper.h>
+#include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
 #include <iostream>
@@ -19,6 +21,11 @@ public:
 			"captcha",
 			"/captcha{1}",
 			"/captcha((/?.*))",1);
+		
+		attach( new apps::config(s),
+			"config",
+			"/config{1}",
+			"/config((/?.*))",1);
 
 		attach( new apps::admin::admin_master(s),
 			"admin",
@@ -36,6 +43,20 @@ public:
 			"((/.*)?)",1);
 
 		mapper().root(settings().get<std::string>("blog.root"));
+	}
+	virtual void main(std::string path)
+	{
+		try {
+			cppcms::application::main(path);
+		}
+		catch(apps::database_version_error const &e) {
+			response().set_redirect_header(url("/config/version"));
+			return;
+		}
+		catch(apps::database_is_not_configured_error const &e) {
+			response().set_redirect_header(url("/config"));
+			return;
+		}
 	}
 };
 

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-12 16:52+0300\n"
-"PO-Revision-Date: 2011-04-13 08:26+0300\n"
+"POT-Creation-Date: 2011-06-14 23:55+0300\n"
+"PO-Revision-Date: 2011-06-15 00:07+0300\n"
 "Last-Translator: Artyom <artyomtnk@yahoo.com>\n"
 "Language-Team: Hebrew <>\n"
 "Language: \n"
@@ -35,6 +35,44 @@ msgstr "שם הנושא לא תקין"
 msgid "The category is not empty, can't delete"
 msgstr "הנושא לא ריק, לא ניתן למחוק"
 
+#: /home/artik/Projects/cppcms/blog/data/config.h:33
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:23
+msgid "Blog Title"
+msgstr "כותרת הבלוג"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:35
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:25
+msgid "Blog Subtitle"
+msgstr "תת־כותרת הבלוג"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:37
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:27
+#: views/blog/skins/contendend.tmpl:74 views/blog/skins/orangesky.tmpl:52
+msgid "Contact"
+msgstr "צור קשר"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:38
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:16
+msgid "Username"
+msgstr "שם משתמש"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:40
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:18
+msgid "Password"
+msgstr "ססמה"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:42
+msgid "Confirm Password"
+msgstr "אמת ססמה"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:45
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:44
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:39
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:27
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:29
+msgid "Save"
+msgstr "שמור"
+
 #: /home/artik/Projects/cppcms/blog/data/admin/comment.h:38
 #: /home/artik/Projects/cppcms/blog/data/blog/post.h:53
 msgid "Author"
@@ -56,13 +94,6 @@ msgstr "קישור"
 #: /home/artik/Projects/cppcms/blog/data/blog/post.h:61
 msgid "Content"
 msgstr "תוכן"
-
-#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:44
-#: /home/artik/Projects/cppcms/blog/data/admin/post.h:39
-#: /home/artik/Projects/cppcms/blog/data/admin/page.h:27
-#: /home/artik/Projects/cppcms/blog/data/admin/options.h:29
-msgid "Save"
-msgstr "שמור"
 
 #: /home/artik/Projects/cppcms/blog/data/admin/comment.h:45
 #: /home/artik/Projects/cppcms/blog/data/admin/post.h:41
@@ -106,30 +137,9 @@ msgstr "סמן כדי למחוק מאמר"
 msgid "Check this to delete page"
 msgstr "סמן כדי למחוק עמוד"
 
-#: /home/artik/Projects/cppcms/blog/data/admin/users.h:16
-msgid "Username"
-msgstr "שם משתמש"
-
-#: /home/artik/Projects/cppcms/blog/data/admin/users.h:18
-msgid "Password"
-msgstr "ססמה"
-
 #: /home/artik/Projects/cppcms/blog/data/admin/users.h:19
 msgid "Login"
 msgstr "כניסה"
-
-#: /home/artik/Projects/cppcms/blog/data/admin/options.h:23
-msgid "Blog Title"
-msgstr "כותרת הבלוג"
-
-#: /home/artik/Projects/cppcms/blog/data/admin/options.h:25
-msgid "Blog Subtitle"
-msgstr "תת־כותרת הבלוג"
-
-#: /home/artik/Projects/cppcms/blog/data/admin/options.h:27
-#: views/blog/skins/contendend.tmpl:104
-msgid "Contact"
-msgstr "צור קשר"
 
 #: /home/artik/Projects/cppcms/blog/data/admin/options.h:28
 msgid "Copyright Notice"
@@ -152,11 +162,13 @@ msgid "comments"
 msgstr "תגובות"
 
 #: views/feed.tmpl:33 views/feed.tmpl:53 views/admin/master.tmpl:12
-#: views/blog/skins/contendend.tmpl:24 views/blog/skins/contendend.tmpl:84
+#: views/admin/config.tmpl:14 views/blog/skins/contendend.tmpl:26
+#: views/blog/skins/contendend.tmpl:54 views/blog/skins/orangesky.tmpl:24
+#: views/blog/skins/orangesky.tmpl:35
 msgid "LTR"
 msgstr "RTL"
 
-#: views/feed.tmpl:57 views/blog/summary.tmpl:32
+#: views/feed.tmpl:57 views/blog/summary.tmpl:31
 msgid "more..."
 msgstr "המשך..."
 
@@ -204,9 +216,9 @@ msgstr "הגדרות"
 msgid "cache"
 msgstr "זיכרון מטמון"
 
-#: views/admin/master.tmpl:50
+#: views/admin/master.tmpl:50 views/admin/config.tmpl:34
 msgid "CppBlog is a high performance blog written in C++."
-msgstr "‏CppBlog זה מהיר מאוד שכתוב ב־C++‎."
+msgstr "‏CppBlog זהו בלוג מהיר מאוד שכתוב ב־C++‎."
 
 #: views/admin/master.tmpl:53
 msgid ""
@@ -223,7 +235,8 @@ msgstr "מאמרים שלא פורסמו"
 msgid "No unpublished posts"
 msgstr "אין מאמרים שלא פורסמו"
 
-#: views/admin/summary.tmpl:18 views/blog/skins/contendend.tmpl:114
+#: views/admin/summary.tmpl:18 views/blog/skins/contendend.tmpl:84
+#: views/blog/skins/orangesky.tmpl:79
 msgid "Pages"
 msgstr "דפים"
 
@@ -240,7 +253,7 @@ msgid "Latest Comments"
 msgstr "התגובות האחרונות"
 
 #: views/admin/summary.tmpl:33 views/admin/categories.tmpl:27
-#: views/blog/post.tmpl:18 views/blog/post.tmpl:38 views/blog/summary.tmpl:26
+#: views/blog/post.tmpl:18 views/blog/post.tmpl:38 views/blog/summary.tmpl:25
 msgid "edit"
 msgstr "ערוך"
 
@@ -248,17 +261,25 @@ msgstr "ערוך"
 msgid "No comments"
 msgstr "אין תגובות"
 
-#: views/admin/page.tmpl:6 views/admin/post.tmpl:6
+#: views/admin/page.tmpl:6
 msgid "Edit Page {1}"
 msgstr "ערוך עמוד {1}"
 
-#: views/admin/page.tmpl:6 views/admin/post.tmpl:6
+#: views/admin/page.tmpl:6
 msgid "Create New Page"
 msgstr "צור עמוד חדש"
 
 #: views/admin/page.tmpl:8 views/admin/post.tmpl:8
 msgid "Preview..."
 msgstr "תצוגה מקדימה..."
+
+#: views/admin/post.tmpl:6
+msgid "Edit Post {1}"
+msgstr "ערוך מאמר {1}"
+
+#: views/admin/post.tmpl:6
+msgid "Create New Post"
+msgstr "צור מאמר חדש"
 
 #: views/admin/post.tmpl:28
 msgid "Categories:"
@@ -310,7 +331,8 @@ msgstr "ערוך תגובה"
 msgid "Go back to the post"
 msgstr "חזרה למאמר"
 
-#: views/admin/categories.tmpl:24 views/blog/skins/contendend.tmpl:123
+#: views/admin/categories.tmpl:24 views/blog/skins/contendend.tmpl:93
+#: views/blog/skins/orangesky.tmpl:88
 msgid "Categories"
 msgstr "נושאים"
 
@@ -330,34 +352,54 @@ msgstr "אין נושאים"
 msgid "New category:"
 msgstr "נושא חדש:"
 
-#: views/blog/skins/contendend.tmpl:6 views/blog/skins/contendend.tmpl:72
+#: views/admin/config.tmpl:44
+msgid "Configure Blog"
+msgstr "הגדרת הבלוג"
+
+#: views/admin/config.tmpl:53
+msgid "Database version is invalid"
+msgstr "גרסת בסיס הנתונים לא נכונה."
+
+#: views/admin/config.tmpl:55
+msgid ""
+"The database version and the software versions do not match. Expected "
+"version {1}, current version {2}"
+msgstr ""
+"גרסת בסיס הנתונים וגרסת התכנה אינן תואמות. הגרסה הצפויה {1}, נוכחית {2}."
+
+#: views/admin/config.tmpl:56
+msgid "Please run SQL database upgrade scripts."
+msgstr "אנא הרץ תסריטי SQL לצורך עדכון בסיס הנתונים."
+
+#: views/blog/skins/contendend.tmpl:6 views/blog/skins/contendend.tmpl:42
+#: views/blog/skins/orangesky.tmpl:7
 msgid "Home"
 msgstr "בית"
 
-#: views/blog/skins/contendend.tmpl:8
+#: views/blog/skins/contendend.tmpl:8 views/blog/skins/orangesky.tmpl:8
 msgid "RSS"
 msgstr "מאמרים ב־‏RSS‏"
 
-#: views/blog/skins/contendend.tmpl:10
+#: views/blog/skins/contendend.tmpl:10 views/blog/skins/orangesky.tmpl:9
 msgid "RSS Comments"
 msgstr "תגובות ב־RSS"
 
-#: views/blog/skins/contendend.tmpl:13
+#: views/blog/skins/contendend.tmpl:13 views/blog/skins/orangesky.tmpl:11
 msgid "Enter"
 msgstr "כניסה"
 
-#: views/blog/skins/contendend.tmpl:71
+#: views/blog/skins/contendend.tmpl:41
 msgid "About"
 msgstr "אודות"
 
-#: views/blog/skins/contendend.tmpl:101
+#: views/blog/skins/contendend.tmpl:71
 msgid ""
 "Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
 msgstr ""
 "מבוסס על עיצוב <a href=\"http://ContentedDesigns.com\">Contented Designs</a>"
 
-#: views/blog/skins/contendend.tmpl:135
+#: views/blog/skins/contendend.tmpl:105 views/blog/skins/orangesky.tmpl:100
 msgid "&copy; All Rights Reserved"
 msgstr "‏&copy; כל הזכויות שמורות"
 
@@ -365,15 +407,15 @@ msgstr "‏&copy; כל הזכויות שמורות"
 msgid "Preview Comment"
 msgstr "תצוגה מקדימה"
 
-#: views/blog/post.tmpl:11 views/blog/summary.tmpl:18
+#: views/blog/post.tmpl:11 views/blog/summary.tmpl:17
 msgid "{1,date=f}, by {2} "
 msgstr "ב־{1,date=f}, מאת {2}"
 
-#: views/blog/post.tmpl:13 views/blog/summary.tmpl:20
+#: views/blog/post.tmpl:13 views/blog/summary.tmpl:19
 msgid "Posted in:"
 msgstr "פורסם תחת:"
 
-#: views/blog/post.tmpl:15 views/blog/summary.tmpl:23
+#: views/blog/post.tmpl:15 views/blog/summary.tmpl:22
 msgid "one comment"
 msgid_plural "{1} comments"
 msgstr[0] "תגובה אחת"
@@ -412,37 +454,43 @@ msgstr ""
 "Markdown\">Markdown</a>."
 
 #: views/blog/post.tmpl:145
-msgid "Realod Captcha"
+msgid "Reload Captcha"
 msgstr "טען צירוף אותיות מחדש"
 
 #: views/blog/post.tmpl:155
 msgid "You must enable JavaScript in order to post comments."
 msgstr "חובה לאפשר JavaScript כדי להגיב."
 
-#: views/blog/summary.tmpl:7
+#: views/blog/summary.tmpl:6
 msgid "RSS for {1}"
 msgstr "‏{1} ב־RSS‏"
 
-#: views/blog/summary.tmpl:12
+#: views/blog/summary.tmpl:11
 msgid "Posts in category &#8216;{1}&#8217;."
 msgstr "מאמרים בנושא ‏{1}‏."
 
-#: views/blog/summary.tmpl:39 views/blog/summary.tmpl:48
-#: views/blog/summary.tmpl:50
+#: views/blog/summary.tmpl:38 views/blog/summary.tmpl:47
+#: views/blog/summary.tmpl:49
 msgid "next page"
 msgstr "העמוד הבא"
 
-#: views/blog/summary.tmpl:41
+#: views/blog/summary.tmpl:40
 msgid "previous page"
 msgstr "העמוד הקודם"
 
-#: views/blog/summary.tmpl:59
+#: views/blog/summary.tmpl:58
 msgid "There are not posts in category &#8216;{1}&#8217;"
 msgstr "אין מאמרים בנושא ‏{1}‏"
 
-#: views/blog/summary.tmpl:61
+#: views/blog/summary.tmpl:60
 msgid "There are no posts in the blog"
 msgstr "אין מאמרים בבלוג"
+
+#: views/blog/skins/orangesky.tmpl:55
+msgid ""
+"The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr ""
+"עיצוב התבנית מבוסס על עיצוב תבנית OrangeSky של WordPress מאת Naoko McCracken‏"
 
 #~ msgid "You can send a trackback to following url:"
 #~ msgstr "אפשר לשלוח טרקבק לכתובת הבאה:"

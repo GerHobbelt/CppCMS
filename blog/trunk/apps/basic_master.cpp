@@ -1,4 +1,5 @@
 #include <apps/basic_master.h>
+#include <apps/dbversion.h>
 #include <data/basic_master.h>
 #include <cppdb/frontend.h>
 #include <cppcms/json.h>
@@ -356,6 +357,14 @@ namespace apps {
 
 		r=sql()<<"SELECT id,value FROM text_options ";
 
+		std::string dbversion;
+		std::string is_configured;
+
+		//
+		// Update me when needed!
+		//
+		char const *expected_database_version = CPPBLOG_DBVERSION;
+
 		while(r.next()) {
 			std::string id,value;
 			r >> id >> value;
@@ -367,6 +376,16 @@ namespace apps {
 				c.info.copyright_string = value;
 			else if(id == "contact")
 				c.info.contact = value;
+			else if(id == "dbversion")
+				dbversion=value;
+			else if(id == "is_configured")
+				is_configured = value;
+		}
+		if(dbversion!=expected_database_version) {
+			throw database_version_error();
+		}
+		if(is_configured!="yes") {
+			throw database_is_not_configured_error();
 		}
 		cache().add_trigger("options");
 		cache().store_data("general_info",c.info,rec.detach());
