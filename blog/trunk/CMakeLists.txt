@@ -43,6 +43,11 @@ if(NOT CMAKE_BUILD_TYPE)
 	      FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+if(WIN32 OR CYGWIN)
+	# We use shared libraries...
+	add_definitions(-DDLL_EXPORT)
+endif()
+
 # Sources
 
 set(SKINS contendend orangesky)

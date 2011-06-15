@@ -37,7 +37,7 @@ namespace blog {
 
 	struct comment_form : public cppcms::form {
 		cppcms::widgets::text author;
-		cppcms::widgets::email mail;
+		cppcms::widgets::regex_field mail;
 		cppcms::widgets::regex_field url;
 		cppcms::widgets::textarea content;
 		cppcms::widgets::submit preview;
@@ -49,10 +49,11 @@ namespace blog {
 		{
 			using booster::locale::translate;
 			author.id("author");
-			author.limits(1,256);
+			author.limits(0,256);
 			author.message(translate("Author"));
 			mail.id("email");
-			mail.limits(1,256);
+			mail.regex(booster::regex("([^@]+@[^@]+)?")); // Fix me for better e-mail
+			mail.limits(0,256);
 			mail.message(translate("E-Mail"));
 			mail.help(translate("the email would not displayed"));
 			url.regex(cppcms::xss::rules::uri_matcher());

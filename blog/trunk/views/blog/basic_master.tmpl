@@ -26,9 +26,13 @@
                         }
                         return "";
                 }
+		function is_admin()
+		{
+			return get_cookie('user').length > 0;
+		}
 		function write_if_admin(message)
 		{
-			if(get_cookie('user').length > 0) {
+			if(is_admin()) {
 				document.write(message);
 			}
 		}

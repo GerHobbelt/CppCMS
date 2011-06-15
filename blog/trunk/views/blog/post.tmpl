@@ -63,19 +63,32 @@
 			var email = document.getElementById('email').value;
                         var url=document.getElementById('url').value;
                         var message=document.getElementById('msg').value;
-                        if(author.length == 0
-                           || email.length == 0
-                           || message.length  == 0)
-                        {
-                                alert('<% gt "Name, E-Mail, Message content are mandatory!" %>');
-                                return false; 
-                        }
-                        else {
-                                set_cookie('visitor_name',author,365);
-                                set_cookie('visitor_email',email,365);
-                                set_cookie('visitor_url',url,365);
-                                return true;
-                        }
+			if(is_admin()) 
+			{
+				if(message.length  == 0)
+				{
+					alert('<% gt "Message content are mandatory!" %>');
+					return false; 
+				}
+				else {
+					return true;
+				}
+			}
+			else {
+				if(author.length == 0
+				   || email.length == 0
+				   || message.length  == 0)
+				{
+					alert('<% gt "Name, E-Mail, Message content are mandatory!" %>');
+					return false; 
+				}
+				else {
+					set_cookie('visitor_name',author,365);
+					set_cookie('visitor_email',email,365);
+					set_cookie('visitor_url',url,365);
+					return true;
+				}
+			}
                 }
 		function get_captcha()
 		{
