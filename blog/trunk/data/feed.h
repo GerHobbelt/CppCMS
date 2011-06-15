@@ -8,7 +8,6 @@ namespace data {
 		struct master : public data::basic_master {
 			std::string blog_name;
 			std::string blog_description;
-			std::string host;
 		};
 		struct comment {
 			int id;
