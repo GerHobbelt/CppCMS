@@ -912,8 +912,8 @@ namespace boost {
                 }
                 
                 ///
-                /// Return the underlying iterator that break_iterator points it. Iterator must not point to the
-                /// end of the range, otherwise throws std::out_of_range exception
+                /// Return the underlying iterator that break_iterator points it. The iterator must not point to the
+                /// end of the range.
                 ///
                 /// Note, returned value is not lvalue, you can't use this iterator to change underlying iterators.
                 /// 
