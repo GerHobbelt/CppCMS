@@ -59,6 +59,13 @@ void test_iterator(icu::CharacterIterator &ref,icu::CharacterIterator &it,Iterat
         }
     } test_equal_base = { distances, begin, actual,ref,it };
 
+    std::cout << "---- Basic Properties " << std::endl;
+    {
+        TEST(ref.startIndex() == it.startIndex());
+        TEST(ref.endIndex() == it.endIndex());
+        TEST(ref.getIndex() == it.getIndex());
+        TEST(ref.getLength() == it.getLength());
+    }
     std::cout << "---- Forward Iteration first,next" << std::endl;
     
     {

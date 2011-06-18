@@ -145,7 +145,7 @@ namespace boost {
                         uint32_t idx = get(hash_offset_ + 4*hkey);
                         /// Not found
                         if(idx == 0)
-                            return pair_type((char const *)0,(char const *)0);
+                            return null_pair;
                         /// If equal values return translation
                         if(key_equals(key(idx-1),context_in,key_in))
                             return value(idx-1);
@@ -182,6 +182,8 @@ namespace boost {
                 {
                     uint32_t len = get(translations_offset_ + id*8);
                     uint32_t off = get(translations_offset_ + id*8 + 4);
+                    if(off >= file_size_ || off + len >= file_size_)
+                        throw std::runtime_error("Bad mo-file format");
                     return pair_type(&data_[off],&data_[off]+len);
                 }
 
@@ -260,7 +262,7 @@ namespace boost {
                 {
                     uint32_t tmp;
                     if(offset > file_size_ - 4) {
-                        throw std::runtime_error("Bad file format");
+                        throw std::runtime_error("Bad mo-file format");
                     }
                     memcpy(&tmp,data_ + offset,4);
                     convert(tmp);

@@ -74,12 +74,13 @@ calendar::calendar(calendar const &other) :
 calendar const &calendar::operator = (calendar const &other) 
 {
     if(this !=&other) {
+        impl_.reset(other.impl_->clone());
         locale_ = other.locale_;
         tz_ = other.tz_;
-        impl_.reset(other.impl_->clone());
     }
     return *this;
 }
+
 
 bool calendar::is_gregorian() const
 {
@@ -158,8 +159,8 @@ date_time::date_time(date_time const &other,date_time_period_set const &s)
 date_time const &date_time::operator = (date_time const &other)
 {
     if(this != &other) {
-        impl_.reset();
-        impl_.reset(other.impl_->clone());
+        date_time tmp(other);
+        swap(tmp);
     }
     return *this;
 }

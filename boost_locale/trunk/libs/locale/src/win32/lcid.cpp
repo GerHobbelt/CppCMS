@@ -25,7 +25,9 @@ namespace boost {
 namespace locale {
 namespace impl_win {
 
-static volatile bool table_is_ready;
+typedef std::map<std::string,unsigned> table_type;
+
+static table_type * volatile table = 0;
 
 boost::mutex &lcid_table_mutex()
 {
@@ -49,7 +51,10 @@ BOOL CALLBACK proc(char *s)
 
         unsigned lcid ;
         ss >>lcid;
-
+        if(ss.fail() || !ss.eof()) {
+            return FALSE;
+        }
+            
         char iso_639_lang[16];
         char iso_3166_country[16];
         if(GetLocaleInfoA(lcid,LOCALE_SISO639LANGNAME,iso_639_lang,sizeof(iso_639_lang))==0)
@@ -78,16 +83,15 @@ BOOL CALLBACK proc(char *s)
 
 std::map<std::string,unsigned>  const &get_ready_lcid_table()
 {
-    if(table_is_ready)
-        return real_lcid_table();
+    if(table)
+        return *table;
     else {
         boost::unique_lock<boost::mutex> lock(lcid_table_mutex());
-        std::map<std::string,unsigned> &table = real_lcid_table();
-        if(!table.empty())
-            return table;
+        if(table)
+            return *table;
         EnumSystemLocalesA(proc,LCID_INSTALLED);
-        table_is_ready = true;
-        return table;
+        table = &real_lcid_table();
+        return *table;
     }
 }
 

@@ -222,6 +222,7 @@ namespace boost {
                 ~string_set();
                 string_set(string_set const &other);
                 string_set const &operator=(string_set const &other);
+                void swap(string_set &other);
                 
                 template<typename Char>
                 void set(Char const *s)

@@ -34,6 +34,7 @@ namespace boost {
             {
                 d->position=std::numeric_limits<unsigned>::max();
                 d->precision=ios.precision();
+                d->flags = ios.flags();
                 d->info=ios_info::get(ios);
                 d->saved_locale = ios.getloc();
                 d->restore_locale=false;
@@ -54,6 +55,7 @@ namespace boost {
             {
                 ios_info::get(ios_) = d->info;
                 ios_.width(0);
+                ios_.flags(d->flags);
                 if(d->restore_locale)
                     imbue(d->saved_locale);
             }

@@ -28,18 +28,27 @@ int main()
     for(int i=0;i<8;i++)
         s=s+s;
     icu::UnicodeString str(s.c_str(),"UTF-8");
-    UChar const *ubegin = str.getTerminatedBuffer();
-    UChar const *uend = ubegin+str.length();
 #ifdef NATIVE
     icu::CharacterIterator *iter=new icu::StringCharacterIterator(str);
 #else
     #ifdef USE_U16
+        UChar const *ubegin = str.getTerminatedBuffer();
+        UChar const *uend = ubegin+str.length();
+        std::list<UChar> l(ubegin,uend);
         #if defined(BRIDGE)
+            #ifdef USE_LIST
+            boost::locale::basic_text<UChar> txt(l.begin(),l.end());
+            #else
             boost::locale::basic_text<UChar> txt(ubegin,uend);
+            #endif
             icu::CharacterIterator *iter=
                 boost::locale::impl_icu::utf16_iterator<boost::locale::basic_text<UChar>::iterator>(txt.begin(),txt.end());
         #else
+            #ifdef USE_LIST
+            icu::CharacterIterator *iter=boost::locale::impl_icu::utf16_iterator<std::list<UChar>::iterator>(l.begin(),l.end());
+            #else
             icu::CharacterIterator *iter=boost::locale::impl_icu::utf16_iterator<UChar const *>(ubegin,uend);
+            #endif
         #endif
     #else
         std::list<char> l(s.begin(),s.end());

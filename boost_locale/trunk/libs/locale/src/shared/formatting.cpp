@@ -9,6 +9,7 @@
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/date_time.hpp>
 #include <typeinfo>
+#include <algorithm>
 #include "ios_prop.hpp"
 
 namespace boost {
@@ -39,19 +40,18 @@ namespace boost {
             }
         }
         
+        void ios_info::string_set::swap(string_set &other)
+        {
+            std::swap(type,other.type);
+            std::swap(size,other.size);
+            std::swap(ptr,other.ptr);
+        }
+        
         ios_info::string_set const &ios_info::string_set::operator=(string_set const &other)
         {
             if(this!=&other) {
-                delete [] ptr;
-                ptr = 0;
-                size = 0;
-                type = 0;
-                if(other.ptr!=0) {
-                    ptr=new char[other.size];
-                    size=other.size;
-                    type=other.type;
-                    memcpy(ptr,other.ptr,size);
-                }
+                string_set tmp(other);
+                swap(tmp);
             }
             return *this;
         }

@@ -46,9 +46,9 @@ namespace impl_win {
         std::string grouping;
     };
 
-    inline int collation_level_to_flag(collator_base::level_type level)
+    inline DWORD collation_level_to_flag(collator_base::level_type level)
     {
-        int flags;
+        DWORD flags;
         switch(level) {
         case collator_base::primary:
             flags = NORM_IGNORESYMBOLS | NORM_IGNORECASE | NORM_IGNORENONSPACE;

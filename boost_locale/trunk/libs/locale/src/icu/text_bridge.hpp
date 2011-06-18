@@ -131,26 +131,31 @@ namespace impl_icu {
         
         UChar nextPostInc() 
         {
-            if(size == 0)
+            switch(size) {
+            case 0:
                 return icu::CharacterIterator::DONE;
-            if(size == 1) {
-                UChar result = value[0];
-                this->pos++;
-                real().extract_next();
-                index = 0;
-                return result;
-            }
-            else { // size == 2
-                UChar result = value[index];
-                this->pos++;
-                if(index == 0) {
-                    index = 1;
-                }
-                else {
+            case 1:
+                {
+                    UChar result = value[0];
+                    this->pos++;
                     real().extract_next();
                     index = 0;
+                    return result;
                 }
-                return result;
+            case 2:
+            default:
+                {
+                    UChar result = value[index];
+                    this->pos++;
+                    if(index == 0) {
+                        index = 1;
+                    }
+                    else {
+                        real().extract_next();
+                        index = 0;
+                    }
+                    return result;
+                }
             }
         }
         UChar32 next32PostInc()
@@ -361,9 +366,9 @@ namespace impl_icu {
                     InputIterator
                 >
                 (b,e),
-            real_end_pos(-1),
             converter(c)
         {
+            this->end = this->textLength = std::distance(b,e);
             extract_curr();
         }
 
@@ -431,20 +436,10 @@ namespace impl_icu {
         }
         void go_to_end()
         {
-            if(real_end_pos!=-1) {
-                this->it = this->it_end;
-                this->pos = real_end_pos;
-                this->index = 0;
-                this->size = 0;
-            }
-            else {
-                this->pos += std::distance(this->it,this->it_end);
-                real_end_pos = this->pos;
-                this->it = this->it_end;
-                this->index = 0;
-                this->size = 0;
-                this->end = this->textLength = this->pos;
-            }
+            this->it = this->it_end;
+            this->pos = this->end;
+            this->index = 0;
+            this->size = 0;
         }
         void extract_curr()
         {
@@ -505,8 +500,6 @@ namespace impl_icu {
                 }
             }
         }
-    private:
-        int32_t real_end_pos;
     protected:
         Converter converter;
     };
@@ -605,26 +598,21 @@ namespace impl_icu {
 
         utf8_char_iter(IteratorType begin,IteratorType end) :
             utf_char_iter_base<utf8_char_iter<IteratorType>,IteratorType>(begin,end),
-            real_end_pos(-1),
             curr_len(0)
         {
-            /*IteratorType tmp = begin;
-            size_t len = 0;
-            bool invalid_utf8=false;
-            while(tmp!=end && !invalid_utf8) {
-                char c=*tmp;
-                ++tmp;
-                int n = U8_COUNT_TRAIL_BYTES(c);
-                if(n==3)
-                    len+=2;
-                else
-                    len+=1;
-                while(tmp!=end && n>0) {
-                    ++tmp;
-                    n--;
+            for(IteratorType it=begin;it!=end;++it) {
+                char c=*it;
+                if(U8_IS_SINGLE(c))
+                    this->end++;
+                else if(U8_IS_LEAD(c)) {
+                    int n = U8_COUNT_TRAIL_BYTES(c);
+                    if(n == 3)
+                        this->end+=2;
+                    else
+                        this->end++;
                 }
             }
-            this->end=this->textLength = len;*/
+            this->textLength = this->end;
             extract_curr();
         }
         
@@ -748,19 +736,10 @@ namespace impl_icu {
         }
         void go_to_end()
         {
-            if(real_end_pos!=-1) {
-                this->it = this->it_end;
-                this->pos = real_end_pos;
-                this->index = 0;
-                this->size = 0;
-            }
-            else {
-                // FIXME
-                while(this_type::next()!=icu::CharacterIterator::DONE)
-                    ;
-                real_end_pos = this->pos;
-                this->end = this->textLength = this->pos;
-            }
+            this->it = this->it_end;
+            this->pos = this->end;
+            this->index = 0;
+            this->size = 0;
         }
         void extract_curr()
         {
@@ -836,7 +815,6 @@ namespace impl_icu {
             }
         }
     private:
-        int32_t real_end_pos;
         int curr_len;
     };
 
@@ -847,9 +825,16 @@ namespace impl_icu {
         typedef utf32_char_iter<IteratorType> this_type;
 
         utf32_char_iter(IteratorType begin,IteratorType end) :
-            utf_char_iter_base<utf32_char_iter<IteratorType>,IteratorType>(begin,end),
-            real_end_pos(-1)
+            utf_char_iter_base<utf32_char_iter<IteratorType>,IteratorType>(begin,end)
         {
+            for(IteratorType it=begin;it!=end;++it) {
+                UChar32 c=*it;
+                if(U_IS_SUPPLEMENTARY(c))
+                    this->end+=2;
+                else
+                    this->end++;
+            }
+            this->textLength = this->end;
             extract_curr();
         }
         
@@ -893,19 +878,10 @@ namespace impl_icu {
         }
         void go_to_end()
         {
-            if(real_end_pos!=-1) {
-                this->it = this->it_end;
-                this->pos = real_end_pos;
-                this->index = 0;
-                this->size = 0;
-            }
-            else {
-                // FIXME
-                while(this_type::next()!=icu::CharacterIterator::DONE)
-                    ;
-                real_end_pos = this->pos;
-                this->end = this->textLength = this->pos;
-            }
+            this->it = this->it_end;
+            this->pos = this->end;
+            this->index = 0;
+            this->size = 0;
         }
         void extract_curr()
         {
@@ -938,8 +914,6 @@ namespace impl_icu {
             }
             extract_curr();
         }
-    private:
-        int32_t real_end_pos;
     };
 
 
@@ -1055,7 +1029,25 @@ namespace impl_icu {
     }
 
 
+    template<typename CharType,int size=sizeof(CharType)>
+    struct create_iterator;
 
+    template<typename CharType>
+    struct create_iterator<CharType,1> 
+    {
+        typedef CharType char_type;
+        typedef basic_text_iterator<CharType> iterator_type;
+        typedef basic_text<CharType> text_type;
+        typedef basic_utf_char_iter<iterator_type> icu_iterator_type;
+
+        static icu_iterator_type *get_iterator(text_type const &txt,std::string const &encoding)
+        {
+            if(is_utf8(encoding))
+                return new utf8_char_iter<iterator_type>(txt.begin(),txt.end()); 
+        }
+        
+    };
+    basic_text_iterator<CharType> create_text_iterator(
 
 
 } /// impl_icu
