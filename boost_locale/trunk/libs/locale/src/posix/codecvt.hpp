@@ -9,6 +9,10 @@
 #define BOOST_LOCALE_IMPL_POSIX_CODECVT_HPP
 #include <boost/locale/config.hpp>
 #include <boost/locale/util.hpp>
+
+#include <memory>
+#include <string>
+
 namespace boost {
 namespace locale {
 namespace impl_posix {
