@@ -49,15 +49,7 @@ namespace impl_icu {
         ///
         /// Format the value and return the number of Unicode code points
         ///
-        virtual string_type format(uint64_t value,size_t &code_points) const = 0;
-        ///
-        /// Format the value and return the number of Unicode code points
-        ///
         virtual string_type format(int32_t value,size_t &code_points) const = 0;
-        ///
-        /// Format the value and return the number of Unicode code points
-        ///
-        virtual string_type format(uint32_t value,size_t &code_points) const = 0;
 
         ///
         /// Parse the string and return the number of used characters. If it returns 0
@@ -73,17 +65,7 @@ namespace impl_icu {
         /// Parse the string and return the number of used characters. If it returns 0
         /// then parsing failed.
         ///
-        virtual size_t parse(string_type const &str,uint64_t &value) const = 0;
-        ///
-        /// Parse the string and return the number of used characters. If it returns 0
-        /// then parsing failed.
-        ///
         virtual size_t parse(string_type const &str,int32_t &value) const = 0;
-        ///
-        /// Parse the string and return the number of used characters. If it returns 0
-        /// then parsing failed.
-        ///
-        virtual size_t parse(string_type const &str,uint32_t &value) const = 0;
 
         ///
         /// Get formatter for the current state of ios_base -- flags and locale,
