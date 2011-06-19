@@ -185,7 +185,7 @@ void test_manip(std::string e_charset="UTF-8")
     }
     if(sizeof(long)==8) {
         TEST_MIN_MAX(long,"-9,223,372,036,854,775,808","9,223,372,036,854,775,807");
-        TEST_MIN_MAX(unsigned long,"0","18446744073709551615"); // Unsupported range by icu - ensure fallback
+        TEST_MIN_MAX_FMT(unsigned long,"0","18446744073709551615"); // Unsupported range by icu - ensure fallback
         TEST_NOPAR(as::number,"-1",unsigned long);
     }
     #ifndef BOOST_NO_LONG_LONG
