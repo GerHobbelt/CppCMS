@@ -35,15 +35,15 @@ boost::mutex &lcid_table_mutex()
     return m;
 }
 
-std::map<std::string,unsigned> &real_lcid_table()
+table_type &real_lcid_table()
 {
-    static std::map<std::string,unsigned> table;
+    static table_type table;
     return table;
 }
 
 BOOL CALLBACK proc(char *s)
 {
-    std::map<std::string,unsigned> &tbl = real_lcid_table();
+    table_type &tbl = real_lcid_table();
     try {
         std::istringstream ss;
         ss.str(s);
@@ -64,7 +64,7 @@ BOOL CALLBACK proc(char *s)
             lc_name += "_";
             lc_name += iso_3166_country;
         }
-        std::map<std::string,unsigned>::iterator p = tbl.find(lc_name);
+        table_type::iterator p = tbl.find(lc_name);
         if(p!=tbl.end()) {
             if(p->second > lcid)
                 p->second = lcid;
@@ -81,7 +81,7 @@ BOOL CALLBACK proc(char *s)
 }
 
 
-std::map<std::string,unsigned>  const &get_ready_lcid_table()
+table_type  const &get_ready_lcid_table()
 {
     if(table)
         return *table;
@@ -111,8 +111,8 @@ unsigned locale_to_lcid(std::string const &locale_name)
         id+="@" + d.variant;
     }
 
-    std::map<std::string,unsigned> const &tbl = get_ready_lcid_table();
-    std::map<std::string,unsigned>::const_iterator p = tbl.find(id);
+    table_type const &tbl = get_ready_lcid_table();
+    table_type::const_iterator p = tbl.find(id);
     
     unsigned lcid = 0;
     if(p!=tbl.end())
