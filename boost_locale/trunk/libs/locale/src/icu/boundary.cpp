@@ -63,29 +63,29 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
                 switch(t) {
                 case word:
                     if(UBRK_WORD_NONE<=buf[i] && buf[i]<UBRK_WORD_NONE_LIMIT)
-                        indx.back().mark |= word_none;
+                        indx.back().rule |= word_none;
                     else if(UBRK_WORD_NUMBER<=buf[i] && buf[i]<UBRK_WORD_NUMBER_LIMIT)
-                        indx.back().mark |= word_number;
+                        indx.back().rule |= word_number;
                     else if(UBRK_WORD_LETTER<=buf[i] && buf[i]<UBRK_WORD_LETTER_LIMIT)
-                        indx.back().mark |= word_letter;
+                        indx.back().rule |= word_letter;
                     else if(UBRK_WORD_KANA<=buf[i] && buf[i]<UBRK_WORD_KANA_LIMIT)
-                        indx.back().mark |= word_kana;
+                        indx.back().rule |= word_kana;
                     else if(UBRK_WORD_IDEO<=buf[i] && buf[i]<UBRK_WORD_IDEO_LIMIT)
-                        indx.back().mark |= word_ideo;
+                        indx.back().rule |= word_ideo;
                     break;
 
                 case line:
                     if(UBRK_LINE_SOFT<=buf[i] && buf[i]<UBRK_LINE_SOFT_LIMIT)
-                        indx.back().mark |= line_soft;
+                        indx.back().rule |= line_soft;
                     else if(UBRK_LINE_HARD<=buf[i] && buf[i]<UBRK_LINE_HARD_LIMIT)
-                        indx.back().mark |= line_hard;
+                        indx.back().rule |= line_hard;
                     break;
 
                 case sentence:
                     if(UBRK_SENTENCE_TERM<=buf[i] && buf[i]<UBRK_SENTENCE_TERM_LIMIT)
-                        indx.back().mark |= sentence_term;
+                        indx.back().rule |= sentence_term;
                     else if(UBRK_SENTENCE_SEP<=buf[i] && buf[i]<UBRK_SENTENCE_SEP_LIMIT)
-                        indx.back().mark |= sentence_sep;
+                        indx.back().rule |= sentence_sep;
                     break;
                 default:
                     ;
@@ -93,7 +93,7 @@ index_type map_direct(boundary_type t,icu::BreakIterator *it,int reserve)
             }
         }
         else {
-            indx.back().mark |=character_any; // Baisc mark... for character
+            indx.back().rule |=character_any; // Baisc mark... for character
         }
     }
     return indx;
