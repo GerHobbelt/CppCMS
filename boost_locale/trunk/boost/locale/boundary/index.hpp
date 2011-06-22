@@ -522,9 +522,10 @@ namespace boost {
             
 
             ///
-            /// \brief Class the holds boundary mapping of the text that can be used with iterators
+            /// \brief This class holds an index of tokens in the text range and allows to iterate over them 
             ///
             /// When the object is created it creates index and provides access to it with iterators.
+            ///
             /// It is used mostly with break_iterator and token_iterator. For each boundary point it
             /// provides the description mark that allows distinguishing between different types of boundaries.
             /// For example, it marks whether a sentence terminates because a mark like "?" or "." was found or because

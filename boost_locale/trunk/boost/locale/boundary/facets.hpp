@@ -29,9 +29,7 @@ namespace boost {
         ///
         namespace boundary {
             ///
-            /// \defgroup boundary Boundary Analysis
-            ///
-            /// This module contains all operations required for boundary analysis of text: character, word, like and sentence boundaries
+            /// \addtogroup boundary
             ///
             /// @{
             ///
@@ -169,6 +167,10 @@ namespace boost {
                 #endif
             };
             #endif
+
+            ///
+            /// @}
+            ///
 
 
         } // boundary

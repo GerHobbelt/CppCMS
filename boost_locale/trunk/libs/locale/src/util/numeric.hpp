@@ -13,6 +13,7 @@
 #include <boost/locale/formatting.hpp>
 #include <boost/locale/info.hpp>
 #include <sstream>
+#include <vector>
 #include <stdlib.h>
 
 #include "timezone.hpp"

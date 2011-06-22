@@ -102,6 +102,11 @@ namespace boost {
                 default:        return 0;
                 }
             }
+
+            ///
+            ///@}
+            ///
+
         } // boundary
     } // locale
 } // boost

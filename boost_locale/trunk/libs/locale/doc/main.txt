@@ -4,8 +4,6 @@
 
 \mainpage Boost.Locale
 
-\htmlonly <p style="font-size:80%; text-align:center">(Under development for Boost)</p> \endhtmlonly
-
 \section main_intro What is Boost.Locale?
 
 Boost.Locale is a library that provides high quality
