@@ -16,6 +16,8 @@
 
 #include <boost/locale/hold_ptr.hpp>
 #include <boost/locale/date_time_facet.hpp>
+#include <boost/locale/formatting.hpp>
+#include <boost/locale/time_zone.hpp>
 #include <locale>
 #include <vector>
 #include <stdexcept>
@@ -840,7 +842,7 @@ namespace boost {
         /// For example:
         /// \code
         ///  date_time now(time(0),hebrew_calendar)
-        ///  cout << "Year:" t / perood::year <<" Full Date:"<< as::date_time << t;
+        ///  cout << "Year: " << period::year(now) <<" Full Date:"<< now;
         /// \endcode
         ///
         /// The output may be Year:5770 Full Date:Jan 1, 2010
@@ -848,7 +850,22 @@ namespace boost {
         template<typename CharType>
         std::basic_ostream<CharType> &operator<<(std::basic_ostream<CharType> &out,date_time const &t)
         {
-            out << t.time();
+            double time_point = t.time();
+            uint64_t display_flags = ios_info::get(out).display_flags();
+            if  (
+                    display_flags == flags::date 
+                    || display_flags == flags::time 
+                    || display_flags == flags::datetime 
+                    || display_flags == flags::strftime
+                ) 
+            {
+                out << time_point;
+            }
+            else {
+                ios_info::get(out).display_flags(flags::datetime);
+                out << time_point;
+                ios_info::get(out).display_flags(display_flags);
+            }
             return out;
         }
 
@@ -861,7 +878,21 @@ namespace boost {
         std::basic_istream<CharType> &operator>>(std::basic_istream<CharType> &in,date_time &t)
         {
             double v;
-            in >> v;
+            uint64_t display_flags = ios_info::get(in).display_flags();
+            if  (
+                    display_flags == flags::date 
+                    || display_flags == flags::time 
+                    || display_flags == flags::datetime 
+                    || display_flags == flags::strftime
+                ) 
+            {
+                in >> v;
+            }
+            else {
+                ios_info::get(in).display_flags(flags::datetime);
+                in >> v;
+                ios_info::get(in).display_flags(display_flags);
+            }
             t.time(v);
             return in;
         }
@@ -925,23 +956,7 @@ namespace boost {
             return date_time_duration(earlier,later);
         }
 
-
-        ///
-        /// \brief namespace that holds function for operating global time zone identifier
-        ///
-        namespace time_zone {
-            ///
-            /// Get global time zone identifier. If empty, system time zone is used
-            ///
-            BOOST_LOCALE_DECL std::string global();
-            ///
-            /// Set global time zone identifier returing pervious one. If empty, system time zone is used
-            ///
-            BOOST_LOCALE_DECL std::string global(std::string const &new_tz);
-        }
-
-        /// @}
-
+        
         namespace period {
             ///
             ///  Extract from date_time numerical value of Era i.e. AC, BC in Gregorian and Julian calendar, range [0,1]
@@ -1088,8 +1103,9 @@ namespace boost {
             inline int first_day_of_week(date_time_duration const &dt) { return dt.get(first_day_of_week()); } 
 
 
-
         }
+        
+        /// @}
 
 
     } // locale

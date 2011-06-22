@@ -14,7 +14,7 @@
 #  pragma warning(disable : 4275 4251 4231 4660)
 #endif
 #include <boost/cstdint.hpp>
-#include <boost/locale/date_time.hpp>
+#include <boost/locale/time_zone.hpp>
 #include <ostream>
 #include <istream>
 #include <string>
