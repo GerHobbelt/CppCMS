@@ -83,7 +83,7 @@ rule configure-full ( properties * : flags-only )
 {
 
     local result ;
-	local flags-result ;
+    local flags-result ;
     
     local found-iconv ;
     
@@ -116,7 +116,7 @@ rule configure-full ( properties * : flags-only )
         if [ configure.builds has_icu : $(properties) : "icu" ]
         {
             found-icu = true ;
-			flags-result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
+            flags-result += <define>BOOST_LOCALE_WITH_ICU=1 $(ICU_OPTS) ;
 
             for s in boundary codecvt collator conversion date_time formatter
                      icu_backend numeric time_zone
@@ -188,12 +188,12 @@ rule configure-full ( properties * : flags-only )
           ;
         result += <source>win32/$(WINAPI_SOURCES).cpp ;
     }
-	
-	if ( ! <boost.locale.winapi>off in $(properties) || ! <boost.locale.std>off in $(properties) )
-	   && ( <target-os>windows in $(properties) || <target-os>cygwin in $(properties) )
-	{
+    
+    if ( ! <boost.locale.winapi>off in $(properties) || ! <boost.locale.std>off in $(properties) )
+       && ( <target-os>windows in $(properties) || <target-os>cygwin in $(properties) )
+    {
         result += <source>win32/lcid.cpp ;
-	}
+    }
  
     if ! <boost.locale.posix> in $(properties:G)
     {
@@ -227,29 +227,29 @@ rule configure-full ( properties * : flags-only )
     {
         result += <source>util/gregorian.cpp ;
     }
-	if "$(flags-only)" = "flags" 
-	{
-		return $(flags-result) ;
-	}
-	else {
-		result += $(flags-result) ;
-		return $(result) ;
-	}
+    if "$(flags-only)" = "flags" 
+    {
+        return $(flags-result) ;
+    }
+    else {
+        result += $(flags-result) ;
+        return $(result) ;
+    }
 }
 
 rule configure ( properties * )
 {
-	local result = [ configure-full $(properties) : "all" ] ;
-	return $(result) ;
-	
+    local result = [ configure-full $(properties) : "all" ] ;
+    return $(result) ;
+    
 }
 
 rule configure-flags ( properties * )
 {
-	local result ;
-	result = [ configure-full $(properties) : "flags" ] ;
-	return $(result) ;
-	
+    local result ;
+    result = [ configure-full $(properties) : "flags" ] ;
+    return $(result) ;
+    
 }
 
 
