@@ -1,0 +1,65 @@
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
+\page locale_gen Locale Generation
+
+Each locale is defined by a specific locale identifier, which contains a mandatory part (Language) and several optional parts
+(Country, Variant, keywords and character encoding of \c std::string). Boost.Locale uses the POSIX naming convention for locales,
+i.e. a locale is defined as <tt>language[_COUNTRY][.encoding][\@variant]</tt>, where lang is ISO-639 language name like "en" or "ru",
+COUNTRY is the ISO-3166 country identifier like "US" or "DE", encoding is the eight-bit character encoding like \c UTF-8 or \c ISO-8859-1,
+and variant is additional options for specializing the locale, like \c euro or \c calendar=hebrew.
+
+Note that each locale should include the encoding in order to handle \c char based strings correctly.
+
+The class \ref boost::locale::generator "generator" provides tools to generate the locales we need. The simplest way to use
+\c generator is to create a locale and set it as the global one:
+
+\code
+    #include <boost/locale.hpp>
+    
+    using namespace boost::locale;
+    int main()
+    {
+        generator gen;
+        // Create locale generator 
+        std::locale::global(gen("")); 
+        // "" - the system default locale, set
+        // it globally
+    }
+\endcode
+
+Of course we can also specify the locale manually
+
+\code
+    std::locale loc = gen("en_US.UTF-8"); 
+    // Use English, United States locale
+\endcode
+
+\note
+
+-   Even if your application uses wide strings everywhere, you should specify the
+    8-bit encoding to use for 8-bit stream IO operations like \c cout or \c fstream.
+    .
+-   The default locale is defined by the environment variables \c LC_CTYPE , \c LC_ALL , and \c LANG
+    in that order (i.e. \c LC_CTYPE first and \c LANG last). On Windows, the library
+    also queries the \c LOCALE_USER_DEFAULT option in the Win32 API when these variables
+    are not set.
+
+\b Tip: Prefer using UTF-8 Unicode encoding over 8-bit encodings like the ISO-8859-X ones.
+
+By default the generated locales include all supported categories and character types. However, if your
+application uses only 8-bit encodings, only wide-character encodings, or only specific facets, you can
+limit the facet generation to specific categories and character types by calling the
+\ref boost::locale::generator::categories() "categories" and \ref boost::locale::generator::characters() "characters"
+member functions of the \ref boost::locale::generator "generator" class.
+
+For example:
+
+\code    
+    generator gen;
+    gen.characters(wchar_t_facet);
+    gen.categories(collation_facet | formatting_facet);
+    std::locale::global(gen("de_DE.UTF-8"));
+\endcode
+
+*/
+

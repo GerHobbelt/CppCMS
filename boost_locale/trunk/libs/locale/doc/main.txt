@@ -1,0 +1,76 @@
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+
+/*!
+
+\mainpage Boost.Locale
+
+\htmlonly <p style="font-size:80%; text-align:center">(Under development for Boost)</p> \endhtmlonly
+
+\section main_intro What is Boost.Locale?
+
+Boost.Locale is a library that provides high quality localization facilities in a C++ way. It uses \c
+std::locale facets to provide localization in transparent and C++-aware manner.
+
+C++ offers a very good base for localization via the existing C++ locale facets: \c std::num_put,
+\c std::ctype, \c std::collate etc. But these are very limited and sometimes buggy by design. Support
+for localization varies between different operating systems, compilers, and standard libraries,
+and there are frequently incompatibilities between them.
+
+On the other hand, there is a great, well debugged, high quality, widely used ICU library that gives
+all of the goodies. But it has a very dated API that mimics Java behavior, completely ignores the STL,
+and provides a useful API only for UTF-16 encoded text, ignoring other popular Unicode encodings like
+UTF-8 and UTF-32 and limited but still popular national character sets like Latin1.
+
+Boost.Locale provides the natural glue between the C++ locales framework, iostreams, and the powerful
+ICU library.
+
+Boost.Locale provides non-ICU based localization support as well. It is based on
+the operating system native API or on the standard C++ library support.
+Sacrificing some less important features, Boost.Locale becomes less powerful but 
+lighter and easier to deploy and use library.
+
+\section main_intro_features Provided Features
+
+- Correct case conversion, case folding and <a href="http://en.wikipedia.org/wiki/Unicode_equivalence">normalization</a>.
+- <a href="http://en.wikipedia.org/wiki/Collation">Collation</a> (sorting), including support for 4 Unicode collation levels.
+- Date, time, timezone and calendar manipulations, formatting and parsing, including transparent
+support for calendars <a href="http://en.wikipedia.org/wiki/List_of_calendars">other than Gregorian</a>.
+- Boundary analysis for characters, words, sentences and line-breaks.
+- Number formatting, spelling and parsing.
+- Monetary formatting and parsing.
+- Powerful message formatting (string translation) including support for plural forms, using GNU catalogs.
+- Character set conversion.
+- Transparent support for 8-bit character sets like Latin1
+- Support for \c char and \c wchar_t
+- Experimental support for C++0x \c char16_t and \c char32_t strings and streams.
+
+\section main_tutorial Tutorials
+
+- \subpage std_locales
+- \subpage using_boost_locale
+    - \ref locale_gen
+    - \ref collation
+    - \ref conversions
+    - \ref formatting_and_parsing
+    - \ref messages_formatting
+    - \ref charset_handling 
+    - \ref boundary_analysys
+    - \ref localized_text_formatting
+    - \ref dates_times_timezones
+    - \ref locale_information
+    - \ref working_with_multiple_locales
+- \subpage using_localization_backends
+- \subpage recommendations_and_myths
+- \subpage building_boost_locale
+- \subpage appendix
+    - \ref rationale
+    - \ref default_encoding_under_windows
+    - \ref running_examples_under_windows 
+    - \ref glossary
+    - \ref tested_compilers_and_paltforms 
+    - \ref status_of_cpp0x_characters_support
+    - \ref special_thanks
+    - \ref copyright
+
+*/
+

@@ -72,6 +72,15 @@ support for calendars <a href="http://en.wikipedia.org/wiki/List_of_calendars">o
     - \ref special_thanks
     - \ref copyright
 
+*/
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+
+/*!
+
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page std_locales Introduction to C++ Standard Library localization support
 
 \section std_locales_basics Getting familiar with standard C++ Locales
@@ -190,6 +199,16 @@ additional issues:
     only under Linux. On all other platforms, attempting to create locales other than "C" or
     "POSIX" would fail.
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
+
+
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page using_boost_locale Using Boost.Locale
 
 In this section we'll talk mostly about the ICU backend, as it is both the default and the most powerful
@@ -209,7 +228,15 @@ supported by other localization backends.
 - \subpage locale_information
 - \subpage working_with_multiple_locales 
 
+*/
 
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
+
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page locale_gen Locale Generation
 
 Each locale is defined by a specific locale identifier, which contains a mandatory part (Language) and several optional parts
@@ -271,6 +298,11 @@ For example:
     std::locale::global(gen("de_DE.UTF-8"));
 \endcode
 
+*/
+
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page collation Collation 
 
 Boost.Locale provides a \ref boost::locale::collator "collator" class, derived from \c std::collate, that adds support for
@@ -309,6 +341,10 @@ You can also set a specific locale or level when creating and using the \ref boo
     std::map<std::string,std::string,comparator<char> > strings(comp);
 \endcode
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page conversions Conversions
 
 There is a set of functions that perform basic string conversion operations: upper, lower and title case conversions, case folding
@@ -341,6 +377,10 @@ Where a letter "ß" was not converted correctly to double-S in first case becaus
 -   All of these functions can work with an STL string, a NUL terminated string, or a range defined by two pointers. They always
     return a newly created STL string.
 -   The length of the string may change, see the above example.
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 
 \page formatting_and_parsing Numbers, Time and Currency formatting and parsing
 
@@ -490,6 +530,10 @@ information. Then it creates a special object that actually formats the number a
 next time a number is written to the stream, the same formatter would be used unless some flags had changed and formatter object is
 invalid.
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page messages_formatting Messages Formatting (Translation)
 
 - \ref messages_formatting_into
@@ -985,9 +1029,8 @@ std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_
 
 */
 
-
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
 /*!
-
 \page charset_handling Character Set Conversions
 
 \section codecvt Convenience Interface
@@ -1117,6 +1160,10 @@ and would allow fast conversion of the content, however its performance may be s
 double-width encodings like Shift-JIS, due to the stateless problem described above.
 
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page boundary_analysys Boundary analysis
 
 Boost.Locale provides a boundary analysis tool, allowing you to split text into characters, words, or sentences, and find appropriate
@@ -1174,6 +1221,10 @@ iterator used for source iteration. For example: you can select the two first se
 
 Would print: "First sentence. Second sentence!"
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page localized_text_formatting Localized Text Formatting
 
 The \c iostream manipulators are very useful, but when we create a messages for the user, sometimes we need something
@@ -1329,6 +1380,10 @@ Because the temporary value of \c (a+b) no longer exists when \c fmt is written 
     cout << fmt;
 \endcode
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page dates_times_timezones Working with dates, times, timezones and calendars.
 
 \section dates_times_timezones_intro Introduction
@@ -1509,6 +1564,10 @@ correctly.
 
 If you need full time zone database support, then you should use ICU library.
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page locale_information Getting information about the current locale
 
 The \c std::locale::name function provides very limited information about a locale. Such a name is platform-
@@ -1531,6 +1590,10 @@ For example:
 \endcode
 
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page working_with_multiple_locales Working with multiple locales
 
 Boost.Locale allows you to work safely with multiple locales in the same process. As we mentioned before, the locale
@@ -1564,6 +1627,10 @@ Then these locales can be imbued to \c iostreams or used directly as parameters 
 
 
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page using_localization_backends Using Localization Backends
 
 By default, Boost.Locale uses ICU for all localization and text manipulation tasks.
@@ -1747,6 +1814,10 @@ for all others:
     // select icu backend for boundary analysis (since it is not supported by \c std)
 \endcode
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page recommendations_and_myths Recommendations and Myths
 
 \section recommendations Recommendations
@@ -1790,6 +1861,10 @@ For example:
 So UTF-16 can be used for Unicode, in fact ICU and may other applications use UTF-16 as their internal Unicode representation, but
 you should be very careful and never assume one-code-point == one-utf16-character.
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page building_boost_locale Building The library
 
 Boost.Locale presently supports  CMake build system and Boost Build.
@@ -1994,6 +2069,10 @@ However this definitely has an effect on some features. For example, if you
 try to use boundary analysis or a calendar facet when the library does not support the icu backend
 you would get an exception.
 
+*/
+
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
 \page appendix Appendix
 
 \section appendix_toc Table of Contents 

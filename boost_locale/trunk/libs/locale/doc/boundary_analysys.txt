@@ -1,0 +1,62 @@
+// vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
+/*!
+\page boundary_analysys Boundary analysis
+
+Boost.Locale provides a boundary analysis tool, allowing you to split text into characters, words, or sentences, and find appropriate
+places for line breaks. 
+
+\note A Unicode code point and a character are not equivalent. For example, the Hebrew word Shalom -- "שָלוֹם" consists
+of 4 characters and 6 code points, where two code points are used for vowels (diacritical marks).
+
+Boost.Locale provides 3 major classes for boundary analysis:
+
+- boost::locale::boundary::mapping -- a special map that holds boundary points for the text.
+- boost::locale::boundary::token_iterator  -- an iterator that returns chunks of text that were split by text boundaries
+- boost::locale::boundary::break_iterator  -- an iterator that returns an iterator to the original text.
+
+To perform boundary analysis, we first create a boundary mapping for the text.
+
+\code
+    using namespace boost::locale::boundary;
+    std::string text="To be, or not to be?"
+    // Create mapping of text for token iterator using default locale.
+    mapping<token_iterator<std::string::const_iterator> > map(word,text.begin(),text.end()); 
+    // Print all "words" -- chunks of word boundary
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
+\endcode
+
+Would print the list: "To", " ", "be", ",", " ", "or", " ", "not", " ", "to", " ", "be", "?"
+You can also provide filters for better selection of the text chunks or boundaries you are interested in. For example:
+
+\code
+    map.mask(word_letters);
+    // Tell newly created iterators to select words that contain letters only.
+    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
+        std::cout <<"`"<< * it << "'"<< std::endl;
+\endcode
+
+Would print only: "To", "be", "or", "not", "to", "be", ignoring all non-words like punctuation.
+
+The break_iterator has different role. Instead of returning text chunks, it returns the underlying
+iterator used for source iteration. For example: you can select the two first sentences like this:
+
+\code
+    using namespace boost::locale::boundary;
+    std::string const text="First sentence. Second sentence! Third one?"
+    // Create a sentence boundary mapping and set the mask of boundaries
+    // to select sentence terminators only, like "?", "." ignoring new lines.
+    typedef break_iterator<std::string::const_iterator> iterator;
+    mapping<iterator> map(sentence,map.begin(),map.end(),sentence_term);
+    iterator p=map.begin();
+    /// Advance p by two steps, make sure p is still valid;
+    for(int i=0;i<2 && p!=text.end();i++)
+        ++p;
+    std::cout << "First two sentences are " << std::string(text.begin(),*p) << std::endl;
+\endcode
+
+Would print: "First sentence. Second sentence!"
+
+*/
+
+
