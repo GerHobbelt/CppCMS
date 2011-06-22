@@ -127,7 +127,7 @@ rule configure-full ( properties * : flags-only )
         }
     }
         
-    if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties) && !<target-os>cygwin in $(properties) 
+    if ! $(found-iconv) && ! $(found-icu) && ! <target-os>windows in $(properties) && ! <target-os>cygwin in $(properties) 
     {
         ECHO "error: Boost.Locale need either iconv or ICU library to be built." ;
         EXIT ;
