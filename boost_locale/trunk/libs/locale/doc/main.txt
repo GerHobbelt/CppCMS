@@ -8,41 +8,50 @@
 
 \section main_intro What is Boost.Locale?
 
-Boost.Locale is a library that provides high quality localization facilities in a C++ way. It uses \c
-std::locale facets to provide localization in transparent and C++-aware manner.
+Boost.Locale is a library that provides high quality
+localization facilities in a C++ way.
 
-C++ offers a very good base for localization via the existing C++ locale facets: \c std::num_put,
-\c std::ctype, \c std::collate etc. But these are very limited and sometimes buggy by design. Support
-for localization varies between different operating systems, compilers, and standard libraries,
-and there are frequently incompatibilities between them.
+It gives powerful tools for development of cross platform
+localized software - the software that talks to user
+in its language.
 
-On the other hand, there is a great, well debugged, high quality, widely used ICU library that gives
-all of the goodies. But it has a very dated API that mimics Java behavior, completely ignores the STL,
-and provides a useful API only for UTF-16 encoded text, ignoring other popular Unicode encodings like
-UTF-8 and UTF-32 and limited but still popular national character sets like Latin1.
+Provided Features:
 
-Boost.Locale provides the natural glue between the C++ locales framework, iostreams, and the powerful
-ICU library.
+-   Correct case conversion, case folding and normalization.
+-   Collation (sorting), including support for 4 Unicode
+    collation levels.
+-   Date, time, timezone and calendar manipulations,
+    formatting and parsing, including transparent support
+    for calendars other than Gregorian.
+-   Boundary analysis for characters, words, sentences and
+    line-breaks.
+-   Number formatting, spelling and parsing.
+-   Monetary formatting and parsing.
+-   Powerful message formatting (string translation)
+    including support for plural forms, using GNU catalogs.
+-   Character set conversion.
+-   Transparent support for 8-bit character sets like Latin1
+-   Support for \c char and \c wchar_t
+-   Experimental support for C++0x \c char16_t and \c char32_t
+    strings and streams.
 
-Boost.Locale provides non-ICU based localization support as well. It is based on
-the operating system native API or on the standard C++ library support.
-Sacrificing some less important features, Boost.Locale becomes less powerful but 
-lighter and easier to deploy and use library.
+Boost.Locale enhances and unifies the standard library's API
+the way it becomes useful and convenient for development
+of cross platform and "cross-culture" software.
 
-\section main_intro_features Provided Features
+In order to achieve this goal Boost.Locale uses 
+the-state-of-the-art Unicode and Localization
+library: <a href="http://icu-project.org/">ICU</a> - International Components for Unicode.
 
-- Correct case conversion, case folding and <a href="http://en.wikipedia.org/wiki/Unicode_equivalence">normalization</a>.
-- <a href="http://en.wikipedia.org/wiki/Collation">Collation</a> (sorting), including support for 4 Unicode collation levels.
-- Date, time, timezone and calendar manipulations, formatting and parsing, including transparent
-support for calendars <a href="http://en.wikipedia.org/wiki/List_of_calendars">other than Gregorian</a>.
-- Boundary analysis for characters, words, sentences and line-breaks.
-- Number formatting, spelling and parsing.
-- Monetary formatting and parsing.
-- Powerful message formatting (string translation) including support for plural forms, using GNU catalogs.
-- Character set conversion.
-- Transparent support for 8-bit character sets like Latin1
-- Support for \c char and \c wchar_t
-- Experimental support for C++0x \c char16_t and \c char32_t strings and streams.
+Boost.Locale creates the natural glue between the C++ locales
+framework, iostreams, and the powerful ICU library.
+
+Boost.Locale provides non-ICU based localization support as well.
+It is based on the operating system native API or on the standard
+C++ library support. Sacrificing some less important features,
+Boost.Locale becomes less powerful but lighter and easier to deploy
+and use library.
+
 
 \section main_tutorial Tutorials
 
