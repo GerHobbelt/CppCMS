@@ -73,11 +73,11 @@ and use library.
     - \ref rationale
     - \ref default_encoding_under_windows
     - \ref running_examples_under_windows 
+    - \ref gettext_for_windows
     - \ref glossary
     - \ref tested_compilers_and_paltforms 
     - \ref status_of_cpp0x_characters_support
     - \ref special_thanks
-    - \ref copyright
 
 */
 

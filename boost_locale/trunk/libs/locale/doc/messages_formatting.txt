@@ -481,6 +481,10 @@ std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_
         a GPL-ed editor. It does not affect your message catalogs or your code.
     -#  I see no reason to reimplement well debugged, working tools like \c xgettext, \c msgfmt, \c msgmerge that
         do a very fine job, especially as they are freely available for download and support almost any platform.
+    All Linux distributions, BSD Flavors, Mac OS X and other Unix like operating systems provide GNU Gettext tools
+    as a standard package.\n
+    Windows users can get GNU Gettext utilities via MinGW project. See \ref gettext_for_windows. 
+
 
 -   Is there any reason to prefer the Boost.Locale implementation to the original GNU Gettext runtime library?
     In either case I would probably need some of the GNU tools.

@@ -123,7 +123,7 @@ namespace boost {
         #endif
 
         ///
-        /// Type of normalization
+        /// The type that defined <a href="http://unicode.org/reports/tr15/#Norm_Forms">normalization form</a>
         ///
 
         typedef enum {
@@ -135,7 +135,7 @@ namespace boost {
         } norm_type;
        
         ///
-        /// Normalize Unicode string \a str according to normalization mode \a n
+        /// Normalize Unicode string \a str according to \ref norm_type "normalization form" \a n
         ///
         /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
@@ -148,7 +148,7 @@ namespace boost {
         }
 
         ///
-        /// Normalize NUL terminated Unicode string \a str according to normalization mode \a n
+        /// Normalize NUL terminated Unicode string \a str according to \ref norm_type "normalization form" \a n
         ///
         /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
@@ -164,7 +164,7 @@ namespace boost {
         }
         
         ///
-        /// Normalize Unicode string in range [begin,end) according to normalization mode \a n
+        /// Normalize Unicode string in range [begin,end) according to \ref norm_type "normalization form" \a n
         ///
         /// Note: This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or UTF-32. It does not take
         /// in account the locale encoding, because Unicode decomposition and composition are meaningless outside 
