@@ -48,7 +48,7 @@ you need to provide a path to location of ICU library using \c -sICU_PATH option
 
 For example:
 
--   If your icu build in placed at \c /opt/icu46 such that the files are placed like\n
+-   If your icu build is placed at \c /opt/icu46 such that the files are placed like\n
     \c /opt/icu46/include/unicode/uversion.h\n
     \c /opt/icu46/include/unicode/calendar.h\n
     \c ... \n
@@ -59,7 +59,7 @@ For example:
     \verbatim
     ./bjam --with-locale -sICU_PATH=/opt/icu46  stage
     \endverbatim
--   If your icu build in placed at <tt>c:\\icu46</tt> such that the files are placed like \n
+-   If your icu build is placed at <tt>c:\\icu46</tt> such that the files are placed like \n
     <tt>c:\\icu46\\include\\unicode\\uversion.h</tt>  \n
     <tt>c:\\icu46\\include\\unicode\\calendar.h</tt> \n
     <tt>...</tt> \n
@@ -118,7 +118,7 @@ You can run unit tests by invoking \c bjam with \c libs/locale/test project para
 \section building_boost_locale_cmake Building With CMake
 
 \note CMake build does not provide mangled library names like boost_locale-mt-gd.lib, so if you
-relay on auto-linking use Boost.Build.
+rely on auto-linking use Boost.Build.
 
 \subsection cmake_building_deps Dependencies
 

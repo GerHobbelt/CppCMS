@@ -9,7 +9,6 @@ There are several important flaws in the standard C, C++ and Boost libraries tha
 -#  The biggest flaw of most libraries that provide operations over dates is the fact that they only support
     the Gregorian calendar. \c boost::date_time , \c std::tm , and standard functions like \c localtime and \c gmtime,
     all assume the Gregorian calendar.
-    .
 -#  The information about local start of week is not provided.
     \n
     For example the standard C and C++ library has \c mktime and \c localtime, but they do not give
@@ -20,8 +19,8 @@ Boost.Locale provides generic \ref boost::locale::date_time "date_time", and \re
 that allow you to perform operations on dates and times for non-Gregorian calendars such as Hebrew, Islamic, Japanese and others.
 
 \ref using_localization_backends "Non-ICU based backends" support the Gregorian calendar only.
-Unlike \c boost::date_time, they fully aware of the local first day of week. Thus,
-if the current day of week is Monday, than setting "current day of week" to Sunday would move the actual date 6 days
+Unlike \c boost::date_time, they are fully aware of the local first day of week. Thus,
+if the current day of week is Monday, then setting "current day of week" to Sunday would move the actual date 6 days
 forward in Russian or French locales and move one day backward in USA and Israeli locales.
 
 \section dates_times_timezones_dt Handling Dates and Time
@@ -42,7 +41,7 @@ For example:
     cout << "Let's meet tomorrow at " << as::date << tomorrow << endl;
     date_time some_point = period::year(1995) + period::january() + period::day(1);
     // Set some_point's date to 1995-Jan-1.
-    cout << "The "<< as::date << some_point " is the " 
+    cout << "The "<< as::date << some_point << " is the " 
         << as::ordinal << some_point / period::day_of_week_local() << " day of the week"  << endl;
 \endcode
 
@@ -73,7 +72,7 @@ For example, for February the <tt>maximum(period::day())</tt> would be 28 (or 29
 \note Be very careful with assumptions about calendars. For example, in the Hebrew calendar, the
 number of months is different for leap years and non-leap years.
 
-We recommended you look at the \c calendar.cpp example provided with this library to get an understanding of how
+We recommend you to look at the \c calendar.cpp example provided with this library to get an understanding of how
 to manipulate dates and times using these classes.
 
 To convert between various calendar dates, you may get the current POSIX time via the
@@ -150,7 +149,7 @@ The example above would just print a number. Thus, you need to use iostream mani
     std::cout << as::date << now << std::endl;
 \endcode
 
-This is important to remember that \c date_time object is alway rendered and parsed in the context
+This is important to remember that \c date_time object is always rendered and parsed in the context
 of the \c iostream's locale and time zone and not in the context of specific \c date_time object.
 
 \section dates_times_timezones_qna Questions and Answers 
@@ -160,9 +159,8 @@ of the \c iostream's locale and time zone and not in the context of specific \c 
 
 -   Boost.DateTime is locale agnostic library and ignores the fact that the first day of week
     varies by the locale.
-    .
 -   Boost.Locale provides a unified access to date and time in time zone aware way.
-    It represents a time as universal scalar - the POSIX time and over that build dates,
+    It represents a time as universal scalar - the POSIX time and over that builds dates,
     local times and time-zones handling.
     \n
     For example, <tt>date_time(some_time.time() + 3600)</tt> may be not equal to

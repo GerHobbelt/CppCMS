@@ -3,8 +3,8 @@
 \page glossary Glossary
 
 -   \anchor term_bmp <b>Basic Multilingual Plane (BMP)</b> -- a part of 
-    the <i>Universal Character Set</i> with code points in tje range U-0000--U-FFFF.
-    The most commonly used UCS characters lay in this plane, including all Western, Cyrillic, Hebrew, Thai, Arabic and CJK encodings.
+    the <i>Universal Character Set</i> with code points in the range U-0000--U-FFFF.
+    The most commonly used UCS characters lay in this plane, including all Western, Cyrillic, Hebrew, Thai, Arabic and CJK characters.
     However there are many characters that lay outside the BMP and they are absolutely required for correct support of East Asian languages.
 -   \b Code \b Point -- a unique number that represents a "character" in the Universal Character Set. Code points lay in the range of
     0-0x10FFFF, and are usually displayed as U+XXXX or U+XXXXXX, where X represents a hexadecimal digit.
@@ -16,7 +16,7 @@
     Non-Unicode encodings are still very popular, for example the Latin-1 (or ISO-8859-1) encoding covers most of the characters for
     Western European languages and significantly simplifies the processing of text for applications designed to handle only such languages.
     \n
-    For Boost.Locale you should provide an eight-bit (\c std::sting) encoding as part of the locale name, like \c en_US.UTF-8 or
+    For Boost.Locale you should provide an eight-bit (\c std::string) encoding as part of the locale name, like \c en_US.UTF-8 or
     \c he_IL.cp1255 . \c UTF-8 is recommended.
 -   \b Facet - or \c std::locale::facet -- a base class that every object that describes a specific locale is derived from. Facets can be
     added to a locale to provide additional culture information.

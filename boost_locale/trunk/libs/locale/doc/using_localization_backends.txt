@@ -31,7 +31,7 @@ All of the alternate backends have these limitations:
 - Only the Gregorian calendar is supported and it is based
   on capabilites of mktime functionality (including dates range)
 - No boundary analysis.
-- Case handing is very simple and based on single codepoint conversions,
+- Case handling is very simple and based on single codepoint conversions,
   though they still handle UTF-8 better than the standard library.
 - Time zone specification is very limited: either local time or a time zone
   in the format "GMT+HH:MM".
@@ -74,8 +74,8 @@ problems with this.
 
 \note
 
-- You need GCC-4.x to use it.
-- Only UTF-8 encoding is supported.
+- If you using GCC compiler under Windows you need GCC-4.x series to use it, GCC-3.4 is not supported
+- Only UTF-8 as narrow locale encoding and UTF-16 as wide encoding are supported. 
 
 \section supported_features_by_backends Supported Features
 

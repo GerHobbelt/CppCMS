@@ -16,7 +16,7 @@ Each facet that was installed into the \c std::locale object can be fetched usin
 the \c std::ctype<Char> facet provides rules for case conversion, so you can convert a character to upper-case like this:
 
 \code
-std::ctype<char> const &ctype_facet = std::use_facet<std::ctype>(some_locale);
+std::ctype<char> const &ctype_facet = std::use_facet<std::ctype<char> >(some_locale);
 char upper_a = ctype_facet.toupper('a');
 \endcode
 
@@ -50,7 +50,7 @@ You can also create your own facets and install them into existing locale object
 And now you can simply provide this information to a locale:
 
 \code
-    std::locale::global(std::locale(std::locale("en_US.UTF-8"),new measure(paper_size::inches)));
+    std::locale::global(std::locale(std::locale("en_US.UTF-8"),new measure(measure::inches)));
     /// Create default locale built from en_US locale and add paper size facet.
 \endcode
 
@@ -62,7 +62,7 @@ Now you can print a distance according to the correct locale:
     {
         measure const &m = std::use_facet<measure>(out.getloc());
         // Fetch locale information from stream
-        std::cout << m.from_metric(value) << " " << m.name();
+        out << m.from_metric(value) << " " << m.name();
     }
 \endcode
 
@@ -75,45 +75,45 @@ There are numerous issues in the standard library that prevent the use of its fu
 additional issues:
 
 -   Setting the global locale has bad side effects.
-    .
+    \n
     Consider following code:
-    .
+    \n
     \code
         int main()
         {
             std::locale::global(std::locale("")); 
-            // Set default locale as global
+            // Set system's default locale as global
             std::ofstream csv("test.csv");
             csv << 1.1 << ","  << 1.3 << std::endl;
         }
     \endcode
-    .
+    \n
     What would be the content of \c test.csv ? It may be "1.1,1.3" or it may be "1,1,1,3" 
     rather than what you had expected.
-    .
+    \n
     More than that it affects even \c printf and libraries like \c boost::lexical_cast giving
     incorrect or unexpected formatting. In fact many third-party libraries are broken in such a
     situation.
-    .
+    \n
     Unlike the standard localization library, Boost.Locale never changes the basic number formatting,
     even when it uses \c std based localization backends, so by default, numbers are always
     formatted using C-style locale. Localized number formatting requires specific flags.
-    .
+    \n
 -   Number formatting is broken on some locales.
-    .
+    \n
     Some locales use the non-breakable space u00A0 character for thousands separator, thus
     in \c ru_RU.UTF-8 locale number 1024 should be displayed as "1 024" where the space
     is a Unicode character with codepoint u00A0. Unfortunately many libraries don't handle
     this correctly, for example GCC and SunStudio display a "\xC2" character instead of
     the first character in the UTF-8 sequence "\xC2\xA0" that represents this code point, and 
     actually generate invalid UTF-8.
-    .
+    \n
 -   Locale names are not standardized. For example, under MSVC you need to provide the name
     \c en-US or \c English_USA.1252 , when on POSIX platforms it would be \c en_US.UTF-8 
     or \c en_US.ISO-8859-1 
-    .
+    \n
     More than that, MSVC does not support UTF-8 locales at all.
-    .
+    \n
 -   Many standard libraries provide only the C and POSIX locales, thus GCC supports localization
     only under Linux. On all other platforms, attempting to create locales other than "C" or
     "POSIX" would fail.

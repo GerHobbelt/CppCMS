@@ -31,7 +31,7 @@ on the platform, so they may be even less convenient when dealing with Unicode t
 There is common assumption that UTF-16 is the best encoding for storing information because it gives "shortest" representation
 of strings.
 
-In fact, it probably the most error-prone encoding to work with. The biggest issue is code points that lay outside of the BMP,
+In fact, it is probably the most error-prone encoding to work with. The biggest issue is code points that lay outside of the BMP,
 which must be represented with surrogate pairs. These characters are very rare and many applications are not tested with them.
 
 For example:
@@ -40,7 +40,7 @@ For example:
 -   Editing a character with a codepoint above 0xFFFF often shows an unpleasant bug: for example, to erase
     such a character in Windows Notepad you have to press backspace twice.
 
-So UTF-16 can be used for Unicode, in fact ICU and may other applications use UTF-16 as their internal Unicode representation, but
+So UTF-16 can be used for Unicode, in fact ICU and many other applications use UTF-16 as their internal Unicode representation, but
 you should be very careful and never assume one-code-point == one-utf16-character.
 
 */

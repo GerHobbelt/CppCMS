@@ -34,7 +34,7 @@ namespace boost {
             ///
             /// \brief The excepton that is thrown in case of conversion error
             ///
-            class conversion_error : public std::runtime_error {
+            class BOOST_SYMBOL_VISIBLE conversion_error : public std::runtime_error {
             public:
                 conversion_error() : std::runtime_error("Conversion failed") {}
             };
@@ -43,7 +43,7 @@ namespace boost {
             /// \brief This exception is thrown in case of use of unsupported
             /// or invalid character set
             ///
-            class invalid_charset_error : public std::runtime_error {
+            class BOOST_SYMBOL_VISIBLE invalid_charset_error : public std::runtime_error {
             public:
 
                 /// Create an error for charset \a charset

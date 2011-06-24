@@ -25,19 +25,19 @@ The model is:
 
 -   First, our application \c foo is prepared for localization by calling the \ref boost::locale::translate() "translate" function 
     for each message used in user interface.
-    .
+    \n
     For example:
     \code
         cout << "Hello World" << endl;
     \endcode
-    Is change to
-    .
+    Is changed to
+    \n
     \code
         cout << translate("Hello World") << endl;
     \endcode
 -   Then all messages are extracted from the source code and a special \c foo.po file is generated that contains all of the
     original English strings.
-    .
+    \n
     \verbatim
         ...
         msgid "Hello World"
@@ -45,14 +45,14 @@ The model is:
         ...
     \endverbatim
 -   The \c foo.po file is translated for the supported locales. For example, \c de.po, \c ar.po, \c en_CA.po , and \c he.po.
-    .
+    \n
     \verbatim
         ...
         msgid "Hello World"
         msgstr "שלום עולם"
     \endverbatim
     And then compiled to the binary \c mo format and stored in the following file structure:
-    .
+    \n
     \verbatim
         de
         de/LC_MESSAGES
@@ -62,7 +62,7 @@ The model is:
         en_CA/LC_MESSAGES/foo.mo
         ...
     \endverbatim
-    .
+    \n
     When the application starts, it loads the required dictionaries. Then when the \c translate function is called and the message is written
     to an output stream, a dictionary lookup is performed and the localized message is written out instead.
 
@@ -76,9 +76,9 @@ All the dictionaries are loaded by the generator class. To use localized strings
 This is done by calling the following member functions of the \c generator class:
 
 -   \ref boost::locale::generator::add_messages_path() "add_messages_path" -- add the root path to the dictionaries.
-    .
+    \n
     For example: if the dictionary is located at \c /usr/share/locale/ar/LC_MESSAGES/foo.mo, then path should be \c /usr/share/locale.
-    .
+    \n
 -   \ref boost::locale::generator::add_messages_domain() "add_messages_domain" -- add the domain (name) of the application. In the above case it would be "foo".
 
 At least one domain and one path should be specified in order to load dictionaries.
@@ -117,25 +117,25 @@ The basic function that allows us to translate a message is boost::locale::trans
 
 -   Basic message translation:\n
     Translate a message, or a message in a given context. The source text is \b not copied.
-    .
+    \n
     -   boost::locale::translate(char const *message)
     -   boost::locale::translate(char const *context,char const *message)
-    .
-    Translate a message, or a message in a given context. The source text \b is not copied.
-    .
+    \n
+    Translate a message, or a message in a given context. The source text \b is copied.
+    \n
     -   boost::locale::translate(std::string const &message)
     -   boost::locale::translate(std::string const &context,std::string const &message)
     Plural form translation:\n
     Translate a message, or a message in a given context. The source text is \b not copied.
-    .
+    \n
     -   boost::locale::translate(char const *single,char const *plural,int number)
     -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
-    .
+    \n
     Translate a message, or a message in a given context. The source text \b is copied.
-    .
+    \n
     -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
     -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
-    .
+    \n
     
 These functions return a special Proxy object of type \ref boost::locale::message "message". It holds all the required
 information for string formatting.
@@ -147,7 +147,7 @@ If the message is found in the dictionary it is written to the output stream, ot
 For example:
 
 \code
-    std::cout << boost::locale::tanslate("Hello World!") << std::endl;
+    std::cout << boost::locale::translate("Hello World!") << std::endl;
 \endcode
 
 This allows the program to postpone translation of the message until the translation is actually needed, even to different
@@ -155,11 +155,10 @@ locale targets.
 
 \code
     // Several output stream that we write a message to
-    // English, Japaneese, Hebrew etc.
+    // English, Japanese, Hebrew etc.
     // Each one them has installed std::locale object that represents
     // their specific locale
     std::ofstream en,ja,he,de,ar;
-    std::wfstream w_ar;
 
     // Send single message to multiple streams
     void send_to_all(message const &msg)
@@ -168,14 +167,13 @@ locale targets.
         // the message is translated to different
         // language
         en << msg;
-        ja << msg
+        ja << msg;
         he << msg;
         de << msg;
         ar << msg;
-        w_ar << msg;
     }
 
-    main()
+    int main()
     {
         ...
         send_to_all(translate("Hello World"));
@@ -186,12 +184,12 @@ locale targets.
 
 -   \c message can be implicitly converted to each type of supported string (i.e. \c std::string, \c std::wstring etc.) using 
     the global locale:
-    .
+    \n
     \code
         std::wstring msg = translate("Do you want to open the file?");
     \endcode
 -   \c message can be explicitly converted to a string using the \c str<CharType> member function for a specific locale.
-    .
+    \n
     \code
         std::wstring msg = translate("Do you want to open the file?").str<wchar_t>(some_locale)
     \endcode
@@ -199,7 +197,7 @@ locale targets.
 
 \subsection plural_forms Plural Forms
 
-GNU Gettext catalogs has simple, robust and yet powerful plural forms support. We recommend the
+GNU Gettext catalogs have simple, robust and yet powerful plural forms support. We recommend the
 original GNU documentation <a href="http://www.gnu.org/software/gettext/manual/gettext.html#Plural-forms">here</a>.
 
 Let's try to solve a simple problem, displaying a message to the user:
@@ -213,7 +211,7 @@ Let's try to solve a simple problem, displaying a message to the user:
 
 This very simple task becomes quite complicated when we deal with languages other than English. Many languages have more
 than two plural forms. For example, in Hebrew there are special forms for single, double, plural, and plural above 10.
-They can't be distinguished by the simple rule "is \c n 1 or not".
+They can't be distinguished by the simple rule "is n 1 or not"
 
 The correct solution is:
 
@@ -245,7 +243,7 @@ In these cases you must add some context information to the original string, by 
     button->setLabel(translate("File","open"));
 \endcode
 
-The context information is provided as the first parameter to the \ref boost::locale::translate(char const*,char const*) "translate"
+The context information is provided as the first parameter to the \ref boost::locale::translate() "translate"
 function in both singular and plural forms. The translator would see this context information and would be able to translate the
 "open" string correctly.
 
@@ -283,7 +281,7 @@ There are three ways to use non-default domains:
 
 -   When working with \c iostream, you can use the parameterized manipulator \ref
     boost::locale::as::domain "as::domain(std::string const &)", which allows switching domains in a stream:
-    .
+    \n
     \code
         cout << as::domain("foo") << translate("Hello") << as::domain("bar") << translate("Hello");
         // First translation is taken from dictionary foo and the other from dictionary bar
@@ -295,7 +293,7 @@ There are three ways to use non-default domains:
     \endcode
 -   You can specify the domain directly using a \ref direct_message_translation "convenience" interface:
     \code
-        MessageBox(dgettext("gui","Error Occured"));
+        MessageBox(dgettext("gui","Error Occurred"));
     \endcode
 
 \subsection direct_message_translation Direct translation (Convenience Interface)
@@ -462,7 +460,7 @@ std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_
 -   Do I need GNU Gettext to use Boost.Locale?
     \n
     Boost.Locale provides a run-time environment to load and use GNU Gettext message catalogs, but it does
-    not provide tools for generation, translation, compilation and managment of these catalogs.
+    not provide tools for generation, translation, compilation and management of these catalogs.
     Boost.Locale only reimplements the GNU Gettext libintl.
     \n
     You would probably need:
@@ -496,6 +494,7 @@ std::locale real_locale(base_locale,boost::locale::gnu_gettext::create_messages_
         a single user like most GUI applications, but is problematic for services and servers.
     -#  The GNU Gettext API supports only 8-bit encodings, making it irrelevant in environments that natively use
         wide strings.
+    -#  The GNU Gettext runtime library distributed under LGPL license which may be not convenient for some users.
 
 */
 

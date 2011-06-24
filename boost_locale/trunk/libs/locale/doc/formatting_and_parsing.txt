@@ -3,7 +3,7 @@
 
 \page formatting_and_parsing Numbers, Time and Currency formatting and parsing
 
-All formatting and parsing is performed via the \c iostream STL library. Each of the above information types is represented as a number.
+All formatting and parsing is performed via the standard I/O streams. Each of the above information types is represented as a number.
 The formatting information is set using iostream manipulators. All manipulators are placed in the boost::locale::as namespace.
 
 For example:
@@ -24,7 +24,7 @@ Here are the manipulators for number formatting:
 
 -   \c as::number -- format number according to local specifications, it takes into account various \c std::ios_base flags like scientific
     format and precision.
-    .
+    \n
 -   \c as::percent -- format number as "percent" format. For example:
     \code
         cout << as::percent << 0.25 <<endl;
@@ -33,10 +33,10 @@ Here are the manipulators for number formatting:
     \verbatim
     25%
     \endverbatim
-    .
+    \n
 -   \c as::spellout -- spell the number. For example, under the English locale, 103 may be displayed as "one hundred three".
     \b Note: not all locales provide rules for spelling numbers. In such a case the number would be displayed in decimal format.
-    .
+    \n
 -   \c as::ordinal -- display an order-of element. For example "2" would be displayed as "2nd" under the English locale. As in
     the above case, not all locales provide ordinal rules.
 
@@ -69,8 +69,8 @@ There are four major manipulators for Date and Time formatting:
 For example:
 
 \code
-    double now=time(0);
-    cout << "Today is "<< as::date << now << " and tommorrow is " << now+24*3600 << endl;
+    time_t now=time(0);
+    cout << "Today is "<< as::date << now << " and tomorrow is " << now+24*3600 << endl;
     cout << "Current time is "<< as::time << now << endl;
     cout << "The current weekday is "<< as::ftime("%A") << now << endl;
 \endcode
@@ -87,7 +87,7 @@ The default format is medium.
 By default, the date and time are shown in the local time zone. This behavior may be changed with the following manipulators:
 
 -   \c as::gmt -- display date and time in GMT.
--   \c as::local_time  -- display in local time format (default).
+-   \c as::local_time  -- display in local time zone (default).
 -   \c as::time_zone  -- parameterized manipulator that sets the time-zone ID for date-time formatting and parsing. It
     takes a string parameter that represents the time zone ID.
 
@@ -95,7 +95,7 @@ For example:
 
 \code
     double now=time(0);
-    cout << as::datetime << as::locale_time << "Locale time is: "<< now << endl;
+    cout << as::datetime << as::local_time << "Local time is: "<< now << endl;
     cout << as::gmt << "GMT Time is: "<< now <<endl;
     cout << as::time_zone("EST") << "Eastern Standard Time is: "<< now <<endl;
 \endcode

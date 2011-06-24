@@ -114,7 +114,7 @@ int main()
 
 \section codecvt_limitations Limitations of std::codecvt
 
-The Standard does not provides any information about \c std::mbstate_t that could be used to save
+The Standard does not provide any information about \c std::mbstate_t that could be used to save
 intermediate code-page conversion states. It leaves the definition up to the compiler implementation, making it
 impossible to reimplement <tt>std::codecvt<wchar_t,char,mbstate_t></tt> for stateful encodings.
 Thus, Boost.Locale's \c codecvt facet implementation may be used with stateless encodings like UTF-8,

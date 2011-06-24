@@ -17,7 +17,7 @@ For example:
 
 \code
     generator gen;
-    get.locale_cache_enabled(true);
+    gen.locale_cache_enabled(true);
     gen("en_US.UTF-8");
     gen("de_DE.UTF-8");
     gen("ja_JP.UTF-8");
@@ -25,11 +25,11 @@ For example:
 
     std::locale en=gen("en_US.UTF-8"); 
     // Fetch an existing locale from the cache
-    std::locale ar=get("ar_EG.UTF-8");
+    std::locale ar=gen("ar_EG.UTF-8");
     // Because ar_EG not in the cache, a new locale is generated (and cached)
 \endcode
 
-Then these locales can be imbued to \c iostreams or used directly as parameters in various functions.
+Then these locales can be imbued to \c iostreams or used directly as parameters to various functions.
 
 
 

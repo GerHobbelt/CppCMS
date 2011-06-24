@@ -13,7 +13,7 @@
 - \ref why_abstract_api
 - \ref why_no_special_character_type
 
-\subsection rationale_why Why is it needed?
+\section rationale_why Why is it needed?
 
 Why do we need a localization library, when standard C++ facets (should) provide most of the required functionality:
 
@@ -32,7 +32,7 @@ Almost every(!) facet has design flaws:
 
 -  \c std::ctype, which is responsible for case conversion, assumes that all conversions can be done on a per-character basis. This is
     probably correct for many languages but it isn't correct in general.
-    .
+    \n
     -# Case conversion may change a string's length. For example, the German word "grüßen" should be converted to "GRÜSSEN" in upper
     case: the letter "ß" should be converted to "SS", but the \c toupper function works on a single-character basis.
     -# Case conversion is context-sensitive. For example, the Greek word "ὈΔΥΣΣΕΎΣ" should be converted to "ὀδυσσεύς", where the Greek letter
@@ -63,7 +63,7 @@ Almost every(!) facet has design flaws:
 Also, many features are not really supported by \c std::locale at all: timezones (as mentioned above), text boundary analysis, number
 spelling, and many others. So it is clear that the standard C++ locales are problematic for real-world applications.
 
-\subsection why_icu Why use an ICU wrapper instead of ICU?
+\section why_icu Why use an ICU wrapper instead of ICU?
 
 ICU is a very good localization library, but it has several serious flaws:
 
@@ -79,7 +79,7 @@ For example: Boost.Locale provides direct integration with \c iostream allowing 
     cout << "You have "<<as::currency << 134.45 << " in your account as of "<<as::datetime << std::time(0) << endl;
 \endcode
 
-\subsection why_icu_wrapper Why an ICU wrapper and not an implementation-from-scratch?
+\section why_icu_wrapper Why an ICU wrapper and not an implementation-from-scratch?
 
 ICU is one of the best localization/Unicode libraries available. It consists of about half a million lines of well-tested,
 production-proven source code that today provides state-of-the art localization tools.
@@ -92,7 +92,7 @@ Thus Boost.Locale wraps ICU with a modern C++ interface, allowing future reimple
 but bringing localization support to Boost today and not in the not-so-near-if-at-all future.
 
 
-\subsection why_icu_api_is_hidden Why is the ICU API not exposed to the user?
+\section why_icu_api_is_hidden Why is the ICU API not exposed to the user?
 
 Yes, the entire ICU API is hidden behind opaque pointers and users have no access to it. This is done for several reasons:
 
@@ -105,7 +105,7 @@ functionality may be reimplemented directly in the Boost.Locale library.
 for the needs of the <a href="http://cppcms.sourceforge.net/">CppCMS C++ Web framework</a>.
 
 
-\subsection why_gnu_gettext Why use GNU Gettext catalogs for message formatting?
+\section why_gnu_gettext Why use GNU Gettext catalogs for message formatting?
 
 There are many available localization formats. The most popular so far are OASIS XLIFF, GNU gettext po/mo files, POSIX catalogs, Qt ts/tm files, Java properties, and Windows resources. However, the last three are useful only in their specific areas, and POSIX catalogs are too simple and limited, so there are only two reasonable options:
 
@@ -133,19 +133,19 @@ So, even though the GNU Gettext mo catalog format is not an officially approved 
 \note Boost.Locale does not use any of the GNU Gettext code, it just reimplements the tool for reading and using mo-files,
 eliminating the biggest GNU Gettext flaw at present -- thread safety when using multiple locales.
 
-\subsection why_plain_number Why is a plain number used for the representation of a date-time, instead of a Boost.DateTime date or Boost.DateTime ptime?
+\section why_plain_number Why is a plain number used for the representation of a date-time, instead of a Boost.DateTime date or Boost.DateTime ptime?
 
 There are several reasons:
 
 -#  A Gregorian Date by definition can't be used to represent locale-independent dates, because not all
     calendars are Gregorian.
 -#  \c ptime -- definitely could be used, but it has several problems:
-    .   
+    \n   
     -   It is created in GMT or Local time clock, when `time()` gives a representation that is independent of time zones
         (usually GMT time), and only later should it be represented in a time zone that the user requests.
         \n
         The timezone is not a property of time itself, but it is rather a property of time formatting.
-        .
+        \n
     -   \c ptime already defines \c operator<< and \c operator>> for time formatting and parsing.
     -   The existing facets for \c ptime formatting and parsing were not designed in a way that the user can override.
         The major formatting and parsing functions are not virtual. This makes it impossible to reimplement the formatting and
@@ -160,24 +160,24 @@ There are several reasons:
 
 Thus, at this point, \c ptime is not supported for formatting localized dates and times.
 
-\subsection why_posix_names Why are POSIX locale names used and not something like the BCP-47 IETF language tag?
+\section why_posix_names Why are POSIX locale names used and not something like the BCP-47 IETF language tag?
 
 There are several reasons:
 
 - POSIX locale names have a very important feature: character encoding. When you specify for example fr-FR, you
 do not actually know how the text should be encoded -- UTF-8, ISO-8859-1, ISO-8859-15 or maybe Windows-1252.
-This may vary between different operating systems and is depend on the current installation. So it is critical
+This may vary between different operating systems and depends on the current installation. So it is critical
 to provide all the required information.
 - ICU fully understands POSIX locales and knows how to treat them correctly.
 - They are native locale names for most operating system APIs (with the exception of Windows)
 
-\subsection why_linear_chunks Why most parts of Boost.Locale work only on linear/contiguous chunks of text
+\section why_linear_chunks Why most parts of Boost.Locale work only on linear/contiguous chunks of text
 
 There are two reasons:
 
 - Boost.Locale relies heavily on the third-party APIs like ICU, POSIX or Win32 API, all of them
   work only on linear chunks of text, so providing non-linear API would just hide the
-  real situation and would not bring read performance advantage.
+  real situation and would not bring real performance advantage.
 - In fact, all known libraries that work with Unicode: ICU, Qt, Glib, Win32 API, POSIX API 
   and others accept an input as single linear chunk of text and there is a good reason for this:
   \n
@@ -196,7 +196,7 @@ However:
    on large chunks of text, will provide an interface for non-linear text handling.
 
 
-\subsection why_abstract_api Why all Boost.Locale implementation is hidden behind abstract interfaces and does not use template metaprogramming?
+\section why_abstract_api Why all Boost.Locale implementation is hidden behind abstract interfaces and does not use template metaprogramming?
 
 There are several major reasons:
 
@@ -207,13 +207,13 @@ There are several major reasons:
 - This approach reduces compilation times significantly. This is very important for library that may be
   used in almost every part of specific program.
 
-\subsection why_no_special_character_type Why Boost.Locale does not provide char16_t/char32_t for non-C++0x platforms.
+\section why_no_special_character_type Why Boost.Locale does not provide char16_t/char32_t for non-C++0x platforms.
 
 There are several reasons:
 
 - C++0x defines \c char16_t and \c char32_t as distinct types, so substituting is with something like \c uint16_t or \c uint32_t
   would not work as for example writing \c uint16_t to \c uint32_t stream would write a number to stream.
-- The C++ locales system would work only of standard facets like \c std::num_put are installed into the 
+- The C++ locales system would work only if standard facets like \c std::num_put are installed into the 
   existing instance of \c std::locale, however in the many standard C++ libraries these facets are specialized for each
   specific character that the standard library supports, so an attempt to create a new facet would
   fail as it is not specialized.
