@@ -5,6 +5,7 @@
 \section appendix_toc Table of Contents 
 
 - \subpage rationale
+- \subpage faq
 - \subpage default_encoding_under_windows
 - \subpage running_examples_under_windows 
 - \subpage gettext_for_windows 

@@ -71,6 +71,7 @@ and use library.
 - \subpage building_boost_locale
 - \subpage appendix
     - \ref rationale
+    - \ref faq
     - \ref default_encoding_under_windows
     - \ref running_examples_under_windows 
     - \ref gettext_for_windows
