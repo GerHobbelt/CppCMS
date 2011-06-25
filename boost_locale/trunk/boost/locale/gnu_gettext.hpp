@@ -14,6 +14,10 @@
 
 namespace boost {
 namespace locale {
+/// \addtogroup message
+/// @{
+
+
 ///
 /// \brief This namespace holds classes that provide GNU Gettext message catalogs support.
 ///
@@ -128,6 +132,9 @@ namespace gnu_gettext {
     /// \endcond
 
 } // gnu_gettext
+
+/// @}
+
 } // locale
 } // boost
 

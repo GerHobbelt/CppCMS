@@ -33,9 +33,6 @@ namespace boost {
 
     namespace locale {
         
-        ///
-        /// \brief This namespae contains all operations required for boundary analysis of text
-        ///
         namespace boundary {
             ///
             /// \defgroup boundary Boundary Analysis
@@ -526,6 +523,35 @@ namespace boost {
             ///
             /// \brief This class holds an index of tokens in the text range and allows to iterate over them 
             ///
+            /// This class is provides \ref begin() and \ref end() member functions that return bidirectional iterators
+            /// to the \ref token objects.
+            ///
+            /// It provides two options on way of selecting tokens:
+            ///
+            /// -   \ref rule(rule_type mask) - a mask that allows to select only specific types of tokens according to
+            ///     various masks as \ref word_any.
+            ///     \n
+            ///     For example: using word boundary analysis, when the provided mask is \ref word_kana then the iterators
+            ///     would iterate only over the words containing Kana letters and \ref word_any would select all types of
+            ///     words excluding ranges that consist of white space and punctuation marks.
+            ///     \n 
+            ///     The default is to select any types of boundaries.
+            /// -   \ref full_select(bool how) - a flag that defines the way a range is selected if the rule of the previous
+            ///     boundary point does not fit the selected rule.
+            ///     \n
+            ///     For example: We want to fetch all sentences from the following text: "Hello! How\nare you?".
+            ///     \n
+            ///     This text contains three boundary points separating it to sentences by different rules:
+            ///     - The exclamation mark "!" ends the sentence "Hello!"
+            ///     - The line feed that splits the sentence "How\nare you?" into two parts.
+            ///     - The question mark that ends the second sentence.
+            ///     \n
+            ///     
+            /// when the \ref rule() is \ref word_any the returned values for "Hello World" would be "Hello",
+            ///     "World" when \ref full_select() is false and "Hello", " World" when \ref full_select() is true.
+            ///     
+            ///
+            ///
             /// When the object is created it creates index and provides access to it with iterators.
             ///
             /// It is used mostly with break_iterator and token_iterator. For each boundary point it
@@ -599,11 +625,17 @@ namespace boost {
                 {
                     return iterator(p,&map_,mask_,full_select_);
                 }
-                
+               
+                ///
+                /// Get the mask of rules that are used
+                /// 
                 rule_type rule() const
                 {
                     return mask_;
                 }
+                ///
+                /// Get the mask of rules that are used
+                /// 
                 void rule(rule_type v)
                 {
                     mask_ = v;

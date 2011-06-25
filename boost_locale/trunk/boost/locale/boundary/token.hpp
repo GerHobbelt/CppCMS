@@ -30,6 +30,21 @@ namespace boundary {
     /// \brief a token object that represents a pair of two iterators that define the range where
     /// this token exits and a rule that defines it.
     ///
+    /// This type of object is dereferenced by the iterators of token_index. Using a rule() member function
+    /// you can get a specific rule this token was selected with. For example, when you use
+    /// word boundary analysis, you can check if the specific word contains Kana letters by checking (rule() & \ref word_kana)!=0
+    /// For a sentence analysis you can check if the sentence is selected because a sentence terminator is found (\ref sentence_term) or
+    /// there is a line break (\ref sentence_sep).
+    ///
+    /// This object can be automatically converted to std::basic_string with the same type of character. It is also
+    /// valid range that has begin() and end() member functions returning iterators on the location of the token.
+    ///
+    /// \see
+    ///
+    /// - \ref token_index
+    /// - \ref bound
+    /// - \ref bound_index
+    ///
     template<typename IteratorType>
     class token : public std::pair<IteratorType,IteratorType> {
     public:
