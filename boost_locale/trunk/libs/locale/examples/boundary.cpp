@@ -22,20 +22,27 @@ int main()
     cout.imbue(loc);
     
 
-    //string text="Hello World! あにま! Linux2.6 and Windows7 is word and number. שָלוֹם עוֹלָם!";
-    string text="Hello!How\nAre you?\n";
+    string text="Hello World! あにま! Linux2.6 and Windows7 is word and number. שָלוֹם עוֹלָם!";
 
     cout<<text<<endl;
 
-    boundary::stoken_index index(boundary::sentence,text.begin(),text.end());
-    index.rule(boundary::sentence_term);
-    //index.full_select(true);
+    boundary::stoken_index index(boundary::word,text.begin(),text.end());
     boundary::stoken_index::iterator p,e;
 
     for(p=index.begin(),e=index.end();p!=e;++p) {
-        cout <<"["<<*p<<"]" << " "  << std::hex << p->rule()<< endl;
+        cout<<"Part ["<<*p<<"] has ";
+        if(p->rule() & boundary::word_number)
+            cout<<"number(s) ";
+        if(p->rule() & boundary::word_letter)
+            cout<<"letter(s) ";
+        if(p->rule() & boundary::word_kana)
+            cout<<"kana character(s) ";
+        if(p->rule() & boundary::word_ideo)
+            cout<<"ideographic character(s) ";
+        if(p->rule() & boundary::word_none)
+            cout<<"no word characters";
+        cout<<endl;
     }
-    return 0;
 
     index.map(boundary::character,text.begin(),text.end());
 
