@@ -42,6 +42,8 @@ void comment::prepare(std::string sid)
 
 			int post_id = r.get<int>(0);
 			c.post_id = post_id;
+			
+			r.clear();
 
 			if(c.form.erase.value()) {
 				sql()<<	"DELETE FROM comments "

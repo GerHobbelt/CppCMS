@@ -32,10 +32,11 @@ public:
 		width(width_),
 		height(height_),
 		lw(height_/2),
-		lh(height_/2),
-		letters(sizeof(choise)-1,Magick::Image(Magick::Geometry(lw,lh),Magick::Color("white")))
+		lh(height_/2)
 	{
 		using namespace Magick;
+		InitializeMagick("");
+		letters.resize(sizeof(choise)-1,Magick::Image(Magick::Geometry(lw,lh),Magick::Color("white")));
 		for(int i=0;i<int(sizeof(choise))-1;i++) {
 			Image &image=letters[i];
 			image.type( GrayscaleType );
@@ -124,7 +125,7 @@ private:
 		}
 		image.negate();
 		image.strokeWidth(height/50.0);
-		for(int times=0;times<2;times++) {
+		/*for(int times=0;times<2;times++) {
 			std::list<Magick::Coordinate> coord;
 			for(unsigned i=0;i<str.size();i++) {
 				int x=int(i)*dx + dx/2  + randlim(seed,lw/2)-lw/4;
@@ -132,7 +133,7 @@ private:
 				coord.push_back(Coordinate(x,y));
 			}
 			image.draw(DrawablePolyline(coord));
-		}
+		}*/
 		/*static const double kern[]=
 			{ 0.1, 0,   0.1,
 			  0,   0.6, 0,

@@ -11,6 +11,24 @@
 #include <cppdb/frontend.h>
 namespace data {
 namespace blog {
+	inline char ascii_lower(char c)
+	{
+		if('A'<=c && c<='Z')
+			return c-'A'+'a';
+		return c;
+	}
+	inline bool equal(std::string const &l,std::string const &r)
+	{
+		if(l.size()!=r.size())
+			return false;
+		for(size_t i=0;i<l.size();i++) {
+			char cl = ascii_lower(l[i]);
+			char cr = ascii_lower(r[i]);
+			if(cl!=cr)
+				return false;
+		}
+		return true;
+	}
 	bool comment_form::validate(cppcms::session_interface &session)
 	{
 		if(!cppcms::form::validate())
@@ -19,7 +37,7 @@ namespace blog {
 		if(session.is_set("user"))
 			return true;
 		
-		if(!session.is_set("captcha") || session.get("captcha")!=captcha.value()) {
+		if(!session.is_set("captcha") || !equal(session.get("captcha"),captcha.value())) {
 			captcha.valid(false);
 			is_valid = false;
 		}
