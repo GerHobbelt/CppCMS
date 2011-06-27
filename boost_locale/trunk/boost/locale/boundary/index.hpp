@@ -565,23 +565,70 @@ namespace boost {
             ///     same \ref boundary_type.  This is very fast operation as they shared same index
             ///     and it does not require its regeneration.
             ///
+            /// \see
+            ///
+            /// - \ref bound_index
+            /// - \ref token
+            /// - \ref bound
+            ///
 
             template<typename BaseIterator>
             class token_index {
             public:
+                
+                ///
+                /// \memberof  token_index
+                /// The type of the iterator used to iterate over the original text
+                ///
                 typedef BaseIterator base_iterator;
                 #ifdef BOOST_LOCALE_DOXYGEN
+                ///
+                /// \memberof  token_index
+                /// The bidirectional iterator that iterates over \ref value_type objects.
+                ///
+                /// -   The iterators may be invalidated by use of any non-const member function
+                ///     including but not limited to \ref rule(rule_type) and \ref full_select(bool).
+                /// -   The returned value_type object is valid as long as iterator points to it.
+                ///     So this following code is wrong as t used after p was updated:
+                ///     \code
+                ///     token_index<some_iterator>::iterator p=index.begin();
+                ///     token<some_iterator> &t = *p;
+                ///     ++p;
+                ///     cout << t.str() << endl;
+                ///     \endcode
+                ///
                 typedef unspecified_iterator_type iterator;
+                ///
+                /// \copydoc iterator
+                ///
                 typedef unspecified_iterator_type const_iterator;
                 #else
                 typedef details::token_index_iterator<base_iterator> iterator;
                 typedef details::token_index_iterator<base_iterator> const_iterator;
                 #endif
+                ///
+                /// \memberof  token_index
+                /// The type dereferenced by the \ref iterator and \ref const_iterator. It is
+                /// an object that represents selected token.
+                ///
                 typedef token<base_iterator> value_type;
 
+                ///
+                /// Default constructor. 
+                ///
+                /// \note
+                ///
+                /// When this object is constructed by default it does not include a valid index, thus
+                /// calling \ref begin(), \ref end() or \ref find() member functions would lead to undefined
+                /// behavior
+                ///
                 token_index() : mask_(0xFFFFFFFFu),full_select_(false)
                 {
                 }
+                ///
+                /// Create a token_index for boundary analysis \ref boundary_type "type" of the text
+                /// in range [begin,end) using a rule \a mask for locale \a loc.
+                ///
                 token_index(boundary_type type,
                             base_iterator begin,
                             base_iterator end,
@@ -593,6 +640,10 @@ namespace boost {
                         full_select_(false)
                 {
                 }
+                ///
+                /// Create a token_index for boundary analysis \ref boundary_type "type" of the text
+                /// in range [begin,end) selecting all possible tokens (full mask) for locale \a loc.
+                ///
                 token_index(boundary_type type,
                             base_iterator begin,
                             base_iterator end,
@@ -604,7 +655,23 @@ namespace boost {
                 {
                 }
 
+                ///
+                /// Create a token_index from a \ref bound_index. It copies all indexing information
+                /// and used default rule (all possible tokens)
+                ///
+                /// This operation is very cheap, so if you use bound_index and token_index on same text
+                /// range it is much better to create one from another rather then indexing the same
+                /// range twice.
+                ///
                 token_index(bound_index<base_iterator> const &);
+                ///
+                /// Copy an index from a \ref bound_index. It copies all indexing information
+                /// and used default rule (all possible tokens)
+                ///
+                /// This operation is very cheap, so if you use bound_index and token_index on same text
+                /// range it is much better to create one from another rather then indexing the same
+                /// range twice.
+                ///
                 token_index const &operator = (bound_index<base_iterator> const &);
 
                 void map(boundary_type type,base_iterator begin,base_iterator end,std::locale const &loc=std::locale())
@@ -642,10 +709,36 @@ namespace boost {
                     mask_ = v;
                 }
 
+                ///
+                /// Get the full_select property value -  should token include in the range
+                /// values that not belong to specific \ref rule() or not.
+                ///
+                /// The default value is false.
+                ///
+                /// For example for \ref sentence boundary with rule \ref sentence_term the tokens
+                /// of text "Hello! How\nare you?" are "Hello!\", "are you?" when full_select() is false
+                /// because "How\n" is selected as sentence by a rule spits the text by line feed. If full_select()
+                /// is true the returned tokens are "Hello! ", "How\nare you?" where "How\n" is joined with the
+                /// following part "are you?"
+                ///
+
                 bool full_select()  const 
                 {
                     return full_select_;
                 }
+
+                ///
+                /// Set the full_select property value -  should token include in the range
+                /// values that not belong to specific \ref rule() or not.
+                ///
+                /// The default value is false.
+                ///
+                /// For example for \ref sentence boundary with rule \ref sentence_term the tokens
+                /// of text "Hello! How\nare you?" are "Hello!\", "are you?" when full_select() is false
+                /// because "How\n" is selected as sentence by a rule spits the text by line feed. If full_select()
+                /// is true the returned tokens are "Hello! ", "How\nare you?" where "How\n" is joined with the
+                /// following part "are you?"
+                ///
 
                 void full_select(bool v) 
                 {
