@@ -531,11 +531,13 @@ namespace boost {
             /// -   \ref rule(rule_type mask) - a mask that allows to select only specific types of tokens according to
             ///     various masks as \ref word_any.
             ///     \n
+            ///     The default is to select any types of boundaries.
+            ///     \n 
             ///     For example: using word boundary analysis, when the provided mask is \ref word_kana then the iterators
             ///     would iterate only over the words containing Kana letters and \ref word_any would select all types of
-            ///     words excluding ranges that consist of white space and punctuation marks.
-            ///     \n 
-            ///     The default is to select any types of boundaries.
+            ///     words excluding ranges that consist of white space and punctuation marks. So iterating over the text
+            ///     "to be or not to be?" with \ref word_any rule would return tokens "to", "be", "or", "not", "to", "be", instead
+            ///     of default "to", " ", "be", " ", "or", " ", "not", " ", "to", " ", "be", "?".
             /// -   \ref full_select(bool how) - a flag that defines the way a range is selected if the rule of the previous
             ///     boundary point does not fit the selected rule.
             ///     \n
@@ -546,23 +548,22 @@ namespace boost {
             ///     - The line feed that splits the sentence "How\nare you?" into two parts.
             ///     - The question mark that ends the second sentence.
             ///     \n
+            ///     If you would only change the \ref rule() to \ref sentence_term then the token_index would
+            ///     provide two sentences "Hello!" and "are you?" as only them actually terminated with required
+            ///     terminator "!" or "?". But changing \ref full_select() to true, the selected token would include
+            ///     all the text up to previous valid boundary point and would return two expected sentences:
+            ///     "Hello!" and "How\nare you?".
             ///     
-            /// when the \ref rule() is \ref word_any the returned values for "Hello World" would be "Hello",
-            ///     "World" when \ref full_select() is false and "Hello", " World" when \ref full_select() is true.
-            ///     
+            /// This class allows to find a token according to the given iterator in range using \ref find() member
+            /// function.
             ///
+            /// \note
             ///
-            /// When the object is created it creates index and provides access to it with iterators.
-            ///
-            /// It is used mostly with break_iterator and token_iterator. For each boundary point it
-            /// provides the description mark that allows distinguishing between different types of boundaries.
-            /// For example, it marks whether a sentence terminates because a mark like "?" or "." was found or because
-            /// a new line symbol is present in the text.
-            ///
-            /// These marks can be read out with the token_iterator::mark() and break_iterator::mark() member functions.
-            ///
-            /// This class stores iterators to the original text, so you should be careful about iterator
-            /// invalidation. If the iterators on the original text are invalid, you can't use this mapping any more.
+            /// -   Changing any of the options - \ref rule() or \ref full_select() and of course re-indexing the text
+            ///     invalidates existing tokens and then can't be used any more.
+            /// -   token_index can be created from bound_index or other token_index that was created with
+            ///     same \ref boundary_type.  This is very fast operation as they shared same index
+            ///     and it does not require its regeneration.
             ///
 
             template<typename BaseIterator>
