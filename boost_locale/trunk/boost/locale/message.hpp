@@ -171,9 +171,9 @@ namespace boost {
         class basic_message {
         public:
 
-            typedef CharType char_type;
-            typedef std::basic_string<char_type> string_type;
-            typedef message_format<char_type> facet_type;
+            typedef CharType char_type; ///< The character this message object is used with
+            typedef std::basic_string<char_type> string_type;   ///< The string type this object can be used with
+            typedef message_format<char_type> facet_type;   ///< The type of the facet the messages are fetched with
 
             ///
             /// Create default empty message
@@ -296,6 +296,9 @@ namespace boost {
             {
             }
 
+            ///
+            /// Copy an object
+            ///
             basic_message(basic_message const &other) :
                 n_(other.n_),
                 c_id_(other.c_id_),
@@ -307,6 +310,9 @@ namespace boost {
             {
             }
 
+            ///
+            /// Assign other message object to this one
+            ///
             basic_message const &operator=(basic_message const &other)
             {
                 if(this==&other) {
@@ -317,6 +323,9 @@ namespace boost {
                 return *this;
             }
 
+            ///
+            /// Swap two message objects
+            ///
             void swap(basic_message &other)
             {
                 std::swap(n_,other.n_);

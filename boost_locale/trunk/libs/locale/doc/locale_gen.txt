@@ -88,7 +88,7 @@ Currently ICU supports following keys:
 -   \c calendar - the calendar used for the current locale. For example: \c gregorian, \c japanese, 
     \c buddhist, \c islamic, \c hebrew,  \c chinese, \c islamic-civil.
 -   \c collation - the collation order used for this locales, for example \c phonebook, \c pinyin, \c traditional,
-    \c stroke", \c direct, \c posix.
+    \c stroke, \c direct, \c posix.
 -   \c currency - the currency used in this locale, the standard 3 letter code like USD or JPY.
 -   \c numbers - the numbering system used, for example: \c latn, \c arab, \c thai.
 

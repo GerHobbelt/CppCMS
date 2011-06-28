@@ -66,8 +66,8 @@
 <tr>
   <td>OpenSolaris/SunOS 5.11</td><td>SunCC 5.10/STLport4</td><td>icu</td><td>4.2</td>
   <td>
-    Some faults in collation, STLport issue<br/>
-    iconv is disabled<br/>
+    Some faults in collation, STLport issue<br>
+    iconv is disabled<br>
     Boost-1.46.x requires patch for Boost.Thread, can be found in <tt>libs/locale/build</tt>
   </td>
 </tr>

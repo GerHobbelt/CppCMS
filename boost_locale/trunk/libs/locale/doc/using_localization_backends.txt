@@ -114,7 +114,7 @@ problems with this.
 </tr>
 <tr>
   <th>Collation</th>
-  <td>Full</td><td>Linux - 1 level<br/>Mac OS X - broken</td><td>3 levels</td><td>1 level</td>
+  <td>Full</td><td>Linux - 1 level<br>Mac OS X - broken</td><td>3 levels</td><td>1 level</td>
 </tr>
 <tr>
   <th>Calendar</th>
@@ -138,7 +138,7 @@ problems with this.
 </tr>
 <tr>
   <th>Useful on</th>
-  <td>Any Platform</td><td>Linux and Mac OS X</td><td>Windows/MinGW/Cygwin</td><td>Linux with GCC or Intel<br/>Windows with MSVC</td>
+  <td>Any Platform</td><td>Linux and Mac OS X</td><td>Windows/MinGW/Cygwin</td><td>Linux with GCC or Intel<br>Windows with MSVC</td>
 </tr>
 </table>
 
