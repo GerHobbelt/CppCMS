@@ -81,7 +81,7 @@ This is done by calling the following member functions of the \c generator class
     \n
 -   \ref boost::locale::generator::add_messages_domain() "add_messages_domain" -- add the domain (name) of the application. In the above case it would be "foo".
 
-At least one domain and one path should be specified in order to load dictionaries.
+\note At least one domain and one path should be specified in order to load dictionaries.
 
 As an example, our first fully localized program:
 
@@ -113,29 +113,37 @@ As an example, our first fully localized program:
 \section message_translation Message Translation
 \subsection indirect_message_translation Indirect Message Translation
 
-The basic function that allows us to translate a message is boost::locale::translate() family of functions:
+The basic function that allows us to translate a message is \ref boost::locale::translate() family of functions.
 
 -   Basic message translation:\n
-    Translate a message, or a message in a given context. The source text is \b not copied.
-    \n
-    -   boost::locale::translate(char const *message)
-    -   boost::locale::translate(char const *context,char const *message)
-    \n
-    Translate a message, or a message in a given context. The source text \b is copied.
-    \n
-    -   boost::locale::translate(std::string const &message)
-    -   boost::locale::translate(std::string const &context,std::string const &message)
-    Plural form translation:\n
-    Translate a message, or a message in a given context. The source text is \b not copied.
-    \n
-    -   boost::locale::translate(char const *single,char const *plural,int number)
-    -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
-    \n
-    Translate a message, or a message in a given context. The source text \b is copied.
-    \n
-    -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
-    -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
-    \n
+    -   Translate a message, or a message in a given context. The source text is \b not copied.
+        \n
+        \code
+        template<typename CharType>
+        basic_message<CharType> translate(CharType const *msg)
+        template<typename CharType>
+        basic_message<CharType> translate(CharType const *context,CharType const *msg)
+        \endcode
+        \n
+    -   Translate a message, or a message in a given context. The source text \b is copied.
+        \n
+        \code
+        template<typename CharType>
+        basic_message<CharType> translate(std::basic_string<CharType> const &msg)
+        template<typename CharType>
+        basic_message<CharType> translate(std::basic_string<CharType> const &context,std::basic_string<CharType> const &msg)
+        \endcode
+-   Plural form translation:\n
+    -   Translate a message, or a message in a given context. The source text is \b not copied.
+        \n
+        -   boost::locale::translate(char const *single,char const *plural,int number)
+        -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
+        \n
+    -   Translate a message, or a message in a given context. The source text \b is copied.
+        \n
+        -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
+        -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
+        \n
     
 These functions return a special Proxy object of type \ref boost::locale::message "message". It holds all the required
 information for string formatting.
