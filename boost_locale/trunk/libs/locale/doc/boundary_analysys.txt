@@ -2,41 +2,124 @@
 /*!
 \page boundary_analysys Boundary analysis
 
-Boost.Locale provides a boundary analysis tool, allowing you to split text into characters, words, or sentences, and find appropriate
-places for line breaks. 
+Boost.Locale provides a boundary analysis tool, allowing you to split text into characters,
+words, or sentences, and find appropriate places for line breaks. 
 
 \note A Unicode code point and a character are not equivalent. For example, the Hebrew word Shalom -- "שָלוֹם" consists
 of 4 characters and 6 code points, where two code points are used for vowels (diacritical marks).
 
-Boost.Locale provides 3 major classes for boundary analysis:
+Boost.Locale provides 2 major classes for boundary analysis:
 
-- boost::locale::boundary::mapping -- a special map that holds boundary points for the text.
-- boost::locale::boundary::token_iterator  -- an iterator that returns chunks of text that were split by text boundaries
-- boost::locale::boundary::break_iterator  -- an iterator that returns an iterator to the original text.
+-   \ref boost::locale::boundary::segment_index - an object that holds an index of segments in the text (like words, characters,
+    sentences). It provides an access to \ref boost::locale::boundary::segment "segment" objects via iterators.
+-   \ref boost::locale::boundary::boundary_point_index - an object that holds an index of boundary points in the text.
+    It allows to iterate over the \ref boost::locale::boundary::boundary_point "boundary_point" objects.
 
-To perform boundary analysis, we first create a boundary mapping for the text.
+Each of the classes above use an iterator type as template parameter. 
+Both of these classes accept in their constructor:
 
+- A flag that defines boundary analysis \ref boost::locale::boundary::boundary_type "boundary_type".
+- The pair of iterators that define the text range that should be analysed
+- A locale parameter (if not given the global one is used)
+
+For example:
 \code
-    using namespace boost::locale::boundary;
-    std::string text="To be, or not to be?"
-    // Create mapping of text for token iterator using default locale.
-    mapping<token_iterator<std::string::const_iterator> > map(word,text.begin(),text.end()); 
-    // Print all "words" -- chunks of word boundary
-    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
-        std::cout <<"`"<< * it << "'"<< std::endl;
+namespace ba=boost::locale::boundary;
+std::string text= ... ;
+std::locale loc = ... ;
+ba::segment_index<std::string::const_iterator> map(ba::word,text.begin(),text.end(),loc);
 \endcode
 
-Would print the list: "To", " ", "be", ",", " ", "or", " ", "not", " ", "to", " ", "be", "?"
-You can also provide filters for better selection of the text chunks or boundaries you are interested in. For example:
+Each of them provide a members \c begin(), \c end() and \c find() that allow to iterate
+over the selected segments or boundaries in the text or find a location of a segment or
+boundary for given iterator.
+
+
+Convenience a typedefs like \ref boost::locale::boundary::ssegment_index "ssegment_index"
+or \ref boost::locale::boundary::wcboundary_point_index "wcboundary_point_index" provided as well,
+where "w", "u16" and "u32" prefixes define a character type \c wchar_t,
+\c char16_t and \c char32_t and "c" and "s" prefixes define whether <tt>std::basic_string<CharType>::const_iterator</tt>
+or <tt>CharType const *</tt> are used.
+
+\section boundary_analysys_segments Iterating Over Segments
+
+The text segments analysis is done using \ref boost::locale::boundary::segment_index "segment_index" class.
+
+It provides a bidirectional iterator that returns \ref boost::locale::boundary::segment "segment" object.
+The segment object represents a pair of iterators that define this segment and a rule according to which it was selected.
+It can be automatically converted to \c std::basic_string object.
+
+To perform boundary analysis, we first create an index object and then iterate over it:
+
+For example:
 
 \code
-    map.mask(word_letters);
-    // Tell newly created iterators to select words that contain letters only.
-    for(token_iterator<std::string::const_iterator> it=map.begin(),e=map.end();it!=e;++it)
-        std::cout <<"`"<< * it << "'"<< std::endl;
+using namespace boost::locale::boundary;
+std::string text="To be or not to be, that is the question."
+// Create mapping of text for token iterator using global locale.
+ssegment_index map(word,text.begin(),text.end()); 
+// Print all "words" -- chunks of word boundary
+for(ssegment_index::iterator it=map.begin(),e=map.end();it!=e;++it)
+    std::cout <<"\""<< * it << "\", ";
+std::cout << std::endl;
 \endcode
 
-Would print only: "To", "be", "or", "not", "to", "be", ignoring all non-words like punctuation.
+Would print:
+
+"To", " ", "be", " ", "or", " ", "not", " ", "to", " ", "be", ",", " ", "that", " ", "is", " ", "the", " ", "question", ".",
+
+And for this <a href="http://tatoeba.org/eng/sentences/show/868189">sample from the Tatoeba database</a> text="生きるか死ぬか、それが問題だ。"  
+the output in Japanese locale it would be:
+
+"生", "きるか", "死", "ぬか", "、", "それが", "問題", "だ", "。", 
+
+As you can see, the boundary analysis that is done by Boost.Locale
+is much more complicated then just splitting the text according
+to white space characters.
+
+The segments selection can be customized using \ref boost::locale::boundary::segment_index::rule(rule_type) "rule()" and
+\ref boost::locale::boundary::segment_index::full_select(bool) "full_select()" member functions.
+
+By default segment_index's iterator return each text segment defined by two boundary points regardless
+the way they were selected. Thus in the example above we could see text segments like "." or " " 
+that were selected as words.
+
+Using a \c rule() member function we can specify a binary mask of rules we want to use for selection of
+the boundary points.
+
+For example, by calling
+
+\code
+map.rule(word_any);
+\endcode
+
+Before starting the iteration process, specify a selection mask that fetches: numbers, letter, Kana letters and
+ideographic characters ignoring all non-word related characters like white space or punctuation marks.
+
+So the code:
+
+\code
+using namespace boost::locale::boundary;
+std::string text="To be or not to be, that is the question."
+// Create mapping of text for token iterator using global locale.
+ssegment_index map(word,text.begin(),text.end()); 
+// Define a rule
+map.rule(word_any);
+// Print all "words" -- chunks of word boundary
+for(ssegment_index::iterator it=map.begin(),e=map.end();it!=e;++it)
+    std::cout <<"\""<< * it << "\", ";
+std::cout << std::endl;
+\endcode
+
+Would print:
+
+"To", "be", "or", "not", "to", "be", "that", "is", "the", "question",
+
+And the for given text="生きるか死ぬか、それが問題だ。" and rule(word_ideo), the example above would print.
+
+"生", "死", "問題", 
+
+
 
 The break_iterator has different role. Instead of returning text chunks, it returns the underlying
 iterator used for source iteration. For example: you can select the two first sentences like this:
