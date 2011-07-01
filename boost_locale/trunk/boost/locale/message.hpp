@@ -519,9 +519,12 @@ namespace boost {
             return out;
         }
 
+        ///
+        /// \anchor boost_locale_translate_family \name Indirect message translation function family
+        /// @{
 
         ///
-        /// Translate a message, \a msg is not copied 
+        /// \brief Translate a message, \a msg is not copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(CharType const *msg)
@@ -529,7 +532,7 @@ namespace boost {
             return basic_message<CharType>(msg);
         }
         ///
-        /// Translate a message in context, \a msg and \a context are not copied 
+        /// \brief Translate a message in context, \a msg and \a context are not copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(   CharType const *context,
@@ -538,7 +541,7 @@ namespace boost {
             return basic_message<CharType>(context,msg);
         }
         ///
-        /// Translate a plural message form, \a single and \a plural are not copied 
+        /// \brief Translate a plural message form, \a single and \a plural are not copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(   CharType const *single,
@@ -548,7 +551,7 @@ namespace boost {
             return basic_message<CharType>(single,plural,n);
         }
         ///
-        /// Translate a plural message from in constext, \a context, \a single and \a plural are not copied 
+        /// \brief Translate a plural message from in constext, \a context, \a single and \a plural are not copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(   CharType const *context,
@@ -560,7 +563,7 @@ namespace boost {
         }
         
         ///
-        /// Translate a message, \a msg is copied 
+        /// \brief Translate a message, \a msg is copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(std::basic_string<CharType> const &msg)
@@ -569,7 +572,7 @@ namespace boost {
         }
         
         ///
-        /// Translate a message in context,\a context and \a msg is copied 
+        /// \brief Translate a message in context,\a context and \a msg is copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(   std::basic_string<CharType> const &context,
@@ -578,7 +581,7 @@ namespace boost {
             return basic_message<CharType>(context,msg);
         }
         ///
-        /// Translate a plural message form in constext, \a context, \a single and \a plural are copied 
+        /// \brief Translate a plural message form in constext, \a context, \a single and \a plural are copied 
         ///
         template<typename CharType>
         inline basic_message<CharType> translate(   std::basic_string<CharType> const &context,
@@ -590,7 +593,7 @@ namespace boost {
         }
 
         ///
-        /// Translate a plural message form, \a single and \a plural are copied 
+        /// \brief Translate a plural message form, \a single and \a plural are copied 
         ///
 
         template<typename CharType>
@@ -600,6 +603,8 @@ namespace boost {
         {
             return basic_message<CharType>(single,plural,n);
         }
+
+        /// @}
 
         // 
         // gettext compatibility functions

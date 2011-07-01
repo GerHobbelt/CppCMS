@@ -113,49 +113,33 @@ As an example, our first fully localized program:
 \section message_translation Message Translation
 \subsection indirect_message_translation Indirect Message Translation
 
-The basic function that allows us to translate a message is \ref boost::locale::translate() family of functions.
+The basic function that allows us to translate a message is \ref boost_locale_translate_family  "boost::locale::translate()" family of functions.
 
--   Basic message translation:\n
-    -   Translate a message, or a message in a given context. The source text is \b not copied.
-        \n
-        \code
-        template<typename CharType>
-        basic_message<CharType> translate(CharType const *msg)
-        template<typename CharType>
-        basic_message<CharType> translate(CharType const *context,CharType const *msg)
-        \endcode
-        \n
-    -   Translate a message, or a message in a given context. The source text \b is copied.
-        \n
-        \code
-        template<typename CharType>
-        basic_message<CharType> translate(std::basic_string<CharType> const &msg)
-        template<typename CharType>
-        basic_message<CharType> translate(std::basic_string<CharType> const &context,std::basic_string<CharType> const &msg)
-        \endcode
--   Plural form translation:\n
-    -   Translate a message, or a message in a given context. The source text is \b not copied.
-        \n
-        -   boost::locale::translate(char const *single,char const *plural,int number)
-        -   boost::locale::translate(char const *context,char const *single,char const *plural,int number)
-        \n
-    -   Translate a message, or a message in a given context. The source text \b is copied.
-        \n
-        -   boost::locale::translate(std::string const &single,std::string const &plural,int number)
-        -   boost::locale::translate(std::string const &context,std::string const &single,std::string const &plural,int number)
-        \n
+These functions use a character type \c CharType as template parameter and receive either <tt>CharType const *</tt> or <tt>std::basic_string<CharType></tt> as input.
+
+The functions can be divided into two groups:
+
+-   Basic message translation: translate a message or a message in given context:\n
+    <tt>translate([context,]message)</tt>
+-   Plural form translation: using a single and plural message forms, integer parameter and optional context:\n
+    <tt>translate([context,]single,plural,number)</tt>
     
-These functions return a special Proxy object of type \ref boost::locale::message "message". It holds all the required
-information for string formatting.
+These functions return a special proxy object - \ref boost::locale::basic_message "basic_message<CharType>".
+This object holds all the required information for the message formatting.
+
 When this object is written to an output \c ostream, it performs a dictionary lookup of the message according to the locale
 imbued in \c iostream.
 
-If the message is found in the dictionary it is written to the output stream, otherwise the original string is written to the stream.
+If the message is found in the dictionary it is written to the output stream,
+otherwise the original string is written to the stream.
 
 For example:
 
 \code
+    // Translate a simple message "Hello World!"
     std::cout << boost::locale::translate("Hello World!") << std::endl;
+    // Translate a message "Open" in context of "File Operation"
+    std::cout << boost::locale::translate("File Operation","Open") << std::endl;
 \endcode
 
 This allows the program to postpone translation of the message until the translation is actually needed, even to different
