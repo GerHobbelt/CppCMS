@@ -154,6 +154,7 @@ do { \
 
 
 #define BOOST_ICU_VER (U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM)
+#define BOOST_ICU_EXACT_VER (U_ICU_VERSION_MAJOR_NUM*10000 + U_ICU_VERSION_MINOR_NUM  * 100 + U_ICU_VERSION_PATCHLEVEL_NUM)
 
 template<typename CharType>
 void test_manip(std::string e_charset="UTF-8")
@@ -256,7 +257,7 @@ void test_manip(std::string e_charset="UTF-8")
     TEST_FP3(as::time,as::time_medium,as::gmt,a_datetime,"3:33:13 PM",time_t,a_time+a_timesec);
     #if BOOST_ICU_VER >= 408
     TEST_FP3(as::time,as::time_long  ,as::gmt,a_datetime,"3:33:13 PM GMT",time_t,a_time+a_timesec);
-        #if BOOST_ICU_VER !=408
+        #if BOOST_ICU_EXACT_VER != 40800
             // know bug #8675
             TEST_FP3(as::time,as::time_full  ,as::gmt,a_datetime,"3:33:13 PM GMT",time_t,a_time+a_timesec);
         #endif
@@ -282,7 +283,7 @@ void test_manip(std::string e_charset="UTF-8")
     TEST_FP4(as::datetime,as::date_medium,as::time_medium,as::gmt,a_datetime,"Feb 5, 1970 3:33:13 PM",time_t,a_datetime);
     #if BOOST_ICU_VER >= 408
     TEST_FP4(as::datetime,as::date_long  ,as::time_long  ,as::gmt,a_datetime,"February 5, 1970 3:33:13 PM GMT",time_t,a_datetime);
-        #if BOOST_ICU_VER != 408
+        #if BOOST_ICU_EXACT_VER != 40800
             // know bug #8675
             TEST_FP4(as::datetime,as::date_full  ,as::time_full  ,as::gmt,a_datetime,"Thursday, February 5, 1970 3:33:13 PM GMT",time_t,a_datetime);
         #endif
