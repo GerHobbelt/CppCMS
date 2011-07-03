@@ -2,11 +2,26 @@
 /*!
 \page boundary_analysys Boundary analysis
 
+- \ref boundary_analysys_basics
+- \ref boundary_analysys_segments
+    - \ref boundary_analysys_segments_basics
+    - \ref boundary_analysys_segments_rules
+    - \ref boundary_analysys_segments_search
+- \ref boundary_analysys_break
+    - \ref boundary_analysys_break_basics
+    - \ref boundary_analysys_break_rules
+    - \ref boundary_analysys_break_search
+
+
+\section boundary_analysys_basics Basics
+
 Boost.Locale provides a boundary analysis tool, allowing you to split text into characters,
 words, or sentences, and find appropriate places for line breaks. 
 
-\note A Unicode code point and a character are not equivalent. For example, the Hebrew word Shalom -- "שָלוֹם" consists
-of 4 characters and 6 code points, where two code points are used for vowels (diacritical marks).
+\note This task is not a trivial task.\n
+For example: a Unicode code point and a character are not equivalent like
+Hebrew word Shalom - "שָלוֹם" that consists of 4 characters and 6 code points (4 base letters and 2 diacritical marks); 
+in some languages words may not be separated by space characters like in Japanese or Chinese.
 
 Boost.Locale provides 2 major classes for boundary analysis:
 
@@ -42,6 +57,7 @@ where "w", "u16" and "u32" prefixes define a character type \c wchar_t,
 or <tt>CharType const *</tt> are used.
 
 \section boundary_analysys_segments Iterating Over Segments
+\section boundary_analysys_segments_basics Basic Iteration
 
 The text segments analysis is done using \ref boost::locale::boundary::segment_index "segment_index" class.
 
@@ -55,9 +71,10 @@ For example:
 
 \code
 using namespace boost::locale::boundary;
+boost::locale::generator gen;
 std::string text="To be or not to be, that is the question."
 // Create mapping of text for token iterator using global locale.
-ssegment_index map(word,text.begin(),text.end()); 
+ssegment_index map(word,text.begin(),text.end(),gen("en_US.UTF-8")); 
 // Print all "words" -- chunks of word boundary
 for(ssegment_index::iterator it=map.begin(),e=map.end();it!=e;++it)
     std::cout <<"\""<< * it << "\", ";
@@ -66,16 +83,24 @@ std::cout << std::endl;
 
 Would print:
 
+\verbatim
 "To", " ", "be", " ", "or", " ", "not", " ", "to", " ", "be", ",", " ", "that", " ", "is", " ", "the", " ", "question", ".",
+\endverbatim
 
-And for this <a href="http://tatoeba.org/eng/sentences/show/868189">sample from the Tatoeba database</a> text="生きるか死ぬか、それが問題だ。"  
-the output in Japanese locale it would be:
+This sentence "生きるか死ぬか、それが問題だ。" (<a href="http://tatoeba.org/eng/sentences/show/868189">from Tatoeba database</a>)
+would be split into following segments in \c ja_JP.UTF-8 (Japanese) locale:
 
+\verbatim
 "生", "きるか", "死", "ぬか", "、", "それが", "問題", "だ", "。", 
+\endverbatim
 
-As you can see, the boundary analysis that is done by Boost.Locale
+The boundary analysis that is done by Boost.Locale
 is much more complicated then just splitting the text according
 to white space characters.
+
+Of course it may be not per
+
+\section boundary_analysys_segments_rules Using Rules
 
 The segments selection can be customized using \ref boost::locale::boundary::segment_index::rule(rule_type) "rule()" and
 \ref boost::locale::boundary::segment_index::full_select(bool) "full_select()" member functions.
@@ -85,7 +110,8 @@ the way they were selected. Thus in the example above we could see text segments
 that were selected as words.
 
 Using a \c rule() member function we can specify a binary mask of rules we want to use for selection of
-the boundary points.
+the boundary points using \ref bl_boundary_word_rules "word", \ref bl_boundary_line_rules "line"
+and \ref bl_boundary_sentence_rules "sentence" boundary rules.
 
 For example, by calling
 
@@ -113,13 +139,160 @@ std::cout << std::endl;
 
 Would print:
 
+\verbatim
 "To", "be", "or", "not", "to", "be", "that", "is", "the", "question",
+\endverbatim
 
-And the for given text="生きるか死ぬか、それが問題だ。" and rule(word_ideo), the example above would print.
+And the for given text="生きるか死ぬか、それが問題だ。" and rule(\ref boost::locale::boundary::word_ideo "word_ideo"), the example above would print.
 
-"生", "死", "問題", 
+\verbatim
+"生", "死", "問題",
+\endverbatim
+
+You can access specific rules the segments where selected it using \ref boost::locale::boundart::segment::rule() "segment::rule()" member
+function. Using a bit-mask of rules.
+
+For example:
+
+\code
+boost::locale::generator gen;
+using namespace boost::locale::boundary;
+std::string text="生きるか死ぬか、それが問題だ。";
+ssegment_index map(word,text.begin(),text.end(),gen("ja_JP.UTF-8")); 
+for(ssegment_index::iterator it=map.begin(),e=map.end();it!=e;++it) {
+    std::cout << "Segment " << *it << " contains: ";
+    if(it->rule() & word_none)
+        std::cout << "white space or punctuation marks ";
+    if(it->rule() & word_kana)
+        std::cout << "kana characters ";
+    if(it->rule() & word_ideo)
+        std::cout << "ideographic characters";
+    std::cout<< std::endl;
+}
+\endcode
+
+Would print
+
+\verbatim
+Segment 生 contains: ideographic characters
+Segment きるか contains: kana characters 
+Segment 死 contains: ideographic characters
+Segment ぬか contains: kana characters 
+Segment 、 contains: white space or punctuation marks 
+Segment それが contains: kana characters 
+Segment 問題 contains: ideographic characters
+Segment だ contains: kana characters 
+Segment 。 contains: white space or punctuation marks 
+\endverbatim
+
+One important things that should be noted that each segment is defined
+by a pair of boundaries and the rule of its ending point defines
+if it is selected or not.
+
+In some cases it may be not what we actually look like.
+
+For example we have a text:
+
+\verbatim
+Hello! How
+are you?
+\endverbatim
+
+And we want to fetch all sentences from the text.
+
+The \ref bl_boundary_sentence_rules "sentence rules" have two options:
+
+- Split the text on the point where sentence terminator like ".!?" detected: \ref boost::locale::boundary::sentence_term "sentence_term"
+- Split the text on the point where sentence separator like "line feed" detected: \ref boost::locale::boundary::sentence_sep "sentence_sep"
+
+Naturally to ignore sentence separators we would call \ref boost::locale::boundary::segment_index::rule(rule_type v) "segment_index::rule(rule_type v)"
+with sentence_term parameter and then run the iterator.
+
+\code
+boost::locale::generator gen;
+using namespace boost::locale::boundary;
+std::string text=   "Hello! How\n"
+                    "are you?\n";
+ssegment_index map(sentence,text.begin(),text.end(),gen("en_US.UTF-8")); 
+map.rule(sentence_term);
+for(ssegment_index::iterator it=map.begin(),e=map.end();it!=e;++it) 
+    std::cout << "Sentence [" << *it << "]" << std::endl;
+\endcode
+
+However we would get the expected segments:
+\verbatim
+Sentence [Hello! ]
+Sentence [are you?
+]
+\endverbatim
+
+The reason is that "How\n" is still considered a sentence but selected by different
+rule.
+
+This behavior can be changed by setting \ref boost::locale::boundary::segment_index::full_select(bool) "segment_index::full_select(bool)"
+to \c true. It would force iterator to join the current segment with all previous segments that may not fit the required rule.
+
+So we add this line:
+
+\code
+map.full_select(true);
+\endcode
+
+Right after "map.rule(sentence_term);" and get expected output:
+
+\verbatim
+Sentence [Hello! ]
+Sentence [How
+are you?
+]
+\endverbatim
+
+\subsection boundary_analysys_segments_search Locating Segments
+
+Sometimes it is useful to find a segment that some specific iterator is pointing on.
+
+For example a user had clicked at specific point, we want to select a word on this
+location.
+
+\ref boost::locale::boundary::segment_index "segment_index" provides 
+\ref boost::locale::boundary::segment_index::find() "find(base_iterator p)" 
+member function for this purpose.
+
+This function returns the iterator to the segmet such that \a p points to.
 
 
+For example:
+
+\code
+text="to be or ";
+ssegment_index map(word,text.begin(),text.end(),gen("en_US.UTF-8"));
+ssegment_index::iterator  p = map.find(text.begin() + 4);
+if(p!=map.end())
+    std::cout << *p << std::endl;
+\endcode
+
+Would print:
+
+\verbatim
+be
+\endverbatim
+
+\note 
+
+if the iterator lays inside the segment this segment returned. If the segment does
+not fit the selection rules, then the segment following requested position
+is returned.
+
+For example: For \ref boost::locale::boundary::word "word" boundary analysis with \ref boost::locale::boundary::word_any "word_any" rule:
+
+- "t|o be or ", would point to "to" - the iterator in the middle of segment "to".
+- "to |be or ", would point to "be" - the iterator at the beggining of the segment "be"
+- "to| be or ", would point to "be" - the iterator does is not point to segment with required rule so next valid segment is selected "be".
+- "to be or| ", would point to end as not valid segment found.
+
+
+\section boundary_analysys_break Ierating Over Boundary Points
+\section boundary_analysys_break_basics Basic Iteration
 
 The break_iterator has different role. Instead of returning text chunks, it returns the underlying
 iterator used for source iteration. For example: you can select the two first sentences like this:
