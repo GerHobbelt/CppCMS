@@ -255,8 +255,10 @@ template<>
 struct utfutf<wchar_t,2> {
     static wchar_t const *ok(){ return  L"\x67\x72\xfc\xdf\x65\x6e"; }
     static wchar_t const *bad() { 
-        static wchar_t buf[256] = L"\x67\x72\xFF\xfc\xdf\x65\x6e"; 
+        static wchar_t buf[256] = L"\x67\x72\xFF\xfc\xFE\xFD\xdf\x65\x6e"; 
         buf[2]=0xDC01; // second surrogate must not be
+        buf[4]=0xD801; // First
+        buf[5]=0xD801; // Must be surrogate trail
         return buf;
     }
 };

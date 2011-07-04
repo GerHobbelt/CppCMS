@@ -151,7 +151,7 @@ And the for given text="生きるか死ぬか、それが問題だ。" and rule(
 "生", "死", "問題",
 \endverbatim
 
-You can access specific rules the segments where selected it using \ref boost::locale::boundart::segment::rule() "segment::rule()" member
+You can access specific rules the segments where selected it using \ref boost::locale::boundary::segment::rule() "segment::rule()" member
 function. Using a bit-mask of rules.
 
 For example:
