@@ -174,16 +174,19 @@ locale targets.
 
 \note
 
--   \c message can be implicitly converted to each type of supported string (i.e. \c std::string, \c std::wstring etc.) using 
+-   \ref boost::locale::basic_message "basic_message" can be implicitly converted 
+    to an apopriate std::basic_string using 
     the global locale:
     \n
     \code
-        std::wstring msg = translate("Do you want to open the file?");
+        std::wstring msg = translate(L"Do you want to open the file?");
     \endcode
--   \c message can be explicitly converted to a string using the \c str<CharType> member function for a specific locale.
+-   \ref boost::locale::basic_message "basic_message" can be explicitly converted
+    to a string using the \ref boost::locale::basic_message::str() "str()" member function for a specific locale.
     \n
     \code
-        std::wstring msg = translate("Do you want to open the file?").str<wchar_t>(some_locale)
+    std::locale ru_RU = ... ;
+    std::string msg = translate("Do you want to open the file?").str(ru_RU);
     \endcode
 
 
