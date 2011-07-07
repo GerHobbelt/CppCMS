@@ -778,6 +778,8 @@ namespace boost {
             ///
             /// Manipulator for switching message domain in ostream,
             ///
+            /// \note The returned object throws std::bad_cast if the I/O stream does not have \ref message_format facet installed
+            /// 
             inline 
             #ifdef BOOST_LOCALE_DOXYGEN
             unspecified_type
