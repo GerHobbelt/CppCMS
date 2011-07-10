@@ -1,7 +1,7 @@
 
 // vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 filetype=cpp.doxygen
 /*!
-\page gettext_for_windows  Donwloading Gettext Tools for Windows
+\page gettext_for_windows  Using Gettext Tools on Windows
 
 In order to get the Gettext tools like \c msgfmt, \c msgmerge, \c xgettext for Windows you have
 basically several options:

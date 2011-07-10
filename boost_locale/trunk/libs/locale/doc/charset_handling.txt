@@ -4,25 +4,34 @@
 
 \section codecvt Convenience Interface
 
-Boost.Locale provides \ref boost::locale::conv::to_utf() "to_utf"  and \ref boost::locale::conv::from_utf() "from_utf"  functions in the \c boost::locale::conv namespace. They are simple and convenient functions to convert a string to and from UTF-8/16/32 strings and strings using other encodings.
+Boost.Locale provides \ref boost::locale::conv::to_utf() "to_utf", \ref boost::locale::conv::from_utf() "from_utf" and 
+\ref boost::locale::conv::utf_to_utf() "utf_to_utf" functions in 
+the \c boost::locale::conv namespace. They are simple and
+convenient functions to convert a string to and from
+UTF-8/16/32 strings and strings using other encodings.
 
 For example:
 
 \code
-    std::string utf8_string = to_utf<char>(latin1_string,"Latin1");
-    std::wstring wide_string = to_utf<wchar_t>(latin1_string,"Latin1");
-    std::string latin1_string = from_utf(wide_string,"Latin1");
+std::string utf8_string = to_utf<char>(latin1_string,"Latin1");
+std::wstring wide_string = to_utf<wchar_t>(latin1_string,"Latin1");
+std::string latin1_string = from_utf(wide_string,"Latin1");
+std::string utf8_string2 = utf_to_utf<char>(wide_string);
 \endcode
 
 
-This function may use an explicit encoding name like "Latin1" or "ISO-8859-8", or use std::locale as a parameter to fetch this information from it.
-It also receives a policy parameter that tells it how to behave if the conversion can't be performed (i.e. an illegal or unsupported character is found).
-By default this function skips all illegal characters and tries to do the best it can, however, it is possible ask it to throw 
-a \ref boost::locale::conv::conversion_error "conversion_error" exception by passing the \c stop flag to it:
+This function may use an explicit encoding name like "Latin1" or "ISO-8859-8",
+or use std::locale as a parameter to fetch this information from it.
+It also receives a policy parameter that tells it how to behave if the
+conversion can't be performed (i.e. an illegal or unsupported character is found).
+By default this function skips all illegal characters and tries to do the best it
+can, however, it is possible ask it to throw 
+a \ref boost::locale::conv::conversion_error "conversion_error" exception 
+by passing the \c stop flag to it:
 
 \code
-    std::wstring s=to_utf<wchar_t>("\xFF\xFF","UTF-8",stop); 
-    // Throws because this string is illegal in UTF-8
+std::wstring s=to_utf<wchar_t>("\xFF\xFF","UTF-8",stop); 
+// Throws because this string is illegal in UTF-8
 \endcode
 
 \section codecvt_codecvt std::codecvt facet 

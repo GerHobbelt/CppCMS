@@ -85,8 +85,8 @@ For example:
     using namespace boost::locale::period;
     generator gen;
     // Create locales with Hebrew and Gregorian (default) calendars.
-    std::locale l_hebrew=gen("en_US@calendar=hebrew");
-    std::locale l_gregorian=gen("en_US");
+    std::locale l_hebrew=gen("en_US.UTF-8@calendar=hebrew");
+    std::locale l_gregorian=gen("en_US.UTF-8");
     
     // Create a Gregorian date from fields
     date_time greg(year(2010) + february() + day(5),l_gregorian);
@@ -129,25 +129,45 @@ several different levels:
 
 \section dates_times_timezones_io I/O Operations on date_time objects
 
-Writing a \ref boost::locale::date_time "date_time" object to iostream is equivalent
-to calling \ref boost::locale::date_time::time() "date_time::time()"
-function and writing it result to the stream as a number - the POSIX time of the specific
-time point.
+Writing a \ref boost::locale::date_time "date_time" is equivalent
+to:
 
+-   Applying \ref boost::locale::as::datetime "as::datetime" manipulator on the stream 
+-   Writing POSIX time as number that is fetched by calling \ref boost::locale::date_time::time()
+    "date_time::time()" function.
+-   Reverting the manipulator effect back.
 
-\code
-    using namespace boost::locale;
-    date_time now;
-    std::cout << now << std::endl;
-\endcode
-
-The example above would just print a number. Thus, you need to use iostream manipulators in order to display current date or time:
+For example this code:
 
 \code
-    using namespace boost::locale;
-    date_time now;
-    std::cout << as::date << now << std::endl;
+using namespace boost::locale;
+date_time now;
+std::cout << now << std::endl;
 \endcode
+
+Would print in the default format, something like:
+
+\verbatim
+2/3/2011 12:00 am
+\endverbatim
+
+However if you need to change the default behavior (for example show only date),
+then you need to use specific iostream manipulator in order to display current date or time,
+it would override the default formatting.
+
+For example
+
+\code
+using namespace boost::locale;
+date_time now;
+std::cout << as::date << now << std::endl;
+\endcode
+
+Would print something like:
+
+\verbatim
+2/3/2011
+\endverbatim
 
 This is important to remember that \c date_time object is always rendered and parsed in the context
 of the \c iostream's locale and time zone and not in the context of specific \c date_time object.
