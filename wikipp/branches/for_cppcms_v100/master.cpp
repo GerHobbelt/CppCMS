@@ -107,7 +107,7 @@ master::master(wiki &_w) :
 		else {
 			/// Translate as the target language
 			/// for fr gettext("LANG")="Francis"
-			lname=_("LANG").str<char>(service().generator().generate(p->second.str()));
+			lname=_("LANG").str(service().generator().generate(p->second.str()));
 			if(lname=="LANG") {
 				lname=p->first;
 			}
