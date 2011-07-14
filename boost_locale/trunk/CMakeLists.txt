@@ -371,6 +371,7 @@ set(LOCALE_TESTS
 		test_ios_prop
 		test_codepage_converter
 		test_date_time
+		test_generator
 		)
 
 if(NOT DISABLE_STD_BACKEND)
@@ -404,7 +405,6 @@ if(BOOST_LOCALE_HAVE_ICU)
 			test_convert
 			test_boundary
 			test_formatting
-			test_generator
 			test_icu_vs_os_timezone
 			)
 endif()
