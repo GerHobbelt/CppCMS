@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <locale>
+#include <time.h>
+#include <stdexcept>
 
 #include <boost/locale.hpp>
 #ifdef BOOST_LOCALE_WITH_ICU
