@@ -365,6 +365,7 @@ set_target_properties(${BOOST_LOCALE_LIBS} PROPERTIES OUTPUT_NAME "boost_locale"
 
 
 set(LOCALE_TESTS
+		test_config
 		test_codepage
 		test_message
 		test_ios_prop
