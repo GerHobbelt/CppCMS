@@ -21,6 +21,9 @@ namespace feed {
 	
 	void feed_master::comments()
 	{
+		// make correct header for cached feed too
+		response().set_content_header("text/xml");
+
 		if(cache().fetch_page("comments"))
 			return;
 		cppdb::result r;
@@ -38,7 +41,6 @@ namespace feed {
 			data::feed::comment &cm = c.items.back();
 			r>>cm.id>>cm.post_id>>cm.author>>cm.content;
 		}
-		response().set_content_header("text/xml");
 		render("feed","comments",c);
 		cache().store_page("comments");
 	}
