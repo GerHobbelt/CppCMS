@@ -69,6 +69,6 @@ create table pages (
 	is_open integer not null
 );
 
-insert into text_options values('dbversion','2');
+insert into text_options values('dbversion','3');
 
 commit;

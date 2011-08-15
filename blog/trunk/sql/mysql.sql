@@ -67,4 +67,4 @@ create table pages (
 	FOREIGN KEY (author_id) REFERENCES users(id)
 ) Engine = InnoDB;
 
-insert into text_options values('dbversion','2');
+insert into text_options values('dbversion','3');

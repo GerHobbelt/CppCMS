@@ -327,6 +327,62 @@ std::string latex_filter(std::string const &in)
 
 
 namespace apps {
+	namespace {
+		typedef bool (*upgrade_callback)(cppdb::session &sql);
+
+		bool dummy_upgrade(cppdb::session &)
+		{
+			throw database_version_error();
+		}
+
+		bool upgrade_2_3(cppdb::session &sql)
+		{
+			BOOSTER_INFO("blog") << "Upgrading 2 to 3";
+			sql<<	"UPDATE post2cat "
+				"SET is_open = "
+				"   ( "
+				"     SELECT posts.is_open "
+				"     FROM posts "
+				"     WHERE posts.id = post2cat.post_id "
+				"   ) " 
+				<< cppdb::exec;
+			sql<<	"UPDATE text_options "
+				"SET value = '3' "
+				"WHERE id='dbversion' "
+				<< cppdb::exec;
+
+		 	return true;
+		}
+
+		bool upgrade(std::string const &current_ver,cppdb::session &sql)
+		{
+			int ver=atoi(current_ver.c_str());
+			int final_ver = atoi(CPPBLOG_DBVERSION);
+			BOOSTER_INFO("blog") << "Upgrading datavase from " << current_ver << " to " <<
+						final_ver;
+			if(ver > final_ver)
+				return false;
+			if(ver < 2)
+				return false;
+			static const upgrade_callback callbacks[] = {
+				dummy_upgrade,
+				dummy_upgrade, // 0,1 not supported
+				upgrade_2_3
+			};
+			cppdb::transaction tr(sql);
+			while(ver < final_ver) {
+
+				upgrade_callback call=callbacks[ver];
+
+				if(!call(sql))
+					return false;
+				ver ++;
+			}
+			BOOSTER_INFO("blog") << "Upgrade completed";
+			tr.commit();
+			return true;
+		}
+	}
 	void init_tex_filer(cppcms::json::value const &s)
 	{
 		if(s.get("blog.tex.enable",false)) {
@@ -381,7 +437,7 @@ namespace apps {
 			else if(id == "is_configured")
 				is_configured = value;
 		}
-		if(dbversion!=expected_database_version) {
+		if(dbversion!=expected_database_version && !upgrade(dbversion,sql())) {
 			throw database_version_error();
 		}
 		if(is_configured!="yes") {

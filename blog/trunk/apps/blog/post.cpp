@@ -36,13 +36,25 @@ namespace blog {
 		bool is_valid = true;
 		if(session.is_set("user"))
 			return true;
+
+		if(session.is_set("visitor"))
+			return true;
 		
-		if(!session.is_set("captcha") || !equal(session.get("captcha"),captcha.value())) {
-			captcha.valid(false);
-			is_valid = false;
+		if(!session.is_set("visitor")) {
+			if(!session.is_set("captcha") || !equal(session.get("captcha"),captcha.value())) {
+				captcha.valid(false);
+				is_valid = false;
+				session.clear();
+			}
+			else {
+				session.set("visitor","1");
+				session.expose("visitor");
+				session.on_server(false);
+				session.expiration(cppcms::session_interface::fixed);
+				session.age(3600*24*7);
+			}
 		}
 
-		session.clear();
 		
 		if(author.value().empty()) {
 			author.valid(false);

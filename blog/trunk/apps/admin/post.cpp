@@ -234,7 +234,7 @@ void post::prepare_shared(int id)
 							<< id
 							<< atoi(cb->identification().c_str())
 							<< now
-							<< is_open
+							<< open_status
 							<< cppdb::exec;
 						std::ostringstream ss;
 						cache().rise("cat_" + cb->identification());

@@ -1,3 +1,3 @@
 #pragma once
 
-#define CPPBLOG_DBVERSION "2"
+#define CPPBLOG_DBVERSION "3"

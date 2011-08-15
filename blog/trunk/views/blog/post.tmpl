@@ -90,8 +90,14 @@
 				}
 			}
                 }
+		function is_authorised_visitor()
+		{
+			return get_cookie('visitor').length > 0;
+		}
 		function get_captcha()
 		{
+			if(is_authorised_visitor())
+				return '';
 			var url = '<% url "/captcha" %>/' + Math.random().toString();
 			var r = '<img alt="captcha" width="120" height="60" src="' 
 				+ url 
@@ -123,6 +129,12 @@
 			}
 			return true;
 		}
+		function write_if_admin_or_authorised_visitor(value)
+		{
+			if(is_admin() || is_authorised_visitor()) {
+				document.write(value);
+			}
+		}
 	-->
 	</script>
 		<form method="post" action="<% url "/blog/post/postback" using id %>#preview" onsubmit="return test_form();" >
@@ -152,13 +164,13 @@
 			<% form as_space response.buttons %>
 			<script type="text/javascript">
 			<!--
-				write_if_admin('<span style="display:none">');
+				write_if_admin_or_authorised_visitor('<span style="display:none">');
 			-->
 			</script>
 			<input type="submit" onclick='return reload_captcha()' value="<% gt "Reload Captcha" %>" />
 			<script type="text/javascript">
 			<!--
-				write_if_admin('</span>');
+				write_if_admin_or_authorised_visitor('</span>');
 			-->
 			</script>
 		</p>
