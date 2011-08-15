@@ -62,6 +62,7 @@ void master::load_sidebar(data::blog::master &c)
 	}
 
 	cache().add_trigger("cats");
+	cache().add_trigger("general_info");
 
 	cache().store_data("sidebar_info",c.sidebar,recorder.detach());
 }

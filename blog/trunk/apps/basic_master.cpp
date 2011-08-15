@@ -405,9 +405,8 @@ namespace apps {
 		c.latex = latex_filter;
 
 
-		if(cache().fetch_data("general_info",c.info))
+		if(cache().fetch_data("options",c.info))
 			return;
-		cppcms::triggers_recorder rec(cache());
 		
 		cppdb::result r;
 
@@ -443,8 +442,7 @@ namespace apps {
 		if(is_configured!="yes") {
 			throw database_is_not_configured_error();
 		}
-		cache().add_trigger("options");
-		cache().store_data("general_info",c.info,rec.detach());
+		cache().store_data("options",c.info);
 	}
 	basic_master::basic_master(cppcms::service &s) : cppcms::application(s)
 	{

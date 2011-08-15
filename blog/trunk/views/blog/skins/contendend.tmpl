@@ -98,7 +98,7 @@
 	</ul>
 <% end %>
 
-<div id="copyright">
+<div id="copyright"><% trigger "options" %>
 <% if not empty info.copyright_string %>
 	<%= info.copyright_string | ext markdown2html %>
 <% else %>
