@@ -2,7 +2,7 @@
 <% view login uses content::login extends master %>
 <% template title() %><% gt "WikiPP :: Login" %><% end %>
 <% template main() %>
-<form action="" method="post">
+<form action="" method="post"><% csrf %>
 <table>
 <% form as_table form %>
 </table>
@@ -23,6 +23,7 @@
 	document.write('st">')
 	-->
 </script>
+<% csrf %>
 <table>
 <% form as_table form %>
 </table>
@@ -36,7 +37,7 @@
 <% view edit_options uses content::edit_options extends master %>
 <% template title() %><% gt "WikiPP :: Edit Options" %><% end %>
 <% template main() %>
-<form action="" method="post">
+<form action="" method="post"><% csrf %>
 <table style="width:100%" >
 <% form as_table form %>
 </table>

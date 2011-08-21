@@ -71,7 +71,7 @@
 		"script_names" : [ "/wikipp" ]
 	},
 	"logging" : {
-		"level" : "error",
+		"level" : "info",
 		"syslog" : {
 			"enable": true,
 			"id" : "WikiPP"
@@ -86,6 +86,7 @@
 		"limit" : 100, // items - thread cache
 	},
 	"security" : {
+		"csrf" : { "enable" : true }
 		// "multipart_form_data_limit" : 65536, // KB
 		// "content_length_limit" : 1024, // KB
 		// "uploads_path" : "" // temporary directory

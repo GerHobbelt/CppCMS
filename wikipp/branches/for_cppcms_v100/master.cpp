@@ -112,7 +112,7 @@ master::master(wiki &_w) :
 				lname=p->first;
 			}
 		}
-		languages[lname]=settings().get<std::string>("wikipp.script") +"/"+ p->first;
+		languages[lname]=settings().get<std::string>("wikipp.script") +"/"+ p->first.str();
 	}
 	media=settings().get<std::string>("wikipp.media");
 	syntax_highlighter=settings().get("wikipp.syntax_highlighter","");

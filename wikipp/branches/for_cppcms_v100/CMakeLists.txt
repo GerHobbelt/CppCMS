@@ -9,6 +9,9 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 option(USE_STATIC_VIEW "Compile view statically into wikipp" OFF)
 
+if(WIN32 OR CYGWIN)
+	add_definitions(-DDLL_EXPORT)
+endif()
 
 
 find_library(CPPCMS cppcms)
