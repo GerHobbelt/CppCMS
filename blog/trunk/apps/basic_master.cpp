@@ -115,7 +115,8 @@ public:
 		path_to_latex_ = config.get("blog.tex.latex","/usr/bin/latex");
 		path_to_dvigif_ = config.get("blog.tex.dvigif","/usr/bin/dvigif");
 		path_to_tmp_ = config.get("blog.tex.temp_dir","/tmp");
-		www_dir_ = config.get<std::string>("blog.media") + "/tex";
+		std::string tmp_www_dir = config.get<std::string>("blog.media") + "/tex";
+		www_dir_ = config.get("blog.tex.www_root",tmp_www_dir);
 		output_dir_ = config.get("blog.tex.output_dir","");
 		if(output_dir_.empty())
 			output_dir_ = 	config.get<std::string>("file_server.document_root",".") 

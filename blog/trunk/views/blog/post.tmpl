@@ -55,10 +55,14 @@
 	<% end %>
 <% end %>
 	<h2><% gt "Add Comment:" %></h2>
+	<p id="last_message"></p>
 	<script type="text/javascript">
 	<!--
         	function test_form() 
                 {
+			// set correct CSRF token
+			var token = get_any_cookie('<% csrf cookie %>');
+			document.getElementById('csrf_token').value = token;
 			var author = document.getElementById('author').value;
 			var email = document.getElementById('email').value;
                         var url=document.getElementById('url').value;
@@ -138,6 +142,7 @@
 	-->
 	</script>
 		<form method="post" action="<% url "/blog/post/postback" using id %>#preview" onsubmit="return test_form();" >
+		<input id="csrf_token" type="hidden" name="_csrf" value="" />
 		<script type="text/javascript">
 		<!--
 			write_if_admin('<div style="display:none">');

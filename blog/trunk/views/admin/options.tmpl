@@ -4,7 +4,7 @@
 <% template master_content() %>
 <div id="form" %>
 <h2><% gt "Options" %></h2>
-	<form action="<% url "." %>" method="post">
+	<form action="<% url "." %>" method="post"><% csrf %>
 		<dl>
 			<% form as_dl form %>
 		</dl>

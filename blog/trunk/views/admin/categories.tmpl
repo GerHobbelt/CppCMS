@@ -26,7 +26,7 @@
 		<% item %>
 		<li><p><% cat.name %> | <a href="javascript:switchvis('cat<%= cat.id %>');" ><% gt "edit" %></a></p>
 		<div id="cat<%= cat.id %>" style="display:none" >
-			<form action="<% url "."  %>" method="post" >
+			<form action="<% url "."  %>" method="post" ><% csrf %>
 				<input type="hidden" name="id" value="<%= cat.id %>" />
 				<input type="text" name="cat" value="<%= cat.name %>" size="20" />
 				<input type="submit" name="save" value="<% gt "Sumbit" %>" />
@@ -41,7 +41,7 @@
 		<h2><% gt "There are no categories" %></h2>
 	<% end %>
 	
-	<form action="<% url "." %>" method="post" >
+	<form action="<% url "." %>" method="post" ><% csrf %>
 	<p>
 		<% gt "New category:" %>
 		<input type="text" name="cat" size="20" />

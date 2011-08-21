@@ -12,9 +12,8 @@
                         ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+
                         ';path=/';
                 }
-                function get_cookie(c_name)
+                function get_any_cookie(c_name)
                 {
-                	c_name='<% cookie_prefix %>_' + c_name; 
                         if (document.cookie.length>0){
                                 c_start=document.cookie.indexOf(c_name + "=");
                                 if (c_start!=-1){ 
@@ -25,6 +24,11 @@
                                 } 
                         }
                         return "";
+                }
+                function get_cookie(c_name)
+                {
+                	c_name='<% cookie_prefix %>_' + c_name; 
+			return get_any_cookie(c_name);
                 }
 		function is_admin()
 		{

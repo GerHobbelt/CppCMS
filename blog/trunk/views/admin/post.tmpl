@@ -20,7 +20,7 @@
 	}
 -->
 </script>
-<form action="<% if id %><% url "/admin/post" using id %><% else %><% url "/admin/post" %><% end %>" method="post" >
+<form action="<% if id %><% url "/admin/post" using id %><% else %><% url "/admin/post" %><% end %>" method="post" ><% csrf %>
 	<dl id="form_title" >
 		<% form as_dl form.title %>
 	</dl>

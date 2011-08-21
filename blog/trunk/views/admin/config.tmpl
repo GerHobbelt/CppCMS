@@ -43,7 +43,7 @@
 <% view config uses data::config extends base_config %>
 <% template title() %><% gt "Configure Blog" %><% end %>
 <% template body() %>
-<form action="<% url "/config" %>" method="post" >
+<form action="<% url "/config" %>" method="post" ><% csrf %>
 <% form as_dl form %>
 </form>
 <% end %>

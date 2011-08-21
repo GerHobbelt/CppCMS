@@ -53,11 +53,17 @@
 	"localization" : {
 		"messages" : {
 			"paths" : [ "./locale" ],
-			"domains" : [ "blog" ]
+			"domains" : [ "cppblog" ]
 		},
 		"locales" : [ 
 			"he_IL.UTF-8",
 			"en_US.UTF-8",
 		]
+	},
+	"security" : {
+		"csrf" : {
+			"enable" : true,
+			"exposed": true
+		}
 	}
 }

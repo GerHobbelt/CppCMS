@@ -7,7 +7,7 @@
 <% if id %>
 <p><a href="<% url "/blog/page/preview" using id %>"><% gt "Preview..." %></a></p>
 <% end %>
-<form action="<% if id %><% url "/admin/page" using id %><% else %><% url "/admin/page" %><% end %>" method="post" >
+<form action="<% if id %><% url "/admin/page" using id %><% else %><% url "/admin/page" %><% end %>" method="post" ><% csrf %>
 	<div id="form_title" >
 		<dl>
 		<% form as_dl form.title %>

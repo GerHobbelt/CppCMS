@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
-project(blog)
+project(cppcms_blog)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include(FindPkgConfig)
+include(CPack)
 
 
 
@@ -90,7 +91,6 @@ set(BLOG_SRC
 	"${CMAKE_CURRENT_BINARY_DIR}/admin.cpp"
 	)
 
-#set(MB_LANG he)
 
 # Actual Build
 
@@ -153,30 +153,16 @@ foreach(SKIN ${SKINS})
 endforeach()
 
 
-add_executable(blog ${BLOG_SRC})
-add_executable(blog_migrate sql/migrate.cpp)
-target_link_libraries(blog ${LIB_CPPCMS})
-target_link_libraries(blog ${LIB_BOOSTER})
-target_link_libraries(blog ${LIB_CPPDB})
-target_link_libraries(blog ${LIB_MARKDOWN})
-target_link_libraries(blog ${IM_LIBRARIES})
-target_link_libraries(blog_migrate ${LIB_CPPDB})
+add_executable(cppblog ${BLOG_SRC})
+add_executable(cppblog_migrate sql/migrate.cpp)
+target_link_libraries(cppblog ${LIB_CPPCMS})
+target_link_libraries(cppblog ${LIB_BOOSTER})
+target_link_libraries(cppblog ${LIB_CPPDB})
+target_link_libraries(cppblog ${LIB_MARKDOWN})
+target_link_libraries(cppblog ${IM_LIBRARIES})
+target_link_libraries(cppblog_migrate ${LIB_CPPDB})
 
-if(EXE_MSGFMT)
-	set(MO_FILES)
-	foreach(LANG ${MB_LANG}) 
-		set(PO locale/${LANG}/LC_MESSAGES/mb.po)
-		set(MO ${CMAKE_CURRENT_BINARY_DIR}/locale/${LANG}/LC_MESSAGES/mb.mo)
-		file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/locale/${LANG}/LC_MESSAGES")
-		set(MO_FILES ${MO_FILES} ${MO})
-		add_custom_command(
-			OUTPUT ${MO}
-			COMMAND ${EXE_MSGFMT} ${PO} -o ${MO}
-			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			DEPENDS ${PO})
-	endforeach()
-	#add_custom_target(create-mo ALL DEPENDS ${MO_FILES})
-else()
+if(NOT EXE_MSGFMT)
 	message("-- msgfmt not found, translations not generatied")
 endif()
 
@@ -227,7 +213,7 @@ add_custom_target(update-po)
 foreach(LOCALE ${LOCALES})
 	set(MODIR "${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES")
 	file(MAKE_DIRECTORY "${MODIR}")
-	set(MOFILE "${MODIR}/blog.mo")
+	set(MOFILE "${MODIR}/cppblog.mo")
 	set(POFILE "${CMAKE_CURRENT_SOURCE_DIR}/po/${LOCALE}.po")
 	
 	add_custom_command(
@@ -248,4 +234,30 @@ endforeach()
 
 add_custom_target(create-po ALL DEPENDS ${MO_FILES})
 
+install(TARGETS cppblog cppblog_migrate
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib/cppblog
+	ARCHIVE DESTINATION lib/cppblog)
+
+if(NOT STATIC_VIEW)
+	install(TARGETS ${SKINS}
+		RUNTIME DESTINATION bin/cppblog
+		LIBRARY DESTINATION lib/cppblog
+		ARCHIVE DESTINATION lib/cppblog)
+endif()
+
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/locale 
+	DESTINATION share)
+install(DIRECTORY media/ 
+	DESTINATION share/cppblog/www/media
+        PATTERN ".svn" EXCLUDE)
+
+install(FILES	sql/sqlite3.sql 
+		sql/mysql.sql
+		sql/postgresql.sql
+		sql/upgrade-1-to-2.sql
+		sql/upgrade-2-to-3.sql
+	DESTINATION share/cppblog)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cppblog-config.js DESTINATION etc/cppblog)
 
