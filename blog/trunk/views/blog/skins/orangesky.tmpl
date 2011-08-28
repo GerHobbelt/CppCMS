@@ -1,7 +1,7 @@
 <% c++ #include "data/blog/master.h" %>
 <% skin %>
 <% view master uses data::blog::master extends basic_master %>
-<% template title() %><% info.blog_title %><% end template %>
+<% template title() %><%= info.blog_title %><% end template %>
 <% template menu() %>
 <ul>
 	<li><a href="<% url "/blog/summary" %>"><% gt "Home" %></a></li>
@@ -79,7 +79,7 @@
 	<h2><% gt "Pages" %></h2>
 	<ul>
 		<% item %>
-		<li><a href="<% url "/blog/page" using page.id %>"><% page.title %></a></li>
+		<li><a href="<% url "/blog/page" using page.id %>"><%= page.title %></a></li>
 		<% end %> 
 	</ul>
 <% end %>
@@ -88,7 +88,7 @@
 <h2><% gt "Categories" %></h2>
 	<ul>
 	<% item %>
-		<li><a href="<% url "/blog/summary/category" using cat.id %>"><% cat.name %></a></li>
+		<li><a href="<% url "/blog/summary/category" using cat.id %>"><%= cat.name %></a></li>
 	<%end%>
 	</ul>
 <% end %>

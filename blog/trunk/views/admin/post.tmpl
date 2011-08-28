@@ -30,7 +30,7 @@
 			<p>
 			<% foreach cat in form.del_from_cat_list %>
 			<% gt "The post is published under catergories:"%>
-			<% separator %>, <% item %><% cat->help() %><% end %>
+			<% separator %>, <% item %><%= cat->help() %><% end %>
 			<% empty %>
 			<% gt "No categories assigned to this post."%>
 			<% end %>

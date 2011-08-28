@@ -12,12 +12,12 @@
 <% end %>
 <% foreach post in posts %>
 	<% item %>
-		<h1><a href="<% url "/blog/post" using post.id %>"><% post.title %></a></h1>
+		<h1><a href="<% url "/blog/post" using post.id %>"><%= post.title %></a></h1>
 		<div class="published">
 			<% gt "{1,date=f}, by {2} " using post.published, post.author %>;
 	<% foreach cat in post.categories %>
 		<% gt "Posted in:" %> 
-		<% separator %>, <% item %><a href="<% url "category" using cat.id %>"><% cat.name %></a><% end %>;
+		<% separator %>, <% item %><a href="<% url "category" using cat.id %>"><%= cat.name %></a><% end %>;
 	<% end %>
 	<a href="<% url "/blog/post" using post.id %>#comments_pos"><% ngt "one comment","{1,num} comments", post.comment_count using post.comment_count %></a>	
 		<script type="text/javascript">
@@ -26,7 +26,7 @@
 		-->
 		</script>	
 		</div>
-		<% post.abstract | ext latex | ext markdown2html %>
+		<%= post.abstract | ext latex | ext markdown2html %>
                 <% if post.has_content %>
                         <a href="<% url "/blog/post" using post.id %>#more"><% gt "more..." %></a>
                 <% end %>

@@ -7,7 +7,7 @@
         <% foreach post in posts %>
 	        <ul>
         	<% item %>
-			<li><a href="<% url "/admin/post" using post.id %>"><% post.title %></a></li>
+			<li><a href="<% url "/admin/post" using post.id %>"><%= post.title %></a></li>
 		<% end %>
 		</ul>
 	<% empty %>
@@ -19,7 +19,7 @@
         <% foreach page in pages %>
 	        <ul>
         	<% item %>
-			<li><a href="<% url "/admin/page" using page.id %>"><% page.title %></a><% if not page.is_open %> <% gt "(not published)" %><%end%></li>
+			<li><a href="<% url "/admin/page" using page.id %>"><%= page.title %></a><% if not page.is_open %> <% gt "(not published)" %><%end%></li>
 		<% end %>
 		</ul>
 	<% empty %>
@@ -29,7 +29,7 @@
         <% foreach comment in comments %>
 	        <ul>
         	<% item %>
-			<li><a href="<% url "/blog/post" using comment.post_id %>#comment_<% comment.id %>"><% comment.username %></a>, 
+			<li><a href="<% url "/blog/post" using comment.post_id %>#comment_<%= comment.id %>"><%= comment.username %></a>, 
 			    <a href="<% url "/admin/comment" using comment.id %>"><% gt "edit" %></a></li>
 		<% end %>
 		</ul>

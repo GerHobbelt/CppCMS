@@ -8,7 +8,7 @@ namespace data {
 			struct comment_form : public cppcms::form {
 				cppcms::widgets::text author;
 				cppcms::widgets::text mail;
-				cppcms::widgets::regex_field url;
+				cppcms::widgets::text url;
 				cppcms::widgets::textarea content;
 				cppcms::widgets::submit save;
 				cppcms::widgets::submit erase;
@@ -37,7 +37,6 @@ namespace data {
 					author.limits(1,256);
 					author.message(translate("Author"));
 					mail.message(translate("E-Mail"));
-					url.regex(cppcms::xss::rules::uri_matcher());
 					url.message(translate("URL"));
 					content.message(translate("Content"));
 					content.limits(1,32768);

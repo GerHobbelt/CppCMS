@@ -3,15 +3,15 @@
 <% view post uses data::blog::post extends master %>
 <% template comment_preview() %>
 <dt id="preview" ><% gt "Preview Comment" %></dt>
-<dd><% preview_content | ext markdown2html | ext xss %></dd>
+<dd><%= preview_content | ext markdown2html | ext xss %></dd>
 <% end %>
 <% template master_content() %>
-<h1><a href="<% url "/blog/post" using id %>"><% title %></a></h1>
+<h1><a href="<% url "/blog/post" using id %>"><%= title %></a></h1>
 <div class="published">
 	<% gt "{1,date=f}, by {2} " using  published , author %>; 
 	<% foreach cat in categories %>
 		<% gt "Posted in:" %> 
-		<% separator %>, <% item %><a href="<% url "/blog/summary/category" using cat.id %>"><% cat.name %></a><% end %>;
+		<% separator %>, <% item %><a href="<% url "/blog/summary/category" using cat.id %>"><%= cat.name %></a><% end %>;
 	<% end %><a href="#comments_pos"><% ngt "one comment","{1} comments", comment_count using comment_count %></a>
 	<script type="text/javascript">
 	<!--
@@ -19,10 +19,10 @@
 	-->
 	</script>	
 </div>
-<% abstract | ext latex | ext markdown2html %>
+<%= abstract | ext latex | ext markdown2html %>
 <% if not empty content %>
 	<span id="more"></span>
-	<% content | ext latex | ext  markdown2html %>
+	<%= content | ext latex | ext  markdown2html %>
 <% end %>
 <div id="comments">
 <span id="comments_pos"></span>
@@ -30,8 +30,8 @@
 	<h2><% gt "Comments" %></h2>
 	<dl>
 	<% item %>
-		<dt id="comment_<% comment.id %>" >
-			<%if not empty comment.url %><a href="<% comment.url %>"><% comment.username %></a><% else %><% comment.username %><% end %>,
+		<dt id="comment_<%= comment.id %>" >
+			<%if not empty comment.url %><a href="<%= comment.url %>"><%= comment.username %></a><% else %><%= comment.username %><% end %>,
  			<% gt "at {1,datetime=s}" using comment.date %>
 			<script type="text/javascript">
 			<!--
@@ -40,7 +40,7 @@
 			</script>	
 		</dt>
 		<dd>
-		<% comment.content | ext markdown2html | ext xss %>
+		<%= comment.content | ext markdown2html | ext xss %>
 		</dd>
 	<% end %>
 	<% if not empty preview_content %> 

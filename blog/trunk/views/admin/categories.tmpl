@@ -24,7 +24,7 @@
 	<h2><% gt "Categories" %></h2>
 	<ul>
 		<% item %>
-		<li><p><% cat.name %> | <a href="javascript:switchvis('cat<%= cat.id %>');" ><% gt "edit" %></a></p>
+		<li><p><%= cat.name %> | <a href="javascript:switchvis('cat<%= cat.id %>');" ><% gt "edit" %></a></p>
 		<div id="cat<%= cat.id %>" style="display:none" >
 			<form action="<% url "."  %>" method="post" ><% csrf %>
 				<input type="hidden" name="id" value="<%= cat.id %>" />

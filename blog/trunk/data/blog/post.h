@@ -38,7 +38,7 @@ namespace blog {
 	struct comment_form : public cppcms::form {
 		cppcms::widgets::text author;
 		cppcms::widgets::regex_field mail;
-		cppcms::widgets::regex_field url;
+		cppcms::widgets::text url;
 		cppcms::widgets::textarea content;
 		cppcms::widgets::submit preview;
 		cppcms::widgets::submit send;
@@ -56,7 +56,6 @@ namespace blog {
 			mail.limits(0,256);
 			mail.message(translate("E-Mail"));
 			mail.help(translate("the email would not displayed"));
-			url.regex(cppcms::xss::rules::uri_matcher());
 			url.message(translate("URL"));
 			url.id("url");
 			content.message(translate("Content"));
@@ -64,8 +63,14 @@ namespace blog {
 			content.limits(1,32768);
 			preview.value(translate("Preview"));
 			send.value(translate("Send"));
-			inputs+author+mail+url;
-			buttons + send + preview;
+
+			inputs.add(author);
+			inputs.add(mail);
+			inputs.add(url);
+
+			buttons.add(send);
+			buttons.add(preview);
+
 			captcha.name("captcha"); // easier to use
 			add(inputs);
 			add(content);

@@ -4,6 +4,8 @@
 #include <cppcms/url_mapper.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/cache_interface.h>
+#include <cppcms/xss.h>
+#include <cppcms/util.h>
 #include <cppcms/session_interface.h>
 
 #include <booster/posix_time.h>
@@ -63,6 +65,13 @@ namespace blog {
 		if(mail.value().empty()) {
 			mail.valid(false);
 			is_valid = false;
+		}
+		if(!url.value().empty()) {
+			std::string escaped = cppcms::util::escape(url.value());
+			if(!cppcms::xss::rules::uri_validator()(escaped.c_str(),escaped.c_str()+escaped.size())) {
+				url.valid(false);
+				is_valid = false;
+			}
 		}
 		
 		return is_valid;
