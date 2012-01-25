@@ -12,7 +12,7 @@ namespace blog {
 
 summary::summary(cppcms::service &s) : master(s)
 {
-	mapper().assign("");
+	mapper().assign("/");
 	dispatcher().assign("/?",&summary::all,this);
 
 	mapper().assign("/from/{1}");

@@ -2,10 +2,10 @@
 	
 	"blog" : {
 		"media" : "/media",
-		"root" : "/blog",
+		"root" : "",
 		"host" : "localhost:8080",
-		"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10",
-		//"connection_string" : "mysql:database=newpress;user=root;password=root;@pool_size=10;@use_prepared=on",
+		//"connection_string" : "sqlite3:db=cppcms.db;@pool_size=10",
+		"connection_string" : "mysql:database=newpress;user=root;password=root;@pool_size=10;@use_prepared=on",
 		"tex" : {
 			"enable" : true,
 			//"latex" : "/usr/bin/latex",
@@ -22,7 +22,12 @@
 		//"socket" : "/tmp/sock"
 	},
 	"http" : {
-		"script" : "/blog" 
+		"script" : "/mb.fcgi",
+		"rewrite" : [
+			{ "regex" : "/media(/.*)?", "pattern" : "$0" },
+			{ "regex" : ".*" , "pattern" : "/mb.fcgi$0" }
+		]
+		
 	},
 	"views" : {
 		 //"default_skin" : "contendend" ,
