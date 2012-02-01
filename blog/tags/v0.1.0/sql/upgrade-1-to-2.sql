@@ -1,0 +1,10 @@
+begin;
+insert into text_options values('blog_title',(select value from options where id=0)); 
+insert into text_options values('blog_description',(select value from options where id=1)); 
+insert into text_options values('contact',(select value from options where id=2)); 
+insert into text_options values('is_configured','yes');
+insert into text_options values('dbversion','2');
+drop table options;
+drop table links;
+drop table link_cats;
+commit;
