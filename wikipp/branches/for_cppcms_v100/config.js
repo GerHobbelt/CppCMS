@@ -1,8 +1,8 @@
 {
 	"wikipp" : {
 		"script" : "/wikipp",
-		"media" :"/templates",
-		"syntax_highlighter" : "/templates/sh",
+		"media" :"/media",
+		"syntax_highlighter" : "/media/sh",
 		"disable_registration" : false,
 
 		"languages" : {
@@ -51,7 +51,7 @@
 		}
 	},
 	"views" : {
-		"paths" : [ "./stage"] ,
+		"paths" : [ "./build"] ,
 		"skins" : [ "view" ] ,
 		//"auto_reload" : true
 	},
@@ -62,7 +62,7 @@
 	"localization" : {
 		// "backend" : "std", you may switch if for performance enhanecements 
 		"messages" : { 
-			"paths" : [ "./stage/locale"],
+			"paths" : [ "./build/locale"],
 			"domains" :  [ "wikipp" ]
 		},
 		"locales" : [ "he_IL.UTF-8" , "en_US.UTF-8", "ru_RU.UTF-8", "pl_PL.UTF-8" ]

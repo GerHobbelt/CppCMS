@@ -37,7 +37,7 @@ include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 include_directories(${CPPDB_INC})
 include_directories(${DISCOUNT_INC})
-include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 find_program(TMPLCC cppcms_tmpl_cc)
 find_program(XGETTEXT xgettext)
@@ -58,14 +58,14 @@ set(TEMPLATES
 )
 
 set(SRC 
-	index.cpp
-	main.cpp
-	master.cpp
-	options.cpp
-	page.cpp
-	users.cpp
-	wiki.cpp
-	markdown.cpp
+	src/index.cpp
+	src/main.cpp
+	src/master.cpp
+	src/options.cpp
+	src/page.cpp
+	src/users.cpp
+	src/wiki.cpp
+	src/markdown.cpp
 )
 
 add_custom_command(
@@ -137,7 +137,7 @@ endforeach()
 
 add_custom_target(create-po ALL DEPENDS ${MO_FILES})
 
-add_executable(wikipp_migrate migrate.cpp)
+add_executable(wikipp_migrate src/migrate.cpp)
 target_link_libraries(wikipp_migrate ${CPPDB})
 
 
@@ -147,7 +147,7 @@ install(TARGETS wikipp wikipp_migrate view
 	ARCHIVE DESTINATION lib/wikipp)
 
 foreach(STYLE style style-ltr style-rtl) 
-	install(FILES templates/${STYLE}.css DESTINATION share/wikipp/media)
+	install(FILES media/${STYLE}.css DESTINATION share/wikipp/media)
 endforeach()
 foreach(LOCALE ${LOCALES})
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES/wikipp.mo 
