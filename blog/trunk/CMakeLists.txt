@@ -168,7 +168,7 @@ endif()
 
 #  Localization
 
-set(LOCALES he)
+set(LOCALES he zh)
 
 set(MO_FILES)
 set(UPDATE_PO_LIST)
@@ -249,7 +249,7 @@ endif()
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/locale 
 	DESTINATION share)
 install(DIRECTORY media/ 
-	DESTINATION share/cppblog/www/media
+	DESTINATION share/cppblog/media
         PATTERN ".svn" EXCLUDE)
 
 install(FILES	sql/sqlite3.sql 
@@ -257,7 +257,7 @@ install(FILES	sql/sqlite3.sql
 		sql/postgresql.sql
 		sql/upgrade-1-to-2.sql
 		sql/upgrade-2-to-3.sql
-	DESTINATION share/cppblog)
+	DESTINATION share/cppblog/sql)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cppblog-config.js DESTINATION etc/cppblog)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/sample_config.js DESTINATION share/cppblog)
 
