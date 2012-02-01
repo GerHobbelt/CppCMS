@@ -1,0 +1,674 @@
+# translation of cppblog.po to Simplified Chinese.
+# xkx <xkx.zju@gmail.com>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: cppblog\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-08-21 18:22+0300\n"
+"PO-Revision-Date: 2009-11-19 22:00+0300\n"
+"Last-Translator: xkx <xkx.zju@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/page.cpp:71
+#: /home/artik/Projects/cppcms/blog/apps/admin/post.cpp:111
+msgid "Unpublish"
+msgstr "停止发布"
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/page.cpp:73
+#: /home/artik/Projects/cppcms/blog/apps/admin/post.cpp:113
+msgid "Publish"
+msgstr "发布"
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/categories.cpp:52
+msgid "Invalid category name"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/categories.cpp:76
+#, fuzzy
+msgid "The category is not empty, can't delete"
+msgstr "此分类不为空，不能删除。"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:33
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:23
+#, fuzzy
+msgid "Blog Title"
+msgstr "标题："
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:35
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:25
+msgid "Blog Subtitle"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:37
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:27
+#: views/blog/skins/contendend.tmpl:74 views/blog/skins/orangesky.tmpl:52
+msgid "Contact"
+msgstr "联系信息"
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:38
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:16
+#, fuzzy
+msgid "Username"
+msgstr "用户名："
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:40
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:18
+#, fuzzy
+msgid "Password"
+msgstr "密码："
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:42
+#, fuzzy
+msgid "Confirm Password"
+msgstr "确认密码："
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:45
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:44
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:39
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:27
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:29
+msgid "Save"
+msgstr "保存"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:38
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:53
+#, fuzzy
+msgid "Author"
+msgstr "作者："
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:39
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:57
+#, fuzzy
+msgid "E-Mail"
+msgstr "E-Mail:"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:41
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:60
+msgid "URL"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:42
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:36
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:23
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:62
+#, fuzzy
+msgid "Content"
+msgstr "正文："
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:45
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:41
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:29
+#: views/admin/categories.tmpl:33
+msgid "Delete"
+msgstr "删除"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:46
+msgid "Confirm Deletion"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:47
+msgid "Check to Delete"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:29
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:21
+#, fuzzy
+msgid "Title"
+msgstr "标题："
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:32
+#, fuzzy
+msgid "Abstract"
+msgstr "摘要："
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:40
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:28
+msgid "Save and Continue"
+msgstr "保存并继续"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:42
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:30
+#, fuzzy
+msgid "Confirm delete"
+msgstr "删除"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:43
+msgid "Check this to delete post"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:31
+msgid "Check this to delete page"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:19
+msgid "Login"
+msgstr "登录"
+
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:28
+msgid "Copyright Notice"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:58
+msgid "the email would not displayed"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:65
+msgid "Preview"
+msgstr "预览"
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:66
+msgid "Send"
+msgstr "发送"
+
+#: views/feed.tmpl:23
+msgid "comments"
+msgstr "评论"
+
+#: views/feed.tmpl:33 views/feed.tmpl:53 views/admin/master.tmpl:12
+#: views/admin/config.tmpl:14 views/blog/skins/contendend.tmpl:26
+#: views/blog/skins/contendend.tmpl:54 views/blog/skins/orangesky.tmpl:24
+#: views/blog/skins/orangesky.tmpl:35
+msgid "LTR"
+msgstr "LTR"
+
+#: views/feed.tmpl:57 views/blog/summary.tmpl:31
+msgid "more..."
+msgstr "查看更多..."
+
+#: views/admin/master.tmpl:9
+msgid "Admin Protal"
+msgstr "后台管理"
+
+#: views/admin/master.tmpl:24
+msgid "Blog"
+msgstr "浏览站点"
+
+#: views/admin/master.tmpl:24
+msgid "Admin"
+msgstr "后台管理"
+
+#: views/admin/master.tmpl:24
+msgid "Logout"
+msgstr "注销"
+
+#: views/admin/master.tmpl:29
+msgid "Administration Panel"
+msgstr "控制面板"
+
+#: views/admin/master.tmpl:33
+msgid "main"
+msgstr "后台首页"
+
+#: views/admin/master.tmpl:35
+msgid "write post"
+msgstr "新建日志"
+
+#: views/admin/master.tmpl:37
+msgid "write page"
+msgstr "新建页面"
+
+#: views/admin/master.tmpl:39
+msgid "categories"
+msgstr "分类"
+
+#: views/admin/master.tmpl:41
+msgid "options"
+msgstr "站点选项"
+
+#: views/admin/master.tmpl:43
+msgid "cache"
+msgstr "缓存"
+
+#: views/admin/master.tmpl:50 views/admin/config.tmpl:34
+msgid "CppBlog is a high performance blog written in C++."
+msgstr "CppBlog is a high performance blog written in C++."
+
+#: views/admin/master.tmpl:53
+#, fuzzy
+msgid ""
+"This software is availible under GNU GPL Licence, &copy; 2008-2011 Artyom "
+"Beilis."
+msgstr ""
+"This software is availible under GNU GPL Licence, &copy; Artyom Tonkikh。"
+
+#: views/admin/summary.tmpl:6
+msgid "Unpublished Posts"
+msgstr "暂未发布的日志"
+
+#: views/admin/summary.tmpl:14
+msgid "No unpublished posts"
+msgstr "没有暂未发布的日志"
+
+#: views/admin/summary.tmpl:18 views/blog/skins/contendend.tmpl:84
+#: views/blog/skins/orangesky.tmpl:79
+msgid "Pages"
+msgstr "页面"
+
+#: views/admin/summary.tmpl:22
+msgid "(not published)"
+msgstr "（暂未发布）"
+
+#: views/admin/summary.tmpl:26
+msgid "No pages"
+msgstr "没有页面"
+
+#: views/admin/summary.tmpl:28
+msgid "Latest Comments"
+msgstr "最近评论"
+
+#: views/admin/summary.tmpl:33 views/admin/categories.tmpl:27
+#: views/blog/post.tmpl:18 views/blog/post.tmpl:38 views/blog/summary.tmpl:25
+msgid "edit"
+msgstr "编辑"
+
+#: views/admin/summary.tmpl:37
+msgid "No comments"
+msgstr "没有评论"
+
+#: views/admin/page.tmpl:6
+#, fuzzy
+msgid "Edit Page {1}"
+msgstr "编辑页面 No."
+
+#: views/admin/page.tmpl:6
+#, fuzzy
+msgid "Create New Page"
+msgstr "新建页面"
+
+#: views/admin/page.tmpl:8 views/admin/post.tmpl:8
+#, fuzzy
+msgid "Preview..."
+msgstr "预览"
+
+#: views/admin/post.tmpl:6
+#, fuzzy
+msgid "Edit Post {1}"
+msgstr "编辑日志 No."
+
+#: views/admin/post.tmpl:6
+#, fuzzy
+msgid "Create New Post"
+msgstr "新建日志"
+
+#: views/admin/post.tmpl:28
+msgid "Categories:"
+msgstr "分类："
+
+#: views/admin/post.tmpl:32
+msgid "The post is published under catergories:"
+msgstr "这篇日志属于分类："
+
+#: views/admin/post.tmpl:35
+msgid "No categories assigned to this post."
+msgstr "这篇日志没有指定分类。"
+
+#: views/admin/post.tmpl:37
+msgid "(click to edit)"
+msgstr "（编辑分类）"
+
+#: views/admin/post.tmpl:41
+msgid "Remove From Categories:"
+msgstr "从分类删除："
+
+#: views/admin/post.tmpl:49
+msgid "Add To Categories:"
+msgstr "添加到分类："
+
+#: views/admin/caching.tmpl:7
+#, fuzzy
+msgid "Cached one entry."
+msgid_plural "Cached {1,num} entries."
+msgstr[0] " %1% 条缓存记录。"
+
+#: views/admin/caching.tmpl:10
+msgid "Clear Cache"
+msgstr "清空缓存"
+
+#: views/admin/caching.tmpl:14
+msgid "The caching system is disabled."
+msgstr "缓存系统暂未启用"
+
+#: views/admin/options.tmpl:6
+msgid "Options"
+msgstr "选项"
+
+#: views/admin/comment.tmpl:6
+#, fuzzy
+msgid "Edit comment"
+msgstr "编辑评论 No."
+
+#: views/admin/comment.tmpl:7
+msgid "Go back to the post"
+msgstr ""
+
+#: views/admin/categories.tmpl:24 views/blog/skins/contendend.tmpl:93
+#: views/blog/skins/orangesky.tmpl:88
+msgid "Categories"
+msgstr "分类"
+
+#: views/admin/categories.tmpl:32 views/admin/categories.tmpl:48
+msgid "Sumbit"
+msgstr "提交"
+
+#: views/admin/categories.tmpl:34
+msgid "Delete from posts:"
+msgstr "删除关联"
+
+#: views/admin/categories.tmpl:41
+msgid "There are no categories"
+msgstr "没有分类"
+
+#: views/admin/categories.tmpl:46
+msgid "New category:"
+msgstr "新建分类："
+
+#: views/admin/config.tmpl:44
+msgid "Configure Blog"
+msgstr ""
+
+#: views/admin/config.tmpl:53
+msgid "Database version is invalid"
+msgstr ""
+
+#: views/admin/config.tmpl:55
+msgid ""
+"The database version and the software versions do not match. Expected "
+"version {1}, current version {2}"
+msgstr ""
+
+#: views/admin/config.tmpl:56
+msgid "Please run SQL database upgrade scripts."
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:6 views/blog/skins/contendend.tmpl:42
+#: views/blog/skins/orangesky.tmpl:7
+msgid "Home"
+msgstr "首页"
+
+#: views/blog/skins/contendend.tmpl:8 views/blog/skins/orangesky.tmpl:8
+msgid "RSS"
+msgstr "订阅"
+
+#: views/blog/skins/contendend.tmpl:10 views/blog/skins/orangesky.tmpl:9
+msgid "RSS Comments"
+msgstr "订阅评论"
+
+#: views/blog/skins/contendend.tmpl:13 views/blog/skins/orangesky.tmpl:11
+msgid "Enter"
+msgstr "管理"
+
+#: views/blog/skins/contendend.tmpl:41
+msgid "About"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:71
+msgid ""
+"Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+"Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+
+#: views/blog/skins/contendend.tmpl:105 views/blog/skins/orangesky.tmpl:100
+#, fuzzy
+msgid "&copy; All Rights Reserved"
+msgstr "© All Rights Reserved"
+
+#: views/blog/post.tmpl:5
+#, fuzzy
+msgid "Preview Comment"
+msgstr "预览"
+
+#: views/blog/post.tmpl:11 views/blog/summary.tmpl:17
+msgid "{1,date=f}, by {2} "
+msgstr ""
+
+#: views/blog/post.tmpl:13 views/blog/summary.tmpl:19
+msgid "Posted in:"
+msgstr "分类："
+
+#: views/blog/post.tmpl:15 views/blog/summary.tmpl:22
+#, fuzzy
+msgid "one comment"
+msgid_plural "{1} comments"
+msgstr[0] " ‏%1% 条评论"
+
+#: views/blog/post.tmpl:30
+msgid "Comments"
+msgstr "评论"
+
+#: views/blog/post.tmpl:35
+msgid "at {1,datetime=s}"
+msgstr ""
+
+#: views/blog/post.tmpl:57
+msgid "Add Comment:"
+msgstr "添加评论："
+
+#: views/blog/post.tmpl:70
+#, fuzzy
+msgid "Message content are mandatory!"
+msgstr "名字，E-Mail及正文都是必填的。"
+
+#: views/blog/post.tmpl:82
+msgid "Name, E-Mail, Message content are mandatory!"
+msgstr "名字，E-Mail及正文都是必填的。"
+
+#: views/blog/post.tmpl:98
+msgid "Captcha"
+msgstr ""
+
+#: views/blog/post.tmpl:100
+msgid "Try Again"
+msgstr ""
+
+#: views/blog/post.tmpl:143
+msgid ""
+"You can write your messages using <a href=\"http://en.wikipedia.org/wiki/"
+"Markdown\">Markdown</a> syntax."
+msgstr ""
+"您可以使用 <a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> 语"
+"法。"
+
+#: views/blog/post.tmpl:158
+msgid "Reload Captcha"
+msgstr ""
+
+#: views/blog/post.tmpl:168
+msgid "You must enable JavaScript in order to post comments."
+msgstr "您必须启用浏览器的 JavaScript 功能才能发表评论。"
+
+#: views/blog/summary.tmpl:6
+#, fuzzy
+msgid "RSS for {1}"
+msgstr "订阅分类：‏%1%"
+
+#: views/blog/summary.tmpl:11
+#, fuzzy
+msgid "Posts in category &#8216;{1}&#8217;."
+msgstr "\"%1%\" 中的日志："
+
+#: views/blog/summary.tmpl:38 views/blog/summary.tmpl:47
+#: views/blog/summary.tmpl:49
+msgid "next page"
+msgstr "下一页"
+
+#: views/blog/summary.tmpl:40
+#, fuzzy
+msgid "previous page"
+msgstr "新建页面"
+
+#: views/blog/summary.tmpl:58
+#, fuzzy
+msgid "There are not posts in category &#8216;{1}&#8217;"
+msgstr "分类 \"%1%\" 中没有日志。"
+
+#: views/blog/summary.tmpl:60
+msgid "There are no posts in the blog"
+msgstr "暂时没有日志。"
+
+#: views/blog/skins/orangesky.tmpl:55
+msgid ""
+"The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr ""
+"The template design based on WordPress OrangeSky template by Naoko McCracken"
+
+# Please translate LANG as native name of language, for example for French -- `Français'
+#~ msgid "LANG"
+#~ msgstr "简体中文"
+
+#~ msgid "Title and Content are mandatory!"
+#~ msgstr "标题和正文必须填写。"
+
+#~ msgid "Title and Abstract are mandatory!"
+#~ msgstr "标题和摘要必须填写。"
+
+#~ msgid "Are you shure?"
+#~ msgstr "你确定吗？"
+
+#~ msgid "Send Trackback:"
+#~ msgstr "发送Trackback："
+
+#~ msgid "Trackback URL:"
+#~ msgstr "Trackback地址："
+
+#~ msgid "Tasks"
+#~ msgstr "常用操作"
+
+#~ msgid "To The Blog"
+#~ msgstr "查看日志"
+
+#~ msgid "Edit Links"
+#~ msgstr "管理链接"
+
+#~ msgid "Edit Categories"
+#~ msgstr "管理分类"
+
+#~ msgid "Edit Options"
+#~ msgstr "站点选项"
+
+#~ msgid "Administrate Cache"
+#~ msgstr "缓存管理"
+
+#~ msgid "Error"
+#~ msgstr "错误"
+
+#~ msgid "The page you had looked for not found"
+#~ msgstr "您要访问的页面不存在。"
+
+#~ msgid "Not all mandatory fields were filled:"
+#~ msgstr "必填选项不可为空："
+
+#~ msgid "Name"
+#~ msgstr "名字"
+
+#~ msgid "E-Mail, it will not be disclosed in the comment text"
+#~ msgstr "E-Mail，不会被公开"
+
+#~ msgid "Message Body"
+#~ msgstr "评论"
+
+#~ msgid "Press \"back\" browser button and fix the form"
+#~ msgstr "请返回检查"
+
+#~ msgid "%1%, by %2% "
+#~ msgstr "%1%, by %2%"
+
+#~ msgid "Preview of message content:"
+#~ msgstr "预览："
+
+#~ msgid "at "
+#~ msgstr " "
+
+#~ msgid "You can send a trackback to following url:"
+#~ msgstr "您可以发送Trackback到这个链接："
+
+#~ msgid "trackback"
+#~ msgstr "Trackback"
+
+#~ msgid "Name:"
+#~ msgstr "名字:"
+
+#~ msgid "Site:"
+#~ msgstr "站点:"
+
+#~ msgid "Submit"
+#~ msgstr "提交"
+
+#~ msgid "links"
+#~ msgstr "链接"
+
+#~ msgid "No links"
+#~ msgstr "没有链接"
+
+#~ msgid "Url:"
+#~ msgstr "主页地址："
+
+#~ msgid "The passwords are not identical!"
+#~ msgstr "两次密码不同"
+
+#~ msgid "Configuration is complete"
+#~ msgstr "配置完成"
+
+#~ msgid "Not all fields are filled"
+#~ msgstr "请填写所有项目。"
+
+#~ msgid "Blog Name:"
+#~ msgstr "Blog名："
+
+#~ msgid "Blog Description:"
+#~ msgstr "Blog描述："
+
+#~ msgid "Contact:"
+#~ msgstr "联系信息："
+
+#~ msgid "Copyright Text (markdown):"
+#~ msgstr "版权信息（markdown）："
+
+#~ msgid "Links"
+#~ msgstr "链接"
+
+#~ msgid "Description:"
+#~ msgstr "描述："
+
+#~ msgid "New Link"
+#~ msgstr "新建链接"
+
+#~ msgid "New Category"
+#~ msgstr "新建分类"
+
+#~ msgid "No categories"
+#~ msgstr "没有分类"
+
+#~ msgid "Cannot remove category!"
+#~ msgstr "无法删除此分类"
+
+#~ msgid ""
+#~ "There are posts belongs to it. Maybe you need to mark \"delete from posts"
+#~ "\"?"
+#~ msgstr "有日志关联，请使用选项\"删除关联\"。"
+
+#~ msgid "No url given"
+#~ msgstr "请给出链接地址"
+
+#~ msgid "The trackback was send sucessefully"
+#~ msgstr "Trackback发送成功"
+
+#~ msgid "The send had failed with following message: %1%"
+#~ msgstr "发送失败： %1%"
+
+#~ msgid "Press here to return to post."
+#~ msgstr "点击此处回到日志"
+
+#~ msgid "Project"
+#~ msgstr "项目"
+
+#~ msgid "Downloads"
+#~ msgstr "下载"
+
+#~ msgid "Project Site"
+#~ msgstr "项目站点"

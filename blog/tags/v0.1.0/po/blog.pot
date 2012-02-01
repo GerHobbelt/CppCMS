@@ -1,0 +1,496 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-02-01 15:11+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/page.cpp:71
+#: /home/artik/Projects/cppcms/blog/apps/admin/post.cpp:111
+msgid "Unpublish"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/page.cpp:73
+#: /home/artik/Projects/cppcms/blog/apps/admin/post.cpp:113
+msgid "Publish"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/categories.cpp:52
+msgid "Invalid category name"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/apps/admin/categories.cpp:76
+msgid "The category is not empty, can't delete"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:33
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:23
+msgid "Blog Title"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:35
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:25
+msgid "Blog Subtitle"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:37
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:27
+#: views/blog/skins/contendend.tmpl:74 views/blog/skins/orangesky.tmpl:52
+msgid "Contact"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:38
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:16
+msgid "Username"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:40
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:18
+msgid "Password"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:42
+msgid "Confirm Password"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/config.h:45
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:43
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:39
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:27
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:29
+msgid "Save"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:38
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:53
+msgid "Author"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:39
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:57
+msgid "E-Mail"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:40
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:59
+msgid "URL"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:41
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:36
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:23
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:61
+msgid "Content"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:44
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:41
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:29
+#: views/admin/categories.tmpl:33
+msgid "Delete"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:45
+msgid "Confirm Deletion"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/comment.h:46
+msgid "Check to Delete"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:29
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:21
+msgid "Title"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:32
+msgid "Abstract"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:40
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:28
+msgid "Save and Continue"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:42
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:30
+msgid "Confirm delete"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/post.h:43
+msgid "Check this to delete post"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/page.h:31
+msgid "Check this to delete page"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/users.h:19
+msgid "Login"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/admin/options.h:28
+msgid "Copyright Notice"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:58
+msgid "the email would not displayed"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:64
+msgid "Preview"
+msgstr ""
+
+#: /home/artik/Projects/cppcms/blog/data/blog/post.h:65
+msgid "Send"
+msgstr ""
+
+#: views/feed.tmpl:23
+msgid "comments"
+msgstr ""
+
+#: views/feed.tmpl:33 views/feed.tmpl:53 views/admin/master.tmpl:12
+#: views/admin/config.tmpl:14 views/blog/skins/contendend.tmpl:26
+#: views/blog/skins/contendend.tmpl:54 views/blog/skins/orangesky.tmpl:24
+#: views/blog/skins/orangesky.tmpl:35
+msgid "LTR"
+msgstr ""
+
+#: views/feed.tmpl:57 views/blog/summary.tmpl:31
+msgid "more..."
+msgstr ""
+
+#: views/admin/master.tmpl:9
+msgid "Admin Protal"
+msgstr ""
+
+#: views/admin/master.tmpl:24
+msgid "Blog"
+msgstr ""
+
+#: views/admin/master.tmpl:24
+msgid "Admin"
+msgstr ""
+
+#: views/admin/master.tmpl:24
+msgid "Logout"
+msgstr ""
+
+#: views/admin/master.tmpl:29
+msgid "Administration Panel"
+msgstr ""
+
+#: views/admin/master.tmpl:33
+msgid "main"
+msgstr ""
+
+#: views/admin/master.tmpl:35
+msgid "write post"
+msgstr ""
+
+#: views/admin/master.tmpl:37
+msgid "write page"
+msgstr ""
+
+#: views/admin/master.tmpl:39
+msgid "categories"
+msgstr ""
+
+#: views/admin/master.tmpl:41
+msgid "options"
+msgstr ""
+
+#: views/admin/master.tmpl:43
+msgid "cache"
+msgstr ""
+
+#: views/admin/master.tmpl:50 views/admin/config.tmpl:34
+msgid "CppBlog is a high performance blog written in C++."
+msgstr ""
+
+#: views/admin/master.tmpl:53
+msgid ""
+"This software is availible under GNU GPL Licence, &copy; 2008-2011 Artyom "
+"Beilis."
+msgstr ""
+
+#: views/admin/summary.tmpl:6
+msgid "Unpublished Posts"
+msgstr ""
+
+#: views/admin/summary.tmpl:14
+msgid "No unpublished posts"
+msgstr ""
+
+#: views/admin/summary.tmpl:18 views/blog/skins/contendend.tmpl:84
+#: views/blog/skins/orangesky.tmpl:79
+msgid "Pages"
+msgstr ""
+
+#: views/admin/summary.tmpl:22
+msgid "(not published)"
+msgstr ""
+
+#: views/admin/summary.tmpl:26
+msgid "No pages"
+msgstr ""
+
+#: views/admin/summary.tmpl:28
+msgid "Latest Comments"
+msgstr ""
+
+#: views/admin/summary.tmpl:33 views/admin/categories.tmpl:27
+#: views/blog/post.tmpl:18 views/blog/post.tmpl:38 views/blog/summary.tmpl:25
+msgid "edit"
+msgstr ""
+
+#: views/admin/summary.tmpl:37
+msgid "No comments"
+msgstr ""
+
+#: views/admin/page.tmpl:6
+msgid "Edit Page {1}"
+msgstr ""
+
+#: views/admin/page.tmpl:6
+msgid "Create New Page"
+msgstr ""
+
+#: views/admin/page.tmpl:8 views/admin/post.tmpl:8
+msgid "Preview..."
+msgstr ""
+
+#: views/admin/post.tmpl:6
+msgid "Edit Post {1}"
+msgstr ""
+
+#: views/admin/post.tmpl:6
+msgid "Create New Post"
+msgstr ""
+
+#: views/admin/post.tmpl:28
+msgid "Categories:"
+msgstr ""
+
+#: views/admin/post.tmpl:32
+msgid "The post is published under catergories:"
+msgstr ""
+
+#: views/admin/post.tmpl:35
+msgid "No categories assigned to this post."
+msgstr ""
+
+#: views/admin/post.tmpl:37
+msgid "(click to edit)"
+msgstr ""
+
+#: views/admin/post.tmpl:41
+msgid "Remove From Categories:"
+msgstr ""
+
+#: views/admin/post.tmpl:49
+msgid "Add To Categories:"
+msgstr ""
+
+#: views/admin/caching.tmpl:7
+msgid "Cached one entry."
+msgid_plural "Cached {1,num} entries."
+msgstr[0] ""
+msgstr[1] ""
+
+#: views/admin/caching.tmpl:10
+msgid "Clear Cache"
+msgstr ""
+
+#: views/admin/caching.tmpl:14
+msgid "The caching system is disabled."
+msgstr ""
+
+#: views/admin/options.tmpl:6
+msgid "Options"
+msgstr ""
+
+#: views/admin/comment.tmpl:6
+msgid "Edit comment"
+msgstr ""
+
+#: views/admin/comment.tmpl:7
+msgid "Go back to the post"
+msgstr ""
+
+#: views/admin/categories.tmpl:24 views/blog/skins/contendend.tmpl:93
+#: views/blog/skins/orangesky.tmpl:88
+msgid "Categories"
+msgstr ""
+
+#: views/admin/categories.tmpl:32 views/admin/categories.tmpl:48
+msgid "Sumbit"
+msgstr ""
+
+#: views/admin/categories.tmpl:34
+msgid "Delete from posts:"
+msgstr ""
+
+#: views/admin/categories.tmpl:41
+msgid "There are no categories"
+msgstr ""
+
+#: views/admin/categories.tmpl:46
+msgid "New category:"
+msgstr ""
+
+#: views/admin/config.tmpl:44
+msgid "Configure Blog"
+msgstr ""
+
+#: views/admin/config.tmpl:53
+msgid "Database version is invalid"
+msgstr ""
+
+#: views/admin/config.tmpl:55
+msgid ""
+"The database version and the software versions do not match. Expected "
+"version {1}, current version {2}"
+msgstr ""
+
+#: views/admin/config.tmpl:56
+msgid "Please run SQL database upgrade scripts."
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:6 views/blog/skins/contendend.tmpl:42
+#: views/blog/skins/orangesky.tmpl:7
+msgid "Home"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:8 views/blog/skins/orangesky.tmpl:8
+msgid "RSS"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:10 views/blog/skins/orangesky.tmpl:9
+msgid "RSS Comments"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:13 views/blog/skins/orangesky.tmpl:11
+msgid "Enter"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:41
+msgid "About"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:71
+msgid ""
+"Based on Design by <a href=\"http://ContentedDesigns.com\">Contented "
+"Designs</a>"
+msgstr ""
+
+#: views/blog/skins/contendend.tmpl:105 views/blog/skins/orangesky.tmpl:100
+msgid "&copy; All Rights Reserved"
+msgstr ""
+
+#: views/blog/post.tmpl:5
+msgid "Preview Comment"
+msgstr ""
+
+#: views/blog/post.tmpl:11
+msgid "{1,date=s}, by {2} "
+msgstr ""
+
+#: views/blog/post.tmpl:13 views/blog/summary.tmpl:19
+msgid "Posted in:"
+msgstr ""
+
+#: views/blog/post.tmpl:15 views/blog/summary.tmpl:22
+msgid "one comment"
+msgid_plural "{1} comments"
+msgstr[0] ""
+msgstr[1] ""
+
+#: views/blog/post.tmpl:30
+msgid "Comments"
+msgstr ""
+
+#: views/blog/post.tmpl:35
+msgid "at {1,datetime=s}"
+msgstr ""
+
+#: views/blog/post.tmpl:57
+msgid "Add Comment:"
+msgstr ""
+
+#: views/blog/post.tmpl:74
+msgid "Message content are mandatory!"
+msgstr ""
+
+#: views/blog/post.tmpl:86
+msgid "Name, E-Mail, Message content are mandatory!"
+msgstr ""
+
+#: views/blog/post.tmpl:108
+msgid "Captcha"
+msgstr ""
+
+#: views/blog/post.tmpl:110
+msgid "Try Again"
+msgstr ""
+
+#: views/blog/post.tmpl:160
+msgid ""
+"You can write your messages using <a href=\"http://en.wikipedia.org/wiki/"
+"Markdown\">Markdown</a> syntax."
+msgstr ""
+
+#: views/blog/post.tmpl:175
+msgid "Reload Captcha"
+msgstr ""
+
+#: views/blog/post.tmpl:185
+msgid "You must enable JavaScript in order to post comments."
+msgstr ""
+
+#: views/blog/summary.tmpl:6
+msgid "RSS for {1}"
+msgstr ""
+
+#: views/blog/summary.tmpl:11
+msgid "Posts in category &#8216;{1}&#8217;."
+msgstr ""
+
+#: views/blog/summary.tmpl:17
+msgid "{1,date=f}, by {2} "
+msgstr ""
+
+#: views/blog/summary.tmpl:38 views/blog/summary.tmpl:47
+#: views/blog/summary.tmpl:49
+msgid "next page"
+msgstr ""
+
+#: views/blog/summary.tmpl:40
+msgid "previous page"
+msgstr ""
+
+#: views/blog/summary.tmpl:58
+msgid "There are not posts in category &#8216;{1}&#8217;"
+msgstr ""
+
+#: views/blog/summary.tmpl:60
+msgid "There are no posts in the blog"
+msgstr ""
+
+#: views/blog/skins/orangesky.tmpl:55
+msgid ""
+"The template design based on WordPress OrangeSky template by Naoko McCracken"
+msgstr ""

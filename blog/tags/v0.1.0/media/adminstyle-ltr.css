@@ -1,0 +1,23 @@
+* { margin:0px; padding:0px;}
+h1, h2, h3, h4, h5, h6, p, pre, blockquote, label, ul, ol, dl, 
+fieldset, address, pre { margin:5px;}
+li, dd { margin-left:2em;}
+
+#logout { float:right;}
+
+#header { text-align:left;}
+
+#news {
+        float: right;
+        margin-right:5px;
+}
+
+#menu {
+        margin-left:5px;
+        float: left;
+        padding:5px;
+}
+
+#langlist {
+	text-align: right;
+}
