@@ -4,21 +4,23 @@
 # This file is distributed under the same license as the Wiki++ package.
 #
 # Michal Fita <michal.fita@gmail.com>, 2010.
-# artik <artyomtnk@yahoo.com>, 2010.
+# artik <artyomtnk@yahoo.com>, 2010, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-31 08:20+0300\n"
-"PO-Revision-Date: 2010-07-31 08:24+0300\n"
-"Last-Translator: artik <artyomtnk@yahoo.com>\n"
-"Language-Team: Hebrew <en@li.org>\n"
+"POT-Creation-Date: 2012-02-01 13:06+0200\n"
+"PO-Revision-Date: 2012-02-01 13:10+0200\n"
+"Last-Translator: Artyom <artyomtnk@yahoo.com>\n"
+"Language-Team: Hebrew <>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: master.cpp:36
+#: master.cpp:110
 msgid "LANG"
 msgstr "Polski"
 
@@ -42,19 +44,19 @@ msgstr "O wiki"
 msgid "Copyright String"
 msgstr ""
 
-#: options.cpp:19 users.cpp:44
+#: options.cpp:19 users.cpp:45
 msgid "Submit"
 msgstr "Wyślij"
 
-#: options.cpp:27
+#: options.cpp:32
 msgid "Disable creation of new articles by visitors"
 msgstr "Wyłącza tworzenie nowych artykułów przez gości"
 
-#: options.cpp:108
-msgid "Wiki++ &mdash; CppCMS Wiki"
+#: options.cpp:110
+msgid "Wiki++ - CppCMS Wiki"
 msgstr ""
 
-#: options.cpp:111
+#: options.cpp:113
 msgid ""
 "## About\n"
 "\n"
@@ -66,114 +68,111 @@ msgstr ""
 "Wiki++ jest silnikiem wiki napędzanym\n"
 "szkieletem [CppCMS](http://cppcms.sf.net/) dla aplikacji web.\n"
 
-#: options.cpp:116
-msgid "(C) All Rights Reserverd"
+#: options.cpp:118
+msgid "(C) All Rights Reserved"
 msgstr "(C) Wszelkie prawa zastrzeżone"
 
-#: page.cpp:18
+#: page.cpp:17
 msgid "Title"
 msgstr "Tytuł"
 
-#: page.cpp:19
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:110
+#: page.cpp:18 /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:111
 msgid "Content"
 msgstr "Zawartość"
 
-#: page.cpp:20
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:114
+#: page.cpp:19 /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:115
 msgid "Sidebar"
 msgstr ""
 
-#: page.cpp:21
+#: page.cpp:20
 msgid "Save"
 msgstr "Zapisz"
 
-#: page.cpp:22
+#: page.cpp:21
 msgid "Save and Continue"
 msgstr "Zapisz i kontynuuj"
 
-#: page.cpp:23
+#: page.cpp:22
 msgid "Preview"
 msgstr "Podgląd"
 
-#: page.cpp:28
+#: page.cpp:32
 msgid "Disable editing by visitors"
 msgstr "Wyłącz edycję przez gości"
 
-#: page.cpp:29
+#: page.cpp:33
 msgid "Please Login"
 msgstr "Proszę się zalogować"
 
-#: users.cpp:18 users.cpp:40
+#: users.cpp:17 users.cpp:41
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: users.cpp:19 users.cpp:41
+#: users.cpp:18 users.cpp:42
 msgid "Password"
 msgstr "Hasło"
 
-#: users.cpp:20
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:65
+#: users.cpp:19 /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:65
 msgid "Login"
 msgstr "Logowanie"
 
-#: users.cpp:42
+#: users.cpp:43
 msgid "Confirm"
 msgstr "Potwierdź"
 
-#: users.cpp:43
+#: users.cpp:44
 msgid "Solve"
 msgstr ""
 
-#: users.cpp:74
+#: users.cpp:79
 msgid "This user exists"
 msgstr "Taki użytkownik istnieje"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:5
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:5
 msgid "Wellcome to WikiPP"
 msgstr "Zapraszamy do WikiPP"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:9
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:9
 msgid " Users Area"
 msgstr " Obszar użytkownika"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:14
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:14
 msgid "Navigation"
 msgstr "Nawigacja"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:16
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:16
 msgid "Index"
 msgstr "Indeks"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:17
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:17
 msgid "Changes"
 msgstr "Zmiany"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:20
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:20
 msgid "Main Page"
 msgstr "Strona główna"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:42
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:42
 msgid "LTR"
-msgstr ""
+msgstr "LTR"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:68
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:68
 msgid "Logout "
 msgstr "Wyloguj "
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:78
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:78
 msgid "Main"
 msgstr "Główna"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:90
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:90
 msgid "Valid CSS"
 msgstr "Poprawny CSS"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:91
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:91
 msgid "Valid XHTML 1.0"
 msgstr "Poprawny XTML 1.0"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:96
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:96
 msgid ""
 "Template design based on <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
@@ -181,124 +180,124 @@ msgstr ""
 "Projekt wzorca bazuja na <a href=\"http://ContentedDesigns.com\">Contented "
 "Designs</a>"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/main.tmpl:99
+#: /home/artik/Projects/cppcms/wikipp/templates/main.tmpl:99
 msgid "Contact"
 msgstr "Kontakt"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:14
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:26
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:14
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:26
 msgid "Edit"
 msgstr "Edycja"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:16
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:31
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:16
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:31
 msgid "History"
 msgstr "Histora"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:26
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:26
 msgid "New Article"
 msgstr "Nowy artykuł"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:29
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:5
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:29
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:5
 msgid "Back to page"
 msgstr "Powrót do strony"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:67
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:68
 msgid "Edit this version (rollback)"
 msgstr "Edycja tej wersji (przywrócenie)"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:72
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:73
 msgid "(version {1,num}, from {2,dt=s})"
 msgstr "(wersja {1,ord}, z {2,dt=s})"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:77
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:78
 msgid "Difference \"{1}\" ver. {2} versus ver. {3}"
 msgstr "Różnica \"{1}\" w. {2} w stosunku do w. {3}"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:79
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:81
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:80
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:82
 msgid "Edit version {1,num}"
 msgstr "Edycja wersji {1,num}"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:98
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:99
 msgid "No such page or version exist"
 msgstr "Wybrana strona lub wersja nie istnieje"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:100
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:101
 msgid "No difference between these versions"
 msgstr "Brak różnic między tymi wersjami"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:103
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:104
 msgid "Titles"
 msgstr "Tytuły"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/page.tmpl:105
+#: /home/artik/Projects/cppcms/wikipp/templates/page.tmpl:106
 msgid "Version {1}"
 msgstr "Wersja {1}"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:3
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:3
 msgid "WikiPP :: History"
 msgstr "WikiPP :: Historia"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:14
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:14
 msgid "Version {1,num}, changed at {2,dt=s}, by {3}"
 msgstr "Wersja {1,num}, zmieniona {2,dt=s}, przez {3}"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:15
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:15
 msgid "Show"
 msgstr "Pokaż"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:16
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:16
 msgid "Edit (rollback)"
 msgstr "Edytuj (przywróć)"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:17
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:33
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:17
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:33
 msgid "Diff to previous"
 msgstr "Różnice z poprzednią"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:23
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:23
 msgid "History is empty"
 msgstr "Historia jest pusta"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/hist.tmpl:25
+#: /home/artik/Projects/cppcms/wikipp/templates/hist.tmpl:25
 msgid "Next page"
 msgstr "Następna strona"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/admin.tmpl:3
+#: /home/artik/Projects/cppcms/wikipp/templates/admin.tmpl:3
 msgid "WikiPP :: Login"
 msgstr "WikiPP :: Logowanie"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/admin.tmpl:11
+#: /home/artik/Projects/cppcms/wikipp/templates/admin.tmpl:11
 msgid "Register as new user"
 msgstr "Rejestracja jako nowy użytkownik"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/admin.tmpl:16
+#: /home/artik/Projects/cppcms/wikipp/templates/admin.tmpl:16
 msgid "WikiPP :: Register"
 msgstr "WikiPP :: Rejestracja"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/admin.tmpl:37
+#: /home/artik/Projects/cppcms/wikipp/templates/admin.tmpl:38
 msgid "WikiPP :: Edit Options"
 msgstr "WikiPP :: Edycja opcji"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:4
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:4
 msgid "Index of Articles"
 msgstr "Index artykułów"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:26
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:26
 msgid "Recent Changes"
 msgstr "Ostatnie zmiany"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:32
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:32
 msgid "version {1,num}, at {2,dt=s}, by {3}"
 msgstr "wersja {1,num}, z {2,dt=s}, przez {3}"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:38
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:38
 msgid "Next Page"
 msgstr "Następna strona"
 
-#: /home/artik/Projects/FastBlog/cppblog/wikipp_v100/templates/toc.tmpl:40
+#: /home/artik/Projects/cppcms/wikipp/templates/toc.tmpl:40
 msgid "No more changes"
 msgstr "Nie ma więcej zmian"
 

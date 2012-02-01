@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(wikipp)
 
+include(CPack)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -137,3 +139,19 @@ add_custom_target(create-po ALL DEPENDS ${MO_FILES})
 
 add_executable(wikipp_migrate migrate.cpp)
 target_link_libraries(wikipp_migrate ${CPPDB})
+
+
+install(TARGETS wikipp wikipp_migrate view
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib/wikipp
+	ARCHIVE DESTINATION lib/wikipp)
+
+foreach(STYLE style style-ltr style-rtl) 
+	install(FILES templates/${STYLE}.css DESTINATION share/wikipp/media)
+endforeach()
+foreach(LOCALE ${LOCALES})
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES/wikipp.mo 
+		DESTINATION share/locale/${LOCALE}/LC_MESSAGES/)
+endforeach()
+install(FILES sample_config.js DESTINATION share/wikipp)
+

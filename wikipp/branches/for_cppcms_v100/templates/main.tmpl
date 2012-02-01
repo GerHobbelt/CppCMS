@@ -4,27 +4,27 @@
 <% view master uses content::master %>
 <% template title() %><% gt "Wellcome to WikiPP" %><% end %>
 <% template navigation() %>
-<a href="<% login_link %>"><span id="loginout"></span></a>
+<a href="<%= login_link %>"><span id="loginout"></span></a>
 &nbsp;/&nbsp;
-<a href="<% edit_options %>"><% gt" Users Area" %></a>
+<a href="<%= edit_options %>"><% gt" Users Area" %></a>
 <% end template %>
 <% template navbar() %>
-<% about | ext markdown %>
+<%= about | ext markdown %>
 <hr/>
 <h2><% gt "Navigation" %></h2>
 <ul>
-	<li><a href="<% toc %>"><% gt "Index" %></a></li>
-	<li><a href="<% changes %>"><% gt "Changes" %></a></li>
+	<li><a href="<%= toc %>"><% gt "Index" %></a></li>
+	<li><a href="<%= changes %>"><% gt "Changes" %></a></li>
 </ul>
 <% foreach l in languages %>
 <h2><% gt "Main Page" %></h2>
 <ul>
-<% item %><li><a href="<% l.second %>"><% l.first %></a></li><% end %>
+<% item %><li><a href="<%= l.second %>"><%= l.first %></a></li><% end %>
 </ul>
 <% end %>
 <% end template %>
 <% template main() %><% end %>
-<% template wiki_title() %><% wiki_title %><% end %>
+<% template wiki_title() %><%= wiki_title %><% end %>
 <% template sidebar() %><% end %>
 <% template render() %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -33,20 +33,20 @@
 <head>
 	<title><% include title() %></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<link href="<% media %>/style.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/style.css" rel="stylesheet" type="text/css" />
 	<% if not empty syntax_highlighter %>
-		<script language="javascript"  src="<% media %>/sh/Scripts/shCore.js"></script>
-		<script language="javascript"  src="<% media %>/sh/Scripts/shBrushCpp.js"></script>
-		<link href="<% media %>/sh/Styles/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+		<script language="javascript"  src="<%= media %>/sh/Scripts/shCore.js"></script>
+		<script language="javascript"  src="<%= media %>/sh/Scripts/shBrushCpp.js"></script>
+		<link href="<%= media %>/sh/Styles/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 	<% end %>
-	<link href="<% media %>/style-<% if rtl %>rtl<% else %>ltr<%end%>.css" rel="stylesheet" type="text/css" />
+	<link href="<%= media %>/style-<% if rtl %>rtl<% else %>ltr<%end%>.css" rel="stylesheet" type="text/css" />
 </head>
 <body onload="loginout()">
 	<script type="text/javascript">
 	<!--
                 function get_cookie(c_name)
                 {
-                	c_name='<% cookie_prefix %>' + c_name; 
+                	c_name='<%= cookie_prefix %>' + c_name; 
                         if (document.cookie.length>0){
                                 c_start=document.cookie.indexOf(c_name + "=");
                                 if (c_start!=-1){ 
@@ -75,7 +75,7 @@
 		<h1 id="title"><% include wiki_title() %></h1>
 	</div>
 	<div id="path">
-		<a href="<% main_local %>"><% gt "Main" %></a>
+		<a href="<%= main_local %>"><% gt "Main" %></a>
 		&nbsp;/&nbsp;
 		<% include navigation()%>
 	</div>
@@ -93,10 +93,10 @@
 	</div>
 	<div id="footer">
 		<div id="copyrightdesign">
-		<% copyright %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
+		<%= copyright %> | <% gt "Template design based on <a href=\"http://ContentedDesigns.com\">Contented Designs</a>" %>
 		</div>
 		<div id="footercontact">
-		<a href="<% contact %>"><% gt "Contact" %></a>
+		<a href="<%= contact %>"><% gt "Contact" %></a>
 		</div>
 	</div>
 </div>

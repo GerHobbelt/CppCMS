@@ -17,7 +17,12 @@ options_form::options_form()
 	about.message(_("About Wiki"));
 	copyright.message(_("Copyright String"));
 	submit.value(_("Submit"));
-	*this + users_only + contact_mail + wiki_title + copyright + about + submit;
+	add(users_only);
+	add(contact_mail);
+	add(wiki_title);
+	add(copyright);
+	add(about);
+	add(submit);
 	wiki_title.non_empty();
 	copyright.non_empty();
 	contact_mail.non_empty();
@@ -110,7 +115,7 @@ void options::load()
 				"Wiki++ is a wiki engine powered by\n"
 				"[CppCMS](http://cppcms.sf.net/) web development framework.\n",context().locale());
 	if(local.copyright.empty())
-		local.copyright=cppcms::locale::gettext("(C) All Rights Reserverd",context().locale());
+		local.copyright=cppcms::locale::gettext("(C) All Rights Reserved",context().locale());
 	cache().store_data("local_ops:"+locale_name,local);
 	loaded=true;
 }

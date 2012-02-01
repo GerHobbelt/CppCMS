@@ -1,8 +1,8 @@
 <% skin view %>
 <% view history uses content::history extends master %>
-<% template title() %><% gt "WikiPP :: History" %> :: <% title %><% end %>
+<% template title() %><% gt "WikiPP :: History" %> :: <%= title %><% end %>
 <% template navigation() %>
-<a href="<% page_link %>"><% gt "Back to page" %></a>
+<a href="<%= page_link %>"><% gt "Back to page" %></a>
 &nbsp;/&nbsp;
 <% include master::navigation() %>
 <% end template %>
@@ -12,9 +12,9 @@
 	<% item %>
 	<li>
 		<% gt "Version {1,num}, changed at {2,dt=s}, by {3}" using row.version, row.update, row.author %>,
-		<a href="<% row.show_url %>"><% gt "Show" %></a>,
-		<a href="<% row.edit_url %>"><% gt "Edit (rollback)" %></a><% if not empty row.diff_url %>, 
-			<a href="<% row.diff_url %>"><% gt "Diff to previous" %></a>
+		<a href="<%= row.show_url %>"><% gt "Show" %></a>,
+		<a href="<%= row.edit_url %>"><% gt "Edit (rollback)" %></a><% if not empty row.diff_url %>, 
+			<a href="<%= row.diff_url %>"><% gt "Diff to previous" %></a>
 			<% end %>
 	</li>
 	<% end %>
@@ -22,7 +22,7 @@
 <% empty %>
 <h2><% gt "History is empty" %></h2>
 <% end %>
-<% if not empty page %><p><a href="<% page %>"><% gt "Next page" %></a></p><% end %>
+<% if not empty page %><p><a href="<%= page %>"><% gt "Next page" %></a></p><% end %>
 <% end template %>
 <% end view %>
 <% end skin %>

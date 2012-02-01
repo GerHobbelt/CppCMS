@@ -20,8 +20,13 @@ page_form::page_form(apps::wiki *_w):
 	save.value(_("Save"));
 	save_cont.value(_("Save and Continue"));
 	preview.value(_("Preview"));
-	fields + title + content + sidebar;
-	buttons + save + save_cont + preview + users_only;
+	fields.add(title);
+	fields.add(content);
+	fields.add(sidebar);
+	buttons.add(save);
+	buttons.add(save_cont);
+	buttons.add(preview);
+	buttons.add(users_only);
 	add(fields);
 	add(buttons);
 	users_only.help(_("Disable editing by visitors"));

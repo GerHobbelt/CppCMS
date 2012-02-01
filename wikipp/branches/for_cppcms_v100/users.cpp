@@ -17,7 +17,9 @@ login_form::login_form(apps::wiki *_w) :
 	username.message(_("Username"));
 	password.message(_("Password"));
 	login.value(_("Login"));
-	*this + username + password + login;
+	add(username);
+	add(password);
+	add(login);
 	username.non_empty();
 	password.non_empty();
 }
@@ -41,7 +43,11 @@ new_user_form::new_user_form(apps::wiki *_w):
 	password2.message(_("Confirm"));
 	captcha.message(_("Solve"));
 	submit.value(_("Submit"));
-	*this + username + password1 + password2 + captcha + submit;
+	add(username);
+	add(password1);
+	add(password2);
+	add(captcha);
+	add(submit);
 	username.non_empty();
 	password1.non_empty();
 	password2.check_equal(password1);

@@ -10,7 +10,7 @@
 		<% foreach cell in row %>
 		<% item %>
 			<% if not empty cell.title %>
-				<td><a href="<% cell.url %>"><% cell.title %></a>
+				<td><a href="<%= cell.url %>"><%= cell.title %></a>
 			<% else %>
 				<td>&nbsp;</td>
 			<% end %>
@@ -28,14 +28,14 @@
 <% foreach c in content %>
 	<ul>
 	<% item %>
-	<li><a href="<% c.url %>"><% c.title %></a> &mdash; 
+	<li><a href="<%= c.url %>"><%= c.title %></a> &mdash; 
 		<% gt "version {1,num}, at {2,dt=s}, by {3}" using c.version,c.created,c.author %><% if not empty c.diff_url %>, 
-			<a href="<% c.diff_url %>"><% gt "Diff to previous" %></a><% end %>
+			<a href="<%= c.diff_url %>"><% gt "Diff to previous" %></a><% end %>
 
 	</li>
 	<% end item %>
 	</ul>
-	<% if not empty next %><p><a href="<% next %>"><% gt "Next Page" %></a></p><% end %>
+	<% if not empty next %><p><a href="<%= next %>"><% gt "Next Page" %></a></p><% end %>
 <% empty %>
 <h2><% gt "No more changes" %></h2>
 <% end %>
