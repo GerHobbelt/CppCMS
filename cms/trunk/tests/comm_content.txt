@@ -1,4 +1,0 @@
-Object oriented is usually slower then regular procedural approach. For example exception handling takes some of the speed, so does references of the object itself.
-
-So I think that it is problematic to compare two different approaches on the same level. I also believe that if you will develop a custom made engine that will suite only for your need, and you will write it in a very optimized way, it will be faster, so you must judge IMHO each engine on it's own criteria.
-

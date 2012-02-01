@@ -1,2 +1,0 @@
-#!/bin/sh
-exec ./cppblog -c config-local.txt
