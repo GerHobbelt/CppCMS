@@ -149,9 +149,15 @@ install(TARGETS wikipp wikipp_migrate view
 foreach(STYLE style style-ltr style-rtl) 
 	install(FILES media/${STYLE}.css DESTINATION share/wikipp/media)
 endforeach()
+
+foreach(SQL sqlite3 postgresql mysql) 
+	install(FILES sql/${SQL}.sql DESTINATION share/wikipp/sql)
+endforeach()
+
 foreach(LOCALE ${LOCALES})
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/locale/${LOCALE}/LC_MESSAGES/wikipp.mo 
 		DESTINATION share/locale/${LOCALE}/LC_MESSAGES/)
 endforeach()
+
 install(FILES sample_config.js DESTINATION share/wikipp)
 
