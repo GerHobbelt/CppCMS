@@ -1,0 +1,11 @@
+# Server configuration
+server.api = "fastcgi"
+server.mod = "prefork"
+server.socket = "/tmp/cppcms.sock"
+
+# Dynamicly loadable templates directory
+
+templates.ext = ".so" 
+templates.dirs = { "." }
+
+
