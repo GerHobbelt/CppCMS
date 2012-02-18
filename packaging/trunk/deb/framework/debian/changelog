@@ -1,3 +1,9 @@
+cppcms (0.999.1-1) unstable; urgency=low
+
+  * Upstream release
+
+ -- artik <Artyom Beilis <artyomtnk@yahoo.com>>  Wed, 25 Jan 2012 17:52:15 +0200
+
 cppcms (0.999.0-1) unstable; urgency=low
 
   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
