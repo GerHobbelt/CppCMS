@@ -1,3 +1,9 @@
+cppcms (1.0.0-1) unstable; urgency=low
+
+  * Upstream stable release
+
+ -- artik <Artyom Beilis <artyomtnk@yahoo.com>>  Wed, 26 Feb 2012 23:30:00 +0200
+ 
 cppcms (0.999.1-1) unstable; urgency=low
 
   * Upstream release
