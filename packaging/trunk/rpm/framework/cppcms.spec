@@ -5,7 +5,7 @@ Summary:        CppCMS - C++ Web Framework
 Group:          Development/Libraries/C and C++
 License:        LGPLv3
 URL:            http://cppcms.com
-Source:         http://downloads.sourceforge.net/project/cppcms/cppcms/1.0.0/%{name}-%{version}.tar.bz2 
+Source:         http://downloads.sourceforge.net/project/cppcms/cppcms/1.0.1/%{name}-%{version}.tar.bz2 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 BuildRequires:  cmake zlib-devel pcre-devel libicu-devel gcc-c++ gcc libgcrypt-devel make python
