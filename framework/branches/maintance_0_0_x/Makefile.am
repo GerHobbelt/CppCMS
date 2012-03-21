@@ -8,7 +8,7 @@ bin_PROGRAMS = cppcms_make_key
 EXTRA_DIST = hello_world_skin1.tmpl hello_world_view1.tmpl hello_world_skin2.tmpl Changelog autogen.sh config.txt
 
 hello_world_fcgi_SOURCES = hello_world.cpp hello_world_view1.cpp hello_world_view2.cpp
-hello_world_fcgi_LDADD = libcppcms.la transtext/libcppcmstranstext.la
+hello_world_fcgi_LDADD = @CPPCMS_LIBS@ libcppcms.la transtext/libcppcmstranstext.la
 hello_world_fcgi_CXXFLAGS= -Wall -I./transtext
 
 
