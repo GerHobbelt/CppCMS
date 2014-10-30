@@ -1,5 +1,5 @@
 Name:           cppcms
-Version:        1.0.4
+Version:        1.0.5
 Release:        1
 Summary:        CppCMS - C++ Web Framework
 Group:          Development/Libraries/C and C++
