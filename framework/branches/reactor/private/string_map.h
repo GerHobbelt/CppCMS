@@ -25,12 +25,14 @@ namespace cppcms {
 				free_space_(0),
 				data_(0)
 			{
-				add_page();
+			}
+			void set_page_size(size_t n)
+			{
+				page_size_ = n;
 			}
 			void clear()
 			{
 				destroy();
-				add_page();
 			}
 			~string_pool()
 			{

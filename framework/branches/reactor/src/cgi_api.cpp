@@ -178,18 +178,200 @@ booster::shared_ptr<connection> connection::self()
 	return shared_from_this();
 }
 
-void connection::async_prepare_request(	http::context *context,
-					ehandler const &h)
+struct cgi_binder : public ehandler::callable_type; {
+	booster::shared_ptr<connecton> conn;
+	http::context *context;
+	ehandler handler;
+	cgi_binder(booster::shared_ptr<connecton> c,http::context *ctx,ehandler const &h) :
+		conn(c),
+		context(ctx),
+		handler(h)
+	{
+	}
+
+	virtual void operator()(booster::system::error_code const &e)
+	{
+		conn->handle_io_readiness(e,this);
+	}
+};
+
+typedef booster::intrusive_ptr<cgi_binder> cgi_binder_ptr;
+
+size_t connecton::write_some(booster::aio::const_buffer const &b,booster::system::error_code &e)
 {
-	async_read_headers(boost::bind(&connection::on_headers_read,self(),_1,context,h));
+	// FIXME handle SSL
+	return socket_.write_some(b,e);
 }
 
-void connection::on_headers_read(booster::system::error_code const &e,http::context *context,ehandler const &h)
+size_t connecton::read_some(booster::aio::mutable_buffer const &b,booster::system::error_code &e)
 {
-	if(e)  {
-		set_error(h,e.message());
+	// FIXME handle SSL
+	return socket_.read_some(b,e);
+}
+
+
+void connection::handle_io_readiness(booster::system::error_code const &ein,cgi_binder_ptr const &dt)
+{
+	if(ein) {
+		dt->handle(ein);
 		return;
 	}
+	booster::system::error_code e;
+
+	if(!filter().output.empty()) {
+		size_t n = write_some(filter().output,e);
+		filter().output += n;
+		if(is_would_block(e) || (!e && !filter().output.empty())) {
+			socket_.on_writeable(dt);
+			return;
+		}
+		if(e) {
+			dt->handle(e);
+			return;
+		}
+	}
+	if(local_buffer_size_ > 0) {
+		size_t tmp = local_buffer_size_;
+		local_buffer_size_=0;
+		handle_input(&local_buffer_[0],tmp,dt);
+	}
+	else {
+		size_t n = read_some(booster::aio::buffer(buffer_,buffer_len_),e);
+		if(is_would_block(e)) 
+			socket_.on_readable(dt);
+		else if(e)
+			dt->handle(e);
+		else
+			handle_input(buffer_,n,dt);
+	}
+}
+
+void connection::save_buffer(char const *ptr,size_t len)
+{
+	if(len == 0)
+		return;
+	if(local_buffer_.size() < len)
+		local_buffer_.resize(len);
+	memmove(&local_buffer_[0],ptr,len);
+	local_buffer_size_=len;
+	local_buffer_.resize(len);
+}
+
+bool connection::check_error(booster::system::error_code const &e,cgi_binder_ptr const &dt)
+{
+	if(e) {
+		if(filter().status() == cgi_filter::output_completed) {
+			dt->status = e;
+			return false;
+		}
+		dt->handle(e);
+		return true;
+	}
+	return false;
+}
+
+void connection::handle_input(char const *ptr,size_t len,cgi_binder_ptr const &dt)
+{
+	for(;;) {
+		booster::system::error_code e;
+		if(!filter().output.empty()) {
+			size_t n=write_some(filter().output,e);
+			filter().output+=n;
+			if(would_block(e)) {
+				save_buffer(ptr,len);
+				socket_.on_writeable(dt);
+				return;
+			}
+			if(e) {
+				dt->handle(e);
+				return;
+			}
+			continue;
+		}
+		switch(filter().state()) {
+		case cgi_filter::init:
+			{
+				size_t n = filter().consume_headers(ptr,len,e);
+				ptr += n;
+				len -=n;
+				if(e) {
+					dt->handle(e);
+					return;
+				}
+				if(filter().state() >= cgi_filter::headers_ready) {
+					if(test_forwarding(ptr,len,dt))
+						return;
+					on_headers_ready(dt,e);
+					if(check_error(e,dt))
+						return;
+				}
+			}
+			break;
+		case cgi_filter::headers_ready:
+			{
+				size_t n = filter().consume_body(ptr,len,e);
+				ptr += n;
+				len -=n;
+				if(e) {
+					dt->handle(e);
+					return;
+				}
+				while(!filter().input.empty()) {
+					const_buffer::buffer_data_type data = filter().input.get();
+					for(size_t i=0;i<data.second;i++) {
+						on_some_input_read(data.first[i].ptr,data.first[i].size,e);
+						if(check_error(e))
+							return;
+						if(e) {
+							filter().input.clear();
+							break;
+						}
+					}
+				}
+			}
+			break;
+		case cgi_filter::body_read:
+			{
+				save_buffer(ptr,len);
+				dt->handle(dt->status);
+				return;
+			}
+			break;
+		case cgi_filter::output_completed:
+			save_buffer(ptr,len);
+			dt->handle(dt->status);
+			return;
+		}
+		if(len == 0 && filter().output.empty()) {
+			socket_.on_readable(dt);
+			return;
+		}
+	}
+}
+
+void connecton::try_to_write_some(booster::system::error_code &e,
+				  cgi_binder_ptr const &dt)
+{
+	while(!filter().output.empty()) {
+		size_t n = socket_.write_some(filter().output,e);
+		if(n > 0) {
+			filter().output += n;
+			continue;
+		}
+		if(e) {
+			if(socket_.would_block(e)) {
+				reading_=false;
+				socket_.on_writeable(dt);
+				return;
+			}
+			dt->handler(e);
+			return;
+		}
+	}
+}
+
+bool connecton::test_forwarding(char const *ptr,size_t len,cgi_binder_ptr const &dt)
+{
 	forwarder::address_type addr = service().forwarder().check_forwading_rules(
 		cgetenv("HTTP_HOST"),
 		cgetenv("SCRIPT_NAME"),
@@ -197,13 +379,72 @@ void connection::on_headers_read(booster::system::error_code const &e,http::cont
 	
 	if(addr.second != 0 && !addr.first.empty()) {
 		booster::shared_ptr<cgi_forwarder> f(new cgi_forwarder(self(),addr.first,addr.second));
+		f->set_data(ptr,len);
 		f->async_run();
-		h(http::context::operation_aborted);
+		dt->handler(http::context::operation_aborted);
+		return true;
+	}
+	return false;
+}
+
+void connection::on_headers_ready(cgi_binder_ptr const &dt,booster::system::error_code &e)
+{
+	dt->context->request().prepare();
+	
+	http::content_type content_type = context->request().content_type_parsed();
+	char const *s_content_length=cgetenv("CONTENT_LENGTH");
+	long long content_length = *s_content_length == 0 ? 0 : atoll(s_content_length);
+
+	if(content_length < 0)  {
+		handle_http_error(400,e);
 		return;
 	}
-	context->request().prepare();
-	load_content(e,context,h);
+	
+	input_complete_= content_length == 0;
+	if(content_length > 0) {
+		if((is_multipart_ = (content_type.media_type()=="multipart/form-data"))) {
+			// 64 MB
+			long long allowed=service().cached_settings().security.multipart_form_data_limit*1024;
+			if(content_length > allowed) { 
+				BOOSTER_NOTICE("cppcms") << "multipart/form-data size too big " << content_length << 
+					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
+				handle_http_error(413,context,h);
+				return false;
+			}
+			multipart_parser_.reset(new multipart_parser(
+				service().cached_settings().security.uploads_path,
+				service().cached_settings().security.file_in_memory_limit));
+			read_size_ = content_length;
+			if(!multipart_parser_->set_content_type(content_type)) {
+				BOOSTER_NOTICE("cppcms") << "Invalid multipart/form-data request" << content_length << 
+					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
+				handle_http_error(400,e);
+				return;
+			}
+		}
+		else {
+			long long allowed=service().cached_settings().security.content_length_limit*1024;
+			if(content_length > allowed) {
+				BOOSTER_NOTICE("cppcms") << "POST data size too big " << content_length << 
+					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
+				handle_http_error(413,dt);
+				return;
+			}
+			post_data_.resize(content_length);
+			read_size_ = content_length;
+		}
+	}
+	return ;
 }
+
+
+
+void connection::async_prepare_request(	http::context *context,
+					ehandler const &h)
+{
+	socket_.on_readable(new cgi_binder(shared_from_this(),context,h));
+}
+
 
 void connection::aync_wait_for_close_by_peer(booster::callback<void()> const &on_eof)
 {
@@ -217,56 +458,37 @@ void connection::handle_eof(callback const &on_eof)
 	}
 }
 
-void connection::set_error(ehandler const &h,std::string s)
-{
-	error_=s;
-	h(http::context::operation_aborted);
-}
 
-void connection::handle_http_error(int code,http::context *context,ehandler const &h)
+void connection::handle_http_error(int code,booster::system::error_code &e)
 {
-	async_chunk_.clear();
-	async_chunk_.reserve(256);
-	std::string status;
-	status.reserve(128);
-	status += char('0' +  code/100);
-	status += char('0' +  code/10 % 10);
-	status += char('0' +  code % 10);
-	status += ' ';
-	status += http::response::status_to_string(code);
+	std::ostringstream ss;
+	char const *status = http::response::status_to_string(code);
+	ss.setlocale(std::locale::classic());
 	if(context->service().cached_settings().service.generate_http_headers) {
-		async_chunk_ += "HTTP/1.0 ";
-		async_chunk_ += status;
-		async_chunk_ += "\r\n"
-				"Connection: close\r\n"
-				"Content-Type: text/html\r\n"
-				"\r\n";
+		ss << "HTTP/1.0 " << code << ' ' << status 
+		   << "\r\n"
+		      "Connection: close\r\n"
+		      "Content-Type: text/html\r\n"
+		      "\r\n";
 	}
 	else {
-		async_chunk_ += "Content-Type: text/html\r\n"
-				"Status: ";
-		async_chunk_ += status;
-		async_chunk_ += "\r\n"
-				"\r\n";
+		ss << "Content-Type: text/html\r\n"
+		      "Status: " << code << ' ' << status << "\r\n"
+		      "\r\n";
 	}
 
 
-	async_chunk_ += 	
-		"<html>\r\n"
+	ss <<  "<html>\r\n"
 		"<body>\r\n"
-		"<h1>";
-	async_chunk_ += status;
-	async_chunk_ += "</h1>\r\n"
+		"<h1>" << code << " " << status << "</h1>\r\n"
 		"</body>\r\n"
 		"</html>\r\n";
-	async_write(async_chunk_.c_str(),async_chunk_.size(),
-		boost::bind(
-			&connection::handle_http_error_eof,
-			self(),
-			_1,
-			_2,
-			code,
-			h));
+	
+	async_chunk_ = ss.str();
+	filter().format_output(async_chunk_.c_str(),async_chunk_.size(),true,e);
+	if(!e) {
+		e=FIXME;;
+	}
 }
 
 void connection::handle_http_error_eof(
@@ -291,85 +513,33 @@ void connection::handle_http_error_done(booster::system::error_code const &e,int
 	set_error(h,http::response::status_to_string(code));
 }
 
-void connection::load_content(booster::system::error_code const &e,http::context *context,ehandler const &h)
+bool connection::on_some_input_read(char const *p,size_t n,cgi_binder_ptr const &dt)
 {
-	if(e)  {
-		set_error(h,e.message());
-		return;
-	}
-
-	http::content_type content_type = context->request().content_type_parsed();
-	char const *s_content_length=cgetenv("CONTENT_LENGTH");
-
-	long long content_length = *s_content_length == 0 ? 0 : atoll(s_content_length);
-
-	if(content_length < 0)  {
-		handle_http_error(400,context,h);
-		return;
-	}
+	if(is_multipart_)
+		return on_some_input_read(p,n,dt)
 	
-	if(content_length > 0) {
-		if(content_type.media_type()=="multipart/form-data") {
-			// 64 MB
-			long long allowed=service().cached_settings().security.multipart_form_data_limit*1024;
-			if(content_length > allowed) { 
-				BOOSTER_NOTICE("cppcms") << "multipart/form-data size too big " << content_length << 
-					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
-				handle_http_error(413,context,h);
-				return;
-			}
-			multipart_parser_.reset(new multipart_parser(
-				service().cached_settings().security.uploads_path,
-				service().cached_settings().security.file_in_memory_limit));
-			read_size_ = content_length;
-			if(!multipart_parser_->set_content_type(content_type)) {
-				BOOSTER_NOTICE("cppcms") << "Invalid multipart/form-data request" << content_length << 
-					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
-				handle_http_error(400,context,h);
-				return;
-			}
-			content_.clear();
-			content_.resize(8192);
-			async_read_some(&content_.front(),content_.size(),
-				boost::bind(&connection::on_some_multipart_read,
-					self(),
-					_1,
-					_2,
-					context,
-					h));
-		}
-		else {
-			long long allowed=service().cached_settings().security.content_length_limit*1024;
-			if(content_length > allowed) {
-				BOOSTER_NOTICE("cppcms") << "POST data size too big " << content_length << 
-					" REMOTE_ADDR = `" << getenv("REMOTE_ADDR") << "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
-				handle_http_error(413,context,h);
-				return;
-			}
-			content_.clear();
-			content_.resize(content_length,0);
-			async_read(	&content_.front(),
-					content_.size(),
-					boost::bind(&connection::on_post_data_loaded,self(),_1,context,h));
-		}
+	if(n > read_size_) {
+		handle_http_error(400,dt);
+		return false;
 	}
-	else  {
-		on_post_data_loaded(booster::system::error_code(),context,h);
-	}
+	size_t pos = post_data_.size() - read_size_;
+	memcpy(&post_data_[read_size_],p,n);
+	read_size_ -= n;
+	return true;
 }
-
-void connection::on_some_multipart_read(booster::system::error_code const &e,size_t n,http::context *context,ehandler const &h)
+bool connection::on_some_multipart_read(char const *p,size_t n,cgi_binder_ptr const &dt)
 {
-	if(e) { set_error(h,e.message()); return; }
 	read_size_-=n;
-	if(read_size_ < 0) { handle_http_error(400,context,h); return ;}
-	multipart_parser::parsing_result_type r = multipart_parser_->consume(&content_.front(),n);
+	if(read_size_ < 0) { 
+		handle_http_error(400,dt); 
+		return false;
+	}
+	multipart_parser::parsing_result_type r = multipart_parser_->consume(p,n);
 	if(r == multipart_parser::eof) {
 		if(read_size_ != 0)  {
-			handle_http_error(400,context,h);
-			return;
+			handle_http_error(400,dt);
+			return false;
 		}
-		content_.clear();
 		multipart_parser::files_type files = multipart_parser_->get_files();
 		long long allowed=service().cached_settings().security.content_length_limit*1024;
 		for(unsigned i=0;i<files.size();i++) {
@@ -378,36 +548,27 @@ void connection::on_some_multipart_read(booster::system::error_code const &e,siz
 						files[i]->size() 
 						<< " REMOTE_ADDR = `" << getenv("REMOTE_ADDR") 
 						<< "' REMOTE_HOST=`" << getenv("REMOTE_HOST") << "'";
-				handle_http_error(413,context,h);
-				return;
+				handle_http_error(413,dt);
+				return false;
 			}
 		}
 		context->request().set_post_data(files);
 		multipart_parser_.reset();
-		h(http::context::operation_completed);
-		return;
+		return true;
 	}
 	else if (r==multipart_parser::parsing_error) {
-		handle_http_error(400,context,h);
-		return;
+		handle_http_error(400,dt);
+		return true;
 	}
 	else if(r==multipart_parser::no_room_left) {
-		handle_http_error(413,context,h);
-		return;
+		handle_http_error(413,dt);
+		return false;
 	}
 	else if(read_size_ == 0) {
-		handle_http_error(400,context,h);
-		return;
+		handle_http_error(400,dt);
+		return false;
 	}
-	else {
-		async_read_some(&content_.front(),content_.size(),
-			boost::bind(&connection::on_some_multipart_read,
-				self(),
-				_1,
-				_2,
-				context,
-				h));
-	}
+	return true;
 }
 
 

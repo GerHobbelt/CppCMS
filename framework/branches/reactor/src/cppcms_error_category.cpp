@@ -18,6 +18,7 @@ namespace impl {
 		switch(cat) {
 		case errc::ok: return "ok";
 		case errc::protocol_violation: return "protocol violation";
+		case errc::would_block: return "would block";
 		default:
 			return "unknown";
 		}
