@@ -17,7 +17,7 @@ namespace cppcms {
 			enum {
 				ok,
     				protocol_violation,
-				would_block;
+				would_block
 			};
 		}
 		class error_category : public booster::system::error_category {

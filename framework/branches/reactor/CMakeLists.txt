@@ -419,7 +419,7 @@ if(NOT DISABLE_FCGI)
 endif()
 
 if(NOT DISABLE_SCGI)
-	set(CPPCMS_SOURCES ${CPPCMS_SOURCES} src/scgi_api.cpp)
+	set(CPPCMS_SOURCES ${CPPCMS_SOURCES} src/scgi_api.cpp src/scgi_filter.cpp)
 	set(CPPCMS_HAS_SCGI 1)
 endif()
 

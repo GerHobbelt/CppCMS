@@ -10,6 +10,7 @@
 
 #include <booster/noncopyable.h>
 #include <booster/shared_ptr.h>
+#include <booster/aio/buffer.h>
 #include <booster/enable_shared_from_this.h>
 #include <vector>
 #include <map>
@@ -42,6 +43,7 @@ namespace cppcms {
 
 namespace impl {
 	class multipart_parser;
+	class cgi_filter;
 namespace cgi {
 
 	typedef booster::callback<void(booster::system::error_code const &e)> handler;
@@ -50,6 +52,8 @@ namespace cgi {
 	typedef cppcms::http::context::handler ehandler;
 
 	class connection;
+	struct cgi_binder;
+	typedef booster::intrusive_ptr<cgi_binder> cgi_binder_ptr;
 	class acceptor : public booster::noncopyable {
 	public:
 		virtual void async_accept() = 0;
@@ -83,63 +87,40 @@ namespace cgi {
 		
 		void aync_wait_for_close_by_peer(callback const &on_eof);
 
-		std::string getenv(std::string const &key)
-		{
-			return env_.get_safe(key.c_str());
-		}
-		char const *cgetenv(char const *key)
-		{
-			return env_.get_safe(key);
-		}
-		std::string getenv(char const *key) 
-		{
-			return env_.get_safe(key);
-		}
-		virtual std::map<std::string,std::string> const &getenv()
-		{
-			if(map_env_.empty() && env_.begin()!=env_.end()) {
-				for(string_map::iterator p=env_.begin();p!=env_.end();++p) {
-					map_env_[p->key]=p->value;
-				}
-			}
-			return map_env_;
-		}
+		std::string getenv(std::string const &key);
+		char const *cgetenv(char const *key);
+		std::string getenv(char const *key);
+		std::map<std::string,std::string> const &getenv();
 		bool is_reuseable();
-	
-		std::string last_error();
-	
 
 		/****************************************************************************/
 
-		// These are abstract member function that should be implemented by
-		// actual protocol like FCGI, SCGI, HTTP or CGI
-	public:
-		virtual void async_write(void const *,size_t,io_handler const &h) = 0;
-		virtual size_t write(void const *,size_t,booster::system::error_code &e) = 0;
-	protected:
+		void async_write(void const *,size_t,io_handler const &h);
+		size_t write(void const *,size_t,booster::system::error_code &e);
 
+		booster::aio::io_service &get_io_service();
+	private:
 
-		virtual void async_read_headers(handler const &h) = 0;
-		virtual bool keep_alive() = 0;
+		cgi_filter &filter();
+		size_t write_some(booster::aio::const_buffer const &b,booster::system::error_code &e);
+		size_t read_some(booster::aio::mutable_buffer const &b,booster::system::error_code &e);
+		void handle_io_readiness(booster::system::error_code const &ein,cgi_binder_ptr const &dt);
+		void try_to_write_some(booster::system::error_code &e,cgi_binder_ptr const &dt);
 
-		// Concept implementation headers		
-		
-		virtual void async_read_some(void *,size_t,io_handler const &h) = 0;
-		virtual void on_async_read_complete() {}
-		virtual void async_read_eof(callback const &h) = 0;
-		virtual void async_write_eof(handler const &h) = 0;
-		virtual void write_eof() = 0;
-		virtual booster::aio::io_service &get_io_service() = 0;
+		bool test_forwarding(char const *ptr,size_t len,cgi_binder_ptr const &dt);
+		void on_headers_ready(cgi_binder_ptr const &dt,booster::system::error_code &e);
+		bool on_some_input_read(char const *p,size_t n,cgi_binder_ptr const &dt);
+		bool on_some_multipart_read(char const *p,size_t n,cgi_binder_ptr const &dt);
+
+		void save_buffer(char const *ptr,size_t len);
+		bool check_error(booster::system::error_code const &e,cgi_binder_ptr const &dt);
+		void handle_input(char const *ptr,size_t len,cgi_binder_ptr const &dt);
 
 		/****************************************************************************/
 
 	protected:
-		
-		string_pool pool_;
-		string_map env_;
-
 		booster::shared_ptr<connection> self();
-		void async_read(void *,size_t,io_handler const &h);
+
 	private:
 
 		struct reader;
@@ -150,11 +131,11 @@ namespace cgi {
 		friend struct writer;
 		friend struct async_write_binder;
 		friend struct cgi_forwarder;
-
+		friend struct cgi_binder;
+/*
 		void set_error(ehandler const &h,std::string s);
 		void on_headers_read(booster::system::error_code const &e,http::context *,ehandler const &h);
 		void load_content(booster::system::error_code const &e,http::context *,ehandler const &h);
-		void on_post_data_loaded(booster::system::error_code const &e,http::context *,ehandler const &h);
 		void on_some_multipart_read(booster::system::error_code const &e,size_t n,http::context *,ehandler const &h);
 		void on_async_write_written(booster::system::error_code const &e,bool complete_response,ehandler const &h);
 		void on_eof_written(booster::system::error_code const &e,ehandler const &h);
@@ -164,16 +145,20 @@ namespace cgi {
 		void handle_http_error_done(booster::system::error_code const &e,int code,ehandler const &h);
 
 		std::vector<char> content_;
-		cppcms::service *service_;
 		std::string async_chunk_;
 		std::string error_;
-		bool request_in_progress_;
 		long long read_size_;
 		std::auto_ptr<multipart_parser> multipart_parser_;
 
+		*/
+
+		cppcms::service *service_;
+		bool request_in_progress_;
+		booster::aio::stream_socket socket_;
 		std::map<std::string,std::string> map_env_;
 
-		booster::intrusive_ptr<async_write_binder> cached_async_write_binder_;
+		size_t local_buffer_size_;
+		std::vector<char> local_buffer_;
 
 	};
 

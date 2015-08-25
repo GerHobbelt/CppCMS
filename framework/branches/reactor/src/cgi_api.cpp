@@ -17,6 +17,7 @@
 #include "cached_settings.h"
 #include <cppcms/json.h>
 #include "cgi_api.h"
+#include "cgi_filter.h"
 #include "multipart_parser.h"
 #include <cppcms/util.h>
 #include <scgi_header.h>
@@ -41,6 +42,7 @@ namespace cppcms { namespace impl { namespace cgi {
 	//
 	// Special forwarder from generic CGI to SCGI
 	//
+	/*
 	struct connection::cgi_forwarder : public booster::enable_shared_from_this<connection::cgi_forwarder> {
 	public:
 		cgi_forwarder(booster::shared_ptr<connection> c,std::string ip,int port) :
@@ -128,7 +130,7 @@ namespace cppcms { namespace impl { namespace cgi {
 				conn_->async_write(&response_.front(),len,boost::bind(&cgi_forwarder::on_response_written,shared_from_this(),_1,_2));
 			}
 		}
-		void on_response_written(booster::system::error_code const &e,size_t /*len*/)
+		void on_response_written(booster::system::error_code const &e,size_t )
 		{
 			if(e) { cleanup(); return; }
 			scgi_.async_read_some(booster::aio::buffer(response_),
@@ -151,16 +153,42 @@ namespace cppcms { namespace impl { namespace cgi {
 		std::vector<char> response_;
 
 	};
+	*/
 
 
 
 
 
+std::string connection::getenv(std::string const &key)
+{
+	return filter().env().get_safe(key.c_str());
+}
+char const *connection::cgetenv(char const *key)
+{
+	return filter().env().get_safe(key);
+}
+std::string connection::getenv(char const *key) 
+{
+	return filter().env().get_safe(key);
+}
+std::map<std::string,std::string> const &connection::getenv()
+{
+	string_map &e=filter().env();
+	if(map_env_.empty() && e.begin()!=e.end()) {
+		for(string_map::iterator p=e.begin();p!=e.end();++p) {
+			map_env_[p->key]=p->value;
+		}
+	}
+	return map_env_;
+}
 
 
 connection::connection(cppcms::service &srv) :
 	service_(&srv),
-	request_in_progress_(true)
+	request_in_progress_(true),
+	socket_(srv.get_io_service()),
+	local_buffer_size_(0)
+	#warning "Fix me - socket/io-service initialization"
 {
 }
 
@@ -178,15 +206,23 @@ booster::shared_ptr<connection> connection::self()
 	return shared_from_this();
 }
 
-struct cgi_binder : public ehandler::callable_type; {
-	booster::shared_ptr<connecton> conn;
+struct cgi_binder : public ehandler::callable_type {
+	booster::shared_ptr<connection> conn;
 	http::context *context;
 	ehandler handler;
-	cgi_binder(booster::shared_ptr<connecton> c,http::context *ctx,ehandler const &h) :
+	cgi_binder(booster::shared_ptr<connection> c,http::context *ctx,ehandler const &h) :
 		conn(c),
 		context(ctx),
 		handler(h)
 	{
+	}
+
+	void handle(booster::system::error_code const &e)
+	{
+		if(e)
+			handler(http::context::operation_aborted);
+		else
+			handler(http::context::operation_completed);
 	}
 
 	virtual void operator()(booster::system::error_code const &e)
@@ -195,15 +231,14 @@ struct cgi_binder : public ehandler::callable_type; {
 	}
 };
 
-typedef booster::intrusive_ptr<cgi_binder> cgi_binder_ptr;
 
-size_t connecton::write_some(booster::aio::const_buffer const &b,booster::system::error_code &e)
+size_t connection::write_some(booster::aio::const_buffer const &b,booster::system::error_code &e)
 {
 	// FIXME handle SSL
 	return socket_.write_some(b,e);
 }
 
-size_t connecton::read_some(booster::aio::mutable_buffer const &b,booster::system::error_code &e)
+size_t connection::read_some(booster::aio::mutable_buffer const &b,booster::system::error_code &e)
 {
 	// FIXME handle SSL
 	return socket_.read_some(b,e);
@@ -221,7 +256,7 @@ void connection::handle_io_readiness(booster::system::error_code const &ein,cgi_
 	if(!filter().output.empty()) {
 		size_t n = write_some(filter().output,e);
 		filter().output += n;
-		if(is_would_block(e) || (!e && !filter().output.empty())) {
+		if(socket_.would_block(e) || (!e && !filter().output.empty())) {
 			socket_.on_writeable(dt);
 			return;
 		}
@@ -237,7 +272,7 @@ void connection::handle_io_readiness(booster::system::error_code const &ein,cgi_
 	}
 	else {
 		size_t n = read_some(booster::aio::buffer(buffer_,buffer_len_),e);
-		if(is_would_block(e)) 
+		if(socket_.would_block(e)) 
 			socket_.on_readable(dt);
 		else if(e)
 			dt->handle(e);
@@ -349,7 +384,7 @@ void connection::handle_input(char const *ptr,size_t len,cgi_binder_ptr const &d
 	}
 }
 
-void connecton::try_to_write_some(booster::system::error_code &e,
+void connection::try_to_write_some(booster::system::error_code &e,
 				  cgi_binder_ptr const &dt)
 {
 	while(!filter().output.empty()) {
@@ -370,7 +405,7 @@ void connecton::try_to_write_some(booster::system::error_code &e,
 	}
 }
 
-bool connecton::test_forwarding(char const *ptr,size_t len,cgi_binder_ptr const &dt)
+bool connection::test_forwarding(char const *ptr,size_t len,cgi_binder_ptr const &dt)
 {
 	forwarder::address_type addr = service().forwarder().check_forwading_rules(
 		cgetenv("HTTP_HOST"),
@@ -378,9 +413,10 @@ bool connecton::test_forwarding(char const *ptr,size_t len,cgi_binder_ptr const 
 		cgetenv("PATH_INFO"));
 	
 	if(addr.second != 0 && !addr.first.empty()) {
-		booster::shared_ptr<cgi_forwarder> f(new cgi_forwarder(self(),addr.first,addr.second));
+		#warning "Fix me cgi_forwarder"
+		/*booster::shared_ptr<cgi_forwarder> f(new cgi_forwarder(self(),addr.first,addr.second));
 		f->set_data(ptr,len);
-		f->async_run();
+		f->async_run();*/
 		dt->handler(http::context::operation_aborted);
 		return true;
 	}
@@ -571,14 +607,6 @@ bool connection::on_some_multipart_read(char const *p,size_t n,cgi_binder_ptr co
 	return true;
 }
 
-
-void connection::on_post_data_loaded(booster::system::error_code const &e,http::context *context,ehandler const &h)
-{
-	if(e) { set_error(h,e.message()); return; }
-	context->request().set_post_data(content_);
-	on_async_read_complete();
-	h(http::context::operation_completed);
-}
 
 bool connection::is_reuseable()
 {
